@@ -102,7 +102,7 @@
 #   The main part of this function is run only if omitGroups=TRUE
 	
 	# First, return datET if there is no missing data, otherwise run the function
-	if (sum(is.na(datET))==0) return(rep(TRUE,nrow(datET)));
+	if (sum(is.na(datET))==0) return(rep(TRUE,nrow(datET)))
 	
 	# Set up the variables.
 	names(rowGroup)     = rowID
@@ -114,7 +114,7 @@
 	missingData         = rowSums(is.na(datET))
 	
 	# Omit all probes with at least omitPercent genes missing
-        keep = missingData<(omitPercent*dim(datET)[2]/100);
+        keep = missingData<(omitPercent*dim(datET)[2]/100)
 	
 	# Omit relevant genes and return results
 	if (omitGroups)
@@ -123,8 +123,8 @@
 			keepGenes[gn] = (missingData[gn] == min(missingData[gn]))
 		}
 
-        keep = keep & keepGenes;
-	return (keep);
+        keep = keep & keepGenes
+	return (keep)
 }
 
 # ----------------- Main Function ------------------- #
@@ -133,7 +133,7 @@ collapseRows <- function(datET, rowGroup, rowID, method="MaxMean", connectivityB
 	methodFunction=NULL, connectivityPower=1, selectFewestMissing=TRUE, thresholdCombine=NA)
 {
 
-	# datET = as.matrix(as.data.frame(datET));
+	# datET = as.matrix(as.data.frame(datET))
 	methodAverage = FALSE
 	if (method=="Average") methodAverage = TRUE   # Required for later
 	if (method!="function") methodFunction = NULL # Required for later
@@ -141,7 +141,7 @@ collapseRows <- function(datET, rowGroup, rowID, method="MaxMean", connectivityB
 	if ( sum(rowGroup=="",na.rm=TRUE)>0 ){
 	   warning(paste("rowGroup contains blanks. It is strongly recommended that you remove",
                     "these rows before calling the function.\n",
-                    "   But for your convenience, the collapseRow function will remove these rows"));
+                    "   But for your convenience, the collapseRow function will remove these rows"))
 	   rowGroup[rowGroup==""]=NA
 	}
 
@@ -206,9 +206,9 @@ collapseRows <- function(datET, rowGroup, rowID, method="MaxMean", connectivityB
 ##  Also, remove all probes with more than 90% missing data
 	
 	keep = .selectFewestMissing(datET, rowID, rowGroup, selectFewestMissing)
-        datET = datET[keep, ];
-        rowGroup = rowGroup[keep];
-        rowID = rowID[keep];
+        datET = datET[keep, ]
+        rowGroup = rowGroup[keep]
+        rowID = rowID[keep]
 
 	rnDat = rownames(datET)
 	
@@ -232,16 +232,16 @@ collapseRows <- function(datET, rowGroup, rowID, method="MaxMean", connectivityB
 #    Note: methodFunction must be a function that takes a vector of numbers as input and
 #     outputs a single number. This function will return(0) or crash otherwise.
 
-        recMethods = c("function","ME","MaxMean","maxRowVariance","MinMean","absMinMean","absMaxMean","Average");
-        imethod = pmatch(method, recMethods);
+        recMethods = c("function","ME","MaxMean","maxRowVariance","MinMean","absMinMean","absMaxMean","Average")
+        imethod = pmatch(method, recMethods)
         
 	if (is.na(imethod)) {
-		printFlush("Error: entered method is not a legal option. Recognized options are *maxRowVariance*,");
-		printFlush("       *maxRowVariance*, *MaxMean*, *MinMean*, *absMaxMean*, *absMinMean*, *ME*,");
+		printFlush("Error: entered method is not a legal option. Recognized options are *maxRowVariance*,")
+		printFlush("       *maxRowVariance*, *MaxMean*, *MinMean*, *absMaxMean*, *absMinMean*, *ME*,")
 		printFlush("       *Average* or *function* for a user-defined function.")
 		return(0)
 	}
-        if (imethod > 2) method = spaste(".", method);
+        if (imethod > 2) method = spaste(".", method)
 	if (method=="function") 
         {
           method = methodFunction
@@ -256,8 +256,8 @@ collapseRows <- function(datET, rowGroup, rowID, method="MaxMean", connectivityB
 	rowID[is.na(rowID)] = rowGroup[is.na(rowID)]    # Use group if row is missing
 	rownames(datET)[is.na(rnDat)]   = rowGroup[is.na(rnDat)]
 	remove       = (is.na(rowID))|(is.na(rowGroup)) # Omit if both gene and probe are missing
-	rowID  = rowID[!remove];
-	rowGroup = rowGroup[!remove];
+	rowID  = rowID[!remove]
+	rowGroup = rowGroup[!remove]
 	names(rowGroup) = rowID
 	rowID = sort(intersect(rnDat,rowID))
 	if (length(rowID)<=1){
@@ -331,14 +331,14 @@ collapseRows <- function(datET, rowGroup, rowID, method="MaxMean", connectivityB
 		datETOut[g,] = as.numeric(datET[probes[genes==g],])
 		rowsOut[g] = probes[genes==g]
 	}
-        count = 0;
+        count = 0
 	for (g in twos){
 		datETTmp = datET[probes[genes==g],]
 		datETOut[g,] = as.numeric(method(datETTmp))
 		whichTest    = apply(datETTmp,1,whichTestFn)
 		rowsOut[g] = (names(whichTest)[whichTest==max(whichTest)])[1]
-		count = count + 1;
-		if (count %% 1000 == 0) collectGarbage();
+		count = count + 1
+		if (count %% 1000 == 0) collectGarbage()
 	}
 	for (g in more){
 		datETTmp = datET[probes[genes==g],]
@@ -346,8 +346,8 @@ collapseRows <- function(datET, rowGroup, rowID, method="MaxMean", connectivityB
 		datETOut[g,] = as.numeric(datETTmp[which.max(rowSums(adj,na.rm=TRUE)),])
 		whichTest    = apply(datETTmp,1,whichTestFn)
                 rowsOut[g] = (names(whichTest)[whichTest==max(whichTest)])[1]
-		count = count + 1;
-		if (count %% 1000 == 0) collectGarbage();
+		count = count + 1
+		if (count %% 1000 == 0) collectGarbage()
 	}
 	if (!is.null(methodFunction))
 		write("...Ignore previous comment.  Function completed properly!","")

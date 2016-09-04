@@ -88,7 +88,7 @@ convertGrey=TRUE, omitColors="grey", reassignScale=1, threshNumber=NULL) {
 	## Recalculate the new module membership values
 		MEs      = (moduleEigengenes(t(datExpr), colors=as.character(colorOut)))$eigengenes
 		MEs      = MEs[,colnames(MEs)!="MEgrey"]
-		datCorrs = as.data.frame(cor(t(datExpr),MEs,use="p"));
+		datCorrs = as.data.frame(cor(t(datExpr),MEs,use="p"))
 		colnames(datCorrs) = modules
 	}
 	if(!is.null(dim(mergeLog))){

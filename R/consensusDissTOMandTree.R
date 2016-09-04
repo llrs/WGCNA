@@ -6,27 +6,27 @@ consensusDissTOMandTree <- function (multiExpr, softPower, TOM=NULL){
 	if(is.null(TOM)){
 		adjacencies <- TOM <- list()
 		for (set in 1:nSets){
-			adjacencies[[set]] = adjacency(multiExpr[[set]]$data,power=softPower,type="signed");
+			adjacencies[[set]] = adjacency(multiExpr[[set]]$data,power=softPower,type="signed")
 			diag(adjacencies[[set]])=0
 			write(paste("Adjacency, set",set),"")
-			TOM[[set]] = TOMsimilarity(adjacencies[[set]], TOMType="signed");
+			TOM[[set]] = TOMsimilarity(adjacencies[[set]], TOMType="signed")
 			write(paste("Similarity, set",set),"")
 			collectGarbage()
 		}
 	}
 	nSets  = length(TOM)
 	set.seed(12345);     
-	scaleP = 0.95;
-	nSamples = as.integer(1/(1-scaleP) * 1000);
+	scaleP = 0.95
+	nSamples = as.integer(1/(1-scaleP) * 1000)
 	scaleSample = sample(nGenes*(nGenes-1)/2, size = nSamples)
-	TOMScalingSamples = list();
+	TOMScalingSamples = list()
 	scaleQuant <- scalePowers <- rep(1, nSets)
 	for (set in 1:nSets){
 		TOMScalingSamples[[set]] = as.dist(TOM[[set]])[scaleSample]
-		scaleQuant[set] = quantile(TOMScalingSamples[[set]],probs = scaleP, type = 8);
+		scaleQuant[set] = quantile(TOMScalingSamples[[set]],probs = scaleP, type = 8)
 		if (set>1){
-			scalePowers[set] = log(scaleQuant[1])/log(scaleQuant[set]);
-			TOM[[set]] = TOM[[set]]^scalePowers[set];
+			scalePowers[set] = log(scaleQuant[1])/log(scaleQuant[set])
+			TOM[[set]] = TOM[[set]]^scalePowers[set]
 		}
 		write(paste("Scaling, set",set),"")
 	}
@@ -38,7 +38,7 @@ consensusDissTOMandTree <- function (multiExpr, softPower, TOM=NULL){
 	for (i in 1:4){
 		a = kp[[i]][[1]];  b = kp[[i]][[2]]
 		consensusTOMi[[i]] = TOM[[1]][a,b]
-		for (j in 2:nSets)   consensusTOMi[[i]] = pmin(consensusTOMi[[i]], TOM[[j]][a,b]);
+		for (j in 2:nSets)   consensusTOMi[[i]] = pmin(consensusTOMi[[i]], TOM[[j]][a,b])
 		write(paste(i,"of 4 iterations in pMin"),"")
 	}
 	consensusTOM = rbind(cbind(consensusTOMi[[1]],consensusTOMi[[2]]), 
@@ -47,7 +47,7 @@ consensusDissTOMandTree <- function (multiExpr, softPower, TOM=NULL){
 	
 	consensusTOM = 1-consensusTOM
 	write("Starting dendrogram tree.","")
-	consTree     = fastcluster::hclust(as.dist(consensusTOM), method = "average");
+	consTree     = fastcluster::hclust(as.dist(consensusTOM), method = "average")
 	write("DONE!!!!","")
 	out = list(consensusTOM,consTree)
 	names(out) = c("consensusTOM","consTree")

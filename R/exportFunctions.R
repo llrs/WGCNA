@@ -9,26 +9,26 @@ exportNetworkToVisANT = function(
   probeToGene = NULL)
 {
   adjMat = as.matrix(adjMat)
-  adjMat[is.na(adjMat)] = 0;
-  nRow = nrow(adjMat);
-  checkAdjMat(adjMat, min = -1, max = 1);
+  adjMat[is.na(adjMat)] = 0
+  nRow = nrow(adjMat)
+  checkAdjMat(adjMat, min = -1, max = 1)
   probes = dimnames(adjMat)[[1]]
   if (!is.null(probeToGene))
   {
-    probes2genes = match(probes, probeToGene[,1]);
+    probes2genes = match(probes, probeToGene[,1])
     if (sum(is.na(probes2genes)) > 0) 
-      stop("Error translating probe names to gene names: some probe names could not be translated.");
+      stop("Error translating probe names to gene names: some probe names could not be translated.")
     probes = probeToGene[probes2genes, 2]
   }
 
-  rowMat = matrix(c(1:nRow), nRow, nRow, byrow = TRUE);
-  colMat = matrix(c(1:nRow), nRow, nRow);
+  rowMat = matrix(c(1:nRow), nRow, nRow, byrow = TRUE)
+  colMat = matrix(c(1:nRow), nRow, nRow)
 
-  adjDst = as.dist(adjMat);
-  dstRows = as.dist(rowMat);
-  dstCols = as.dist(colMat);
+  adjDst = as.dist(adjMat)
+  dstRows = as.dist(rowMat)
+  dstCols = as.dist(colMat)
 
-  if (is.null(maxNConnections)) maxNConnections = length(adjDst);
+  if (is.null(maxNConnections)) maxNConnections = length(adjDst)
 
   ranks = rank(-abs(adjDst), na.last = TRUE, ties.method = "first")
   edges = abs(adjDst) > threshold & ranks <= maxNConnections
@@ -40,12 +40,12 @@ exportNetworkToVisANT = function(
      direction = rep(0, nEdges),
      method = rep("M0039", nEdges),
      weight = if (weighted) adjDst[edges] else rep(1, nEdges)
-     );
+     )
 
   if (!is.null(file))
     write.table(visAntData, file = file, quote = FALSE, row.names = FALSE, col.names = FALSE)
 
-  invisible(visAntData);
+  invisible(visAntData)
 }
 
 exportNetworkToCytoscape = function(
@@ -60,25 +60,25 @@ exportNetworkToCytoscape = function(
   includeColNames = TRUE)
 {
   adjMat = as.matrix(adjMat)
-  adjMat[is.na(adjMat)] = 0;
-  nRow = nrow(adjMat);
-  checkAdjMat(adjMat, min = -1, max = 1);
+  adjMat[is.na(adjMat)] = 0
+  nRow = nrow(adjMat)
+  checkAdjMat(adjMat, min = -1, max = 1)
   if (is.null(nodeNames)) nodeNames = dimnames(adjMat)[[1]]
   if (is.null(nodeNames)) 
     stop("Cannot determine node names: nodeNames is NULL and adjMat has no dimnames.")
-  rowMat = matrix(c(1:nRow), nRow, nRow, byrow = TRUE);
-  colMat = matrix(c(1:nRow), nRow, nRow);
+  rowMat = matrix(c(1:nRow), nRow, nRow, byrow = TRUE)
+  colMat = matrix(c(1:nRow), nRow, nRow)
 
   if (!is.null(nodeAttr))
   {
-    if (is.null(dim(nodeAttr))) nodeAttr = data.frame(nodeAttribute = nodeAttr);
-    nodeAttr = as.data.frame(nodeAttr);
-  } else nodeAttr = data.frame(nodeAttribute = rep(NA, ncol(adjMat)));
+    if (is.null(dim(nodeAttr))) nodeAttr = data.frame(nodeAttribute = nodeAttr)
+    nodeAttr = as.data.frame(nodeAttr)
+  } else nodeAttr = data.frame(nodeAttribute = rep(NA, ncol(adjMat)))
 
 
-  adjDst = as.dist(adjMat);
-  dstRows = as.dist(rowMat);
-  dstCols = as.dist(colMat);
+  adjDst = as.dist(adjMat)
+  dstRows = as.dist(rowMat)
+  dstCols = as.dist(colMat)
 
   edges = abs(adjDst) > threshold
   nEdges = sum(edges)
@@ -89,27 +89,27 @@ exportNetworkToCytoscape = function(
      direction = rep("undirected", nEdges),
      fromAltName = if (is.null(altNodeNames)) rep("NA", nEdges) else altNodeNames[dstRows[edges]],
      toAltName = if (is.null(altNodeNames)) rep("NA", nEdges) else altNodeNames[dstCols[edges]]
-     );
+     )
 
-  nodesPresent = rep(FALSE, ncol(adjMat));
-  nodesPresent[dstRows[edges]] = TRUE;
-  nodesPresent[dstCols[edges]] = TRUE;
-  nNodes = sum(nodesPresent);
+  nodesPresent = rep(FALSE, ncol(adjMat))
+  nodesPresent[dstRows[edges]] = TRUE
+  nodesPresent[dstCols[edges]] = TRUE
+  nNodes = sum(nodesPresent)
   nodeData = data.frame (
      nodeName = nodeNames[nodesPresent],
      altName = if (is.null(altNodeNames)) rep("NA", nNodes) else altNodeNames[nodesPresent],
      nodeAttr[nodesPresent, ]
-     );
+     )
 
   if (!is.null(edgeFile))
     write.table(edgeData, file = edgeFile, quote = FALSE, row.names = FALSE, col.names = includeColNames,
-                sep = "\t");
+                sep = "\t")
   
   if (!is.null(nodeFile))
     write.table(nodeData, file = nodeFile, quote = FALSE, row.names = FALSE, col.names = includeColNames,
-                sep = "\t");
+                sep = "\t")
 
-  list(edgeData = edgeData, nodeData = nodeData);
+  list(edgeData = edgeData, nodeData = nodeData)
 }
   
 

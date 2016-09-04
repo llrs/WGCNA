@@ -76,7 +76,7 @@ selectBranch <- function (hierTOM, g1, g2){
 	if(!is.numeric(g2)) g2 = which(hierTOM$labels==g2)
 	if((length(g1)==0)|(length(g2)==0)|(max(c(g1,g2))>length(hierTOM$labels))){
 		write("Input genes are not both legal indices","")
-		return(hierTOM);
+		return(hierTOM)
 	}
 	
 # Now determine which branch is the correct one, and find the genes
@@ -135,7 +135,7 @@ swapTwoBranches <- function (hierTOM, g1, g2){
 	if(!is.numeric(g2)) g2 = which(hierTOM$labels==g2)
 	if((length(g1)==0)|(length(g2)==0)|(max(c(g1,g2))>length(hierTOM$labels))){
 		write("Input genes are not both legal indices","")
-		return(hierTOM);
+		return(hierTOM)
 	}
 	
 # Now determine the genes in each branch
@@ -168,7 +168,7 @@ omitColors="grey", power=2, type="signed",...){
 	numGenes = max(round(numGenes),2)
 	keep     = NULL
 	isIndex  = FALSE
-	modules  = names(table(colorh));
+	modules  = names(table(colorh))
 	numCols  = table(colorh)
 	if(!(is.na(omitColors)[1]))  modules = modules[!is.element(modules,omitColors)]
 	if(is.null(colnames(datExpr))){
@@ -193,7 +193,7 @@ power=2, type="signed",...){
 ## This function returns the gene in each module with the highest connectivity.
 	
 	isIndex = FALSE
-	modules = names(table(colorh));
+	modules = names(table(colorh))
 	if(!(is.na(omitColors)[1]))  modules = modules[!is.element(modules,omitColors)]
 	if(is.null(colnames(datExpr))){
 		colnames(datExpr) = 1:dim(datExpr)[2]

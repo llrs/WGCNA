@@ -62,7 +62,7 @@
   if (any(duplicated(colID)))
      stop("'colID' contains duplicate entries.")
 
-  rnDat = mtd.colnames(mdx);
+  rnDat = mtd.colnames(mdx)
 
   if ( sum(is.na(colID))>0 )
       warning(spaste("The argument colID contains missing data. It is recommend you choose non-missing,\n",
@@ -71,7 +71,7 @@
    if ( sum(group=="",na.rm=TRUE)>0 ){
       warning(paste("group contains blanks. It is strongly recommended that you remove",
                     "these rows before calling the function.\n",
-                    "   But for your convenience, the collapseRow function will remove these rows"));
+                    "   But for your convenience, the collapseRow function will remove these rows"))
       group[group==""]=NA
    }
 
@@ -84,35 +84,35 @@
   if ((is.null(rnDat))&(checkSets(mdx)$nGenes==length(colID)))
   {
     write("Warning: mdx does not have column names. Using 'colID' as column names.","")
-    rnDat = colID;
-    mdx = mtd.setColnames(mdx, colID);
+    rnDat = colID
+    mdx = mtd.setColnames(mdx, colID)
   }
   if (is.null(rnDat))
      stop("'mdx' does not have row names and \n",
-          "length of 'colID' is not the same as # variables in mdx.");
+          "length of 'colID' is not the same as # variables in mdx.")
 
-  keepProbes = rep(TRUE, checkSets(mdx)$nGenes);
+  keepProbes = rep(TRUE, checkSets(mdx)$nGenes)
 
   if (sum(is.element(rnDat,colID))!=length(colID)){
       write("Warning: row names of input data and probes not identical...","")
       write("... Attempting to proceed anyway. Check results carefully.","")
-      keepProbes = is.element(colID, rnDat);
+      keepProbes = is.element(colID, rnDat)
       colID = colID[keepProbes]
-      mdx = mtd.subset(mdx, , colID);
+      mdx = mtd.subset(mdx, , colID)
       group = group[colID]
   }
 
   restCols = (group!="" & !is.na(group))
   if (any(!restCols))
   {
-    keepProbes[keepProbes] = restCols;
-    mdx = mtd.subset(mdx, , restCols);
+    keepProbes[keepProbes] = restCols
+    mdx = mtd.subset(mdx, , restCols)
     group = group[restCols]
     colID = colID[restCols]
     rnDat = rnDat[restCols]
   }
 
-  list(mdx = mdx, group = group, colID = colID, keepProbes = keepProbes);
+  list(mdx = mdx, group = group, colID = colID, keepProbes = keepProbes)
 }
 
 
@@ -128,58 +128,58 @@ selectFewestConsensusMissing <- function(mdx, colID, group,
 #   The main part of this function is run only if omitGroups=TRUE
    
    otherArgs = list(...)
-   nVars = checkSets(mdx)$nGenes;
-   nSamples = checkSets(mdx)$nSamples;
-   nSets = length(mdx);
+   nVars = checkSets(mdx)$nGenes
+   nSamples = checkSets(mdx)$nSamples
+   nSets = length(mdx)
 
    if ((!"checkConsistency" %in% names(otherArgs)) || otherArgs$checkConsistency)
    {
-      cd = .checkConsistencyOfGroupAndColID(mdx, colID, group);
-      mdx = cd$mdx;
-      group = cd$group;
-      colID = cd$colID;
-      keep = cd$keepProbes;
+      cd = .checkConsistencyOfGroupAndColID(mdx, colID, group)
+      mdx = cd$mdx
+      group = cd$group
+      colID = cd$colID
+      keep = cd$keepProbes
    } else
-      keep = rep(TRUE, nVars);
+      keep = rep(TRUE, nVars)
 
    # First, return datET if there is no missing data, otherwise run the function
    if (sum(mtd.apply(mdx, function(x) sum(is.na(x)), mdaSimplify = TRUE))==0) 
-     return(rep(TRUE, nVars));
+     return(rep(TRUE, nVars))
    
    # Set up the variables.
    names(group)     = colID
-   probes              = mtd.colnames(mdx);
+   probes              = mtd.colnames(mdx)
    genes               = group[probes]
-   keepGenes           = rep(TRUE, nVars);
+   keepGenes           = rep(TRUE, nVars)
    tGenes              = table(genes)
    checkGenes          = sort(names(tGenes)[tGenes>1])
-   presentData         = as.matrix(mtd.apply(mdx, function(x) colSums(is.finite(x)), mdaSimplify = TRUE));
+   presentData         = as.matrix(mtd.apply(mdx, function(x) colSums(is.finite(x)), mdaSimplify = TRUE))
 
-   presentFrac = presentData/matrix(nSamples, nVars, nSets, byrow = TRUE);
+   presentFrac = presentData/matrix(nSamples, nVars, nSets, byrow = TRUE)
    consensusPresentFrac = .consensusCalculation(setTomMat = presentFrac, useMean = FALSE,
                             setWeightMat = NULL,
-                            consensusQuantile = consensusQuantile)$consensus;
+                            consensusQuantile = consensusQuantile)$consensus
    
    # Omit all probes with at least omitFrac genes missing
    #keep = consensusPresentFrac > omitFraction
-   minProportionPresent = as.numeric(minProportionPresent);
+   minProportionPresent = as.numeric(minProportionPresent)
 
    # Omit relevant genes and return results
    if (minProportionPresent > 0)
    {
-      if (verbose) pind = initProgInd();
+      if (verbose) pind = initProgInd()
       for (gi in 1:length(checkGenes))
       {
-         g = checkGenes[gi];
+         g = checkGenes[gi]
          gn            = which(genes==g)
          keepGenes[gn] = (consensusPresentFrac[gn] >= minProportionPresent * max(consensusPresentFrac[gn]))
-         if (verbose) pind = updateProgInd(gi/length(checkGenes), pind);
+         if (verbose) pind = updateProgInd(gi/length(checkGenes), pind)
       }
-      if (verbose) printFlush("");
+      if (verbose) printFlush("")
    }
 
-   keep[keep] = keepGenes;
-   return (keep);
+   keep[keep] = keepGenes
+   return (keep)
 }
 
 # ----------------- Main Function ------------------- #
@@ -211,51 +211,51 @@ consensusRepresentatives = function(mdx,
 
    if (!is.null(dim(mdx)))
    {
-     warning("consensusRepresentatives: wrapping matrix-like input into a mdx structure.");
-     mdx = multiData(mdx);
+     warning("consensusRepresentatives: wrapping matrix-like input into a mdx structure.")
+     mdx = multiData(mdx)
    }
-   spaces = indentSpaces(indent);
+   spaces = indentSpaces(indent)
    nSamples= checkSets(mdx)$nSamples
-   nSets = length(mdx);
+   nSets = length(mdx)
 
-   colnames.in = mtd.colnames(mdx);
+   colnames.in = mtd.colnames(mdx)
 
-   calibration = match.arg(calibration);
+   calibration = match.arg(calibration)
    
     ## Test to make sure the variables are the right length.
     #     if not, fix it if possible, or stop.
 
-   cd = .checkConsistencyOfGroupAndColID(mdx, colID, group);
-   colID = cd$colID;
-   group = cd$group;
-   mdx = cd$mdx;
+   cd = .checkConsistencyOfGroupAndColID(mdx, colID, group)
+   colID = cd$colID
+   group = cd$group
+   mdx = cd$mdx
    keepVars = cd$keepProbes
 
-   rnDat = mtd.colnames(mdx);
+   rnDat = mtd.colnames(mdx)
 
       
 ## For each gene, select the gene with the fewest missing probes (if minProportionPresent==TRUE)
 ##  Also, remove all probes with more than 90% missing data
    
    if (verbose > 0)
-     printFlush(spaste(spaces, "..selecting variables with lowest numbers of missing data.."));
+     printFlush(spaste(spaces, "..selecting variables with lowest numbers of missing data.."))
    keep = selectFewestConsensusMissing(mdx, colID, group, minProportionPresent, 
                                  consensusQuantile = consensusQuantile, verbose = verbose -1)
-   mdx = mtd.subset(mdx, , keep);
-   keepVars[keepVars] = keep;
+   mdx = mtd.subset(mdx, , keep)
+   keepVars[keepVars] = keep
 
-   group = group[keep];
-   colID = colID[keep];
+   group = group[keep]
+   colID = colID[keep]
 
-   rnDat = mtd.colnames(mdx);
+   rnDat = mtd.colnames(mdx)
    
 ##   If method="function", use the function "methodFunction" as a way of combining genes
 #    Alternatively, use one of the built-in functions 
 #    Note: methodFunction must be a function that takes a vector of numbers as input and
 #     outputs a single number. This function will return(0) or crash otherwise.
 
-   recMethods = c("function","MaxMean","maxVariance","MinMean","absMinMean","absMaxMean");
-   imethod = pmatch(method, recMethods);
+   recMethods = c("function","MaxMean","maxVariance","MinMean","absMinMean","absMaxMean")
+   imethod = pmatch(method, recMethods)
         
    if (is.na(imethod)) 
       stop("Error: entered method is not a legal option. Recognized options are\n",
@@ -264,47 +264,47 @@ consensusRepresentatives = function(mdx,
 
    if (imethod > 1) 
    {
-     selectionStatisticFnc = spaste(".cr.", method);
+     selectionStatisticFnc = spaste(".cr.", method)
      selStatFnc = get(selectionStatisticFnc, mode = "function")
    } else {
-     selStatFnc = match.fun(selectionStatisticFnc);
+     selStatFnc = match.fun(selectionStatisticFnc)
      if((!is.function(selStatFnc))&(!is.null(selStatFnc)))
             stop("Error: 'selectionStatisticFnc must be a function... please read the help file.")
    }
       
 ## Format the variables for use by this function
    colID[is.na(colID)] = group[is.na(colID)]    # Use group if row is missing
-   rnDat[is.na(rnDat)]   = group[is.na(rnDat)];
-   mdx = mtd.setColnames(mdx, rnDat);
+   rnDat[is.na(rnDat)]   = group[is.na(rnDat)]
+   mdx = mtd.setColnames(mdx, rnDat)
 
    remove       = (is.na(colID))|(is.na(group)) # Omit if both gene and probe are missing
-   colID  = colID[!remove];
-   group = group[!remove];
+   colID  = colID[!remove]
+   group = group[!remove]
    names(group) = colID
    colID = sort(intersect(rnDat,colID))
    if (length(colID)<=1)
       stop("None of the variable names in 'mdx' are in 'colID'.")
 
    group = group[colID]
-   mdx  = mtd.apply(mdx, as.matrix);
-   keepVars[keepVars] =  mtd.colnames(mdx) %in% colID;
-   mdx = mtd.subset(mdx, , colID);
+   mdx  = mtd.apply(mdx, as.matrix)
+   keepVars[keepVars] =  mtd.colnames(mdx) %in% colID
+   mdx = mtd.subset(mdx, , colID)
 
    probes = mtd.colnames(mdx)
    genes  = group[probes]
    tGenes = table(genes)
-   colnames.out = sort(names(tGenes));
+   colnames.out = sort(names(tGenes))
     
    if (getRepresentativeData)
    {
      mdxOut = mtd.apply(mdx, function(x) 
      {
-       out = matrix(0, nrow(x), length(tGenes));
-       rownames(out) = rownames(x);
+       out = matrix(0, nrow(x), length(tGenes))
+       rownames(out) = rownames(x)
        colnames(out) = colnames.out
-       out;
-     });
-     names(mdxOut) = names(mdx);
+       out
+     })
+     names(mdxOut) = names(mdx)
    }
 
    representatives = rep("", length(colnames.out))
@@ -320,7 +320,7 @@ consensusRepresentatives = function(mdx,
      if(!is.numeric(connectivityPower))
         stop("Error: if entered, connectivityPower must be numeric.")
      if(connectivityPower<=0)
-       stop("Warning: connectivityPower must be >= 0.");
+       stop("Warning: connectivityPower must be >= 0.")
 
      if(any(nSamples<=5)){
        write("Warning: 5 or fewer samples, this method of probe collapse is unreliable...","")
@@ -333,29 +333,29 @@ consensusRepresentatives = function(mdx,
 
    selectionStatistics = mtd.apply(mdx, function(x) 
              do.call(selStatFnc, c(list(x), statisticFncArguments)),
-              mdaSimplify = TRUE);
+              mdaSimplify = TRUE)
 
-   #if (FALSE) xxx = selectionStatistics;
+   #if (FALSE) xxx = selectionStatistics
 
    if (is.null(dim(selectionStatistics)))
-      stop("Calculation of selection statistics produced results of zero or unqual lengths.");
+      stop("Calculation of selection statistics produced results of zero or unqual lengths.")
 
    if (calibration=="full quantile")
-      selectionStatistics = normalize.quantiles(selectionStatistics);
+      selectionStatistics = normalize.quantiles(selectionStatistics)
 
    #if (FALSE)
    #{
-   #   sizeGrWindow(14, 5);
-   #   par(mfrow = c(1,3));
+   #   sizeGrWindow(14, 5)
+   #   par(mfrow = c(1,3))
    #   for (set in 1:nSets)
-   #     hist(xxx[, set], breaks = 200);
+   #     hist(xxx[, set], breaks = 200)
 #
 ##      for (set in 1:nSets)
  #       verboseScatterplot(xxx[, set], selectionStatistics[, set], samples = 10000)
  #  }
 
    consensusSelStat = .consensusCalculation(selectionStatistics, useMean = FALSE, setWeightMat = NULL,
-                             consensusQuantile = consensusQuantile)$consensus;
+                             consensusQuantile = consensusQuantile)$consensus
 
    # Actually run the summarization.
 
@@ -367,69 +367,69 @@ consensusRepresentatives = function(mdx,
       twos = sort(names(tGenes)[tGenes>1]) # only use "method"
       more = character(0)
    }
-   ones2genes =  match(ones, genes);
+   ones2genes =  match(ones, genes)
    if (getRepresentativeData) for (set in 1:nSets)
-       mdxOut[[set]]$data[,ones] = mdx[[set]]$data[, ones2genes];
-   representatives[ones] = probes[ones2genes];
-   count = 0;
+       mdxOut[[set]]$data[,ones] = mdx[[set]]$data[, ones2genes]
+   representatives[ones] = probes[ones2genes]
+   count = 0
 
    if (length(twos) > 0)
    {
      if (verbose > 0)
-       printFlush(spaste(spaces, "..selecting representatives for 2-variable groups.."));
-     if (verbose > 1) pind = initProgInd(paste(spaces, ".."));
-     repres = rep(NA, length(twos));
+       printFlush(spaste(spaces, "..selecting representatives for 2-variable groups.."))
+     if (verbose > 1) pind = initProgInd(paste(spaces, ".."))
+     repres = rep(NA, length(twos))
      for (ig in 1:length(twos))
      {
-        g = twos[ig];
-        probeIndex = which(genes==g);
-        repres[ig] = probeIndex[which.max(consensusSelStat[probeIndex])];
-        if (verbose > 1) pind = updateProgInd(ig/length(twos), pind);
+        g = twos[ig]
+        probeIndex = which(genes==g)
+        repres[ig] = probeIndex[which.max(consensusSelStat[probeIndex])]
+        if (verbose > 1) pind = updateProgInd(ig/length(twos), pind)
      }
-     if (verbose > 1) printFlush("");
+     if (verbose > 1) printFlush("")
      if (getRepresentativeData) for (set in 1:nSets)
-        mdxOut[[set]]$data[, twos] = mdx[[set]]$data[, repres];
-     representatives[twos] = probes[repres];
+        mdxOut[[set]]$data[, twos] = mdx[[set]]$data[, repres]
+     representatives[twos] = probes[repres]
    }
    if (length(more) > 0)
    {
      if (verbose > 0)
-       printFlush(spaste(spaces, "..selecting representatives for 3-variable groups.."));
-     if (verbose > 1) pind = initProgInd(paste(spaces, ".."));
-     genes.more = genes[genes %in% more];
-     nAll = length(genes.more);
-     connectivities = matrix(NA, nAll, nSets);
+       printFlush(spaste(spaces, "..selecting representatives for 3-variable groups.."))
+     if (verbose > 1) pind = initProgInd(paste(spaces, ".."))
+     genes.more = genes[genes %in% more]
+     nAll = length(genes.more)
+     connectivities = matrix(NA, nAll, nSets)
      for (ig in 1:length(more))
      {
-        g = more[ig];
-        keepProbes1 = which(genes==g);
-        keep.inMore = which(genes.more==g);
-        mdxTmp = mtd.subset(mdx, , keepProbes1);
+        g = more[ig]
+        keepProbes1 = which(genes==g)
+        keep.inMore = which(genes.more==g)
+        mdxTmp = mtd.subset(mdx, , keepProbes1)
         adj = mtd.apply(mdxTmp, function(x) do.call(adjacency, 
-                c(list(x, type = "signed", power = connectivityPower), adjacencyArguments)));
-        connectivities[keep.inMore, ] = mtd.apply(adj, colSums, mdaSimplify = TRUE);
-        count = count + 1;
-        if (count %% 50000 == 0) collectGarbage();
-        if (verbose > 1) pind = updateProgInd(ig/(2*length(more)), pind);
+                c(list(x, type = "signed", power = connectivityPower), adjacencyArguments)))
+        connectivities[keep.inMore, ] = mtd.apply(adj, colSums, mdaSimplify = TRUE)
+        count = count + 1
+        if (count %% 50000 == 0) collectGarbage()
+        if (verbose > 1) pind = updateProgInd(ig/(2*length(more)), pind)
      }
 
      if (calibration=="full quantile")
-       connectivities = normalize.quantiles(connectivities);
+       connectivities = normalize.quantiles(connectivities)
 
      consConn = .consensusCalculation(connectivities, useMean = FALSE, setWeightMat = NULL,
-                                               consensusQuantile = consensusQuantile)$consensus;
-     repres.inMore = rep(0, length(more));
+                                               consensusQuantile = consensusQuantile)$consensus
+     repres.inMore = rep(0, length(more))
      for (ig in 1:length(more))
      {
-        probeIndex = which(genes.more==more[ig]);
-        repres.inMore[ig] = probeIndex[which.max(consConn[probeIndex])];
-        if (verbose > 1) pind = updateProgInd(ig/(2*length(more)) + 0.5, pind);
+        probeIndex = which(genes.more==more[ig])
+        repres.inMore[ig] = probeIndex[which.max(consConn[probeIndex])]
+        if (verbose > 1) pind = updateProgInd(ig/(2*length(more)) + 0.5, pind)
      }
-     repres = which(genes %in% more)[repres.inMore];
-     if (verbose > 1) printFlush("");
+     repres = which(genes %in% more)[repres.inMore]
+     if (verbose > 1) printFlush("")
      if (getRepresentativeData) for (set in 1:nSets)
        mdxOut[[set]]$data[, more] = as.numeric(mdx[[set]]$data[, repres]); 
-     representatives[more] = probes[repres];
+     representatives[more] = probes[repres]
    }
       
    # Retreive the information about which probes were saved, and include that information
@@ -438,7 +438,7 @@ consensusRepresentatives = function(mdx,
    out2 = cbind(colnames.out, representatives)
    colnames(out2) = c("group","selectedColID")
 
-   reprIndicator = keepVars;
+   reprIndicator = keepVars
    reprIndicator[keepVars] [match(representatives, mtd.colnames(mdx))] = TRUE
    reprIndicator = colnames.in
    out = list(representatives = out2, 

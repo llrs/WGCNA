@@ -2,11 +2,11 @@
 
 .onAttach = function(libname, pkgname)
 {
-  ourVer = try( gsub("[^0-9_.-]", "", packageVersion("WGCNA"), fixed = FALSE) );
+  ourVer = try( gsub("[^0-9_.-]", "", packageVersion("WGCNA"), fixed = FALSE) )
 
-  if (inherits(ourVer, "try-error")) ourVer = "";
+  if (inherits(ourVer, "try-error")) ourVer = ""
 
-  printFlush("==========================================================================\n*");
+  printFlush("==========================================================================\n*")
   printFlush(paste("*  Package WGCNA", ourVer, "loaded.\n*"))
 
   if (.useNThreads()==1 && .nProcessorsOnline() > 1)
@@ -32,12 +32,12 @@
          "*           export ", .threadAllowVar, "=", .nProcessorsOnline(), 
          "\n*",
          "\n*     before running R. Other operating systems or shells will", 
-         "\n*     have a similar command to achieve the same aim.\n*"));
+         "\n*     have a similar command to achieve the same aim.\n*"))
   }
-  printFlush("==========================================================================\n\n");
+  printFlush("==========================================================================\n\n")
 
 
-  imputeVer = try( gsub("[^0-9_.-]", "", packageVersion("impute"), fixed = FALSE) );
+  imputeVer = try( gsub("[^0-9_.-]", "", packageVersion("impute"), fixed = FALSE) )
 
   if (!inherits(imputeVer, "try-error"))
   {
@@ -50,7 +50,7 @@
             "from Bioconductor at \n",
             "http://www.bioconductor.org/packages/release/bioc/html/impute.html . \n",
             "If the above link is dead, search for package 'impute' \n",
-            "in the Downloads -> Software section of http://www.bioconductor.org .\n"));
+            "in the Downloads -> Software section of http://www.bioconductor.org .\n"))
     }
   }
 }

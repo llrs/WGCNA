@@ -39,46 +39,46 @@ userListEnrichment <- function (geneR, labelR, fnIn = NULL, catNmIn = fnIn, name
         datIn[, 2] = paste(datIn[, 2], catNmIn[i], sep = "__")
         glIn = rbind(glIn, datIn)
       }
-      glIn = cbind(glIn, Type = rep("User", nrow(glIn)));
+      glIn = cbind(glIn, Type = rep("User", nrow(glIn)))
     }
     if (useBrainLists) {
-        if (!(exists("BrainLists"))) BrainLists = NULL;
-        data("BrainLists",envir=sys.frame(sys.nframe()));
+        if (!(exists("BrainLists"))) BrainLists = NULL
+        data("BrainLists",envir=sys.frame(sys.nframe()))
         write("See help file for details regarding brain list references.", 
             "")
         glIn = rbind(glIn, cbind(BrainLists, Type = rep("Brain", nrow(BrainLists))))
     }
     if (useBloodAtlases) { 
-        if (!(exists("BloodLists"))) BloodLists = NULL;
-        data("BloodLists",envir=sys.frame(sys.nframe()));
+        if (!(exists("BloodLists"))) BloodLists = NULL
+        data("BloodLists",envir=sys.frame(sys.nframe()))
         write("See help file for details regarding blood atlas references.",
 		        "")
 	      glIn = rbind(glIn, cbind(BloodLists, Type = rep("Blood", nrow(BloodLists))))
     }
     if (useStemCellLists) {
-        if (!(exists("SCsLists"))) SCsLists = NULL;
-        data("SCsLists",envir=sys.frame(sys.nframe()));
+        if (!(exists("SCsLists"))) SCsLists = NULL
+        data("SCsLists",envir=sys.frame(sys.nframe()))
         write("See help file for details regarding stem cell list references.", 
             "")
         glIn = rbind(glIn, cbind(SCsLists, Type = rep("StemCells", nrow(SCsLists))))
     }
 	  if (useBrainRegionMarkers) {
-        if (!(exists("BrainRegionMarkers"))) BrainRegionMarkers = NULL;
-        data("BrainRegionMarkers",envir=sys.frame(sys.nframe()));
+        if (!(exists("BrainRegionMarkers"))) BrainRegionMarkers = NULL
+        data("BrainRegionMarkers",envir=sys.frame(sys.nframe()))
         write("Brain region markers from http://human.brain-map.org/ -- see help file for details.", 
             "")
         glIn = rbind(glIn, cbind(BrainRegionMarkers, Type = rep("HumanBrainRegions", nrow(BrainRegionMarkers))))
     }
     if (useImmunePathwayLists) { 
-        if (!(exists("ImmunePathwayLists"))) ImmunePathwayLists = NULL;
-        data("ImmunePathwayLists",envir=sys.frame(sys.nframe()));
+        if (!(exists("ImmunePathwayLists"))) ImmunePathwayLists = NULL
+        data("ImmunePathwayLists",envir=sys.frame(sys.nframe()))
         write("See help file for details regarding immune pathways.",
 		        "")
 	      glIn = rbind(glIn, cbind(ImmunePathwayLists, Type = rep("Immune", nrow(ImmunePathwayLists))))
     }
     if (usePalazzoloWang) { 
-        if (!(exists("PWLists"))) PWLists = NULL;
-        data("PWLists",envir=sys.frame(sys.nframe()));
+        if (!(exists("PWLists"))) PWLists = NULL
+        data("PWLists",envir=sys.frame(sys.nframe()))
         write("See help file for details regarding Palazzolo / Wang lists from CHDI.",
 		        "")
 		write("---- there are many of these gene sets so the function may take several minutes to run.",
@@ -104,35 +104,35 @@ userListEnrichment <- function (geneR, labelR, fnIn = NULL, catNmIn = fnIn, name
     omitCategories = c(omitCategories, "background")      
     catsR = catsR[!is.element(catsR, omitCategories)]
     catsIn = sort(unique(labelIn))
-    typeIn = glIn.2[keep, ][match(catsIn, labelIn), 3];
+    typeIn = glIn.2[keep, ][match(catsIn, labelIn), 3]
     lenAll = length(geneAll)
-    nCols.pValues = 5;
-    nComparisons = length(catsR) * length(catsIn);
-    nIn = length(catsIn);
-    nR = length(catsR);
+    nCols.pValues = 5
+    nComparisons = length(catsR) * length(catsIn)
+    nIn = length(catsIn)
+    nR = length(catsR)
     index = 1; 
-    nOverlap = rep(0, nComparisons);
-    pValues = rep(1, nComparisons);
-    ovGenes = vector(mode = "list", length = nComparisons);
-    isI = matrix(FALSE, lenAll, nIn);
+    nOverlap = rep(0, nComparisons)
+    pValues = rep(1, nComparisons)
+    ovGenes = vector(mode = "list", length = nComparisons)
+    isI = matrix(FALSE, lenAll, nIn)
     for (i in 1:nIn)
     {
-      isI[, i] = is.element(geneAll,geneIn[labelIn == catsIn[i]]);
+      isI[, i] = is.element(geneAll,geneIn[labelIn == catsIn[i]])
     }
     for (r in 1:length(catsR)) 
     {
       isR  = is.element(geneAll,geneR[(labelR == catsR[r])])
       for (i in 1:length(catsIn)) 
       { 
-        isI.1 = isI[, i];
+        isI.1 = isI[, i]
         lyn  = sum(isR&(!isI.1))
         lny  = sum(isI.1&(!isR))
         lyy  = sum(isR&isI.1)
         gyy  = geneAll[isR&isI.1]
         lnn  = lenAll - lyy - lyn - lny
         pv   = fisher.test(matrix(c(lnn,lny,lyn,lyy), 2, 2), alternative = "greater")$p.value
-        nOverlap[index] = lyy;
-        pValues[index] = pv;
+        nOverlap[index] = lyy
+        pValues[index] = pv
         ovGenes[[index]] = gyy
         index = index + 1
       }
@@ -145,8 +145,8 @@ userListEnrichment <- function (geneR, labelR, fnIn = NULL, catNmIn = fnIn, name
                                         Pvalues = pValues,
                                         CorrectedPvalues = ifelse(pValues * nComparisons > 1, 1,
                                                                   pValues * nComparisons)),
-                   ovGenes = ovGenes);
-    namesOv = paste(results$pValues$InputCategories, "--", results$pValues$UserDefinedCategories);
+                   ovGenes = ovGenes)
+    namesOv = paste(results$pValues$InputCategories, "--", results$pValues$UserDefinedCategories)
     names(results$ovGenes) = namesOv
     if (outputCorrectedPvalues) {
         results$sigOverlaps = results$pValues[results$pValues$CorrectedPvalues < 0.05, c(1, 2, 3, 6)]
@@ -155,21 +155,21 @@ userListEnrichment <- function (geneR, labelR, fnIn = NULL, catNmIn = fnIn, name
         write("Note that outputted p-values are not corrected for multiple comparisons.", 
             "")
     }
-    results$sigOverlaps = results$sigOverlaps[order(results$sigOverlaps[, 4]), ];
-    row.names(results$sigOverlaps) = NULL;
+    results$sigOverlaps = results$sigOverlaps[order(results$sigOverlaps[, 4]), ]
+    row.names(results$sigOverlaps) = NULL
     
     rSig  = results$sigOverlaps
-    nSig = nrow(rSig);
+    nSig = nrow(rSig)
     if (nSig > 0)
     {
        rCats = paste(rSig$InputCategories,"--",rSig$UserDefinedCategories)
-       rNums <- rep(0, nSig);
-       rGenes <- rep("", nSig);
+       rNums <- rep(0, nSig)
+       rGenes <- rep("", nSig)
        for (i in 1:nSig)
        {
          rGn    = results$ovGenes[[which(names(results$ovGenes)==rCats[i])]]
-         rNums[i]  = length(rGn);
-         rGenes[i] = paste(rGn,collapse=", ");
+         rNums[i]  = length(rGn)
+         rGenes[i] = paste(rGn,collapse=", ")
        }
        rSig$NumGenes = rNums
        rSig$CategoryGenes = rGenes

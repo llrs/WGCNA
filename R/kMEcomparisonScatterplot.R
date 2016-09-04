@@ -38,10 +38,10 @@ fileName = if (plotAll) paste("kME_correlations_between_",nameA,"_and_",nameB,"_
 # Second, make the plots
 	xlab  = paste("kME values in",nameA)
 	ylab  = paste("kME values in",nameB)
-        printFlush(paste("Plotting kME scatterplots into file", fileName));
+        printFlush(paste("Plotting kME scatterplots into file", fileName))
 	if (plotAll){
 		pdf(file=fileName)
-		numPlot = min(maxPlot,length(colorh));
+		numPlot = min(maxPlot,length(colorh))
 		these   = sample(1:length(colorh),numPlot)
 		for (i in 1:length(mods)){
 			plotCol = mods[i]; if(mods[i]=="white") plotCol="black"

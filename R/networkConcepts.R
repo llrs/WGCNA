@@ -8,10 +8,10 @@
 networkConcepts = function(datExpr, power=1, trait=NULL, networkType = "unsigned") 
 {
 
-  networkTypeC = charmatch(networkType, .networkTypes);
+  networkTypeC = charmatch(networkType, .networkTypes)
   if (is.na(networkTypeC))
     stop(paste("Unrecognized networkType argument.",
-         "Recognized values are (unique abbreviations of)", paste(.networkTypes, collapse = ", ")));
+         "Recognized values are (unique abbreviations of)", paste(.networkTypes, collapse = ", ")))
 
   if(networkTypeC==1)
   {
@@ -20,8 +20,8 @@ networkConcepts = function(datExpr, power=1, trait=NULL, networkType = "unsigned
   {
   	adj <- abs((cor(datExpr,use="p")+1)/2)^power
   } else {
-        cor = cor(datExpr,use="p");
-        cor[cor < 0] = 0;
+        cor = cor(datExpr,use="p")
+        cor[cor < 0] = 0
   	adj <- cor^power
   }
   diag(adj)=0 # Therefore adj=A-I.
@@ -60,7 +60,7 @@ networkConcepts = function(datExpr, power=1, trait=NULL, networkType = "unsigned
   ClusterCoef.CF.App=(sum(Conformity^2)/sum(Conformity))^2
 
   ### Eigengene-based Network Concepts
-  m1=moduleEigengenes(datExpr, colors = rep(1, Size));
+  m1=moduleEigengenes(datExpr, colors = rep(1, Size))
   # Weighted Expression Conformity
   ConformityE=cor(datExpr,m1[[1]][,1],use="pairwise.complete.obs"); ConformityE=abs(ConformityE)^power; 
   ConnectivityE=sum(ConformityE)*ConformityE; #Expression Connectivity
@@ -72,7 +72,7 @@ networkConcepts = function(datExpr, power=1, trait=NULL, networkType = "unsigned
 
   ### Significance measure only when trait is available.
   if(!is.null(trait)){
-    EigengeneSignificance = abs(cor(trait, m1[[1]], use="pairwise.complete.obs") )^power;
+    EigengeneSignificance = abs(cor(trait, m1[[1]], use="pairwise.complete.obs") )^power
     EigengeneSignificance = EigengeneSignificance[1,1]
     GS= abs(cor(datExpr, trait, use="pairwise.complete.obs") )^power; GS=GS[,1]
     GSE=ConformityE * EigengeneSignificance; GSE=GSE[,1]
@@ -97,7 +97,7 @@ mean(Connectivity.CF.App) ) )
 VarExplained=m1[[2]][,1], Conformity=Conformity, ClusterCoef=ClusterCoef, Connectivity=Connectivity,
 MAR=MAR, ConformityE=ConformityE)
   if(!is.null(trait)){
-    output$GS=GS; output$GSE=GSE;
+    output$GS=GS; output$GSE=GSE
     Significance=cbind(c(ModuleSignificance, HubGeneSignificance, EigengeneSignificance),
     c(ModuleSignificanceE, HubGeneSignificanceE, NA))
     colnames(Significance)=c("Fundamental", "Eigengene-based")
@@ -208,7 +208,7 @@ MAR=MAR, ConformityE=ConformityE)
 #   2. If the adjacency matrix is 2 by 2, then a warning message is issued.
 #   3. If the adjacency matrix is a ZERO matrix, then a warning message is issued and vector of 0 is returned.
 
-if( exists(".NPC.iterate") ) rm(.NPC.iterate);
+if( exists(".NPC.iterate") ) rm(.NPC.iterate)
 .NPC.iterate=function(adj, loop=10^(10), tol=10^(-10)){
 	if(!.is.adjmat(adj)) stop("The input matrix is not a valid adjacency matrix!")
 	n=dim(adj)[1]
@@ -241,7 +241,7 @@ if( exists(".NPC.iterate") ) rm(.NPC.iterate);
   # diag(adjmat1)=0
   no.nodes=dim(adjmat1)[[1]]
   computeLinksInNeighbors <- function(x, imatrix){x %*% imatrix %*% x}
-  computeSqDiagSum = function(x, vec) { sum(x^2 * vec) };
+  computeSqDiagSum = function(x, vec) { sum(x^2 * vec) }
   nolinksNeighbors <- c(rep(-666,no.nodes))
   total.edge <- c(rep(-666,no.nodes))
   maxh1=max(as.dist(adjmat1) ); minh1=min(as.dist(adjmat1) ); 
@@ -251,7 +251,7 @@ if( exists(".NPC.iterate") ) rm(.NPC.iterate);
                  "than 1 or smaller than 0: max=",maxh1,", min=",minh1)) 
   } else { 
     nolinksNeighbors <- apply(adjmat1, 1, computeLinksInNeighbors, imatrix=adjmat1)
-    subTerm = apply(adjmat1, 1, computeSqDiagSum, vec = diag(adjmat1));
+    subTerm = apply(adjmat1, 1, computeSqDiagSum, vec = diag(adjmat1))
     plainsum  <- apply(adjmat1, 1, sum)
     squaresum <- apply(adjmat1^2, 1, sum)
     total.edge = plainsum^2 - squaresum
@@ -345,7 +345,7 @@ conformityBasedNetworkConcepts = function(adj, GS=NULL)
   {
       warning(paste("The sum of conformities equals zero.\n",
                     "Maybe you used an input adjacency matrix with lots of zeroes?\n",
-                    "Specifically, sum(Conformity,na.rm=T)==0."));
+                    "Specifically, sum(Conformity,na.rm=T)==0."))
       MAR.CF.App= rep(NA,Size) 
       ClusterCoef.CF.App= rep(NA,Size) 
   } #end of if

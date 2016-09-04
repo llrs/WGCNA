@@ -17,7 +17,7 @@ datIsExpression=TRUE){
 	}
 	
 # Find and format the kME values and other variables for both inputs
-	G1 = dimnames(dat1)[[datIsExpression+1]];  G2 = dimnames(dat2)[[datIsExpression+1]];
+	G1 = dimnames(dat1)[[datIsExpression+1]];  G2 = dimnames(dat2)[[datIsExpression+1]]
 	if(datIsExpression){
 		if(is.null(MEs1))
 			MEs1 = (moduleEigengenes(dat1, colors=as.character(colorh1), excludeGrey=omitGrey))$eigengenes
@@ -28,12 +28,12 @@ datIsExpression=TRUE){
 		if (length(grep("PC",mods1))==length(mods1)) mods1 = substr(mods1,3,nchar(mods1))
 		if (length(grep("ME",mods2))==length(mods2)) mods2 = substr(mods2,3,nchar(mods2))	
 		if (length(grep("PC",mods2))==length(mods2)) mods2 = substr(mods2,3,nchar(mods2))
-		out = corAndPvalue(dat1,MEs1);  MM1 = out$cor;  PV1 = out$p;  rm(out);
-		out = corAndPvalue(dat2,MEs2);  MM2 = out$cor;  PV2 = out$p;  rm(out);
-		colnames(MM1) <- colnames(PV1) <- mods1;
-		colnames(MM2) <- colnames(PV2) <- mods2;
-		rownames(MM1) <- rownames(PV1) <- G1;
-		rownames(MM2) <- rownames(PV2) <- G2;
+		out = corAndPvalue(dat1,MEs1);  MM1 = out$cor;  PV1 = out$p;  rm(out)
+		out = corAndPvalue(dat2,MEs2);  MM2 = out$cor;  PV2 = out$p;  rm(out)
+		colnames(MM1) <- colnames(PV1) <- mods1
+		colnames(MM2) <- colnames(PV2) <- mods2
+		rownames(MM1) <- rownames(PV1) <- G1
+		rownames(MM2) <- rownames(PV2) <- G2
 	} else {
 		MM1 = dat1[,sort(colnames(dat1))];  mods1 = colnames(MM1)
 		MM2 = dat2[,sort(colnames(dat2))];  mods2 = colnames(MM2)
@@ -41,8 +41,8 @@ datIsExpression=TRUE){
 		if (length(grep("PC",mods1))==length(mods1)) mods1 = substr(mods1,3,nchar(mods1))
 		if (length(grep("ME",mods2))==length(mods2)) mods2 = substr(mods2,3,nchar(mods2))
 		if (length(grep("PC",mods2))==length(mods2)) mods2 = substr(mods2,3,nchar(mods2))
-		colnames(MM1) = mods1;  colnames(MM2) = mods2;
-		rownames(MM1) = G1;     rownames(MM2) = G2;
+		colnames(MM1) = mods1;  colnames(MM2) = mods2
+		rownames(MM1) = G1;     rownames(MM2) = G2
 		if(omitGrey){
 			MM1 = MM1[,!is.element(mods1,"grey")];  mods1 = colnames(MM1)
 			MM2 = MM2[,!is.element(mods2,"grey")];  mods2 = colnames(MM2)
