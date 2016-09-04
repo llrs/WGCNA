@@ -73,13 +73,15 @@ moduleEigengenes <- function(expr, colors, impute = TRUE, nPC = 1,
     if (!is.element(align, alignRecognizedValues)) {
         printFlush(paste("ModulePrincipalComponents: Error:",
                          "parameter align has an unrecognised value:",
-                         align, "; Recognized values are ", alignRecognizedValues))
+                         align, "; Recognized values are ",
+                         alignRecognizedValues))
         stop()
     }
 
     maxVarExplained = 10
     if (nPC>maxVarExplained)
-        warning(paste("Given nPC is too large. Will use value", maxVarExplained))
+        warning(paste("Given nPC is too large. Will use value",
+                      maxVarExplained))
 
     nVarExplained = min(nPC, maxVarExplained)
     modlevels = levels(factor(colors))
@@ -208,7 +210,9 @@ moduleEigengenes <- function(expr, colors, impute = TRUE, nPC = 1,
             warning(paste("Eigengene calculation of module", modulename,
                           "failed with the following error \n     ",
                           pc, "The offending module has been removed.\n"))
-            validMEs[i] = FALSE; isPC[i] = FALSE; isHub[i] = FALSE
+            validMEs[i] = FALSE
+            isPC[i] = FALSE
+            isHub[i] = FALSE
             validColors[restrict1] = grey
         } else {
             PrinComps[, i] = pc
@@ -380,18 +384,19 @@ orderMEs <- function(MEs, greyLast = TRUE,
         } else {
             multiSet = FALSE
             MEs = fixDataStructure(MEs)
-            useSets = NULL; orderBy = 1
+            useSets = NULL
+            orderBy = 1
         }
 
         if (!is.null(useSets))
             if (is.na(match(orderBy, useSets))) orderBy = useSets[1]
 
-            if (is.null(order))
-            {
+            if (is.null(order)) {
                 if (verbose > 0) {
-                    printFlush(paste(spaces,
-                                     "orderMEs: order not given, calculating using given set",
-                                     orderBy))}
+                    printFlush(paste(
+                        spaces,
+                    "orderMEs: order not given, calculating using given set",
+                        orderBy))}
                 corPC = cor(MEs[[orderBy]]$data, use = "p")
                 disPC = 1 - corPC
                 order = .clustOrder(disPC, greyLast = greyLast, greyName = greyName)
@@ -863,7 +868,8 @@ checkSets <- function(data, checkStructure = FALSE, useSets = NULL)
         if (checkStructure)
         {
             structureOK = FALSE
-            nGenes = 0; nSamples = 0
+            nGenes = 0
+            nSamples = 0
         } else {
             stop("data does not appear to have the correct format. Consider using
            fixDataStructure", "or setting checkStructure = TRUE when calling
@@ -1139,7 +1145,8 @@ mergeCloseModules <- function(
         stop(paste("Given cutHeight is out of sensible range between 0 and",
                    1 + as.integer(useAbs)))
 
-    done = FALSE; iteration = 1
+    done = FALSE
+    iteration = 1
 
     MergedColors = colors
     ok = try(
@@ -1185,8 +1192,10 @@ mergeCloseModules <- function(
                     printFlush(paste(spaces, " ..there is nothing to merge."))
                     MergedNewColors = colors
                     MergedColors = colors
-                    nOldMods = 1; nNewMods = 1
-                    oldTree = NULL; Tree = NULL
+                    nOldMods = 1
+                    nNewMods = 1
+                    oldTree = NULL
+                    Tree = NULL
                     break
                 }
 
@@ -2365,7 +2374,8 @@ plotOrderedColors <- function(
     for (j in 1:nColorRows) {
         jj = jIndex
         ind = (1:dimC[1])
-        xl = (ind - 1.5 + startAt) * step; xr = (ind - 0.5 + startAt) * step
+        xl = (ind - 1.5 + startAt) * step
+        xr = (ind - 0.5 + startAt) * step
         yb = rep(yBottom[jj], dimC[1])
         yt = rep(yTop[jj], dimC[1])
         if (is.null(dim(C))) {
@@ -2858,8 +2868,10 @@ stdErr <- function(x){ sqrt(var(x, na.rm = TRUE)/sum(!is.na(x))  ) }
     on.exit(par(usr))
     par(usr = c(usr[1:2], 0, 1.5))
     h <- hist(x, plot = FALSE)
-    breaks <- h$breaks; nB <- length(breaks)
-    y <- h$counts; y <- y/max(y)
+    breaks <- h$breaks
+    nB <- length(breaks)
+    y <- h$counts
+    y <- y/max(y)
     rect(breaks[ - nB], 0, breaks[ - 1], y, col = "cyan", ...)
 }
 
@@ -4209,7 +4221,7 @@ simulateDatExpr <- function(eigengenes, nGenes, modProportions,
     trueKME = rep(NA, nGenes)
     trueKME.whichMod = rep(0, nGenes)
 
-    gene.index = 0;		# Where to put the current gene into datExpr
+    gene.index = 0 # Where to put the current gene into datExpr
 
     for(mod in c(1:nMods)) {
         nModGenes = no.in.modules[mod]
@@ -4292,9 +4304,9 @@ simulateDatExpr <- function(eigengenes, nGenes, modProportions,
 # simulate several sets with some of the modules left out.
 # eigengenes are specified in a standard multi - set data format.
 # leaveOut must be a matrix of No.Modules x No.Sets of TRUE/FALSE values
-# minCor must be a single number here; modProportions are a single vector,
+# minCor must be a single number here modProportions are a single vector,
 # since the proportions should be the same for all sets.
-# nSamples is a vector specifying the number of samples in each set; this must
+# nSamples is a vector specifying the number of samples in each set this must
 # be compatible with the dimensions of the eigengenes.
 
 simulateMultiExpr <- function(eigengenes, nGenes, modProportions,
@@ -4983,7 +4995,8 @@ labeledHeatmap <- function(
     ...) {
 
     if (!is.null(colorLabels)) {
-        xColorLabels = colorLabels; yColorLabels = colorLabels
+        xColorLabels = colorLabels
+        yColorLabels = colorLabels
     }
 
     if (is.null(yLabels) & (!is.null(xLabels)) &
@@ -6318,7 +6331,11 @@ numbers2colors <- function(
 # assesses how similar two clusterings are
 randIndex <- function(tab, adjust = TRUE)
 {
-    a <- 0; b <- 0; c <- 0; d <- 0; nn <- 0
+    a <- 0
+    b <- 0
+    c <- 0
+    d <- 0
+    nn <- 0
     m <- nrow(tab)
     n <- ncol(tab)
     for (i in 1:m) {
@@ -7395,9 +7412,11 @@ consensusKME <- function(multiExpr, moduleLabels, multiEigengenes = NULL,
             stop("Function `corAndPvalueFnc' did not return a p-value.")
         kME[,, set] = cp[[corComp]]
         p[,, set] = cp[[pComp]]
-        if (!is.null(cp$Z)) { Z[,, set] = cp$Z; haveZs = TRUE}
-        if (!is.null(cp$nObs))
-        {
+        if (!is.null(cp$Z)) {
+            Z[,, set] = cp$Z
+            haveZs = TRUE
+        }
+        if (!is.null(cp$nObs)) {
             nObs[,, set] = cp$nObs
         } else
             nObs[,, set] = t(
