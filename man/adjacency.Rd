@@ -14,7 +14,7 @@ adjacency(datExpr, selectCols = NULL, type = "unsigned", power = if (type
 }
 \arguments{
 \item{similarity}{A (signed) similarity matrix: square, symmetric matrix with
-entries between -1 and 1.}
+entries between  - 1 and 1.}
 
 \item{type}{Network type, allowed values are \code{"unsigned"},
 \code{"signed"}, \code{"signed hybrid"}, \code{"distance"}.}
@@ -31,8 +31,8 @@ Should be either a numeric vector giving the indices of the genes to be used,
  or a boolean vector indicating which genes are to be used.}
 
 \item{corFnc}{Character string specifying the function to be used to
-calculate co-expression similarity for correlation networks. Defaults to
-Pearson correlation. Any function returning values between -1 and 1 can
+calculate co - expression similarity for correlation networks. Defaults to
+Pearson correlation. Any function returning values between  - 1 and 1 can
 be used.}
 
 \item{corOptions}{Character string specifying additional arguments to be
@@ -40,8 +40,8 @@ passed to the function given by \code{corFnc}. Use
 \code{"use = 'p', method = 'spearman'"} to obtain Spearman correlation.}
 
 \item{distFnc}{Character string specifying the function to be used to
-calculate co-expression similarity for distance networks. Defaults to the
-function \code{\link{dist}}. Any function returning non-negative values
+calculate co - expression similarity for distance networks. Defaults to the
+function \code{\link{dist}}. Any function returning non - negative values
 can be used.}
 
 \item{distOption}{Character string specifying additional arguments to be
@@ -58,7 +58,8 @@ Adjacency matrix of dimensions \code{ncol(datExpr)} times
 \description{
 Calculates (correlation or distance) network adjacency from given expression
 data or from a similarity. Computes the adjacency from the expression data:
-takes cor, transforms it as appropriate and possibly adds a sign if requested.
+takes cor, transforms it as appropriate and possibly adds a sign if
+requested.
 }
 \details{
 The argument \code{type} determines whether a correlation (\code{type} one of
@@ -80,9 +81,9 @@ will be given arguments \code{(datExpr, datExpr[selectCols], ...)}; hence the
 
 Correlation and distance are transformed as follows: for
 \code{type = "unsigned"}, adjacency = |cor|^power; for \code{type = "signed"}
-, adjacency = (0.5 * (1+cor) )^power; for \code{type = "signed hybrid"},
+, adjacency = (0.5 * (1 + cor))^power; for \code{type = "signed hybrid"},
 adjacency = cor^power if cor>0 and 0 otherwise; and for
-\code{type = "distance"}, adjacency = (1-(dist/max(dist))^2)^power.
+\code{type = "distance"}, adjacency = (1 - (dist/max(dist))^2)^power.
 
 The function \code{adjacency.fromSimilarity} inputs a similarity matrix, that
  is it skips the correlation calculation step but is otherwise identical.
@@ -93,18 +94,19 @@ among the columns of \code{datExpr} irrespective of whether a correlation or
 a distance network is requested.
 }
 \examples{
-adj <- adjacency.fromSimilarity(similarity)
+adj <-  adjacency.fromSimilarity(similarity)
 adj <- adjacency(datExpr)
 }
 \author{
 Peter Langfelder and Steve Horvath
 }
 \references{
-Bin Zhang and Steve Horvath (2005) A General Framework for Weighted Gene Co-Expression
-Network Analysis, Statistical Applications in Genetics and Molecular Biology, Vol. 4 No. 1, Article 17
+Bin Zhang and Steve Horvath (2005) A General Framework for Weighted Gene
+Co-Expression Network Analysis, Statistical Applications in Genetics and
+Molecular Biology, Vol. 4 No. 1, Article 17
 
-Langfelder P, Horvath S (2007) Eigengene networks for studying the relationships between co-expression
-modules. BMC Systems Biology 2007, 1:54
+Langfelder P, Horvath S (2007) Eigengene networks for studying the
+relationships between co - expression modules. BMC Systems Biology 2007, 1:54
 }
 \keyword{array}
 

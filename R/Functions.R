@@ -135,11 +135,13 @@ moduleEigengenes <- function(expr, colors, impute = TRUE, nPC = 1,
                             datModule = datModule$data
                         } }, silent = TRUE)
                     }
-                    # The << -  in the next line is extremely important.
+                    # The <<- in the next line is extremely important.
                     # Using = or <- will create a local variable of
                     # the name .Random.seed and will leave the important global
                     # .Random.seed untouched.
-                    if (seedSaved) .Random.seed << -  saved.seed
+                    if (seedSaved) {
+                        .Random.seed <<- saved.seed
+                    }
                 }
 
                 if (verbose > 5) printFlush(paste(spaces, " ...scaling"))
@@ -903,7 +905,7 @@ multiSetMEs <- function(exprData, colors, universalColors = NULL,
                         grey = if (is.null(universalColors)) {
                             if(is.numeric(colors)) 0 else "grey"} else
                                 if (is.numeric(universalColors)) {
-                                    0 else "grey"},
+                                    0} else {"grey"},
                         subHubs = TRUE,
                         trapErrors = FALSE,
                         returnValidOnly = trapErrors,
@@ -1725,7 +1727,7 @@ scaleFreePlot <- function(connectivity, nBreaks = 10, truncated = FALSE,
         p.dk = p.dk[ - 1]
         log.dk = log.dk[ - 1]
     }
-    log.p.dk = as.numeric(log10(p.dk + 1e - 09))
+    log.p.dk = as.numeric(log10(p.dk + 1e-09))
     lm1 = lm(log.p.dk ~ log.dk)
     if (truncated == TRUE) {
         lm2 = lm(log.p.dk ~ log.dk + I(10^log.dk))
@@ -1767,7 +1769,8 @@ scaleFreePlot <- function(connectivity, nBreaks = 10, truncated = FALSE,
 # http://www.genetics.ucla.edu/labs/horvath/GTOM/
 GTOMdist <- function(adjMat, degree = 1)
 {
-    maxh1 = max(as.dist(adjMat)) minh1 = min(as.dist(adjMat))
+    maxh1 = max(as.dist(adjMat))
+    minh1 = min(as.dist(adjMat))
     if (degree != round(abs(degree)))
         stop("'degree' must be a positive integer.")
     if (maxh1>1 | minh1 < 0)
@@ -1852,7 +1855,8 @@ vectorTOM <- function(datExpr, vect, subtract1 = FALSE, blockSize = 2000,
 
     subtract1 = as.numeric(subtract1)
 
-    nVect = ncol(vect) nGenes = ncol(datExpr)
+    nVect = ncol(vect)
+    nGenes = ncol(datExpr)
     TOM = matrix(nrow = nGenes, ncol = nVect)
 
     if (verbose > 0) {
@@ -1975,7 +1979,6 @@ subsetTOM <- function(datExpr, subset,
 #' @title Calculate network adjacency
 #' @aliases adjacency
 #' @aliases adjacency.fromSimilarity
-#' @usage
 #' @description
 #' Calculates (correlation or distance) network adjacency from given expression
 #' data or from a similarity. Computes the adjacency from the expression data:
@@ -2363,7 +2366,8 @@ plotOrderedColors <- function(
         jj = jIndex
         ind = (1:dimC[1])
         xl = (ind - 1.5 + startAt) * step; xr = (ind - 0.5 + startAt) * step
-        yb = rep(yBottom[jj], dimC[1]) yt = rep(yTop[jj], dimC[1])
+        yb = rep(yBottom[jj], dimC[1])
+        yt = rep(yTop[jj], dimC[1])
         if (is.null(dim(C))) {
             rect(xl, yb, xr, yt, col = as.character(C),
                  border = as.character(C))
@@ -2549,7 +2553,8 @@ plotNetworkHeatmap <- function(datExpr, plotGenes, useTOM = TRUE, power = 6 ,
         warning(paste(
             "Since you have fewer than 3 genes, the network will not be
             visualized.\n",
-            "   Hint: please input more genes.")) plot(1, 1)
+            "   Hint: please input more genes."))
+        plot(1, 1)
     } else {
         datErest = datExpr[, match1 ]
         ADJ1 = adjacency(datErest, power = power, type = networkType)
@@ -2716,7 +2721,7 @@ checkAdjMat <- function(adjMat, min = 0, max = 1) {
         stop("adjacency is not numeric")
     if (dim[1] != dim[2])
         stop("adjacency is not square")
-    if (max(abs(adjMat - t(adjMat)), na.rm = TRUE) > 1e - 12)
+    if (max(abs(adjMat - t(adjMat)), na.rm = TRUE) > 1e-12)
         stop("adjacency is not symmetric")
     if (min(adjMat, na.rm = TRUE) < min || max(adjMat, na.rm = TRUE) > max)
         stop("some entries are not between", min, "and", max)
@@ -2791,7 +2796,8 @@ clusterCoef <- function(adjMat) {
     computeLinksInNeighbors <- function(x, imatrix){x %*% imatrix %*% x}
     nolinksNeighbors <- c(rep(- 666, nNodes))
     total.edge <- c(rep(- 666, nNodes))
-    maxh1 = max(as.dist(adjMat)) minh1 = min(as.dist(adjMat))
+    maxh1 = max(as.dist(adjMat))
+    minh1 = min(as.dist(adjMat))
     if (maxh1>1 | minh1 < 0)
         stop(paste("The adjacency matrix contains entries that are larger than 1 or
                smaller than 0: max  = ",
@@ -2810,22 +2816,22 @@ clusterCoef <- function(adjMat) {
 #===============================================================================
 # The function addErrorBars  is used to create error bars in a barplot
 # usage: addErrorBars(as.vector(means), as.vector(stderrs), two.side = FALSE)
-addErrorBars< - function(means, errors, two.side = FALSE) {
+addErrorBars <- function(means, errors, two.side = FALSE) {
     if(!is.numeric(means)) {
         stop("All arguments must be numeric")}
 
     if(is.null(dim(means)) || length(dim(means)) == 1){
-        xval< - (cumsum(c(0.7, rep(1.2, length(means) - 1))))
+        xval <- (cumsum(c(0.7, rep(1.2, length(means) - 1))))
     }else{
         if (length(dim(means)) == 2){
-            xval< - cumsum(array(c(1, rep(0, dim(means)[1] - 1)),
+            xval <- cumsum(array(c(1, rep(0, dim(means)[1] - 1)),
                                  dim = c(1, length(means)))) + 0:(length(means) - 1) + .5
         }else{
             stop("First argument must either be a vector or a matrix") }
     }
-    MW< - 0.25 * (max(xval)/length(xval))
-    ERR1< - means + errors
-    ERR2< - means - errors
+    MW <- 0.25 * (max(xval)/length(xval))
+    ERR1 <- means + errors
+    ERR2 <- means - errors
     for(i in 1:length(means)){
         segments(xval[i], means[i], xval[i], ERR1[i])
         segments(xval[i] - MW, ERR1[i], xval[i] + MW, ERR1[i])
@@ -2848,7 +2854,8 @@ stdErr <- function(x){ sqrt(var(x, na.rm = TRUE)/sum(!is.na(x))  ) }
 # put the correlation coefficients on the lower panel.
 
 .panel.hist <- function(x, ...){
-    usr <- par("usr") on.exit(par(usr))
+    usr <- par("usr")
+    on.exit(par(usr))
     par(usr = c(usr[1:2], 0, 1.5))
     h <- hist(x, plot = FALSE)
     breaks <- h$breaks; nB <- length(breaks)
@@ -2864,7 +2871,8 @@ stdErr <- function(x){ sqrt(var(x, na.rm = TRUE)/sum(!is.na(x))  ) }
 # reports the original value of corr, with a minimum format.
 
 .panel.cor <- function(x, y, digits = 2, prefix = "", cex.cor){
-    usr <- par("usr") on.exit(par(usr))
+    usr <- par("usr")
+    on.exit(par(usr))
     par(usr = c(0, 1, 0, 1))
     r <- abs(cor(x, y))
     txt <- format(c(r, 0.123456789), digits = digits)[1]
@@ -2958,7 +2966,7 @@ verboseScatterplot <- function(x, y,
                                cex.lab = 1.5, cex.main = 1.5, abline = FALSE,
                                abline.color = 1, abline.lty = 1,
                                corLabel = corFnc,
-                               displayAsZero = 1e - 5,
+                               displayAsZero = 1e-5,
                                col = 1, bg = 0,
                                lmFnc = lm,
                                ...) {
@@ -2975,7 +2983,7 @@ verboseScatterplot <- function(x, y,
     #corp = signif(cor.test(x, y, use = "p",
     #method = correlationmethod)$p.value, 2)
     #corp = signif(eval(corpExpr)$p.value, 2)
-    if (corp < 10^(- 200)) corp = "<1e - 200" else corp = paste0(" = ", corp)
+    if (corp < 10^(- 200)) corp = "<1e-200" else corp = paste0(" = ", corp)
     if (!is.na(corLabel))
     {
         mainX = paste0(main, " ", corLabel, " = ", cor, ", p", corp)
@@ -3013,7 +3021,7 @@ verboseBoxplot <- function(x, g,
     if (is.na(ylab)) ylab = as.character(match.call(expand.dots = FALSE)$x)
     #print(ylab1)
     p1 = signif(kruskal.test(x, factor(g))$p.value, 2)
-    #if (p1< 5.0 * 10^(- 22)) p1 = "< 5e - 22"
+    #if (p1< 5.0 * 10^(- 22)) p1 = "< 5e-22"
     boxplot(x~factor(g), notch = notch, varwidth = varwidth,
             main = paste(main, "p  = ", p1),
             xlab = xlab, ylab = ylab, cex = cex, cex.axis = cex.axis,
@@ -3256,7 +3264,9 @@ addGuideLines <- function(dendro, all = FALSE, count = 50, positions = NULL,
         dendro$merge[, 1]<0]
     objHeights[ - dendro$merge[dendro$merge[, 2]<  0, 2]] = dendro$height[
         dendro$merge[, 2]<0]
-    box = par("usr") ymin = box[3]; ymax = box[4]
+    box = par("usr")
+    ymin = box[3]
+    ymax = box[4]
     objHeights = objHeights - hang * (ymax - ymin)
     objHeights[objHeights<ymin] = ymin
     posHeights = pmin(objHeights[dendro$order][floor(positions)],
@@ -3326,7 +3336,7 @@ nearestNeighborConnectivity <- function(datExpr, nNeighbors = 50, power = 6,
         }
         samplePool = order[sample(x = nGenes, size = nLinks)]
         if (saved) {
-            .Random.seed << -  savedSeed
+            .Random.seed <<- savedSeed
             }
         poolExpr = datExpr[, samplePool]
         subtract[ - samplePool] = 0
@@ -3456,7 +3466,7 @@ nearestNeighborConnectivityMS <- function(multiExpr, nNeighbors = 50,
         }
         samplePool = order[sample(x = nGenes, size = nLinks)]
         if (saved) {
-            .Random.seed << -  savedSeed
+            .Random.seed <<- savedSeed
         }
         subtract[ - samplePool] = 0
     }
@@ -3593,7 +3603,7 @@ plotDendroAndColors <- function(dendro, colors, groupLabels = NULL,
     } else nRows = 1
     if (!is.null(rowText)) {
         nRows = nRows + if (is.null(textPositions)) {
-            nRows else length(textPositions)
+            nRows} else {length(textPositions)
         }
     }
 
@@ -5110,12 +5120,13 @@ labeledHeatmap <- function(
     {
         xLabYPos = ifelse(xLabPos == 1, ymin - offsety, ymax + offsety)
         if (is.null(cex.lab)) cex.lab = 1
-        mapply(text, x = labPos$xMid[xTextLabInd], labels = xLabels[xTextLabInd],
+        mapply(text, x = labPos$xMid[xTextLabInd],
+               labels = xLabels[xTextLabInd],
                MoreArgs = list(y = xLabYPos, srt = xLabelsAngle,
-                               adj = xLabelsAdj, xpd = TRUE, cex = cex.lab.x, col = colors.lab.x))
+                               adj = xLabelsAdj, xpd = TRUE, cex = cex.lab.x,
+                               col = colors.lab.x))
     }
-    if (sum(xValidColors)>0)
-    {
+    if (sum(xValidColors)>0) {
         baseY = ifelse(xLabPos == 1, ymin - offsety, ymax + offsety)
         deltaY = ifelse(xLabPos == 1, xColW, - xColW)
         rect(xleft = labPos$xMid[xColorLabInd] - xspacing/2, ybottom = baseY,
@@ -5128,34 +5139,38 @@ labeledHeatmap <- function(
                                    adj = xLabelsAdj,
                                    xpd = TRUE, srt = xLabelsAngle, cex = cex.lab.x, col = colors.lab.x))
     }
-    if (sum(!yValidColors)>0)
-    {
+    if (sum(!yValidColors) > 0) {
         if (is.null(cex.lab)) cex.lab = 1
         mapply(text, y = labPos$yMid[yTextLabInd], labels = yLabels[yTextLabInd],
                MoreArgs = list(x = xmin - offsetx, srt = 0,
                                 adj = c(1, 0.5), xpd = TRUE, cex = cex.lab.y, col = colors.lab.y))
     }
-    if (sum(yValidColors)>0)
-    {
-        rect(xleft = xmin -  offsetx, ybottom = rev(labPos$yMid[yColorLabInd]) - yspacing/2,
-             xright = xmin -  offsetx + yColW, ytop = rev(labPos$yMid[yColorLabInd]) + yspacing/2,
+    if (sum(yValidColors) > 0) {
+        rect(xleft = xmin -  offsetx,
+             ybottom = rev(labPos$yMid[yColorLabInd]) - yspacing/2,
+             xright = xmin -  offsetx + yColW,
+             ytop = rev(labPos$yMid[yColorLabInd]) + yspacing/2,
              density = - 1, col = substring(rev(yLabels[yColorLabInd]), 3),
              border = substring(rev(yLabels[yColorLabInd]), 3), xpd = TRUE)
         #for (i in yColorLabInd)
         #{
-        #  lines(c(xmin -  offsetx, xmin -  offsetx + yColW), y = rep(labPos$yMid[i] - yspacing/2, 2), col = i, xpd = TRUE)
-        #  lines(c(xmin -  offsetx, xmin -  offsetx + yColW), y = rep(labPos$yMid[i] + yspacing/2, 2), col = i, xpd = TRUE)
+        #  lines(c(xmin -  offsetx, xmin -  offsetx + yColW),
+        #  y = rep(labPos$yMid[i] - yspacing/2, 2), col = i, xpd = TRUE)
+        #  lines(c(xmin -  offsetx, xmin -  offsetx + yColW),
+        #  y = rep(labPos$yMid[i] + yspacing/2, 2), col = i, xpd = TRUE)
         #}
         if (!is.null(ySymbols))
-            mapply(text, y = labPos$yMid[yColorLabInd], labels = ySymbols[yColorLabInd],
+            mapply(text, y = labPos$yMid[yColorLabInd],
+                   labels = ySymbols[yColorLabInd],
                    MoreArgs = list(xmin + yColW - 2 * offsetx,
-                                    adj = c(1, 0.5), xpd = TRUE, cex = cex.lab.y, col = colors.lab.y))
+                                    adj = c(1, 0.5),
+                                   xpd = TRUE, cex = cex.lab.y,
+                                   col = colors.lab.y))
     }
 
     # Draw separator lines, if requested
 
-    if (length(verticalSeparator.x) > 0)
-    {
+    if (length(verticalSeparator.x) > 0) {
         nLines = length(verticalSeparator.x)
         vs.col = .extend(verticalSeparator.col, nLines)
         vs.lty = .extend(verticalSeparator.lty, nLines)
@@ -5165,11 +5180,11 @@ labeledHeatmap <- function(
             stop("If given. 'verticalSeparator.x' must all be between 0 and the number of columns.")
         x.lines = ifelse(verticalSeparator.x>0, labPos$xRight[verticalSeparator.x], labPos$xLeft[1])
         for (l in 1:nLines)
-            lines(rep(x.lines[l], 2), c(ymin, ymax), col = vs.col[l], lty = vs.lty[l], lwd = vs.lwd[l])
+            lines(rep(x.lines[l], 2), c(ymin, ymax), col = vs.col[l],
+                  lty = vs.lty[l], lwd = vs.lwd[l])
 
         angle = xLabelsAngle/180 * pi
-        if (xLabelsPosition == "bottom")
-        {
+        if (xLabelsPosition == "bottom") {
             sign = 1
             y0 = ymin
         } else {
@@ -5182,21 +5197,24 @@ labeledHeatmap <- function(
         ext.y = sign * extension.bottom * sign(sin(angle))
         for (l in 1:nLines)
             lines(c(x.lines[l], x.lines[l], x.lines[l] + vs.ext * ext.x),
-                  c(y0, y0 - sign * offsety, y0 - sign * offsety - vs.ext * ext.y),
+                  c(y0, y0 - sign * offsety,
+                    y0 - sign * offsety - vs.ext * ext.y),
                   col = vs.col[l], lty = vs.lty[l], lwd = vs.lwd[l], xpd = TRUE)
     }
 
-    if (length(horizontalSeparator.y) >0)
-    {
+    if (length(horizontalSeparator.y) > 0) {
         if (any(horizontalSeparator.y < 0 | horizontalSeparator.y > nRows))
-            stop("If given. 'horizontalSeparator.y' must all be between 0 and the number of rows.")
+            stop("If given. 'horizontalSeparator.y' must all be between 0 and
+                 the number of rows.")
         reverseRows = TRUE
         if (reverseRows)
         {
             horizontalSeparator.y = nRows - horizontalSeparator.y + 1
-            y.lines = ifelse(horizontalSeparator.y <= nRows, labPos$yBot[horizontalSeparator.y], labPos$yTop[nRows])
+            y.lines = ifelse(horizontalSeparator.y <= nRows,
+                             labPos$yBot[horizontalSeparator.y], labPos$yTop[nRows])
         } else {
-            y.lines = ifelse(horizontalSeparator.y > 0, labPos$yBot[horizontalSeparator.y], labPos$yTop[1])
+            y.lines = ifelse(horizontalSeparator.y > 0,
+                             labPos$yBot[horizontalSeparator.y], labPos$yTop[1])
         }
         nLines = length(horizontalSeparator.y)
         vs.col = .extend(horizontalSeparator.col, nLines)
@@ -5204,22 +5222,26 @@ labeledHeatmap <- function(
         vs.lwd = .extend(horizontalSeparator.lwd, nLines)
         vs.ext = .extend(horizontalSeparator.ext, nLines)
         for (l in 1:nLines)
-            lines(c(xmin - vs.ext[l] * extension.left, xmax), rep(y.lines[l], 2),
+            lines(c(xmin - vs.ext[l] * extension.left, xmax),
+                  rep(y.lines[l], 2),
                   col = vs.col[l], lty = vs.lty[l], lwd = vs.lwd[l], xpd = TRUE)
     }
 
-    if (!is.null(textMatrix))
-    {
+    if (!is.null(textMatrix)) {
         if (is.null(cex.text)) cex.text = par("cex")
         if (is.null(dim(textMatrix)))
-            if (length(textMatrix) == prod(dim(Matrix))) dim(textMatrix) = dim(Matrix)
+            if (length(textMatrix) == prod(dim(Matrix))) {
+                dim(textMatrix) = dim(Matrix)
+            }
             if (!isTRUE(all.equal(dim(textMatrix), dim(Matrix))))
-                stop("labeledHeatmap: textMatrix was given, but has dimensions incompatible with Matrix.")
+                stop("labeledHeatmap: textMatrix was given, but has dimensions
+                     incompatible with Matrix.")
             for (rw in 1:dim(Matrix)[1])
                 for (cl in 1:dim(Matrix)[2])
                 {
                     text(labPos$xMid[cl], labPos$yMid[rw],
-                         as.character(textMatrix[rw, cl]), xpd = TRUE, cex = cex.text, adj = textAdj)
+                         as.character(textMatrix[rw, cl]), xpd = TRUE,
+                         cex = cex.text, adj = textAdj)
                 }
     }
     axis(1, labels = FALSE, tick = FALSE)
@@ -5328,24 +5350,27 @@ labeledHeatmap.multiPage <- function(
             keep.hs = numeric(0)
 
         main.1 = main
-        if (addPageNumberToMain & multiPage) main.1 = spaste(main, "(page ", page, ")")
-        labeledHeatmap(Matrix = Matrix[rows, cols, drop = FALSE],
-                       xLabels = xLabels[cols], xSymbols = xSymbols[cols],
-                       yLabels = yLabels[rows], ySymbols = ySymbols[rows],
-                       textMatrix = textMatrix[rows, cols, drop = FALSE],
-                       zlim = zlim, main = main.1,
-                       verticalSeparator.x = verticalSeparator.x[keep.vs] - min(cols) + 1,
-                       verticalSeparator.col = verticalSeparator.col[keep.vs],
-                       verticalSeparator.lty = verticalSeparator.lty[keep.vs],
-                       verticalSeparator.lwd = verticalSeparator.lwd[keep.vs],
-                       verticalSeparator.ext = verticalSeparator.ext[keep.vs],
+        if (addPageNumberToMain & multiPage) main.1 = spaste(
+            main, "(page ", page, ")")
+        labeledHeatmap(
+            Matrix = Matrix[rows, cols, drop = FALSE],
+            xLabels = xLabels[cols], xSymbols = xSymbols[cols],
+            yLabels = yLabels[rows], ySymbols = ySymbols[rows],
+            textMatrix = textMatrix[rows, cols, drop = FALSE],
+            zlim = zlim, main = main.1,
+            verticalSeparator.x = verticalSeparator.x[keep.vs] - min(cols) + 1,
+            verticalSeparator.col = verticalSeparator.col[keep.vs],
+            verticalSeparator.lty = verticalSeparator.lty[keep.vs],
+            verticalSeparator.lwd = verticalSeparator.lwd[keep.vs],
+            verticalSeparator.ext = verticalSeparator.ext[keep.vs],
 
-                       horizontalSeparator.y = horizontalSeparator.y[keep.hs] - min(rows) + 1,
-                       horizontalSeparator.col = horizontalSeparator.col[keep.hs],
-                       horizontalSeparator.lty = horizontalSeparator.lty[keep.hs],
-                       horizontalSeparator.lwd = horizontalSeparator.lwd[keep.hs],
-                       horizontalSeparator.ext = horizontalSeparator.ext[keep.hs],
-                       ...)
+            horizontalSeparator.y = horizontalSeparator.y[keep.hs] -
+                min(rows) + 1,
+            horizontalSeparator.col = horizontalSeparator.col[keep.hs],
+            horizontalSeparator.lty = horizontalSeparator.lty[keep.hs],
+            horizontalSeparator.lwd = horizontalSeparator.lwd[keep.hs],
+            horizontalSeparator.ext = horizontalSeparator.ext[keep.hs],
+            ...)
         page = page + 1
     }
 }
@@ -5362,16 +5387,17 @@ labeledHeatmap.multiPage <- function(
 # Plots a barplot of the Matrix and writes the labels underneath such that they are readable.
 
 labeledBarplot <- function(Matrix, labels, colorLabels = FALSE, colored = TRUE,
-                            setStdMargins = TRUE, stdErrors = NULL, cex.lab = NULL,
+                            setStdMargins = TRUE, stdErrors = NULL,
+                           cex.lab = NULL,
                             xLabelsAngle = 45, ...)
 {
     if (setStdMargins) par(mar = c(3, 3, 2, 2) + 0.2)
 
-    if (colored)
-    {
+    if (colored) {
         colors = substring(labels, 3)
     } else {
-        colors = rep("grey", times = ifelse(length(dim(Matrix))<2, length(Matrix), dim(Matrix)[[2]]))
+        colors = rep("grey", times = ifelse(length(dim(Matrix))<2,
+                                            length(Matrix), dim(Matrix)[[2]]))
     }
 
     ValidColors = !is.na(match(substring(labels, 3), colors()))
@@ -5389,16 +5415,19 @@ labeledBarplot <- function(Matrix, labels, colorLabels = FALSE, colored = TRUE,
         means = Matrix
     }
 
-    if (!is.null(stdErrors)) addErrorBars(means, 1.96 * stdErrors, two.side = TRUE)
+    if (!is.null(stdErrors)) addErrorBars(means, 1.96 * stdErrors,
+                                          two.side = TRUE)
 
     # axis(1, labels = FALSE)
     nlabels = length(labels)
     plotbox = par("usr")
-    xmin = plotbox[1]; xmax = plotbox[2]; ymin = plotbox[3]; yrange = plotbox[4] - ymin
+    xmin = plotbox[1]
+    xmax = plotbox[2]
+    ymin = plotbox[3]
+    yrange = plotbox[4] - ymin
     ymax = plotbox[4]
     # print(paste("yrange:", yrange))
-    if (nlabels>1)
-    {
+    if (nlabels>1) {
         spacing = (mp[length(mp)] - mp[1])/(nlabels - 1)
     } else {
         spacing = (xmax - xmin)
@@ -5407,27 +5436,31 @@ labeledBarplot <- function(Matrix, labels, colorLabels = FALSE, colored = TRUE,
     xshift = spacing/2
     xrange = spacing * nlabels
     if (is.null(cex.lab)) cex.lab = 1
-    if (colorLabels)
-    {
-        #rect(xshift + ((1:nlabels) - 1) * spacing - spacing/2.1, ymin - spacing/2.1 - spacing/8,
-        #     xshift + ((1:nlabels) - 1) * spacing + spacing/2.1, ymin - spacing/8,
-        #     density = - 1, col = substring(labels, 3), border = substring(labels, 3), xpd = TRUE)
-        if (sum(!ValidColors)>0)
-        {
+    if (colorLabels) {
+        #rect(xshift + ((1:nlabels) - 1) * spacing - spacing/2.1,
+        #ymin - spacing/2.1 - spacing/8,
+        #     xshift + ((1:nlabels) - 1) * spacing + spacing/2.1,
+        #     ymin - spacing/8,
+        #     density = - 1, col = substring(labels, 3),
+        #     border = substring(labels, 3), xpd = TRUE)
+        if (sum(!ValidColors)>0) {
             text(mp[!ValidColors], ymin - 0.02, srt = 45,
-                  adj = 1, labels = labels[TextLabInd], xpd = TRUE, cex = cex.lab,
-                  srt = xLabelsAngle)
+                 adj = 1, labels = labels[TextLabInd],
+                 xpd = TRUE, cex = cex.lab,
+                 srt = xLabelsAngle)
         }
-        if (sum(ValidColors)>0)
-        {
-            rect(mp[ValidColors] - spacing/2.1, ymin - 2 * spacing/2.1 * yrange/xrange - yoffset,
+        if (sum(ValidColors)>0) {
+            rect(mp[ValidColors] - spacing/2.1,
+                 ymin - 2 * spacing/2.1 * yrange/xrange - yoffset,
                  mp[ValidColors] + spacing/2.1, ymin - yoffset,
                  density = - 1, col = substring(labels[ValidColors], 3),
                  border = substring(labels[ValidColors], 3), xpd = TRUE)
         }
     } else {
-        text(((1:nlabels) - 1) * spacing + spacing/2, ymin - 0.02 * yrange, srt = 45,
-             adj = 1, labels = labels, xpd = TRUE, cex = cex.lab, srt = xLabelsAngle)
+        text(((1:nlabels) - 1) * spacing + spacing/2,
+             ymin - 0.02 * yrange, srt = 45,
+             adj = 1, labels = labels, xpd = TRUE,
+             cex = cex.lab, srt = xLabelsAngle)
     }
     axis(2, labels = TRUE)
 }
@@ -5437,13 +5470,12 @@ labeledBarplot <- function(Matrix, labels, colorLabels = FALSE, colored = TRUE,
 # sizeGrWindow
 #
 #-------------------------------------------------------------------------------
-# if the current device isn't of the required dimensions, close it and open a new one.
+# if the current device isn't of the required dimensions, close it and open a
+# new one.
 
-sizeGrWindow <- function(width, height)
-{
+sizeGrWindow <- function(width, height) {
     din = par("din")
-    if ((din[1] != width) | (din[2] != height))
-    {
+    if ((din[1] != width) | (din[2] != height)) {
         dev.off()
         dev.new(width = width, height = height)
     }
@@ -5453,36 +5485,41 @@ sizeGrWindow <- function(width, height)
 # GreenToRed.R
 #===============================================================================
 
-greenBlackRed <- function(n, gamma = 1)
-{
+greenBlackRed <- function(n, gamma = 1) {
     half = as.integer(n/2)
-    red = c(rep(0, times = half), 0, seq(from = 0, to = 1, length.out = half)^(1/gamma))
-    green = c(seq(from = 1, to = 0, length.out = half)^(1/gamma), rep(0, times = half + 1))
+    red = c(rep(0, times = half), 0,
+            seq(from = 0, to = 1, length.out = half)^(1/gamma))
+    green = c(seq(from = 1, to = 0, length.out = half)^(1/gamma),
+              rep(0, times = half + 1))
     blue = rep(0, times = 2 * half + 1)
     col = rgb(red, green, blue, maxColorValue = 1)
     col
 }
 
-greenWhiteRed <- function(n, gamma = 1, warn = TRUE)
-{
+greenWhiteRed <- function(n, gamma = 1, warn = TRUE) {
     if (warn)
-        warning(spaste("WGCNA::greenWhiteRed: this palette is not suitable for people\n",
-                       "with green - red color blindness (the most common kind of color blindness).\n",
-                       "Consider using the function blueWhiteRed instead."))
+        warning(spaste(
+            "WGCNA::greenWhiteRed: this palette is not suitable for people\n",
+            "with green - red color blindness (the most common kind of color
+            blindness).\n",
+            "Consider using the function blueWhiteRed instead."))
     half = as.integer(n/2)
-    red = c(seq(from = 0, to = 1, length.out = half)^(1/gamma), rep(1, times = half + 1))
-    green = c(rep(1, times = half + 1), seq(from = 1, to = 0, length.out = half)^(1/gamma))
+    red = c(seq(from = 0, to = 1, length.out = half)^(1/gamma),
+            rep(1, times = half + 1))
+    green = c(rep(1, times = half + 1),
+              seq(from = 1, to = 0, length.out = half)^(1/gamma))
     blue = c(seq(from = 0, to = 1, length.out = half)^(1/gamma), 1,
              seq(from = 1, to = 0, length.out = half)^(1/gamma))
     col = rgb(red, green, blue, maxColorValue = 1)
     col
 }
 
-redWhiteGreen <- function(n, gamma = 1)
-{
+redWhiteGreen <- function(n, gamma = 1) {
     half = as.integer(n/2)
-    green = c(seq(from = 0, to = 1, length.out = half)^(1/gamma), rep(1, times = half + 1))
-    red = c(rep(1, times = half + 1), seq(from = 1, to = 0, length.out = half)^(1/gamma))
+    green = c(seq(from = 0, to = 1, length.out = half)^(1/gamma),
+              rep(1, times = half + 1))
+    red = c(rep(1, times = half + 1),
+            seq(from = 1, to = 0, length.out = half)^(1/gamma))
     blue = c(seq(from = 0, to = 1, length.out = half)^(1/gamma), 1,
              seq(from = 1, to = 0, length.out = half)^(1/gamma))
     col = rgb(red, green, blue, maxColorValue = 1)
@@ -5495,17 +5532,16 @@ redWhiteGreen <- function(n, gamma = 1)
 #
 #===============================================================================
 
-blueWhiteRed <- function(n, gamma = 1, endSaturation = 1)
-{
-    if (endSaturation >1  | endSaturation < 0) stop("'endSaturation' must be between 0 and 1.")
+blueWhiteRed <- function(n, gamma = 1, endSaturation = 1) {
+    if (endSaturation >1  | endSaturation < 0)
+        stop("'endSaturation' must be between 0 and 1.")
     es = 1 - endSaturation
     blueEnd = c(0.05 + es * 0.45, 0.55 + es * 0.25, 1.00)
     redEnd = c(1.0, 0.2 + es * 0.6, 0.6 * es)
     middle = c(1, 1, 1)
 
     half = as.integer(n/2)
-    if (n%%2 == 0)
-    {
+    if (n%%2 == 0) {
         index1 = c(1:half)
         index2 = c(1:half) + half
         frac1 = ((index1 - 1)/(half - 1))^(1/gamma)
@@ -5517,8 +5553,7 @@ blueWhiteRed <- function(n, gamma = 1, endSaturation = 1)
         frac2 = rev((c(1:half)/half)^(1/gamma))
     }
     cols = matrix(0, n, 3)
-    for (c in 1:3)
-    {
+    for (c in 1:3) {
         cols[ index1, c] = blueEnd[c] + (middle[c] - blueEnd[c]) * frac1
         cols[ index2, c] = redEnd[c] + (middle[c] - redEnd[c]) * frac2
     }
@@ -5534,16 +5569,14 @@ blueWhiteRed <- function(n, gamma = 1, endSaturation = 1)
 # Filters out probes that are not common to all datasets, and puts probes into the same order in each
 # set. Works by creating dataframes of probe names and their indices and merging them all.
 
-keepCommonProbes <- function(multiExpr, orderBy = 1)
-{
+keepCommonProbes <- function(multiExpr, orderBy = 1) {
     size = checkSets(multiExpr)
     nSets = size$nSets
     if (nSets <= 0) stop("No expression data given!")
 
     Names = data.frame(Names = names(multiExpr[[orderBy]]$data))
 
-    if (nSets>1) for (set in (1:nSets))
-    {
+    if (nSets>1) for (set in (1:nSets)) {
         SetNames = data.frame(Names = names(multiExpr[[set]]$data),
                               index = c(1:dim(multiExpr[[set]]$data)[2]))
         Names = merge(Names, SetNames, by.x = "Names", by.y = "Names", all = FALSE, sort = FALSE)
@@ -5562,27 +5595,26 @@ keepCommonProbes <- function(multiExpr, orderBy = 1)
 #-------------------------------------------------------------------------------
 
 # Adds a trait vector to a set of eigenvectors.
-# Caution: multiTraits is assumed to be a vector of lists with each list having an entry data which is
-# a nSamples x nTraits data frame with an appropriate column name, not a vector.
+# Caution: multiTraits is assumed to be a vector of lists with each list having
+# an entry data which is a nSamples x nTraits data frame with an appropriate
+# column name, not a vector.
 
-addTraitToMEs <- function(multiME, multiTraits)
-{
+addTraitToMEs <- function(multiME, multiTraits) {
     nSets = length(multiTraits)
     setsize = checkSets(multiTraits)
     nTraits = setsize$nGenes
     nSamples = setsize$nSamples
 
     if (length(multiME) != nSets)
-        stop("Numbers of sets in multiME and multiTraits parameters differ - must be the same.")
+        stop("Numbers of sets in multiME and multiTraits parameters differ -
+             must be the same.")
 
     multiMETs = vector(mode = "list", length = nSets)
-    for (set in 1:nSets)
-    {
+    for (set in 1:nSets) {
         trait.subs = multiTraits[[set]]$data
         multiMET = as.data.frame(cbind(multiME[[set]]$data, trait.subs))
         colnames(multiMET) = c(colnames(multiME[[set]]$data), colnames(trait.subs))
-        if (!is.null(multiME[[set]]$AET))
-        {
+        if (!is.null(multiME[[set]]$AET)) {
             AET = as.data.frame(cbind(multiME[[set]]$averageExpr, trait.subs))
             colnames(AET) = c(colnames(multiME[[set]]$averageExpr), colnames(trait.subs))
         }
@@ -5598,17 +5630,17 @@ addTraitToMEs <- function(multiME, multiTraits)
 #
 #-------------------------------------------------------------------------------
 #
-# Given a set of multiME (or OrderedMEs), calculate the preservation values for each module in each pair
+# Given a set of multiME (or OrderedMEs), calculate the preservation values for
+# each module in each pair
 # of datasets and return them as a matrix
 
-correlationPreservation <- function(multiME, setLabels, excludeGrey = TRUE, greyLabel = "grey")
-{
+correlationPreservation <- function(multiME, setLabels, excludeGrey = TRUE,
+                                    greyLabel = "grey") {
     nSets = length(multiME)
     if (nSets != length(setLabels)) stop("The lengths of multiME and setLabels must equal.")
     if (nSets <= 1) stop("Something is wrong with argument multiME: its length is 0 or 1")
     Names = names(multiME[[1]]$data)
-    if (excludeGrey)
-    {
+    if (excludeGrey) {
         Use = substring(Names, 3) != greyLabel
     } else {
         Use = rep(TRUE, times = length(Names))
@@ -5619,8 +5651,7 @@ correlationPreservation <- function(multiME, setLabels, excludeGrey = TRUE, grey
     CPInd = 1
     CPNames = NULL
     for (i in 1:(nSets - 1))
-        for (j in (i + 1):nSets)
-        {
+        for (j in (i + 1):nSets) {
             corME1 = cor(multiME[[i]]$data[, Use], use = "p")
             corME2 = cor(multiME[[j]]$data[, Use], use = "p")
             d = 1 - abs(tanh((corME1 - corME2) / (abs(corME1) + abs(corME2))^2))
@@ -5641,23 +5672,24 @@ correlationPreservation <- function(multiME, setLabels, excludeGrey = TRUE, grey
 #
 #-------------------------------------------------------------------------------
 #
-# Given a set of multiME (or OrderedMEs), calculate the preservation values for each each pair
-# of datasets and return them as a matrix.
+# Given a set of multiME (or OrderedMEs), calculate the preservation values for
+# each each pair of datasets and return them as a matrix.
 
-setCorrelationPreservation <- function(multiME, setLabels, excludeGrey = TRUE, greyLabel = "grey",
-                                       method = "absolute")
-{
+setCorrelationPreservation <- function(multiME, setLabels, excludeGrey = TRUE,
+                                       greyLabel = "grey",
+                                       method = "absolute") {
     m = charmatch(method, c("absolute", "hyperbolic"))
-    if (is.na(m))
-    {
-        stop("Unrecognized method given. Recognized methods are absolute, hyperbolic.")
+    if (is.na(m)) {
+        stop("Unrecognized method given. Recognized methods are absolute,
+             hyperbolic.")
     }
     nSets = length(multiME)
-    if (nSets != length(setLabels)) stop("The lengths of multiME and setLabels must equal.")
-    if (nSets <= 1) stop("Something is wrong with argument multiME: its length is 0 or 1")
+    if (nSets != length(setLabels))
+        stop("The lengths of multiME and setLabels must equal.")
+    if (nSets <= 1)
+        stop("Something is wrong with argument multiME: its length is 0 or 1")
     Names = names(multiME[[1]]$data)
-    if (excludeGrey)
-    {
+    if (excludeGrey) {
         Use = substring(Names, 3) != greyLabel
     } else {
         Use = rep(TRUE, times = length(Names))
@@ -5666,8 +5698,7 @@ setCorrelationPreservation <- function(multiME, setLabels, excludeGrey = TRUE, g
     SCP = matrix(0, nrow = nSets, ncol = nSets)
     diag(SCP) = 0
     for (i in 1:(nSets - 1))
-        for (j in (i + 1):nSets)
-        {
+        for (j in (i + 1):nSets) {
             corME1 = cor(multiME[[i]]$data[, Use], use = "p")
             corME2 = cor(multiME[[j]]$data[, Use], use = "p")
             if (m == 1) {
@@ -5708,59 +5739,60 @@ preservationNetworkConnectivity <- function(
     blockSize = 1000,
     setSeed = 12345,
     weightPower = 2,
-    verbose = 2, indent = 0)
+    verbose = 2, indent = 0) {
 
-{
     spaces = indentSpaces(indent)
 
     size = checkSets(multiExpr)
     nGenes = size$nGenes
     nSets = size$nSets
-    if (!is.null(useSets) || !is.null(useGenes))
-    {
+    if (!is.null(useSets) || !is.null(useGenes)) {
         if (is.null(useSets)) useSets = c(1:nSets)
         if (is.null(useGenes)) useGenes = c(1:nGenes)
         useExpr = vector(mode = "list", length = length(useSets))
         for (set in 1:length(useSets))
             useExpr[[set]] = list(data = multiExpr[[useSets[set]]]$data[, useGenes])
         multiExpr = useExpr
-        rm(useExpr) collectGarbage()
+        rm(useExpr)
+        collectGarbage()
     }
     size = checkSets(multiExpr)
     nGenes = size$nGenes
     nSets = size$nSets
 
-    if (is.null(sampleLinks))
-    {
+    if (is.null(sampleLinks)) {
         sampleLinks = (nGenes > nLinks)
     }
 
     if (sampleLinks) nLinks = min(nLinks, nGenes) else nLinks = nGenes
 
-    if (blockSize * nLinks > .largestBlockSize) blockSize = as.integer(.largestBlockSize/nLinks)
+    if (blockSize * nLinks > .largestBlockSize)
+        blockSize = as.integer(.largestBlockSize/nLinks)
 
     intNetworkType = charmatch(networkType, .networkTypes)
     if (is.na(intNetworkType))
-        stop(paste("Unrecognized networkType argument. Recognized values are (unique abbreviations of)",
+        stop(paste("Unrecognized networkType argument. Recognized values are
+                   (unique abbreviations of)",
                    paste(.networkTypes, collapse = ", ")))
 
     subtract = rep(1, nGenes)
-    if (sampleLinks)
-    {
+    if (sampleLinks) {
         if (verbose > 0)
-            printFlush(paste(spaces, "preservationNetworkConnectivity: selecting sample pool of size",
+            printFlush(paste(spaces, "preservationNetworkConnectivity:
+                             selecting sample pool of size",
                              nLinks, ".."))
         sd = apply(multiExpr[[1]]$data, 2, sd, na.rm = TRUE)
         order = order(- sd)
         saved = FALSE
-        if (exists(".Random.seed"))
-        {
+        if (exists(".Random.seed")) {
             saved = TRUE
             savedSeed = .Random.seed
             if (is.numeric(setSeed)) set.seed(setSeed)
         }
         samplePool = order[sample(x = nGenes, size = nLinks)]
-        if (saved) .Random.seed << -  savedSeed
+        if (saved) {
+            .Random.seed <<- savedSeed
+        }
         subtract[ - samplePool] = 0
     }
 
@@ -5797,74 +5829,88 @@ preservationNetworkConnectivity <- function(
     if (sampleLinks)
     {
         corEval = parse(text = paste(corFnc,
-                                     "(multiExpr[[set]]$data[, samplePool], multiExpr[[set]]$data[, blockIndex] ",
+                                     "(multiExpr[[set]]$data[, samplePool],
+                                     multiExpr[[set]]$data[, blockIndex] ",
                                      prepComma(corOptions), ")"))
     } else {
         corEval = parse(text = paste(corFnc,
-                                     "(multiExpr[[set]]$data, multiExpr[[set]]$data[, blockIndex] ",
+                                     "(multiExpr[[set]]$data,
+                                     multiExpr[[set]]$data[, blockIndex] ",
                                      prepComma(corOptions), ")"))
     }
 
-    while (start <= nGenes)
-    {
+    while (start <= nGenes) {
         end = start + blockSize - 1
         if (end>nGenes) end = nGenes
         blockIndex = c(start:end)
         nBlockGenes = end - start + 1
         blockAdj = array(0, dim = c(nSets, nLinks, nBlockGenes))
-        #if (verbose>1) printFlush(paste(spaces, "..working on genes", start, "through", end, "of", nGenes))
-        for (set in 1:nSets)
-        {
+        #if (verbose>1) printFlush(paste(spaces, "..working on genes", start,
+        #"through", end, "of", nGenes))
+        for (set in 1:nSets) {
             c = eval(corEval)
-            if (intNetworkType == 1)
-            { c = abs(c)
-            } else if (intNetworkType == 2)
-            { c = (1 + c)/2
-            } else if (intNetworkType == 3)
-            { c[c < 0] = 0
-            } else stop("Internal error: intNetworkType has wrong value:", intNetworkType, ". Sorry!")
+            if (intNetworkType == 1) {
+                c = abs(c)
+            } else if (intNetworkType == 2) {
+                c = (1 + c)/2
+            } else if (intNetworkType == 3) {
+                c[c < 0] = 0
+            } else {
+                stop("Internal error: intNetworkType has wrong value:",
+                     intNetworkType, ". Sorry!")
+            }
             adj_mat = as.matrix(c^power)
             if (sum(is.na(adj_mat)) > 0)
-                stop("NA values present in adjacency - this function cannot handle them yet. Sorry!")
+                stop("NA values present in adjacency - this function cannot
+                     handle them yet. Sorry!")
             adj_mat[is.na(adj_mat)] = 0
             blockAdj[set,, ] = adj_mat
         }
         min = matrix(0, nLinks, nBlockGenes)
         which = matrix(0, nLinks, nBlockGenes)
-        res = .C("minWhichMin", as.double(blockAdj), as.integer(nSets), as.integer(nLinks * nBlockGenes),
+        res = .C("minWhichMin", as.double(blockAdj), as.integer(nSets),
+                 as.integer(nLinks * nBlockGenes),
                  min = as.double(min), as.double(which))
         min[, ] = res$min
         max = matrix(0, nLinks, nBlockGenes)
-        res = .C("minWhichMin", as.double(- blockAdj), as.integer(nSets), as.integer(nLinks * nBlockGenes),
+        res = .C("minWhichMin", as.double(- blockAdj), as.integer(nSets),
+                 as.integer(nLinks * nBlockGenes),
                  min = as.double(min), as.double(which))
         max[, ] = - res$min
         rm(res)
         diff = max - min
-        allPres[blockIndex] = (apply(1 - diff, 2, sum) - subtract[blockIndex])/(nLinks - subtract[blockIndex])
+        allPres[blockIndex] = (apply(1 - diff, 2, sum) - subtract[blockIndex])/(
+            nLinks - subtract[blockIndex])
         weight = ((max + min)/2)^weightPower
-        allPresW[blockIndex] = (apply((1 - diff) * weight, 2, sum) - subtract[blockIndex])/
+        allPresW[blockIndex] = (apply((1 - diff) * weight, 2, sum) -
+                                    subtract[blockIndex])/
             (apply(weight, 2, sum) - subtract[blockIndex])
         hyp = 1 - tanh(diff/(max + min)^2)
-        allPresH[blockIndex] = (apply(hyp, 2, sum) - subtract[blockIndex])/(nLinks - subtract[blockIndex])
-        allPresWH[blockIndex] = (apply(hyp * weight, 2, sum) - subtract[blockIndex])/
+        allPresH[blockIndex] = (apply(hyp, 2, sum) - subtract[blockIndex])/(
+            nLinks - subtract[blockIndex])
+        allPresWH[blockIndex] = (apply(hyp * weight, 2, sum) -
+                                     subtract[blockIndex])/
             (apply(weight, 2, sum) - subtract[blockIndex])
 
         compNames = NULL
         compInd = 1
         for (set1 in 1:(nSets - 1))
-            for (set2 in (set1 + 1):nSets)
-            {
+            for (set2 in (set1 + 1):nSets) {
                 diff = abs(blockAdj[set1,, ] - blockAdj[set2,, ])
                 compNames = c(compNames, paste(set1, "vs", set2))
-                pairPres[blockIndex, compInd] = (apply(1 - diff, 2, sum) - subtract[blockIndex]) /
+                pairPres[blockIndex, compInd] = (
+                    apply(1 - diff, 2, sum) - subtract[blockIndex]) /
                     (nLinks - subtract[blockIndex])
                 weight = ((blockAdj[set1,, ] + blockAdj[set2,, ])/2)^weightPower
-                pairPresW[blockIndex, compInd] = (apply((1 - diff) * weight, 2, sum) - subtract[blockIndex]) /
+                pairPresW[blockIndex, compInd] = (
+                    apply((1 - diff) * weight, 2, sum) - subtract[blockIndex]) /
                     (apply(weight, 2, sum) - subtract[blockIndex])
                 hyp = 1 - tanh(diff/(blockAdj[set1,, ] + blockAdj[set2,, ])^2)
-                pairPresH[blockIndex, compInd] = (apply(hyp, 2, sum) - subtract[blockIndex]) /
+                pairPresH[blockIndex, compInd] = (
+                    apply(hyp, 2, sum) - subtract[blockIndex]) /
                     (nLinks - subtract[blockIndex])
-                pairPresWH[blockIndex, compInd] = (apply(hyp * weight, 2, sum) - subtract[blockIndex]) /
+                pairPresWH[blockIndex, compInd] = (
+                    apply(hyp * weight, 2, sum) - subtract[blockIndex]) /
                     (apply(weight, 2, sum) - subtract[blockIndex])
                 compInd = compInd + 1
             }
@@ -5875,8 +5921,10 @@ preservationNetworkConnectivity <- function(
     }
     if (verbose > 0) printFlush(" ")
     list(pairwise = pairPres, complete = allPres, pairwiseWeighted = pairPresW,
-         completeWeighted = allPresW, pairwiseHyperbolic = pairPresH, completeHyperbolic = allPresH,
-         pairwiseWeightedHyperbolic = pairPresWH, completeWeightedHyperbolic = allPresWH)
+         completeWeighted = allPresW, pairwiseHyperbolic = pairPresH,
+         completeHyperbolic = allPresH,
+         pairwiseWeightedHyperbolic = pairPresWH,
+         completeWeightedHyperbolic = allPresWH)
 }
 
 #-------------------------------------------------------------------------------
@@ -5884,10 +5932,11 @@ preservationNetworkConnectivity <- function(
 # plotEigengeneNetworks
 #
 #-------------------------------------------------------------------------------
-# Plots a matrix plot of the ME(T)s. On the diagonal the heatmaps show correlation of MEs in the
-# particular subset; off - diagonal are differences in the correlation matrix.
-# setLabels is a vector of titles for the diagonal diagrams; the off - diagonal will have no title
-# for now.
+# Plots a matrix plot of the ME(T)s. On the diagonal the heatmaps show
+# correlation of MEs in the particular subset; off - diagonal are differences in
+# the correlation matrix.
+# setLabels is a vector of titles for the diagonal diagrams; the off - diagonal
+# will have no title for now.
 
 plotEigengeneNetworks <- function(
     multiME, setLabels,
@@ -5905,23 +5954,23 @@ plotEigengeneNetworks <- function(
     plotPreservation = "standard",
     zlimPreservation = c(0, 1),
     printPreservation = FALSE, cex.preservation = 0.9,
-    ...)
-{
+    ...) {
+
     # invertColors = FALSE
     size = checkSets(multiME, checkStructure = TRUE)
-    if (!size$structureOK)
-    {
+    if (!size$structureOK) {
         #printFlush(paste(
-        #  "plotEigengeneNetworks: Given multiME does not appear to be a multi - set structure.\n",
-        #  "Will attempt to convert it into a multi - set structure containing 1 set."))
+        #  "plotEigengeneNetworks: Given multiME does not appear to be a multi -
+        #  set structure.\n",
+        #  "Will attempt to convert it into a multi - set structure containing
+        #  1 set."))
         multiME = fixDataStructure(multiME)
     }
 
     if (is.null(Letters)) Letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
     if (is.null(heatmapColors))
-        if (signed)
-        {
+        if (signed) {
             heatmapColors = blueWhiteRed(50)
         } else {
             heatmapColors = heat.colors(30)
@@ -5937,7 +5986,8 @@ plotEigengeneNetworks <- function(
     par(cex = cex)
     if (excludeGrey) for (set in 1:nSets)
         multiME[[set]]$data  =
-        multiME[[set]]$data[, substring(names(multiME[[set]]$data), 3) != greyLabel]
+        multiME[[set]]$data[
+            , substring(names(multiME[[set]]$data), 3) != greyLabel]
 
     plotPresTypes = c("standard", "hyperbolic", "both")
     ipp = pmatch(plotPreservation, plotPresTypes)
@@ -5946,18 +5996,19 @@ plotEigengeneNetworks <- function(
                    paste(plotPresTypes, sep = ", ")))
 
     letter.ind = 1
-    if (plotDendrograms) for (set in 1:nSets)
-    {
+    if (plotDendrograms) for (set in 1:nSets) {
         #par(cex = StandardCex/1.4)
         par(mar = marDendro)
         labels = names(multiME[[set]]$data)
         uselabels = labels[substring(labels, 3) != greyLabel]
         corME = cor(multiME[[set]]$data[substring(labels, 3) != greyLabel,
-                                        substring(labels, 3) != greyLabel], use = "p")
+                                        substring(labels, 3) != greyLabel],
+                    use = "p")
         disME = as.dist(1 - corME)
         clust = fastcluster::hclust(disME, method = "average")
         if (letterSubPlots) {
-            main = paste0(substring(Letters, letter.ind, letter.ind), ".", setLabels[set])
+            main = paste0(substring(Letters, letter.ind, letter.ind), ".",
+                          setLabels[set])
         } else {
             main = setLabels[set]
         }
@@ -5969,20 +6020,19 @@ plotEigengeneNetworks <- function(
         letter.ind = letter.ind + 1
     }
 
-    if (plotHeatmaps) for (i.row in (1:nSets)) for (i.col in (1:nSets))
-    {
+    if (plotHeatmaps) for (i.row in (1:nSets)) for (i.col in (1:nSets)) {
         letter.ind = i.row * nSets + i.col
-        if (letterSubPlots)
-        {
-            #letter = paste("(", substring(Letters, first = letter.ind, last = letter.ind), ")", sep = "")
-            letter = paste0(substring(Letters, first = letter.ind, last = letter.ind), ".  ")
+        if (letterSubPlots) {
+            #letter = paste("(", substring(Letters, first = letter.ind,
+            #last = letter.ind), ")", sep = "")
+            letter = paste0(substring(Letters, first = letter.ind,
+                                      last = letter.ind), ".  ")
         } else {
             letter = NULL
         }
         par(cex = cex)
         if (setMargins) {
-            if (is.null(marHeatmap))
-            {
+            if (is.null(marHeatmap)) {
                 if (colorLabels) {
                     par(mar = c(1, 2, 3, 4) + 0.2)
                 } else {
@@ -5994,53 +6044,64 @@ plotEigengeneNetworks <- function(
         }
         nModules = dim(multiME[[i.col]]$data)[2]
         textMat = NULL
-        if (i.row == i.col)
-        {
+        if (i.row == i.col) {
             corME = cor(multiME[[i.col]]$data, use = "p")
             pME = corPvalueFisher(corME, nrow(multiME[[i.col]]$data))
-            if (printAdjacency)
-            {
+            if (printAdjacency) {
                 textMat = paste(signif(corME, 2), "\n", signif(pME, 1))
                 dim(textMat) = dim(corME)
             }
-            if (signed)
-            {
+            if (signed) {
                 if (plotAdjacency) {
-                    if (printAdjacency)
-                    {
-                        textMat = paste(signif((1 + corME)/2, 2), "\n", signif(pME, 1))
+                    if (printAdjacency) {
+                        textMat = paste(signif((1 + corME)/2, 2), "\n",
+                                        signif(pME, 1))
                         dim(textMat) = dim(corME)
                     }
-                    labeledHeatmap((1 + corME)/2, names(multiME[[i.col]]$data), names(multiME[[i.col]]$data),
-                                   main = paste(letter, setLabels[[i.col]]), invertColors = FALSE,
+
+                    labeledHeatmap((1 + corME)/2,
+                                   names(multiME[[i.col]]$data),
+                                   names(multiME[[i.col]]$data),
+                                   main = paste(letter, setLabels[[i.col]]),
+                                   invertColors = FALSE,
                                    zlim = c(0, 1.0),
-                                   colorLabels = colorLabels, colors = heatmapColors,
+                                   colorLabels = colorLabels,
+                                   colors = heatmapColors,
                                    setStdMargins = FALSE,
-                                   textMatrix = textMat, cex.text = cex.adjacency, ...)
+                                   textMatrix = textMat,
+                                   cex.text = cex.adjacency, ...)
                 } else {
-                    labeledHeatmap(corME, names(multiME[[i.col]]$data), names(multiME[[i.col]]$data),
-                                   main = paste(letter, setLabels[[i.col]]), invertColors = FALSE,
+                    labeledHeatmap(corME, names(multiME[[i.col]]$data),
+                                   names(multiME[[i.col]]$data),
+                                   main = paste(letter, setLabels[[i.col]]),
+                                   invertColors = FALSE,
                                    zlim = c(- 1, 1.0),
-                                   colorLabels = colorLabels, colors = heatmapColors, setStdMargins = FALSE,
-                                   textMatrix = textMat, cex.text = cex.adjacency, ...)
+                                   colorLabels = colorLabels,
+                                   colors = heatmapColors,
+                                   setStdMargins = FALSE,
+                                   textMatrix = textMat,
+                                   cex.text = cex.adjacency, ...)
                 }
             } else {
-                labeledHeatmap(abs(corME), names(multiME[[i.col]]$data), names(multiME[[i.col]]$data),
-                               main = paste(letter, setLabels[[i.col]]), invertColors = FALSE,
+                labeledHeatmap(abs(corME),
+                               names(multiME[[i.col]]$data),
+                               names(multiME[[i.col]]$data),
+                               main = paste(letter, setLabels[[i.col]]),
+                               invertColors = FALSE,
                                zlim = c(0, 1.0),
-                               colorLabels = colorLabels, colors = heatmapColors,
+                               colorLabels = colorLabels,
+                               colors = heatmapColors,
                                setStdMargins = FALSE,
-                               textMatrix = textMat, cex.text = cex.adjacency, ...)
+                               textMatrix = textMat,
+                               cex.text = cex.adjacency, ...)
             }
-        } else
-        {
+        } else {
             corME1 = cor(multiME[[i.col]]$data, use = "p")
             corME2 = cor(multiME[[i.row]]$data, use = "p")
             cor.dif = (corME1 - corME2)/2
             d = tanh((corME1 - corME2) / (abs(corME1) + abs(corME2))^2)
             # d = abs(corME1 - corME2) / (abs(corME1) + abs(corME2))
-            if (ipp == 1 | ipp == 3)
-            {
+            if (ipp == 1 | ipp == 3) {
                 dispd = cor.dif
                 main = paste(letter, "Preservation")
                 if (ipp == 3) {
@@ -6051,10 +6112,8 @@ plotEigengeneNetworks <- function(
                 dispd = d
                 main = paste(letter, "Hyperbolic preservation")
             }
-            if (i.row>i.col)
-            {
-                if (signed)
-                {
+            if (i.row>i.col) {
+                if (signed) {
                     half = as.integer(length(heatmapColors)/2)
                     range = c(half:length(heatmapColors))
                     halfColors = heatmapColors[range]
@@ -6228,7 +6287,7 @@ randIndex <- function(tab, adjust = TRUE)
     m <- nrow(tab)
     n <- ncol(tab)
     for (i in 1:m) {
-        c< - 0
+        c <- 0
         for(j in 1:n) {
             a <- a + .choosenew(tab[i, j], 2)
             nj <- sum(tab[, j])
@@ -6266,7 +6325,7 @@ goodGenes <- function(datExpr, useSamples = NULL, useGenes = NULL,
     if (is.atomic(datExpr) && (mode(datExpr) != 'numeric'))
         stop("datExpr must contain numeric data.")
 
-    if (is.null(tol)) tol = 1e - 10 * max(abs(datExpr), na.rm = TRUE)
+    if (is.null(tol)) tol = 1e-10 * max(abs(datExpr), na.rm = TRUE)
     if (is.null(useGenes)) useGenes = rep(TRUE, ncol(datExpr))
     if (is.null(useSamples)) useSamples = rep(TRUE, nrow(datExpr))
 
@@ -6351,7 +6410,7 @@ goodGenesMS <- function(multiExpr, useSamples = NULL, useGenes = NULL,
     goodGenes = useGenes
     for (set in 1:nSets)
     {
-        if (is.null(tol)) tol1 = 1e - 10 * max(abs(multiExpr[[set]]$data), na.rm = TRUE) else tol1 = tol
+        if (is.null(tol)) tol1 = 1e-10 * max(abs(multiExpr[[set]]$data), na.rm = TRUE) else tol1 = tol
         if (sum(goodGenes) == 0) break
         if (sum(useSamples[[set]]) == 0) next
         expr1 = multiExpr[[set]]$data[useSamples[[set]], goodGenes, drop = FALSE]
@@ -6494,9 +6553,12 @@ goodSamplesGenesMS <- function(multiExpr, minFraction = 1/2, minNSamples = ..min
 #
 #===============================================================================
 .heatmap <- function(x, Rowv = NULL, Colv = if (symm) "Rowv" else NULL,
-                     distfun = dist, hclustfun = fastcluster::hclust, reorderfun <- function(d,
-                                                                                             w) reorder(d, w), add.expr, symm = FALSE, revC = identical(Colv,
-                                                                                                                                                        "Rowv"), scale = c("row", "column", "none"), na.rm = TRUE,
+                     distfun = dist,
+                     hclustfun = fastcluster::hclust,
+                     reorderfun = function(d, w) {reorder(d, w)},
+                     add.expr,
+                     symm = FALSE, revC = identical(Colv, "Rowv"),
+                     scale = c("row", "column", "none"), na.rm = TRUE,
                      margins = c(1.2, 1.2), ColSideColors, RowSideColors, cexRow = 0.2  +
                          1/log10(nr), cexCol = 0.2 + 1/log10(nc), labRow = NULL,
                      labCol = NULL, main = NULL, xlab = NULL, ylab = NULL, keep.dendro = FALSE,
@@ -6692,7 +6754,7 @@ scaleFreeFitIndex <- function(k, nBreaks = 10, removeFirst = FALSE)
         p.dk = p.dk[ - 1]
         log.dk = log.dk[ - 1]
     }
-    log.p.dk = as.numeric(log10(p.dk + 1e - 09))
+    log.p.dk = as.numeric(log10(p.dk + 1e-09))
     lm1 = lm(log.p.dk ~ log.dk)
     lm2 = lm(log.p.dk ~ log.dk + I(10^log.dk))
     datout = data.frame(Rsquared.SFT = summary(lm1)$r.squared,
@@ -7204,7 +7266,7 @@ consensusKME <- function(multiExpr, moduleLabels, multiEigengenes = NULL, consen
         q = apply(p, c(2:3), qvalue.restricted)
     } else q = NULL
 
-    # kME.average = rowMeans(kME, dims = 2) < - - not neccessary since weighted average also contains it
+    # kME.average = rowMeans(kME, dims = 2)  <- - not neccessary since weighted average also contains it
 
     powers = c(0, 0.5, 1)
     nPowers = length(powers)
