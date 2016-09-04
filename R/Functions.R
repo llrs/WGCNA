@@ -689,11 +689,9 @@ nExtras = length(ExtraColors)
 .GlobalStandardColors = c(BaseColors, ExtraColors[
     rank(sin(13 * c(1:nExtras) + sin(13 * c(1:nExtras))))])
 
-standardColors <- function(n = NULL)
-{
+standardColors <- function(n = NULL){
     if (is.null(n)) return(.GlobalStandardColors)
-    if ((n>0) && (n <= length(.GlobalStandardColors)))
-    {
+    if ((n>0) && (n <= length(.GlobalStandardColors))) {
         return(.GlobalStandardColors[c(1:n)])
     } else {
         stop("Invalid number of standard colors requested.")
@@ -710,14 +708,10 @@ rm(BaseColors, RColors, ExtraColors, nExtras, InBase)
 # "Normalizes" numerical labels such that the largest group is labeled 1, the
 # next largest 2 etc. If KeepZero == TRUE, label zero is preserved.
 
-normalizeLabels <- function(labels, keepZero = TRUE)
-{
-    if (keepZero)
-    {
+normalizeLabels <- function(labels, keepZero = TRUE) {
+    if (keepZero) {
         NonZero = (labels != 0)
-    }
-    else
-    {
+    } else {
         NonZero = rep(TRUE, length(labels))
     }
     f = as.numeric(factor(labels[NonZero]))
@@ -742,19 +736,16 @@ normalizeLabels <- function(labels, keepZero = TRUE)
 
 labels2colors <- function(labels, zeroIsGrey = TRUE, colorSeq = NULL,
                           naColor = "grey",
-                          commonColorCode = TRUE)
-{
+                          commonColorCode = TRUE) {
+
     if (is.null(colorSeq)) colorSeq = standardColors()
 
-    if (is.numeric(labels))
-    {
+    if (is.numeric(labels)) {
         if (zeroIsGrey) minLabel = 0 else minLabel = 1
         if (any(labels<0, na.rm = TRUE)) minLabel = min(c(labels), na.rm = TRUE)
         nLabels = labels
     } else {
-
-        if (commonColorCode)
-        {
+        if (commonColorCode) {
             factors = factor(c(as.matrix(as.data.frame(labels))))
             nLabels = as.numeric(factors)
             dim(nLabels) = dim(labels)
@@ -767,8 +758,7 @@ labels2colors <- function(labels, zeroIsGrey = TRUE, colorSeq = NULL,
         }
     }
 
-    if (max(nLabels, na.rm = TRUE) > length(colorSeq))
-    {
+    if (max(nLabels, na.rm = TRUE) > length(colorSeq)) {
         nRepeats = as.integer((max(labels) - 1)/length(colorSeq)) + 1
         warning(paste(
             "labels2colors: Number of labels exceeds number of avilable colors.",
@@ -787,7 +777,6 @@ labels2colors <- function(labels, zeroIsGrey = TRUE, colorSeq = NULL,
     colors[fin][finLabels != 0] = extColorSeq[finLabels[finLabels != 0]]
     if (!is.null(dim(labels)))
         dim(colors) = dim(labels)
-
     colors
 }
 
@@ -809,8 +798,7 @@ labels2colors <- function(labels, zeroIsGrey = TRUE, colorSeq = NULL,
 # guarranteed fact is that grey probes are labeled by 0 and all probes belonging
 # to the same module have the same number.
 
-moduleNumber <- function(dendro, cutHeight = 0.9, minSize = 50)
-{
+moduleNumber <- function(dendro, cutHeight = 0.9, minSize = 50) {
     Branches = cutree(dendro, h = cutHeight)
     NOnBranches = table(Branches)
     TrueBranch = NOnBranches  >= minSize
@@ -827,11 +815,9 @@ moduleNumber <- function(dendro, cutHeight = 0.9, minSize = 50)
 # Check input data: if they are not a vector of lists, put them into the form of
 # a vector of lists.
 
-fixDataStructure <- function(data, verbose = 0, indent = 0)
-{
+fixDataStructure <- function(data, verbose = 0, indent = 0) {
     spaces = indentSpaces(indent)
-    if ((class(data) != "list") || (class(data[[1]]) != "list"))
-    {
+    if ((class(data) != "list") || (class(data[[1]]) != "list")) {
         if (verbose > 0)
             printFlush(paste(spaces,
                              "fixDataStructure: data is not a vector of lists: converting it into one."))
@@ -850,40 +836,34 @@ fixDataStructure <- function(data, verbose = 0, indent = 0)
 #-------------------------------------------------------------------------------
 # Checks sets for consistency and returns some diagnostics.
 
-.permissiveDim <- function(x)
-{
+.permissiveDim <- function(x) {
     d = dim(x)
     if (is.null(d)) return(c(length(x), 1))
     return(d)
 }
 
-checkSets <- function(data, checkStructure = FALSE, useSets = NULL)
-{
+checkSets <- function(data, checkStructure = FALSE, useSets = NULL) {
     nSets = length(data)
     if (is.null(useSets)) useSets = c(1:nSets)
     if (nSets <= 0) stop("No data given.")
     structureOK = TRUE
-    if ((class(data) != "list") || (class(data[[useSets[1]]]) != "list"))
-    {
-        if (checkStructure)
-        {
+    if ((class(data) != "list") || (class(data[[useSets[1]]]) != "list"))     {
+        if (checkStructure)         {
             structureOK = FALSE
             nGenes = 0
             nSamples = 0
         } else {
-            stop("data does not appear to have the correct format. Consider using
+            stop(
+                "data does not appear to have the correct format. Consider using
            fixDataStructure", "or setting checkStructure = TRUE when calling
            this function.")
         }
     } else {
         nSamples = vector(length = nSets)
         nGenes = .permissiveDim(data[[useSets[1]]]$data)[2]
-        for (set in useSets)
-        {
-            if (nGenes != .permissiveDim(data[[set]]$data)[2])
-            {
-                if (checkStructure)
-                {
+        for (set in useSets) {
+            if (nGenes != .permissiveDim(data[[set]]$data)[2]) {
+                if (checkStructure) {
                     structureOK = FALSE
                 } else {
                     stop(paste("Incompatible number of genes in set 1 and", set))
