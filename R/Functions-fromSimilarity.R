@@ -9,7 +9,7 @@ matrixToNetwork = function(mat,
    diagEntry = 1)
 {
   sm = match.arg(symmetrizeMethod);
-  if (is.na(sm)) 
+  if (is.na(sm))
     stop("Unrecognized or non-unique 'symmetrizeMethod'.");
 
   mat = as.matrix(mat);
@@ -30,7 +30,7 @@ matrixToNetwork = function(mat,
     mat = pmin(mat, t(mat), na.rm = TRUE);
   } else
     mat = pmax(mat, t(mat), na.rm = TRUE);
- 
+
   if (is.null(min)) {
     min = min(mat, na.rm = TRUE);
   } else
@@ -38,7 +38,7 @@ matrixToNetwork = function(mat,
 
   if (is.null(max)) {
     max = max(mat, na.rm = TRUE);
-  } else 
+  } else
     mat[mat > max] = max;
 
   adj = ( (mat-min)/(max-min) )^power;
@@ -53,10 +53,15 @@ checkSimilarity = function(similarity, min=-1, max=1)
   checkAdjMat(similarity, min, max);
 }
 
+#' @name adjacency
+#' @rdname adjacency
+#' @examples
+#' adj <- adjacency.fromSimilarity(similarity)
+#' @export
 adjacency.fromSimilarity = function(similarity, type = "unsigned", power = if (type=="distance") 1 else 6)
 {
   checkSimilarity(similarity);
-  adjacency(similarity, type = type, power = power, corFnc = "I", corOptions="", distFnc = "I", 
+  adjacency(similarity, type = type, power = power, corFnc = "I", corOptions="", distFnc = "I",
             distOptions = "");
 }
 
@@ -66,13 +71,13 @@ softConnectivity.fromSimilarity=function(similarity, type = "unsigned",
 
 {
   checkSimilarity(similarity)
-  softConnectivity(similarity, corFnc = "I", corOptions = "", 
-                   type = type, power = power, 
+  softConnectivity(similarity, corFnc = "I", corOptions = "",
+                   type = type, power = power,
                    blockSize = blockSize, verbose = verbose, indent = indent)
 }
 
 pickHardThreshold.fromSimilarity=function (similarity,
-    RsquaredCut = 0.85, cutVector = seq(0.1, 0.9, by = 0.05), 
+    RsquaredCut = 0.85, cutVector = seq(0.1, 0.9, by = 0.05),
     moreNetworkConcepts=FALSE , removeFirst = FALSE, nBreaks = 10)
 {
   checkSimilarity(similarity)
@@ -81,14 +86,14 @@ pickHardThreshold.fromSimilarity=function (similarity,
                     nBreaks = nBreaks, corFnc = "I", corOptions = "");
 }
 
-pickSoftThreshold.fromSimilarity = function (similarity, 
-    RsquaredCut = 0.85, powerVector = c(seq(1, 10, by = 1), seq(12, 20, by = 2)), 
+pickSoftThreshold.fromSimilarity = function (similarity,
+    RsquaredCut = 0.85, powerVector = c(seq(1, 10, by = 1), seq(12, 20, by = 2)),
     removeFirst = FALSE, nBreaks = 10, blockSize = 1000,
     networkType = "unsigned", moreNetworkConcepts=FALSE, verbose = 0, indent = 0)
 {
   checkSimilarity(similarity)
   pickSoftThreshold(similarity, dataIsExpr = FALSE, RsquaredCut =  RsquaredCut, powerVector = powerVector,
-                    removeFirst = removeFirst, nBreaks = nBreaks, 
+                    removeFirst = removeFirst, nBreaks = nBreaks,
                     blockSize = blockSize, networkType = networkType,
                     moreNetworkConcepts = moreNetworkConcepts,
                     verbose = verbose, indent = indent);

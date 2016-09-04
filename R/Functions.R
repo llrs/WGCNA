@@ -22,7 +22,7 @@ moduleColor.getMEprefix = function()
 }
 
 # ===================================================
-#The function moduleEigengenes finds the first principal component (eigengene) in each 
+#The function moduleEigengenes finds the first principal component (eigengene) in each
 # module defined by the colors of the input vector "colors".
 # The theoretical underpinnings are described in Horvath, Dong, Yip (2005)
 # http://www.genetics.ucla.edu/labs/horvath/ModuleConformity/
@@ -30,22 +30,22 @@ moduleColor.getMEprefix = function()
 
 moduleEigengenes = function(expr, colors, impute = TRUE, nPC = 1, align = "along average",
                             excludeGrey = FALSE, grey = if (is.numeric(colors))  0 else "grey",
-                            subHubs = TRUE, trapErrors = FALSE, 
+                            subHubs = TRUE, trapErrors = FALSE,
                             returnValidOnly = trapErrors,
                             softPower = 6, scale = TRUE,
                             verbose = 0, indent = 0)
 {
   spaces = indentSpaces(indent);
 
-  if (verbose==1) 
-     printFlush(paste(spaces, "moduleEigengenes: Calculating", nlevels(as.factor(colors)), 
+  if (verbose==1)
+     printFlush(paste(spaces, "moduleEigengenes: Calculating", nlevels(as.factor(colors)),
                               "module eigengenes in given set."));
   if (is.null(expr))
-  {  
+  {
     stop("moduleEigengenes: Error: expr is NULL. ");
   }
   if (is.null(colors))
-  {  
+  {
     stop("moduleEigengenes: Error: colors is NULL. ");
   }
 
@@ -60,7 +60,7 @@ moduleEigengenes = function(expr, colors, impute = TRUE, nPC = 1, align = "along
     nl = nlevels(colors);
     nlDrop = nlevels(colors[, drop = TRUE]);
     if (nl > nlDrop)
-     stop(paste("Argument 'colors' contains unused levels (empty modules). ", 
+     stop(paste("Argument 'colors' contains unused levels (empty modules). ",
                 "Use colors[, drop=TRUE] to get rid of them."));
   }
 
@@ -69,7 +69,7 @@ moduleEigengenes = function(expr, colors, impute = TRUE, nPC = 1, align = "along
   alignRecognizedValues =  c("", "along average");
   if (!is.element(align, alignRecognizedValues)) {
     printFlush(paste("ModulePrincipalComponents: Error:",
-                "parameter align has an unrecognised value:", 
+                "parameter align has an unrecognised value:",
                 align, "; Recognized values are ", alignRecognizedValues));
     stop()
   }
@@ -87,8 +87,8 @@ moduleEigengenes = function(expr, colors, impute = TRUE, nPC = 1, align = "along
       stop(paste("Color levels are empty. Possible reason: the only color is grey",
                  "and grey module is excluded from the calculation."));
     }
-  PrinComps = data.frame(matrix(NA,nrow=dim(expr)[[1]], ncol= length(modlevels))) 
-  averExpr = data.frame(matrix(NA,nrow=dim(expr)[[1]], ncol= length(modlevels))) 
+  PrinComps = data.frame(matrix(NA,nrow=dim(expr)[[1]], ncol= length(modlevels)))
+  averExpr = data.frame(matrix(NA,nrow=dim(expr)[[1]], ncol= length(modlevels)))
   varExpl= data.frame(matrix(NA, nrow= nVarExplained, ncol= length(modlevels)))
   validMEs = rep(TRUE, length(modlevels));
   validAEs = rep(FALSE, length(modlevels));
@@ -99,7 +99,7 @@ moduleEigengenes = function(expr, colors, impute = TRUE, nPC = 1, align = "along
   names(averExpr)=paste("AE",modlevels,sep="")
   for(i in c(1:length(modlevels)) )
   {
-    if (verbose>1) 
+    if (verbose>1)
       printFlush(paste(spaces, "moduleEigengenes : Working on ME for module", modlevels[i]));
     modulename = modlevels[i]
     restrict1 = as.character(colors)== as.character(modulename)
@@ -107,7 +107,7 @@ moduleEigengenes = function(expr, colors, impute = TRUE, nPC = 1, align = "along
        printFlush(paste(spaces, " ...", sum(restrict1), "genes"));
     datModule = as.matrix(t(expr[, restrict1]));
     n = dim(datModule)[1]; p = dim(datModule)[2];
-    pc = try( 
+    pc = try(
       {
         if (nrow(datModule)>1 && impute)
         {
@@ -116,7 +116,7 @@ moduleEigengenes = function(expr, colors, impute = TRUE, nPC = 1, align = "along
              saved.seed = .Random.seed;
              seedSaved = TRUE;
           }
-          if (any(is.na(datModule))) 
+          if (any(is.na(datModule)))
           {
              if (verbose > 5) printFlush(paste(spaces, " ...imputing missing data"));
              datModule = impute.knn(datModule, k = min(10, nrow(datModule)-1))
@@ -133,7 +133,7 @@ moduleEigengenes = function(expr, colors, impute = TRUE, nPC = 1, align = "along
         svd1 = svd(datModule, nu = min(n, p, nPC), nv = min(n, p, nPC));
         # varExpl[,i]= (svd1$d[1:min(n,p,nVarExplained)])^2/sum(svd1$d^2)
         if (verbose > 5) printFlush(paste(spaces, " ...calculating PVE"));
-        veMat = cor(svd1$v[, c(1:min(n,p,nVarExplained))], t(datModule), use = "p") 
+        veMat = cor(svd1$v[, c(1:min(n,p,nVarExplained))], t(datModule), use = "p")
         varExpl[c(1:min(n,p,nVarExplained)),i]= rowMeans(veMat^2, na.rm = TRUE)
         # this is the first principal component
         svd1$v[,1]
@@ -145,13 +145,13 @@ moduleEigengenes = function(expr, colors, impute = TRUE, nPC = 1, align = "along
       {
         if (verbose>0)
         {
-          printFlush(paste(spaces, " ..principal component calculation for module", 
+          printFlush(paste(spaces, " ..principal component calculation for module",
                                    modulename, "failed with the following error:"));
           printFlush(paste(spaces, "     ", pc, spaces,
                            " ..hub genes will be used instead of principal components."));
         }
         isPC[i] = FALSE;
-        pc = try( 
+        pc = try(
         {
           scaledExpr = scale(t(datModule));
           covEx = cov(scaledExpr, use = "p");
@@ -164,7 +164,7 @@ moduleEigengenes = function(expr, colors, impute = TRUE, nPC = 1, align = "along
           alignSign = sign(covEx[, hub]);
           alignSign[is.na(alignSign)] = 0;
           isHub[i] = TRUE;
-          pcxMat = scaledExpr * 
+          pcxMat = scaledExpr *
                 matrix(kIM * alignSign, nrow = nrow(scaledExpr), ncol = ncol(scaledExpr), byrow = TRUE) /
                 sum(kIM);
           pcx = rowMeans(pcxMat, na.rm = TRUE);
@@ -173,25 +173,25 @@ moduleEigengenes = function(expr, colors, impute = TRUE, nPC = 1, align = "along
         }, silent = TRUE);
       }
     }
-    
+
     if (class(pc)=='try-error')
     {
       if (!trapErrors) stop(pc);
       if (verbose>0)
       {
-        printFlush(paste(spaces, " ..ME calculation of module", modulename, 
+        printFlush(paste(spaces, " ..ME calculation of module", modulename,
                                  "failed with the following error:"));
         printFlush(paste(spaces, "     ", pc, spaces,
                          " ..the offending module has been removed."));
       }
-      warning(paste("Eigengene calculation of module", modulename, 
-                    "failed with the following error \n     ", 
+      warning(paste("Eigengene calculation of module", modulename,
+                    "failed with the following error \n     ",
                     pc, "The offending module has been removed.\n"));
       validMEs[i] = FALSE; isPC[i] = FALSE; isHub[i] = FALSE;
       validColors[restrict1] = grey;
     } else {
       PrinComps[, i] = pc;
-      ae = try( 
+      ae = try(
       {
         if (isPC[i]) scaledExpr = scale(t(datModule));
         averExpr[, i] = rowMeans(scaledExpr, na.rm = TRUE);
@@ -221,9 +221,9 @@ moduleEigengenes = function(expr, colors, impute = TRUE, nPC = 1, align = "along
       }
       validAEs[i] = !(class(ae)=='try-error');
     }
-  } 
+  }
   allOK = (sum(!validMEs)==0)
-  if (returnValidOnly && sum(!validMEs)>0) 
+  if (returnValidOnly && sum(!validMEs)>0)
   {
     PrinComps = PrinComps[, validMEs]
     averExpr = averExpr[, validMEs];
@@ -235,7 +235,7 @@ moduleEigengenes = function(expr, colors, impute = TRUE, nPC = 1, align = "along
   }
   allPC = (sum(!isPC)==0);
   allAEOK = (sum(!validAEs)==0)
-  list(eigengenes = PrinComps, averageExpr = averExpr, varExplained = varExpl, nPC = nPC, 
+  list(eigengenes = PrinComps, averageExpr = averExpr, varExplained = varExpl, nPC = nPC,
        validMEs = validMEs, validColors = validColors, allOK = allOK, allPC = allPC, isPC = isPC,
        isHub = isHub, validAEs = validAEs, allAEOK = allAEOK)
 }
@@ -257,7 +257,7 @@ removeGreyME = function(MEs, greyMEName = paste(moduleColor.getMEprefix(), "grey
     for (set in 1:length(MEs))
     {
       if (!is.data.frame(MEs[[set]]$data))
-        stop("MEs is a vector list but the list structure is missing the correct 'data' component."); 
+        stop("MEs is a vector list but the list structure is missing the correct 'data' component.");
       newMEs[[set]] = MEs[[set]];
       if (greyMEName %in% names(MEs[[set]]$data))
       {
@@ -279,8 +279,8 @@ removeGreyME = function(MEs, greyMEName = paste(moduleColor.getMEprefix(), "grey
     } else {
        warning("removeGreyME: The given grey ME name was not found among the names of given MEs.");
     }
-  } 
- 
+  }
+
   newMEs;
 }
 #-------------------------------------------------------------------------------------
@@ -303,9 +303,9 @@ collectGarbage=function(){while (gc()[2,4] != gc()[2,4] | gc()[1,4] != gc()[1,4]
 #
 # performs hierarchical clustering on MEs and returns the order suitable for plotting.
 
-orderMEs = function(MEs, greyLast = TRUE, 
-                    greyName = paste(moduleColor.getMEprefix(), "grey", sep=""), 
-                    orderBy = 1, order = NULL, 
+orderMEs = function(MEs, greyLast = TRUE,
+                    greyName = paste(moduleColor.getMEprefix(), "grey", sep=""),
+                    orderBy = 1, order = NULL,
                     useSets = NULL, verbose = 0, indent = 0)
 {
   spaces = indentSpaces(indent);
@@ -314,16 +314,16 @@ orderMEs = function(MEs, greyLast = TRUE,
   {
      if (is.null(order))
      {
-       if (verbose>0) printFlush(paste(spaces, "orderMEs: order not given, calculating using given set", 
+       if (verbose>0) printFlush(paste(spaces, "orderMEs: order not given, calculating using given set",
                                           orderBy));
        corPC = cor(MEs$eigengenes, use="p")
        disPC = 1-corPC;
        order = .clustOrder(disPC, greyLast = greyLast, greyName = greyName);
-     } 
-   
+     }
+
      if (length(order)!=dim(MEs$eigengenes)[2])
        stop("orderMEs: given MEs and order have incompatible dimensions.");
-    
+
      orderedMEs = MEs;
      orderedMEs$eigengenes = as.data.frame(MEs$eigengenes[,order]);
      colnames(orderedMEs$eigengenes) = colnames(MEs$eigengenes)[order];
@@ -348,26 +348,26 @@ orderMEs = function(MEs, greyLast = TRUE,
         MEs = fixDataStructure(MEs);
         useSets = NULL; orderBy = 1;
      }
-   
-     if (!is.null(useSets)) 
+
+     if (!is.null(useSets))
        if (is.na(match(orderBy, useSets))) orderBy = useSets[1];
-   
+
      if (is.null(order))
      {
-       if (verbose>0) printFlush(paste(spaces, "orderMEs: order not given, calculating using given set", 
+       if (verbose>0) printFlush(paste(spaces, "orderMEs: order not given, calculating using given set",
                                           orderBy));
        corPC = cor(MEs[[orderBy]]$data, use="p")
        disPC = 1-corPC;
        order = .clustOrder(disPC, greyLast = greyLast, greyName = greyName);
-     } 
-   
+     }
+
      if (length(order)!=dim(MEs[[orderBy]]$data)[2])
        stop("orderMEs: given MEs and order have incompatible dimensions.");
-    
+
      nSets = length(MEs);
      orderedMEs = MEs;
      if (is.null(useSets)) useSets = c(1:nSets);
-     for (set in useSets) 
+     for (set in useSets)
      {
        orderedMEs[[set]]$data = as.data.frame(MEs[[set]]$data[,order]);
        colnames(orderedMEs[[set]]$data) = colnames(MEs[[set]]$data)[order];
@@ -396,13 +396,13 @@ orderMEs = function(MEs, greyLast = TRUE,
 #
 #---------------------------------------------------------------------------------------------
 
-.clustOrder = function(distM, greyLast = TRUE, 
+.clustOrder = function(distM, greyLast = TRUE,
                        greyName = paste(moduleColor.getMEprefix(), "grey", sep=""))
 {
   distM = as.matrix(distM);
   distNames = dimnames(distM)[[1]];
   greyInd = match(greyName, distNames);
-  if (greyLast && !is.na(greyInd)) 
+  if (greyLast && !is.na(greyInd))
   {
      clusterMEs = (greyName!=distNames);
      if (sum(clusterMEs)>1)
@@ -411,7 +411,7 @@ orderMEs = function(MEs, greyLast = TRUE,
        order = h$order;
        if (sum(order>=greyInd)>0) order[order>=greyInd] = order[order>=greyInd]+1;
        order = c(order, greyInd);
-     } else if (ncol(distM)>1) 
+     } else if (ncol(distM)>1)
      {
        if (greyInd==1)
        {
@@ -430,7 +430,7 @@ orderMEs = function(MEs, greyLast = TRUE,
  # print(paste("names:", names(distM), collapse = ", "));
  # print(paste("order:", order, collapse=", "))
 }
- 
+
 #---------------------------------------------------------------------------------------------
 #
 # consensusOrderMEs
@@ -438,8 +438,8 @@ orderMEs = function(MEs, greyLast = TRUE,
 #---------------------------------------------------------------------------------------------
 # Orders MEs by the dendrogram of their consensus dissimilarity.
 
-consensusOrderMEs = function(MEs, useAbs = FALSE, useSets = NULL, greyLast = TRUE, 
-                             greyName = paste(moduleColor.getMEprefix(), "grey", sep=""), 
+consensusOrderMEs = function(MEs, useAbs = FALSE, useSets = NULL, greyLast = TRUE,
+                             greyName = paste(moduleColor.getMEprefix(), "grey", sep=""),
                              method = "consensus")
 {
   # Debugging code:
@@ -451,7 +451,7 @@ consensusOrderMEs = function(MEs, useAbs = FALSE, useSets = NULL, greyLast = TRU
   order = .clustOrder(Diss, greyLast, greyName);
   #print(order)
   orderMEs(MEs, greyLast = greyLast, greyName = greyName, order = order, useSets = useSets);
-} 
+}
 
 #---------------------------------------------------------------------------------------------
 #
@@ -459,7 +459,7 @@ consensusOrderMEs = function(MEs, useAbs = FALSE, useSets = NULL, greyLast = TRU
 #
 #---------------------------------------------------------------------------------------------
 # This function calcualtes a consensus dissimilarity (i.e., correlation) among sets of MEs (more generally,
-# any sets of vectors). 
+# any sets of vectors).
 # CAUTION: when not using absolute value, the minimum similarity will favor the large negative values!
 
 consensusMEDissimilarity = function(MEs, useAbs = FALSE, useSets = NULL, method = "consensus")
@@ -506,7 +506,7 @@ consensusMEDissimilarity = function(MEs, useAbs = FALSE, useSets = NULL, method 
 }
 
 # Quantile normalization
-# normalize each column such that (column) quantiles are the same 
+# normalize each column such that (column) quantiles are the same
 # The final value for each quantile is the 'summaryType' of the corresponding quantiles across the columns
 
 
@@ -515,7 +515,7 @@ consensusMEDissimilarity = function(MEs, useAbs = FALSE, useSets = NULL, method 
 {
   summaryType = match.arg(summaryType);
   data.sorted = apply(data, 2, sort);
- 
+
   if (summaryType == "median")
   {
     refSample = rowMedians(data.sorted, na.rm = TRUE)
@@ -545,24 +545,24 @@ consensusMEDissimilarity = function(MEs, useAbs = FALSE, useSets = NULL, method 
   if (!Diag) diag(mat) = diagValue;
   mat;
 }
-  
+
 # This function calculates consensus dissimilarity of module eigengenes
 
-.consensusMEDissimilarity = function(multiMEs, 
-                                     useSets = NULL, 
+.consensusMEDissimilarity = function(multiMEs,
+                                     useSets = NULL,
                                      corFnc = cor, corOptions = list(use = 'p'),
                                      equalizeQuantiles = FALSE,
                                      quantileSummary = "mean",
-                                     consensusQuantile = 0, useAbs = FALSE, 
+                                     consensusQuantile = 0, useAbs = FALSE,
                                      greyMEname = "ME0")
 {
   nSets = checkSets(multiMEs)$nSets;
   useMEs = c(1:ncol(multiMEs[[1]]$data))[names(multiMEs[[1]]$data)!=greyMEname]
   useNames = names(multiMEs[[1]]$data)[useMEs];
   nUseMEs = length(useMEs);
-#  if (nUseMEs<2) 
+#  if (nUseMEs<2)
 #    stop("Something is wrong: there are two or more proper modules, but less than two proper",
-#         "eigengenes. Please check that the grey color label and module eigengene label", 
+#         "eigengenes. Please check that the grey color label and module eigengene label",
 #         "are correct.");
 
   if (is.null(useSets)) useSets = c(1:nSets);
@@ -588,24 +588,24 @@ consensusMEDissimilarity = function(MEs, useAbs = FALSE, useSets = NULL, method 
     MEDiss = apply(normalized, 2, .turnDistVectorIntoMatrix, size = nUseMEs, Diag = FALSE, Upper = FALSE,
                                                              diagValue = 0);
   }
- 
+
   ConsDiss = apply(MEDiss, c(1:2), quantile, probs = 1-consensusQuantile, names = FALSE, na.rm = TRUE);
   colnames(ConsDiss) = rownames(ConsDiss) = useNames;
   ConsDiss;
 }
-     
+
 #======================================================================================================
 # ColorHandler.R
 #======================================================================================================
 
 # A set of global variables and functions that should help handling color names for some 400+ modules.
-# A vector called .GlobalStandardColors is defined that holds color names with first few entries 
+# A vector called .GlobalStandardColors is defined that holds color names with first few entries
 # being the well-known and -loved colors. The rest is randomly chosen from the color names of R,
 # excluding grey colors.
 
 #---------------------------------------------------------------------------------------------------------
 #
-# .GlobalStandardColors 
+# .GlobalStandardColors
 #
 #---------------------------------------------------------------------------------------------------------
 # This code forms a vector of color names in which the first entries are given by BaseColors and the rest
@@ -615,7 +615,7 @@ BaseColors = c("turquoise","blue","brown","yellow","green","red","black","pink",
                 "purple","greenyellow","tan","salmon","cyan", "midnightblue", "lightcyan",
                 "grey60", "lightgreen", "lightyellow", "royalblue", "darkred", "darkgreen",
                 "darkturquoise", "darkgrey",
-                "orange", "darkorange", "white", "skyblue", "saddlebrown", "steelblue", 
+                "orange", "darkorange", "white", "skyblue", "saddlebrown", "steelblue",
                 "paleturquoise", "violet", "darkolivegreen", "darkmagenta" );
 
 RColors = colors()[-grep("grey", colors())];
@@ -631,7 +631,7 @@ nExtras = length(ExtraColors);
 standardColors = function(n = NULL)
 {
   if (is.null(n)) return(.GlobalStandardColors);
-  if ((n>0) && (n<=length(.GlobalStandardColors))) 
+  if ((n>0) && (n<=length(.GlobalStandardColors)))
   {
     return(.GlobalStandardColors[c(1:n)]);
   } else {
@@ -667,7 +667,7 @@ normalizeLabels = function(labels, keepZero = TRUE)
   norm_labs[NonZero] = r[f];
   norm_labs;
 }
-  
+
 #---------------------------------------------------------------------------------------------------------
 #
 # labels2colors
@@ -690,7 +690,7 @@ labels2colors = function(labels, zeroIsGrey = TRUE, colorSeq = NULL, naColor = "
     if (any(labels<0, na.rm = TRUE)) minLabel = min(c(labels), na.rm = TRUE)
     nLabels = labels;
   } else {
-    
+
     if (commonColorCode)
     {
       factors = factor(c(as.matrix(as.data.frame(labels))))
@@ -704,14 +704,14 @@ labels2colors = function(labels, zeroIsGrey = TRUE, colorSeq = NULL, naColor = "
       nLabels = sapply(factors, as.numeric)
     }
   }
-      
+
   if (max(nLabels, na.rm = TRUE) > length(colorSeq))
   {
      nRepeats = as.integer((max(labels)-1)/length(colorSeq)) + 1;
-     warning(paste("labels2colors: Number of labels exceeds number of avilable colors.", 
+     warning(paste("labels2colors: Number of labels exceeds number of avilable colors.",
                    "Some colors will be repeated", nRepeats, "times."))
      extColorSeq = colorSeq;
-     for (rep in 1:nRepeats) 
+     for (rep in 1:nRepeats)
        extColorSeq = c(extColorSeq, paste(colorSeq, ".", rep, sep=""));
   } else {
      nRepeats = 1;
@@ -724,7 +724,7 @@ labels2colors = function(labels, zeroIsGrey = TRUE, colorSeq = NULL, naColor = "
   colors[fin][finLabels!=0] = extColorSeq[finLabels[finLabels!=0]];
   if (!is.null(dim(labels)))
     dim(colors) = dim(labels);
-  
+
   colors;
 }
 
@@ -751,7 +751,7 @@ moduleNumber = function(dendro, cutHeight = 0.9, minSize = 50)
   NOnBranches = table(Branches);
   TrueBranch = NOnBranches >= minSize;
   Branches[!TrueBranch[Branches]] = 0;
-  
+
   Branches;
 }
 
@@ -768,7 +768,7 @@ fixDataStructure = function(data, verbose = 0, indent = 0)
   if ((class(data)!="list") || (class(data[[1]])!="list"))
   {
     if (verbose>0)
-      printFlush(paste(spaces, 
+      printFlush(paste(spaces,
                        "fixDataStructure: data is not a vector of lists: converting it into one."));
     x = data;
     data = vector(mode = "list", length = 1);
@@ -811,11 +811,11 @@ checkSets = function(data, checkStructure = FALSE, useSets = NULL)
   } else {
     nSamples = vector(length = nSets);
     nGenes = .permissiveDim(data[[useSets[1]]]$data)[2];
-    for (set in useSets) 
+    for (set in useSets)
     {
       if (nGenes!=.permissiveDim(data[[set]]$data)[2])
       {
-        if (checkStructure) 
+        if (checkStructure)
         {
            structureOK = FALSE;
         } else {
@@ -836,13 +836,13 @@ checkSets = function(data, checkStructure = FALSE, useSets = NULL)
 #
 #--------------------------------------------------------------------------------------
 
-multiSetMEs = function(exprData, colors, universalColors = NULL, useSets = NULL, 
-                       useGenes = NULL, impute = TRUE, 
-                       nPC = 1, align = "along average", excludeGrey = FALSE, 
+multiSetMEs = function(exprData, colors, universalColors = NULL, useSets = NULL,
+                       useGenes = NULL, impute = TRUE,
+                       nPC = 1, align = "along average", excludeGrey = FALSE,
                        grey = if (is.null(universalColors)) {if(is.numeric(colors)) 0 else "grey"} else
                                      if (is.numeric(universalColors)) 0 else "grey",
                        subHubs = TRUE,
-                       trapErrors = FALSE, 
+                       trapErrors = FALSE,
                        returnValidOnly = trapErrors,
                        softPower = 6,
                        verbose = 1, indent = 0)
@@ -859,16 +859,16 @@ multiSetMEs = function(exprData, colors, universalColors = NULL, useSets = NULL,
     consValidColors = universalColors;
   if (is.null(useSets)) useSets = c(1:nSets);
   if (is.null(useGenes))
-  { 
+  {
     for (set in useSets) {
-      if (verbose>0) printFlush(paste(spaces,"  Working on set", as.character(set), "...")); 
+      if (verbose>0) printFlush(paste(spaces,"  Working on set", as.character(set), "..."));
       if (is.null(universalColors)) {
         setColors = colors[,set];
       } else {
-        setColors = universalColors; 
+        setColors = universalColors;
       }
       setMEs = moduleEigengenes(expr = exprData[[set]]$data,
-                            colors = setColors, impute = impute, nPC = nPC, align = align, 
+                            colors = setColors, impute = impute, nPC = nPC, align = align,
                             excludeGrey = excludeGrey, grey = grey,
                             trapErrors = trapErrors, subHubs = subHubs,
                             returnValidOnly = FALSE, softPower = softPower,
@@ -880,27 +880,27 @@ multiSetMEs = function(exprData, colors, universalColors = NULL, useSets = NULL,
         } else {
           consValidMEs = consValidMEs * setMEs$validMEs;
         }
-        consValidColors[setMEs$validColors!=universalColors] = 
+        consValidColors[setMEs$validColors!=universalColors] =
             setMEs$validColors[setMEs$validColors!=universalColors]
       }
       MEs[[set]] = setMEs;
       names(MEs[[set]])[names(setMEs)=='eigengenes'] = 'data';
       # Here's what moduleEigengenes returns:
       #
-      #  list(eigengenes = PrinComps, averageExpr = averExpr, varExplained = varExpl, nPC = nPC, 
+      #  list(eigengenes = PrinComps, averageExpr = averExpr, varExplained = varExpl, nPC = nPC,
       #       validMEs = validMEs, validColors = validColors, allOK = allOK, allPC = allPC, isPC = isPC,
       #       isHub = isHub, validAEs = validAEs, allAEOK = allAEOK)
     }
   } else {
     for (set in useSets) {
-      if (verbose>0) printFlush(paste(spaces,"  Working on set", as.character(set), "...")); 
+      if (verbose>0) printFlush(paste(spaces,"  Working on set", as.character(set), "..."));
       if (is.null(universalColors)) {
         setColors = colors[useGenes ,set];
       } else {
-        setColors = universalColors[useGenes]; 
+        setColors = universalColors[useGenes];
       }
       setMEs = moduleEigengenes(expr = exprData[[set]]$data[, useGenes],
-                            colors = setColors, impute = impute, nPC = nPC, align = align, 
+                            colors = setColors, impute = impute, nPC = nPC, align = align,
                             excludeGrey = excludeGrey, grey = grey,
                             trapErrors = trapErrors, subHubs = subHubs,
                             returnValidOnly = FALSE, softPower = softPower,
@@ -912,7 +912,7 @@ multiSetMEs = function(exprData, colors, universalColors = NULL, useSets = NULL,
         } else {
           consValidMEs = consValidMEs * setMEs$validMEs;
         }
-        consValidColors[setMEs$validColors!=universalColors[useGenes]] = 
+        consValidColors[setMEs$validColors!=universalColors[useGenes]] =
             setMEs$validColors[setMEs$validColors!=universalColors[useGenes]]
       }
       MEs[[set]] = setMEs;
@@ -926,10 +926,10 @@ multiSetMEs = function(exprData, colors, universalColors = NULL, useSets = NULL,
       if (!is.null(consValidMEs)) MEs[[set]]$validMEs = consValidMEs;
       MEs[[set]]$validColors = consValidColors;
     }
-  } 
+  }
   for (set in 1:nSets)
   {
-    MEs[[set]]$allOK = (sum(!MEs[[set]]$validMEs)==0); 
+    MEs[[set]]$allOK = (sum(!MEs[[set]]$validMEs)==0);
     if (returnValidOnly)
     {
       valid = (MEs[[set]]$validMEs > 0);
@@ -944,7 +944,7 @@ multiSetMEs = function(exprData, colors, universalColors = NULL, useSets = NULL,
       MEs[[set]]$validMEs = rep(TRUE, times = ncol(MEs[[set]]$data));
     }
   }
-  
+
   MEs;
 }
 
@@ -953,41 +953,41 @@ multiSetMEs = function(exprData, colors, universalColors = NULL, useSets = NULL,
 # MergeCloseModules
 #
 #---------------------------------------------------------------------------------------------
-                  
+
 
 mergeCloseModules = function(
   # input data
   exprData, colors,
 
   # Optional starting eigengenes
-  MEs = NULL,  
+  MEs = NULL,
 
   # Optional restriction to a subset of all sets
-  useSets = NULL, 
+  useSets = NULL,
 
   # If missing data are present, impute them?
   impute = TRUE,
 
   # Input handling options
-  checkDataFormat = TRUE, 
-  unassdColor = if (is.numeric(colors)) 0 else "grey", 
+  checkDataFormat = TRUE,
+  unassdColor = if (is.numeric(colors)) 0 else "grey",
 
   # Options for eigengene network construction
   corFnc = cor, corOptions = list(use = 'p'),
-  useAbs = FALSE, 
+  useAbs = FALSE,
 
   # Options for constructing the consensus
   equalizeQuantiles = FALSE,
   quantileSummary = "mean",
-  consensusQuantile = 0, 
+  consensusQuantile = 0,
 
   # Merging options
-  cutHeight = 0.2, 
+  cutHeight = 0.2,
   iterate = TRUE,
 
   # Output options
-  relabel = FALSE, 
-  colorSeq = NULL, 
+  relabel = FALSE,
+  colorSeq = NULL,
   getNewMEs = TRUE,
   getNewUnassdME = TRUE,
 
@@ -1009,10 +1009,10 @@ mergeCloseModules = function(
 
   greyMEname = paste(moduleColor.getMEprefix(), unassdColor, sep="");
 
-  if (verbose>0) printFlush(paste(spaces, 
+  if (verbose>0) printFlush(paste(spaces,
             "mergeCloseModules: Merging modules whose distance is less than", cutHeight));
 
-  if (verbose>3) printFlush(paste(spaces, 
+  if (verbose>3) printFlush(paste(spaces,
             "  .. will look for grey label", greyMEname));
 
   if (!checkSets(exprData, checkStructure = TRUE, useSets = useSets)$structureOK)
@@ -1028,7 +1028,7 @@ mergeCloseModules = function(
 
   setsize = checkSets(exprData, useSets = useSets);
   nSets = setsize$nSets;
-  
+
   if (!is.null(MEs))
   {
     checkMEs = checkSets(MEs, checkStructure = TRUE, useSets = useSets);
@@ -1055,28 +1055,28 @@ mergeCloseModules = function(
   if (setsize$nGenes!=length(colors))
     stop("Number of genes in exprData is different from the length of original colors. They must equal.");
 
-  if ((cutHeight <0) | (cutHeight>(1+as.integer(useAbs)))) 
+  if ((cutHeight <0) | (cutHeight>(1+as.integer(useAbs))))
     stop(paste("Given cutHeight is out of sensible range between 0 and", 1+as.integer(useAbs) ));
 
   done = FALSE; iteration = 1;
 
   MergedColors = colors;
-  ok = try( 
+  ok = try(
   {
     while (!done)
     {
-      if (is.null(MEs)) 
+      if (is.null(MEs))
       {
         MEs = multiSetMEs(exprData, colors = NULL, universalColors = colors,
                         useSets = useSets, impute = impute,
-                        subHubs = TRUE, trapErrors = FALSE, excludeGrey = TRUE, 
+                        subHubs = TRUE, trapErrors = FALSE, excludeGrey = TRUE,
                         grey = unassdColor,
                         verbose = verbose-1, indent = indent+1);
         MEs = consensusOrderMEs(MEs, useAbs = useAbs, useSets = useSets, greyLast = FALSE);
         collectGarbage();
       } else if (nlevels(as.factor(colors))!=checkMEs$nGenes)
       {
-        if ((iteration==1) & (verbose>0)) printFlush(paste(spaces, "  Number of given module colors", 
+        if ((iteration==1) & (verbose>0)) printFlush(paste(spaces, "  Number of given module colors",
                   "does not match number of given MEs => recalculating the MEs."))
         MEs = multiSetMEs(exprData, colors = NULL, universalColors = colors,
                         useSets = useSets, impute = impute,
@@ -1087,13 +1087,13 @@ mergeCloseModules = function(
         collectGarbage();
       }
       if (iteration==1) oldMEs = MEs;
-  
+
       # Check colors for number of distinct colors that are not grey
-  
+
       colLevs = as.character(levels(as.factor(colors)));
       if  ( length(colLevs[colLevs!=as.character(unassdColor)])<2 )
       {
-        printFlush(paste(spaces, 
+        printFlush(paste(spaces,
            "mergeCloseModules: less than two proper modules."));
         printFlush(paste(spaces, " ..color levels are",
             paste(colLevs, collapse = ", ")));
@@ -1104,16 +1104,16 @@ mergeCloseModules = function(
         oldTree = NULL; Tree = NULL;
         break;
       }
-  
+
       # Cluster the found module eigengenes and merge ones that are too close according to the specified
       # quantile.
-  
+
       nOldMods = nlevels(as.factor(colors));
 
-      ConsDiss = .consensusMEDissimilarity(MEs, equalizeQuantiles = equalizeQuantiles, 
+      ConsDiss = .consensusMEDissimilarity(MEs, equalizeQuantiles = equalizeQuantiles,
                                            quantileSummary = quantileSummary,
                                            consensusQuantile = consensusQuantile, useAbs = useAbs,
-                                           corFnc = corFnc, corOptions = corOptions, 
+                                           corFnc = corFnc, corOptions = corOptions,
                                            useSets = useSets, greyMEname = greyMEname);
 
       Tree = fastcluster::hclust(as.dist(ConsDiss), method = "average");
@@ -1123,25 +1123,25 @@ mergeCloseModules = function(
       nBranches = nlevels(TreeBranches)
       NumberOnBranch = table(TreeBranches);
       MergedColors = colors;
-      
+
       # Merge modules on the same branch
-  
+
       for (branch in 1:nBranches) if (NumberOnBranch[branch]>1)
       {
         ModulesOnThisBranch = names(TreeBranches)[TreeBranches==UniqueBranches[branch]];
         ColorsOnThisBranch = substring(ModulesOnThisBranch, 3);
         if (is.numeric(origColors)) ColorsOnThisBranch = as.numeric(ColorsOnThisBranch);
-        if (verbose>3) 
-           printFlush(paste(spaces, "  Merging original colors", 
+        if (verbose>3)
+           printFlush(paste(spaces, "  Merging original colors",
                             paste(ColorsOnThisBranch, collapse=", ")));
         for (color in 2:length(ColorsOnThisBranch))
           MergedColors[MergedColors==ColorsOnThisBranch[color]] = ColorsOnThisBranch[1];
       }
 
       MergedColors = MergedColors[, drop = TRUE];
-      
+
       nNewMods = nlevels(as.factor(MergedColors));
-  
+
       if (nNewMods<nOldMods & iterate)
       {
         colors = MergedColors;
@@ -1150,12 +1150,12 @@ mergeCloseModules = function(
         done = TRUE;
       }
       iteration = iteration+1;
-    } 
-    if (relabel) 
+    }
+    if (relabel)
     {
        RawModuleColors = levels(as.factor(MergedColors));
        # relabel the merged colors to the usual order based on the number of genes in each module
-       if (is.null(colorSeq)) 
+       if (is.null(colorSeq))
        {
          if (is.numeric(origColors)) {
            colorSeq = c(1:length(table(origColors)));
@@ -1164,14 +1164,14 @@ mergeCloseModules = function(
            colorSeq = labels2colors(c(1:nNewColors))
          }
        }
-       
+
       # nGenesInModule = rep(0, nNewMods);
       # for (mod in 1:nNewMods) nGenesInModule[mod] = sum(MergedColors==RawModuleColors[mod]);
        nGenesInModule = table(MergedColors);
-     
+
        SortedRawModuleColors = RawModuleColors[order(-nGenesInModule)]
-    
-       # Change the color names to the standard sequence, but leave grey grey 
+
+       # Change the color names to the standard sequence, but leave grey grey
        # (that's why rank in general does not equal color)
        MergedNewColors = MergedColors;
        if (is.factor(MergedNewColors)) MergedNewColors = as.character(MergedNewColors);
@@ -1180,13 +1180,13 @@ mergeCloseModules = function(
        for (color in 1:length(SortedRawModuleColors)) if (SortedRawModuleColors[color]!=unassdColor)
        {
          rank = rank + 1;
-         if (verbose>3) printFlush(paste(spaces, "      ", SortedRawModuleColors[color], 
+         if (verbose>3) printFlush(paste(spaces, "      ", SortedRawModuleColors[color],
                                     "to ", colorSeq[rank]));
          MergedNewColors[MergedColors==SortedRawModuleColors[color]] = colorSeq[rank];
        }
        if (is.factor(MergedColors)) MergedNewColors = as.factor(MergedNewColors);
     } else {
-       MergedNewColors = MergedColors; 
+       MergedNewColors = MergedColors;
     }
     MergedNewColors = MergedNewColors[, drop = TRUE];
 
@@ -1202,11 +1202,11 @@ mergeCloseModules = function(
         newMEs = consensusOrderMEs(NewMEs, useAbs = useAbs, useSets = useSets, greyLast = TRUE,
                                    greyName = greyMEname);
 
-        ConsDiss = .consensusMEDissimilarity(newMEs, 
+        ConsDiss = .consensusMEDissimilarity(newMEs,
                                              equalizeQuantiles = equalizeQuantiles,
                                              quantileSummary = quantileSummary,
                                              consensusQuantile = consensusQuantile, useAbs = useAbs,
-                                             corFnc = corFnc, corOptions = corOptions, 
+                                             corFnc = corFnc, corOptions = corOptions,
                                              useSets = useSets, greyMEname = greyMEname);
         if (length(ConsDiss) > 1)
         {
@@ -1218,7 +1218,7 @@ mergeCloseModules = function(
     } else {
        newMEs = NULL;
     }
-    if (MEsInSingleFrame) 
+    if (MEsInSingleFrame)
     {
       newMEs = newMEs[[1]]$data;
       oldMEs = oldMEs[[1]]$data;
@@ -1238,17 +1238,17 @@ mergeCloseModules = function(
                   "    ", ok, " --> returning unmerged modules and *no* eigengenes.\n"));
     list(colors = origColors, allOK = FALSE);
   } else {
-    list(colors = MergedNewColors, dendro = Tree, oldDendro = oldTree, cutHeight = cutHeight, 
+    list(colors = MergedNewColors, dendro = Tree, oldDendro = oldTree, cutHeight = cutHeight,
          oldMEs = oldMEs, newMEs = newMEs, allOK = TRUE);
   }
 }
 
-  
+
 
 # ===================================================
 #For hard thresholding, we use the signum (step) function
 
-signumAdjacencyFunction = function(corMat, threshold)  
+signumAdjacencyFunction = function(corMat, threshold)
 {
   adjmat= as.matrix(abs(corMat)>=threshold)
   dimnames(adjmat) <- dimnames(corMat)
@@ -1257,9 +1257,9 @@ signumAdjacencyFunction = function(corMat, threshold)
 }
 
 # ===================================================
-# For soft thresholding, one can use the sigmoid function 
+# For soft thresholding, one can use the sigmoid function
 # But we have focused on the power adjacency function in the tutorial...
-sigmoidAdjacencyFunction = function(ss, mu=0.8, alpha=20) 
+sigmoidAdjacencyFunction = function(ss, mu=0.8, alpha=20)
 {
    1/(1+exp(-alpha*(ss-mu)))
 }
@@ -1267,16 +1267,16 @@ sigmoidAdjacencyFunction = function(ss, mu=0.8, alpha=20)
 #This function is useful for speeding up the connectivity calculation.
 #The idea is to partition the adjacency matrix into consecutive baches of a #given size.
 #In principle, the larger the block size the faster is the calculation. But #smaller blockSizes require #less memory...
-# Input: gene expression data set where *rows* correspond to microarray samples #and columns correspond to genes. 
+# Input: gene expression data set where *rows* correspond to microarray samples #and columns correspond to genes.
 # If fewer than minNSamples contain gene expression information for a given
-# gene, then its connectivity is set to missing. 
+# gene, then its connectivity is set to missing.
 
-softConnectivity=function(datExpr, 
-                          corFnc = "cor", corOptions = "use = 'p'", 
-                          type = "unsigned", 
-                          power = if (type == "signed") 15 else 6, 
+softConnectivity=function(datExpr,
+                          corFnc = "cor", corOptions = "use = 'p'",
+                          type = "unsigned",
+                          power = if (type == "signed") 15 else 6,
                           blockSize = 1500, minNSamples = NULL,
-                          verbose = 2, indent = 0) 
+                          verbose = 2, indent = 0)
 {
   spaces = indentSpaces(indent);
   nGenes=dim(datExpr)[[2]]
@@ -1288,28 +1288,28 @@ softConnectivity=function(datExpr,
     minNSamples = max(..minNSamples, nSamples/3);
   }
 
-  if (nGenes<..minNGenes | nSamples<minNSamples ) 
-     stop(paste("Error: Something seems to be wrong. \n", 
+  if (nGenes<..minNGenes | nSamples<minNSamples )
+     stop(paste("Error: Something seems to be wrong. \n",
           "   Make sure that the input data frame has genes as rows and array samples as columns.\n",
-          "   Alternatively, there seem to be fewer than", ..minNGenes, "genes or fewer than", 
+          "   Alternatively, there seem to be fewer than", ..minNGenes, "genes or fewer than",
               minNSamples, "samples. ") )
-  if (nGenes<nSamples ) 
+  if (nGenes<nSamples )
     printFlush("Warning: There are fewer genes than samples in the function softConnectivity. Maybe you should transpose the data?")
 
 
   k=rep(NA,nGenes)
   start = 1;
-  if (verbose>0) { 
-     printFlush(paste(spaces, "softConnectivity: FYI: connecitivty of genes with less than", 
-                               ceiling(minNSamples), "valid samples will be returned as NA.")); 
-     cat(paste(spaces, "..calculating connectivities..")); 
+  if (verbose>0) {
+     printFlush(paste(spaces, "softConnectivity: FYI: connecitivty of genes with less than",
+                               ceiling(minNSamples), "valid samples will be returned as NA."));
+     cat(paste(spaces, "..calculating connectivities.."));
      pind = initProgInd();
   }
   while (start < nGenes)
   {
     end = min(start + blockSize-1, nGenes);
     index1=start:end;
-    ad1 = adjacency(datExpr, index1, power = power, type = type, 
+    ad1 = adjacency(datExpr, index1, power = power, type = type,
                     corFnc = corFnc, corOptions = corOptions);
     k[index1]=colSums(ad1, na.rm = TRUE)-1;
     # If fewer than minNSamples contain gene expression information for a given
@@ -1318,39 +1318,39 @@ softConnectivity=function(datExpr,
     k[index1][NoSamplesAvailable< minNSamples]=NA
     if (verbose>0) pind = updateProgInd(end/nGenes, pind);
     start = end + 1;
-  } 
+  }
   if (verbose > 0) printFlush("");
   k
 } # end of function
 
 
 # ==============================================================================
-# The function PickHardThreshold can help one to estimate the cut-off value 
+# The function PickHardThreshold can help one to estimate the cut-off value
 # when using the signum (step) function.
 # The first column lists the threshold ("cut"),
-# the second column lists the corresponding p-value based on the Fisher Transform 
-# of the correlation. 
+# the second column lists the corresponding p-value based on the Fisher Transform
+# of the correlation.
 # The third column reports the resulting scale free topology fitting index R^2.
-# The fourth column reports the slope of the fitting line, it shoud be negative for 
+# The fourth column reports the slope of the fitting line, it shoud be negative for
 # biologically meaningul networks.
-# The fifth column reports the fitting index for the truncated exponential model. 
+# The fifth column reports the fitting index for the truncated exponential model.
 # Usually we ignore it.
 # The remaining columns list the mean, median and maximum resulting connectivity.
 # To pick a hard threshold (cut) with the scale free topology criterion:
-# aim for high scale free R^2 (column 3), high connectivity (col 6) and negative slope 
+# aim for high scale free R^2 (column 3), high connectivity (col 6) and negative slope
 # (around -1, col 4).
 # The output is a list with 2 components. The first component lists a sugggested cut-off
 # while the second component contains the whole table.
 # The removeFirst option removes the first point (k=0, P(k=0)) from the regression fit.
-# nBreaks specifies how many intervals used to estimate the frequency p(k) i.e. the no. of points in the 
+# nBreaks specifies how many intervals used to estimate the frequency p(k) i.e. the no. of points in the
 # scale free topology plot.
 
-pickHardThreshold=function (data, dataIsExpr = TRUE, RsquaredCut = 0.85, cutVector = seq(0.1, 0.9, 
-    by = 0.05), moreNetworkConcepts=FALSE , removeFirst = FALSE, nBreaks = 10, corFnc = "cor", 
-    corOptions = "use = 'p'") 
+pickHardThreshold=function (data, dataIsExpr = TRUE, RsquaredCut = 0.85, cutVector = seq(0.1, 0.9,
+    by = 0.05), moreNetworkConcepts=FALSE , removeFirst = FALSE, nBreaks = 10, corFnc = "cor",
+    corOptions = "use = 'p'")
 {
     nGenes = dim(data)[[2]]
-    colname1 = c("Cut", "p-value", "SFT.R.sq", "slope=", 
+    colname1 = c("Cut", "p-value", "SFT.R.sq", "slope=",
         "truncated R^2", "mean(k)", "median(k)", "max(k)")
 if(moreNetworkConcepts) {
 colname1=c(colname1,"Density", "Centralization", "Heterogeneity")
@@ -1362,28 +1362,28 @@ colname1=c(colname1,"Density", "Centralization", "Heterogeneity")
     } else
       nSamples = dim(data)[[1]]
 
-    datout = data.frame(matrix(NA, nrow = length(cutVector), 
+    datout = data.frame(matrix(NA, nrow = length(cutVector),
         ncol = length(colname1)))
     names(datout) = colname1
     datout[, 1] = cutVector
     if (dataIsExpr)
     {
-      for (i in 1:length(cutVector)) 
+      for (i in 1:length(cutVector))
       {
           cut1 = cutVector[i]
-          datout[i, 2] = 2 * (1 - pt(sqrt(nSamples - 1) * cut1/sqrt(1 - 
+          datout[i, 2] = 2 * (1 - pt(sqrt(nSamples - 1) * cut1/sqrt(1 -
               cut1^2), nSamples - 1))
       }
-    } else 
+    } else
        datout[, 2] = NA;
 
     fun1 = function(x, dataIsExpr) {
         if (dataIsExpr)
         {
-          corExpr = parse(text = paste(corFnc, "(x, data", 
+          corExpr = parse(text = paste(corFnc, "(x, data",
               prepComma(corOptions), ")"))
           corx = abs(eval(corExpr))
-        } else 
+        } else
           corx = x;
         out1 = rep(NA, length(cutVector))
         for (j in c(1:length(cutVector))) {
@@ -1395,13 +1395,13 @@ colname1=c(colname1,"Density", "Centralization", "Heterogeneity")
     for (i in c(1:length(cutVector))) {
         khelp= datk[, i] - 1
         SFT1=scaleFreeFitIndex(k=khelp,nBreaks=nBreaks,removeFirst=removeFirst)
-        datout[i, 3] = SFT1$Rsquared.SFT  
-        datout[i, 4] = SFT1$slope.SFT 
+        datout[i, 3] = SFT1$Rsquared.SFT
+        datout[i, 4] = SFT1$slope.SFT
         datout[i, 5] = SFT1$truncatedExponentialAdjRsquared
         datout[i, 6] = mean(khelp,na.rm = TRUE)
         datout[i, 7] = median(khelp,na.rm = TRUE)
         datout[i, 8] = max(khelp,na.rm = TRUE)
-if(moreNetworkConcepts) { 
+if(moreNetworkConcepts) {
 Density = sum(khelp)/(nGenes * (nGenes - 1))
 datout[i, 9] =Density
 Centralization = nGenes*(max(khelp)-mean(khelp))/((nGenes-1)*(nGenes-2))
@@ -1431,22 +1431,22 @@ datout[i, 11] = Heterogeneity
 # SH: more netowkr concepts added.
 # PL: re-written for parallel processing
 
-pickSoftThreshold = function (data, dataIsExpr = TRUE, RsquaredCut = 0.85, 
-    powerVector = c(seq(1, 10, by = 1), seq(12, 20, by = 2)), removeFirst = FALSE, nBreaks = 10, 
-    blockSize = NULL, corFnc = cor, corOptions = list(use = 'p'), 
+pickSoftThreshold = function (data, dataIsExpr = TRUE, RsquaredCut = 0.85,
+    powerVector = c(seq(1, 10, by = 1), seq(12, 20, by = 2)), removeFirst = FALSE, nBreaks = 10,
+    blockSize = NULL, corFnc = cor, corOptions = list(use = 'p'),
     networkType = "unsigned", moreNetworkConcepts=FALSE, verbose = 0, indent = 0)
 {
     intType = charmatch(networkType, .networkTypes)
-    if (is.na(intType)) 
-        stop(paste("Unrecognized 'networkType'. Recognized values are", 
+    if (is.na(intType))
+        stop(paste("Unrecognized 'networkType'. Recognized values are",
             paste(.networkTypes, collapse = ", ")))
     nGenes = ncol(data);
-    if (nGenes<3) 
-    { 
-       stop("The input data data contain fewer than 3 rows (nodes).", 
+    if (nGenes<3)
+    {
+       stop("The input data data contain fewer than 3 rows (nodes).",
             "\nThis would result in a trivial correlation network." )
     }
-    if (!dataIsExpr) 
+    if (!dataIsExpr)
     {
       checkSimilarity(data);
       if (any(diag(data)!=1)) diag(data) = 1;
@@ -1455,13 +1455,13 @@ pickSoftThreshold = function (data, dataIsExpr = TRUE, RsquaredCut = 0.85,
     if (is.null(blockSize))
     {
       blockSize = blockSize(nGenes, rectangularBlocks = TRUE, maxMemoryAllocation = 2^30);
-      if (verbose > 0) 
+      if (verbose > 0)
         printFlush(spaste("pickSoftThreshold: will use block size ", blockSize, "."))
     }
-   
-    colname1 = c("Power", "SFT.R.sq", "slope", "truncated R.sq", 
+
+    colname1 = c("Power", "SFT.R.sq", "slope", "truncated R.sq",
                  "mean(k)", "median(k)", "max(k)")
-    if(moreNetworkConcepts) 
+    if(moreNetworkConcepts)
     {
          colname1=c(colname1,"Density", "Centralization", "Heterogeneity")
     }
@@ -1490,20 +1490,20 @@ pickSoftThreshold = function (data, dataIsExpr = TRUE, RsquaredCut = 0.85,
 
     # Main loop
     startG = 1
-    while (startG <= nGenes) 
+    while (startG <= nGenes)
     {
       endG = min (startG + blockSize - 1, nGenes)
 
-      if (verbose > 1) 
+      if (verbose > 1)
           printFlush(paste(spaces, "  ..working on genes", startG, "through", endG, "of", nGenes))
 
       nBlockGenes = endG - startG + 1;
       jobs = allocateJobs(nBlockGenes, nThreads);
       # This assumes that the non-zero length allocations
       # precede the zero-length ones
-      actualThreads = which(sapply(jobs, length) > 0); 
+      actualThreads = which(sapply(jobs, length) > 0);
 
-      datk[ c(startG:endG), ] = foreach(t = actualThreads, .combine = rbind) %dopar% 
+      datk[ c(startG:endG), ] = foreach(t = actualThreads, .combine = rbind) %dopar%
       {
         useGenes = c(startG:endG)[ jobs[[t]] ]
         nGenes1 = length(useGenes);
@@ -1519,8 +1519,8 @@ pickSoftThreshold = function (data, dataIsExpr = TRUE, RsquaredCut = 0.85,
           } else if (intType == 3) {
               corx[corx < 0] = 0
           }
-          if (sum(is.na(corx)) != 0) 
-              warning(paste("Some correlations are NA in block", 
+          if (sum(is.na(corx)) != 0)
+              warning(paste("Some correlations are NA in block",
                   startG, ":", endG, "."))
         } else {
           corx = data[, useGenes];
@@ -1537,18 +1537,18 @@ pickSoftThreshold = function (data, dataIsExpr = TRUE, RsquaredCut = 0.85,
     }
     if (verbose == 1) printFlush("");
 
-    for (i in c(1:length(powerVector))) 
+    for (i in c(1:length(powerVector)))
     {
-        khelp= datk[, i] 
+        khelp= datk[, i]
         SFT1=scaleFreeFitIndex(k=khelp,nBreaks=nBreaks,removeFirst=removeFirst)
-        datout[i, 2] = SFT1$Rsquared.SFT  
-        datout[i, 3] = SFT1$slope.SFT 
+        datout[i, 2] = SFT1$Rsquared.SFT
+        datout[i, 3] = SFT1$slope.SFT
         datout[i, 4] = SFT1$truncatedExponentialAdjRsquared
         datout[i, 5] = mean(khelp,na.rm = TRUE)
         datout[i, 6] = median(khelp,na.rm = TRUE)
         datout[i, 7] = max(khelp,na.rm = TRUE)
-        if(moreNetworkConcepts) 
-        { 
+        if(moreNetworkConcepts)
+        {
            Density = sum(khelp)/(nGenes * (nGenes - 1))
            datout[i, 8] =Density
            Centralization = nGenes*(max(khelp)-mean(khelp))/((nGenes-1)*(nGenes-2))
@@ -1593,18 +1593,18 @@ scaleFreePlot = function(connectivity, nBreaks=10, truncated = FALSE, removeFirs
   }
   log.p.dk= as.numeric(log10(p.dk + 1e-09))
   lm1 = lm(log.p.dk ~ log.dk)
-  if (truncated==TRUE) 
-  { 
+  if (truncated==TRUE)
+  {
     lm2 = lm(log.p.dk ~ log.dk + I(10^log.dk))
     OUTPUT=data.frame(scaleFreeRsquared=round(summary(lm1)$adj.r.squared,2),
                       slope=round(lm1$coefficients[[2]],2),
     TruncatedRsquared=round(summary(lm2)$adj.r.squared,2))
     printFlush("the red line corresponds to the truncated exponential fit")
-    title = paste(main, 
+    title = paste(main,
                 " scale free R^2=",as.character(round(summary(lm1)$adj.r.squared,2)),
                 ", slope=", round(lm1$coefficients[[2]],2),
                 ", trunc.R^2=",as.character(round(summary(lm2)$adj.r.squared,2)))
-  } else { 
+  } else {
     title = paste(main, " scale R^2=",as.character(round(summary(lm1)$adj.r.squared,2)),
                   ", slope=", round(lm1$coefficients[[2]],2))
     OUTPUT=data.frame(scaleFreeRsquared=round(summary(lm1)$adj.r.squared,2),
@@ -1615,7 +1615,7 @@ scaleFreePlot = function(connectivity, nBreaks=10, truncated = FALSE, removeFirs
   lines(log.dk,predict(lm1),col=1)
   if (truncated) lines(log.dk, predict(lm2), col = 2)
   OUTPUT
-} # end of function 
+} # end of function
 
 
 
@@ -1623,43 +1623,43 @@ scaleFreePlot = function(connectivity, nBreaks=10, truncated = FALSE, removeFirs
 
 ##############################################################################################
 ##############################################################################################
-# B) Computing the topological overlap matrix 
+# B) Computing the topological overlap matrix
 ##############################################################################################
 ##############################################################################################
 
 
 
 # ===================================================
-#The function TOMdist computes a dissimilarity 
+#The function TOMdist computes a dissimilarity
 # based on the topological overlap matrix (Ravasz et al)
 # Input: an Adjacency matrix with entries in [0,1]
 #
 #  ************* Removed: use 1-TOMsimilarity(adjMat). ***********************
 #
-#TOMdist=function(adjMat, useActualMax = FALSE) 
+#TOMdist=function(adjMat, useActualMax = FALSE)
 #{
   #diag(adjMat)=0;
   #adjMat[is.na(adjMat)]=0;
-  #maxh1=max(as.dist(adjMat) ); minh1=min(as.dist(adjMat) ); 
-  #if (maxh1>1 | minh1 < 0 ) 
+  #maxh1=max(as.dist(adjMat) ); minh1=min(as.dist(adjMat) );
+  #if (maxh1>1 | minh1 < 0 )
     #stop(paste("The adjacency matrix contains entries that are larger than 1 or",
-               #"smaller than 0: max =",maxh1,", min =",minh1)) 
-  #if ( max(c(as.dist(abs(adjMat-t(adjMat)))))>10^(-12) ) 
-    #stop("Non-symmetric adjacency matrix. ") 
+               #"smaller than 0: max =",maxh1,", min =",minh1))
+  #if ( max(c(as.dist(abs(adjMat-t(adjMat)))))>10^(-12) )
+    #stop("Non-symmetric adjacency matrix. ")
   #adjMat= (adjMat+ t(adjMat) )/2
   #connectivity=apply(adjMat,2,sum)
   #maxADJconst=1
-  #if (useActualMax==TRUE) maxADJconst=max(c(as.dist(adjMat ))) 
+  #if (useActualMax==TRUE) maxADJconst=max(c(as.dist(adjMat )))
   #Dhelp1=matrix(connectivity,ncol=length(connectivity),nrow=length(connectivity))
-  #denomTOM= pmin(as.dist(Dhelp1),as.dist(t(Dhelp1)))   +as.dist(maxADJconst-adjMat); 
+  #denomTOM= pmin(as.dist(Dhelp1),as.dist(t(Dhelp1)))   +as.dist(maxADJconst-adjMat);
   #gc();gc();
   #numTOM=as.dist(adjMat %*% adjMat +adjMat);
   ##TOMmatrix=numTOM/denomTOM
-  ## this turns the TOM matrix into a dissimilarity 
-  #out1=1-as.matrix(numTOM/denomTOM) 
-  #diag(out1)=1 
+  ## this turns the TOM matrix into a dissimilarity
+  #out1=1-as.matrix(numTOM/denomTOM)
+  #diag(out1)=1
   ## setting the diagonal to 1 is unconventional (it should be 0)
-  ## but it leads to nicer looking TOM plots... 
+  ## but it leads to nicer looking TOM plots...
   #out1
 #}
 
@@ -1681,13 +1681,13 @@ scaleFreePlot = function(connectivity, nBreaks=10, truncated = FALSE, removeFirs
   #rm(Dhelp1);
   #numTOM=as.dist(adjMat %*% adjMat +adjMat);
   ##TOMmatrix=numTOM/denomTOM
-  ## this turns the TOM matrix into a dissimilarity 
+  ## this turns the TOM matrix into a dissimilarity
   #out1=1-as.matrix(numTOM/denomTOM)
   #rm(numTOM); rm(denomTOM);
   #collectGarbage();
   #diag(out1)=1
   ## setting the diagonal to 1 is unconventional (it should be 0)
-  ## but it leads to nicer looking TOM plots... 
+  ## but it leads to nicer looking TOM plots...
   #out1
 #}
 
@@ -1713,7 +1713,7 @@ scaleFreePlot = function(connectivity, nBreaks=10, truncated = FALSE, removeFirs
   #rm(Dhelp1);
   #numTOM=as.dist(adjMat %*% adjMat - adjMat);
   ##TOMmatrix=numTOM/denomTOM
-  ## this turns the TOM matrix into a dissimilarity 
+  ## this turns the TOM matrix into a dissimilarity
   #out1=as.matrix(numTOM/denomTOM)
   #rm(numTOM); rm(denomTOM);
   #collectGarbage();
@@ -1732,21 +1732,21 @@ scaleFreePlot = function(connectivity, nBreaks=10, truncated = FALSE, removeFirs
 GTOMdist = function(adjMat, degree = 1)
 {
   maxh1=max(as.dist(adjMat) ); minh1=min(as.dist(adjMat) );
-  if (degree!=round(abs(degree))) 
+  if (degree!=round(abs(degree)))
     stop("'degree' must be a positive integer.");
   if (maxh1>1 | minh1 < 0 )
     stop(paste("Entries of the adjacency matrix are not between 0 and 1: max =",
                  maxh1,", min =",minh1))
 
-  if (  max(c(as.dist(abs(adjMat-t(adjMat)))))>0   ) 
+  if (  max(c(as.dist(abs(adjMat-t(adjMat)))))>0   )
     stop("Given adjacency matrix is not symmetric.")
 
   B <- adjMat;
-  if (degree>=2) for (i in 2:degree) 
+  if (degree>=2) for (i in 2:degree)
   {
           diag(B) <- diag(B) + 1;
           B = B %*% adjMat;# this gives the number of paths with length at most degree connecting a pair
-  }   
+  }
   B <- (B>0);   # this gives the degree-step reachability from a node to another
   diag(B) <- 0;   # exclude each node being its own neighbor
   B <- B %*% B   # this gives the number of common degree-step-neighbor that a pair of nodes share
@@ -1767,7 +1767,7 @@ GTOMdist = function(adjMat, degree = 1)
 #
 #============================================================================================
 
-vectorTOM = function(datExpr, vect, subtract1 = FALSE, blockSize = 2000, 
+vectorTOM = function(datExpr, vect, subtract1 = FALSE, blockSize = 2000,
                      corFnc = "cor", corOptions = "use = 'p'", networkType = "unsigned", power = 6,
                      verbose = 1, indent = 0)
 {
@@ -1779,14 +1779,14 @@ vectorTOM = function(datExpr, vect, subtract1 = FALSE, blockSize = 2000,
 
   if (is.null(dim(vect)))
   {
-     vect = as.matrix(vect) 
+     vect = as.matrix(vect)
      vectIsVector = TRUE;
   } else vectIsVector = FALSE;
 
-  if (nrow(vect)!=nrow(datExpr)) 
+  if (nrow(vect)!=nrow(datExpr))
     stop("Input error: numbers of samples in 'vect' and 'datExpr' must be the same.");
 
-  if (ncol(vect)>blockSize) 
+  if (ncol(vect)>blockSize)
     stop(paste("Input error: number of columns in 'vect' is too large. ",
                "If you are certain you want to try anyway, increase 'blockSize' to at least",
                "the number of columns in 'vect'."));
@@ -1799,7 +1799,7 @@ vectorTOM = function(datExpr, vect, subtract1 = FALSE, blockSize = 2000,
   { corVE = (1+corVE)/2;
   } else if (intType==3)
   { corVE[corVE < 0] = 0;
-  } else 
+  } else
     stop("Unrecognized networkType argument. Recognized values are 'unsigned', 'signed', and 'signed hybrid'.");
 
   corVE = corVE^power;
@@ -1813,11 +1813,11 @@ vectorTOM = function(datExpr, vect, subtract1 = FALSE, blockSize = 2000,
      if (verbose > 1) cat(paste(spaces, "Calculating TOM of a set of vectors with genes"));
      pind = initProgInd();
   }
-  start = 1; 
+  start = 1;
   denomArr = array(0, dim = c(2, blockSize, nVect));
   while (start <= nGenes)
   {
-    end = min(start + blockSize-1, nGenes); 
+    end = min(start + blockSize-1, nGenes);
     blockInd = c(start:end);
     corEval = parse(text = paste(corFnc, "(datExpr[, blockInd], datExpr ", prepComma(corOptions), ")"));
     corEE = eval(corEval);
@@ -1827,7 +1827,7 @@ vectorTOM = function(datExpr, vect, subtract1 = FALSE, blockSize = 2000,
     { corEE = (1+corEE)/2;
     } else if (intType==3)
     { corEE[corEE < 0] = 0;
-    } 
+    }
     corEE = corEE^power;
     num = corEE %*% corVE -subtract1 * corVE[blockInd, ]
     kV = apply(corVE, 2, sum, na.rm = TRUE) - subtract1
@@ -1852,7 +1852,7 @@ vectorTOM = function(datExpr, vect, subtract1 = FALSE, blockSize = 2000,
 #============================================================================================
 
 
-subsetTOM = function(datExpr, subset, 
+subsetTOM = function(datExpr, subset,
                     corFnc = "cor", corOptions = "use = 'p'", networkType = "unsigned", power = 6,
                     verbose = 1, indent = 0)
 {
@@ -1876,14 +1876,14 @@ subsetTOM = function(datExpr, subset,
   if (any(!is.finite(subset))) stop("Entries of 'subset' must all be finite.");
 
   if (min(subset) < 1 | max(subset) > nGenes)
-    stop(paste("Some entries of 'subset' are out of range.", 
+    stop(paste("Some entries of 'subset' are out of range.",
          "\nNote: 'subset' must contain indices of the subset for which the TOM is calculated."));
 
   intType = charmatch(networkType, .networkTypes)
   if (is.na(intType))
     stop(paste("Unrecognized 'networkType'. Recognized values are", paste(.networkTypes, collapse = ", ")));
 
-  adj = adjacency(datExpr, subset, power = power, type = networkType, corFnc = corFnc, 
+  adj = adjacency(datExpr, subset, power = power, type = networkType, corFnc = corFnc,
                   corOptions = corOptions);
 
   adj[is.na(adj)] = 0;
@@ -1911,8 +1911,92 @@ subsetTOM = function(datExpr, subset,
 # A slighly reworked version that assumes one wants the adjacency matrix of data with itself or a
 # subset. The data are given only once, and an additional selection index for columns is given.
 # Caution: no checking of selectCols validity is performed.
-# The probability method is removed as it's not used.
- 
+
+#' @name adjacency
+#' @rdname adjacency
+#' @title Calculate network adjacency
+#' @aliases adjacency
+#' @aliases adjacency.fromSimilarity
+#' @usage
+#' @description
+#' Calculates (correlation or distance) network adjacency from given expression
+#' data or from a similarity. Computes the adjacency from the expression data:
+#' takes cor, transforms it as appropriate and possibly adds a sign if requested.
+#' @param datExpr data.frame containing expression data. Columns correspond to
+#' genes and rows to samples.
+#' @param similarity A (signed) similarity matrix: square, symmetric matrix with
+#'  entries between -1 and 1.
+#' @param selectCols For correlation networks only (see below) can be used to
+#' select genes whose adjacencies will be calculated.
+#' Should be either a numeric vector giving the indices of the genes to be used,
+#'  or a boolean vector indicating which genes are to be used.
+#' @param type Network type, allowed values are \code{"unsigned"},
+#' \code{"signed"}, \code{"signed hybrid"}, \code{"distance"}.
+#' @param power Soft thresholding power, integer used in the function of the
+#' network type.
+#' @param corFnc Character string specifying the function to be used to
+#' calculate co-expression similarity for correlation networks. Defaults to
+#' Pearson correlation. Any function returning values between -1 and 1 can
+#' be used.
+# TODO: This should be changed to passing the function without eval
+#' @param corOptions Character string specifying additional arguments to be
+#' passed to the function given by \code{corFnc}. Use
+#' \code{"use = 'p', method = 'spearman'"} to obtain Spearman correlation.
+#' @param distFnc Character string specifying the function to be used to
+#' calculate co-expression similarity for distance networks. Defaults to the
+#' function \code{\link{dist}}. Any function returning non-negative values
+#' can be used.
+#' @param distOption Character string specifying additional arguments to be
+#' passed to the function given by \code{distFnc}. For example, when the
+#' function  \code{\link{dist}} is used, the argument \code{method} can be used
+#' to specify various ways of computing the distance..
+#' @details
+#' The argument \code{type} determines whether a correlation (\code{type} one of
+#'  \code{"unsigned"}, \code{"signed"}, \code{"signed hybrid"}), or a distance
+#'  network (\code{type} equal \code{"distance"}) will be calculated. In
+#'  correlation networks the adajcency is constructed from correlations (values
+#'  between -1 and 1, with high numbers meaning high similarity). In distance
+#'  networks, the adjacency is constructed from distances (non-negative values,
+#'  high values mean low similarity).
+#'
+#' The function calculates the similarity of columns (genes) in \code{datExpr}
+#' by calling the function given in \code{corFnc} (for correlation networks) or
+#' \code{distFnc} (for distance networks), transforms the similarity according
+#' to \code{type} and raises it to \code{power}, resulting in a weighted network
+#'  adjacency matrix. If \code{selectCols} is given, the \code{corFnc} function
+#' will be given arguments \code{(datExpr, datExpr[selectCols], ...)}; hence the
+#'  returned adjacency will have rows corresponding to all genes and columns
+#'  corresponding to genes selected by \code{selectCols}.
+#'
+#' Correlation and distance are transformed as follows: for
+#' \code{type = "unsigned"}, adjacency = |cor|^power; for \code{type = "signed"}
+#' , adjacency = (0.5 * (1+cor) )^power; for \code{type = "signed hybrid"},
+#' adjacency = cor^power if cor>0 and 0 otherwise; and for
+#' \code{type = "distance"}, adjacency = (1-(dist/max(dist))^2)^power.
+#'
+#' The function \code{adjacency.fromSimilarity} inputs a similarity matrix, that
+#'  is it skips the correlation calculation step but is otherwise identical.
+#' @return
+#' Adjacency matrix of dimensions \code{ncol(datExpr)} times
+#' \code{ncol(datExpr)} (or the same dimensions as \code{similarity}). If
+#' \code{selectCols} was given, the number of columns will be the length
+#' (if numeric) or sum (if boolean) of \code{selectCols}.
+#' @note
+#' When calculated from the \code{datExpr}, the network is always calculated
+#' among the columns of \code{datExpr} irrespective of whether a correlation or
+#' a distance network is requested.
+#' @keywords array
+#' @examples
+#' adj <- adjacency(datExpr)
+#' @author
+#' Peter Langfelder and Steve Horvath
+#' @references
+#' Bin Zhang and Steve Horvath (2005) A General Framework for Weighted Gene Co-Expression
+#' Network Analysis, Statistical Applications in Genetics and Molecular Biology, Vol. 4 No. 1, Article 17
+#'
+#' Langfelder P, Horvath S (2007) Eigengene networks for studying the relationships between co-expression
+#' modules. BMC Systems Biology 2007, 1:54
+#' @export
 adjacency = function(datExpr, selectCols=NULL, type = "unsigned", power = if (type=="distance") 1 else 6,
                      corFnc = "cor", corOptions = "use = 'p'",
                      distFnc = "dist", distOptions = "method = 'euclidean'")
@@ -1934,29 +2018,29 @@ adjacency = function(datExpr, selectCols=NULL, type = "unsigned", power = if (ty
       cor_mat = eval(corExpr);
     }
   } else {
-    if (!is.null(selectCols)) 
+    if (!is.null(selectCols))
       stop("The argument 'selectCols' cannot be used for distance adjacency.");
     corExpr = parse(text = paste(distFnc, "(t(datExpr) ", prepComma(distOptions), ")"));
     # cor_mat = cor(datExpr, use = "p");
     d = eval(corExpr);
-    if (any(d<0)) 
+    if (any(d<0))
       warning("Function WGCNA::adjacency: Distance function returned (some) negative values.");
     cor_mat = 1-as.matrix( (d/max(d, na.rm = TRUE))^2 );
   }
 
   if (intType==1)
-  { cor_mat = abs(cor_mat); 
+  { cor_mat = abs(cor_mat);
   } else if (intType==2)
-  { cor_mat = (1+cor_mat)/2; 
+  { cor_mat = (1+cor_mat)/2;
   } else if (intType==3)
-  { cor_mat[cor_mat < 0] = 0; 
+  { cor_mat[cor_mat < 0] = 0;
   }
   cor_mat^power;
 }
 
-.compiledAdjacency = function(expr, 
+.compiledAdjacency = function(expr,
                                  corType = "pearson", networkType = "unsigned",
-                                 power = 6, 
+                                 power = 6,
                                  maxPOutliers = 1,
                                  quickCor = 0,
                                  pearsonFallback = "individual",
@@ -2038,9 +2122,9 @@ cutreeStaticColor = function(dendro, cutHeight = 0.9, minSize = 50)
   labels2colors(normalizeLabels(moduleNumber(dendro, cutHeight, minSize)));
 }
 
- 
-plotColorUnderTree = function( 
-  dendro, 
+
+plotColorUnderTree = function(
+  dendro,
    colors,
    rowLabels = NULL,
    rowWidths = NULL,
@@ -2071,14 +2155,14 @@ plotColorUnderTree = function(
 
 
 plotOrderedColors = function(
-   order, 
-   colors, 
-   rowLabels = NULL, 
+   order,
+   colors,
+   rowLabels = NULL,
    rowWidths = NULL,
-   rowText = NULL, 
+   rowText = NULL,
    rowTextAlignment = c("left", "center", "right"),
    rowTextIgnore = NULL,
-   textPositions = NULL, 
+   textPositions = NULL,
    addTextGuide = TRUE,
    cex.rowLabels = 1,
    cex.rowText = 0.8,
@@ -2088,7 +2172,7 @@ plotOrderedColors = function(
   colors = as.matrix(colors);
   dimC = dim(colors)
 
-  if (is.null(rowLabels) & (length(dimnames(colors)[[2]])==dimC[2])) 
+  if (is.null(rowLabels) & (length(dimnames(colors)[[2]])==dimC[2]))
      rowLabels = colnames(colors);
 
 
@@ -2097,9 +2181,9 @@ plotOrderedColors = function(
   on.exit(options(stringsAsFactors = sAF[[1]]), TRUE)
 
   nColorRows = dimC[2];
-  if (length(order) != dimC[1] ) 
+  if (length(order) != dimC[1] )
     stop("ERROR: length of colors vector not compatible with number of objects in 'order'.");
-  C = colors[order, , drop = FALSE]; 
+  C = colors[order, , drop = FALSE];
   step = 1/(dimC[1]-1 + 2*startAt);
   #barplot(height=1, col = "white", border=FALSE, space=0, axes=FALSE, ...)
   barplot(height=1, col = "white", border=FALSE, space=0, axes=FALSE)
@@ -2109,16 +2193,16 @@ plotOrderedColors = function(
      if (is.null(textPositions)) textPositions = c(1:nColorRows);
      if (is.logical(textPositions)) textPositions = c(1:nColorRows)[textPositions];
      nTextRows = length(textPositions);
-  } else 
+  } else
      nTextRows = 0;
   nRows = nColorRows + nTextRows;
   ystep = 1/nRows;
-  if (is.null(rowWidths)) 
-  { 
+  if (is.null(rowWidths))
+  {
     rowWidths = rep(ystep, nColorRows + nTextRows)
   } else
   {
-    if (length(rowWidths)!=nRows) 
+    if (length(rowWidths)!=nRows)
       stop("plotOrderedColors: Length of 'rowWidths' must equal the total number of rows.")
     rowWidths = rowWidths/sum(rowWidths);
   }
@@ -2126,7 +2210,7 @@ plotOrderedColors = function(
   hasText = rep(0, nColorRows);
   hasText[textPositions] = 1;
   csPosition = cumsum(c(0, hasText[-nColorRows]));
-  
+
   colorRows = c(1:nColorRows) + csPosition;
   rowType = rep(2, nRows);
   rowType[colorRows] = 1;
@@ -2134,7 +2218,7 @@ plotOrderedColors = function(
   physicalTextRow = c(1:nRows)[rowType==2];
 
   yBottom = c(0, cumsum(rowWidths[nRows:1])) ;  # Has one extra entry but that shouldn't hurt
-  yTop = cumsum(rowWidths[nRows:1]) 
+  yTop = cumsum(rowWidths[nRows:1])
 
   if (!is.null(rowText))
   {
@@ -2143,7 +2227,7 @@ plotOrderedColors = function(
      textPos = list();
      textPosY = list();
      textLevs = list();
-     for (tr in 1:nTextRows) 
+     for (tr in 1:nTextRows)
      {
        charHeight = max(strheight(rowText[, tr], cex = cex.rowText));
        width1 = rowWidths[ physicalTextRow[tr] ];
@@ -2170,7 +2254,7 @@ plotOrderedColors = function(
          if (ends[length(ends)] < starts[length(starts)]) ends = c(ends, length(ind));
          lengths = ends - starts;
          long = which.max(lengths);
-         textPos[[tr]][cl] = switch(rowTextAlignment, 
+         textPos[[tr]][cl] = switch(rowTextAlignment,
                     left = starts[long],
                     center = (starts[long] + ends[long])/2 + 0.5,
                     right = ends[long]+1);
@@ -2182,8 +2266,8 @@ plotOrderedColors = function(
        }
        textPosY[[tr]] = rep(yPos, ceiling(nLevs/nCharFit)+5)[1:nLevs][rank(textPos[[tr]])];
      }
-  } 
-        
+  }
+
   jIndex = nRows;
 
   if (is.null(rowLabels)) rowLabels = c(1:nColorRows);
@@ -2192,24 +2276,24 @@ plotOrderedColors = function(
   {
     jj = jIndex;
     ind = (1:dimC[1]);
-    xl = (ind-1.5+startAt) * step; xr = (ind-0.5+startAt) * step; 
+    xl = (ind-1.5+startAt) * step; xr = (ind-0.5+startAt) * step;
     yb = rep(yBottom[jj], dimC[1]); yt = rep(yTop[jj], dimC[1]);
     if (is.null(dim(C))) {
        rect(xl, yb, xr, yt, col = as.character(C), border = as.character(C));
     } else {
        rect(xl, yb, xr, yt, col = as.character(C[,j]), border = as.character(C[,j]));
     }
-    text(rowLabels[j], pos=2, x= -charWidth/2 +xl[1], y= (yBottom[jj] + yTop[jj])/2, 
+    text(rowLabels[j], pos=2, x= -charWidth/2 +xl[1], y= (yBottom[jj] + yTop[jj])/2,
          cex=cex.rowLabels, xpd = TRUE);
     textRow = match(j, textPositions);
     if (is.finite(textRow))
     {
       jIndex = jIndex - 1;
       xt = (textPos[[textRow]] - 1.5) * step;
-      
+
       xt[xt<par("usr")[1]] = par("usr")[1];
       xt[xt>par("usr")[2]] = par("usr")[2];
-     
+
       #printFlush(spaste("jIndex: ", jIndex, ", yBottom: ", yBottom[jIndex],
       #                  ", yTop: ", yTop[jIndex], ", min(textPosY): ", min(textPosY[[textRow]]),
       #                  ", max(textPosY): ", max(textPosY[[textRow]])));
@@ -2235,17 +2319,17 @@ plotOrderedColors = function(
 # the columns to the genes
 # You can optionally input a quantitative microarray sample trait.
 
-plotClusterTreeSamples=function(datExpr, y = NULL, traitLabels = NULL, yLabels = NULL, 
+plotClusterTreeSamples=function(datExpr, y = NULL, traitLabels = NULL, yLabels = NULL,
          main = if (is.null(y)) "Sample dendrogram" else "Sample dendrogram and trait indicator",
          setLayout = TRUE, autoColorHeight = TRUE, colorHeight = 0.3,
          dendroLabels = NULL,
          addGuide = FALSE, guideAll = TRUE, guideCount = NULL,
          guideHang = 0.20, cex.traitLabels = 0.8,
          cex.dendroLabels = 0.9, marAll = c(1,5,3,1),  saveMar = TRUE,
-         abHeight = NULL, abCol = "red", ...) 
+         abHeight = NULL, abCol = "red", ...)
 {
   dendro = fastcluster::hclust( dist( datExpr  ), method="average" )
-  if (is.null(y) ) 
+  if (is.null(y) )
   {
     oldMar = par("mar");
     par(mar = marAll);
@@ -2254,15 +2338,15 @@ plotClusterTreeSamples=function(datExpr, y = NULL, traitLabels = NULL, yLabels =
   } else {
     if (is.null(traitLabels)) traitLabels = names(as.data.frame(y));
     y = as.matrix(y);
-    if (!is.numeric(y) ) 
+    if (!is.numeric(y) )
     {
        warning(paste("The microarray sample trait y will be transformed to numeric."));
        dimy = dim(y)
        y=as.numeric(y)
        dim(y) = dimy;
     } # end of if (!is.numeric(y) )
-    if (  nrow(as.matrix(datExpr)) != nrow(y) ) 
-      stop(paste("Input Error: dim(as.matrix(datExpr))[[1]] != length(y)\n", 
+    if (  nrow(as.matrix(datExpr)) != nrow(y) )
+      stop(paste("Input Error: dim(as.matrix(datExpr))[[1]] != length(y)\n",
                  "  In plain English: The number of microarray sample arrays does not match the number",
                  "of samples for the trait.\n",
                  "   Hint: Make sure rows of 'datExpr' (and 'y', if it is a matrix) correspond to samples."))
@@ -2273,12 +2357,12 @@ plotClusterTreeSamples=function(datExpr, y = NULL, traitLabels = NULL, yLabels =
     } else {
       y = (y>=median(y, na.rm = TRUE)) + 1;
     }
-    plotDendroAndColors(dendro, colors = y, groupLabels = traitLabels, rowText = yLabels, 
-                        setLayout = setLayout, 
+    plotDendroAndColors(dendro, colors = y, groupLabels = traitLabels, rowText = yLabels,
+                        setLayout = setLayout,
                         autoColorHeight = autoColorHeight, colorHeight = colorHeight,
-                        addGuide = addGuide, guideAll = guideAll, guideCount = guideCount, 
+                        addGuide = addGuide, guideAll = guideAll, guideCount = guideCount,
                         guideHang = guideHang, cex.colorLabels = cex.traitLabels,
-                        cex.dendroLabels = cex.dendroLabels, marAll = marAll, 
+                        cex.dendroLabels = cex.dendroLabels, marAll = marAll,
                         saveMar = saveMar, abHeight = abHeight, abCol = abCol,
                         main = main,
                         ...);
@@ -2289,8 +2373,8 @@ plotClusterTreeSamples=function(datExpr, y = NULL, traitLabels = NULL, yLabels =
 # The function TOMplot creates a TOM plot
 # Inputs:  distance measure, hierarchical (hclust) object, color label=colors
 
-TOMplot = function(dissim, dendro, Colors=NULL, ColorsLeft = Colors, terrainColors=FALSE, 
-                   setLayout = TRUE, ...) 
+TOMplot = function(dissim, dendro, Colors=NULL, ColorsLeft = Colors, terrainColors=FALSE,
+                   setLayout = TRUE, ...)
 {
   if ( is.null(Colors) ) Colors=rep("white", dim(as.matrix(dissim))[[1]] )
   if ( is.null(ColorsLeft)) ColorsLeft = Colors;
@@ -2298,9 +2382,9 @@ TOMplot = function(dissim, dendro, Colors=NULL, ColorsLeft = Colors, terrainColo
   if (nNodes<2) {
      warning("You have only 1 or 2 genes in TOMplot. No plot will be produced")
   } else {
-     if (nNodes != length(ColorsLeft)) 
+     if (nNodes != length(ColorsLeft))
        stop("ERROR: number of (top) color labels does not equal number of left color labels")
-     if (nNodes != dim(dissim)[[1]] ) 
+     if (nNodes != dim(dissim)[[1]] )
        stop(paste("ERROR: number of color labels does not equal number of nodes in dissim.\n",
                   "     nNodes != dim(dissim)[[1]] "))
      labeltree = as.character(Colors)
@@ -2310,14 +2394,14 @@ TOMplot = function(dissim, dendro, Colors=NULL, ColorsLeft = Colors, terrainColo
      dendro$height = (dendro$height - min(dendro$height))/(1.15 *
                                      (max(dendro$height)-min(dendro$height)))
      if (terrainColors) {
-       .heatmap(as.matrix(dissim), Rowv=as.dendrogram(dendro, hang = 0.1), 
-                Colv= as.dendrogram(dendro, hang = 0.1), 
+       .heatmap(as.matrix(dissim), Rowv=as.dendrogram(dendro, hang = 0.1),
+                Colv= as.dendrogram(dendro, hang = 0.1),
                 scale="none", revC = TRUE, ColSideColors=as.character(labeltree),
-                RowSideColors=as.character(labelrow), labRow=FALSE, labCol=FALSE, 
-                col = terrain.colors(100), setLayout = setLayout, ...) 
+                RowSideColors=as.character(labelrow), labRow=FALSE, labCol=FALSE,
+                col = terrain.colors(100), setLayout = setLayout, ...)
      } else {
-       .heatmap(as.matrix(dissim), Rowv=as.dendrogram(dendro, hang = 0.1), 
-                Colv= as.dendrogram(dendro, hang = 0.1), 
+       .heatmap(as.matrix(dissim), Rowv=as.dendrogram(dendro, hang = 0.1),
+                Colv= as.dendrogram(dendro, hang = 0.1),
                scale="none",revC = TRUE, ColSideColors=as.character(labeltree),
                RowSideColors=as.character(labelrow), labRow=FALSE, labCol=FALSE, setLayout = setLayout,
                ...)
@@ -2326,27 +2410,27 @@ TOMplot = function(dissim, dendro, Colors=NULL, ColorsLeft = Colors, terrainColo
 } #end of function
 
 
-plotNetworkHeatmap = function(datExpr,  plotGenes, useTOM = TRUE, power = 6 , 
-                              networkType = "unsigned", main = "Heatmap of the network") 
+plotNetworkHeatmap = function(datExpr,  plotGenes, useTOM = TRUE, power = 6 ,
+                              networkType = "unsigned", main = "Heatmap of the network")
 {
   match1=match( plotGenes ,names(data.frame(datExpr)) )
   match1=match1[ !is.na(match1)]
   nGenes=length(match1)
-  if (  sum( !is.na(match1) )  != length(plotGenes) ) 
+  if (  sum( !is.na(match1) )  != length(plotGenes) )
   {
-    printFlush(paste("Warning: Not all gene names were recognized.", 
+    printFlush(paste("Warning: Not all gene names were recognized.",
                      "Only the following genes were recognized. "));
     printFlush(paste("   ", names(data.frame(datExpr))[match1], collapse = ", " ))
   }
-  if (nGenes< 3 ) 
-  { 
+  if (nGenes< 3 )
+  {
     warning(paste("Since you have fewer than 3 genes, the network will not be visualized.\n",
                   "   Hint: please input more genes.")); plot(1,1)
   } else {
     datErest=datExpr[, match1 ]
     ADJ1 = adjacency(datErest, power = power, type = networkType)
     if (useTOM) {
-       diss1= 1-TOMsimilarity(ADJ1)   
+       diss1= 1-TOMsimilarity(ADJ1)
     } else {
        diss1 = 1-ADJ1;
     }
@@ -2357,14 +2441,14 @@ plotNetworkHeatmap = function(datExpr,  plotGenes, useTOM = TRUE, power = 6 ,
     labelrow  = names(data.frame(datErest))
     labelrow[hier1$order[length(labeltree):1]]=labelrow[hier1$order]
     options(expressions = 10000)
-    heatmap(as.matrix(diss1),Rowv=as.dendrogram(hier1),Colv= as.dendrogram(hier1), scale="none", revC = TRUE, 
+    heatmap(as.matrix(diss1),Rowv=as.dendrogram(hier1),Colv= as.dendrogram(hier1), scale="none", revC = TRUE,
             labRow= labeltree, labCol= labeltree,main=main)
   } # end of if (nGenes> 2 )
 } # end of function
 
 #####################################################################################################
 #####################################################################################################
-# E) Relating a measure of gene significance to the modules 
+# E) Relating a measure of gene significance to the modules
 #####################################################################################################
 #####################################################################################################
 
@@ -2376,15 +2460,15 @@ plotNetworkHeatmap = function(datExpr,  plotGenes, useTOM = TRUE, power = 6 ,
 # It also plots the 95% confidence interval of the mean (CI=mean +/- 1.96* standard error).
 # It also reports a Kruskal Wallis P-value.
 
-plotModuleSignificance = function(geneSignificance, colors, boxplot = FALSE, 
+plotModuleSignificance = function(geneSignificance, colors, boxplot = FALSE,
                                   main = "Gene significance across modules,",
                                   ylab = "Gene Significance", ...)
 {
-  if (length(geneSignificance) != length(colors) ) 
+  if (length(geneSignificance) != length(colors) )
     stop("Error: 'geneSignificance' and 'colors' do not have the same lengths")
   no.colors=length(names(table(colors) ))
   if (no.colors==1) pp=NA
-  if (no.colors>1) 
+  if (no.colors>1)
   {
     pp=try(kruskal.test(geneSignificance,factor(colors))$p.value)
     if (class(pp)=='try-error') pp=NA
@@ -2394,7 +2478,7 @@ plotModuleSignificance = function(geneSignificance, colors, boxplot = FALSE,
     means1=as.vector(tapply(geneSignificance,colors,mean, na.rm = TRUE));
     se1= as.vector(tapply(geneSignificance,colors,stdErr))
     # par(mfrow=c(1,1))
-    barplot(means1, names.arg=names(table(colors) ),col= names(table(colors) ) ,ylab=ylab, 
+    barplot(means1, names.arg=names(table(colors) ),col= names(table(colors) ) ,ylab=ylab,
             main = title, ...)
     addErrorBars(as.vector(means1), as.vector(1.96*se1), two.side=TRUE)
   } else {
@@ -2405,39 +2489,39 @@ plotModuleSignificance = function(geneSignificance, colors, boxplot = FALSE,
 
 #####################################################################################################
 #####################################################################################################
-# F) Carrying out a within module analysis (computing intramodular connectivity etc) 
+# F) Carrying out a within module analysis (computing intramodular connectivity etc)
 #####################################################################################################
 #####################################################################################################
 
 # ===================================================
-#The function DegreeInOut computes for each gene 
-#a) the total number of connections, 
-#b) the number of connections with genes within its module, 
+#The function DegreeInOut computes for each gene
+#a) the total number of connections,
+#b) the number of connections with genes within its module,
 #c) the number of connections with genes outside its module
 # When scaleByMax=TRUE, the within module connectivities are scaled to 1, i.e. the max(K.Within)=1 for each module
 
-intramodularConnectivity = function(adjMat, colors, scaleByMax = FALSE) 
+intramodularConnectivity = function(adjMat, colors, scaleByMax = FALSE)
 {
-  if (nrow(adjMat)!=ncol(adjMat)) 
+  if (nrow(adjMat)!=ncol(adjMat))
     stop("'adjMat' is not a square matrix.");
-  if (nrow(adjMat)!=length(colors)) 
+  if (nrow(adjMat)!=length(colors))
     stop("Dimensions of 'adjMat' and length of 'colors' differ.");
   nNodes=length(colors)
   colorLevels=levels(factor(colors))
   nLevels=length(colorLevels)
   kWithin=rep(-666,nNodes )
   diag(adjMat)=0
-  for (i in c(1:nLevels) ) 
+  for (i in c(1:nLevels) )
   {
     rest1=colors==colorLevels[i];
-    if (sum(rest1) <3 ) { 
-       kWithin[rest1]=0 
+    if (sum(rest1) <3 ) {
+       kWithin[rest1]=0
     } else {
        kWithin[rest1]=apply(adjMat[rest1,rest1], 2, sum, na.rm = TRUE)
        if (scaleByMax) kWithin[rest1]=kWithin[rest1]/max(kWithin[rest1])
     }
   }
-  kTotal= apply(adjMat, 2, sum, na.rm = TRUE) 
+  kTotal= apply(adjMat, 2, sum, na.rm = TRUE)
   kOut=kTotal-kWithin
   if (scaleByMax) kOut=rep(NA, nNodes);
   kDiff=kWithin-kOut
@@ -2445,7 +2529,7 @@ intramodularConnectivity = function(adjMat, colors, scaleByMax = FALSE)
 }
 
 
-intramodularConnectivity.fromExpr = function(datExpr, colors, 
+intramodularConnectivity.fromExpr = function(datExpr, colors,
                           corFnc = "cor", corOptions = "use = 'p'",
                           distFnc = "dist", distOptions = "method = 'euclidean'",
                           networkType = "unsigned", power = if (networkType=="distance") 1 else 6,
@@ -2486,7 +2570,7 @@ intramodularConnectivity.fromExpr = function(datExpr, colors,
 
 
 
-nPresent = function(x) 
+nPresent = function(x)
 {
   sum(!is.na(x))
 }
@@ -2505,7 +2589,7 @@ checkAdjMat = function(adjMat, min = 0, max = 1)
   if (min(adjMat, na.rm = TRUE) < min || max(adjMat, na.rm = TRUE) > max)
     stop("some entries are not between", min, "and", max)
 }
-  
+
 
 
 #####################################################################################################
@@ -2519,31 +2603,31 @@ checkAdjMat = function(adjMat, min = 0, max = 1)
 # Input: datExpr= a possibly very large gene expression data set where the rows
 # correspond to samples and the columns represent genes
 # datME=data frame of module eigengenes (columns correspond to module eigengenes or MEs)
-# A module eigengene based connectivity KME value will be computed if the gene has 
+# A module eigengene based connectivity KME value will be computed if the gene has
 # a non missing expression value in at least minNSamples arrays.
-# Output a data frame where columns are the KME values 
+# Output a data frame where columns are the KME values
 # corresponding to different modules.
-# By splitting the expression data into different blocks, the function can deal with 
-# tens of thousands of gene expression data. 
+# By splitting the expression data into different blocks, the function can deal with
+# tens of thousands of gene expression data.
 # If there are many eigengenes (say hundreds) consider decreasing the block size.
 
 signedKME = function(datExpr, datME, outputColumnName="kME",
-                     corFnc = "cor", corOptions = "use = 'p'") 
+                     corFnc = "cor", corOptions = "use = 'p'")
 {
   datExpr=data.frame(datExpr)
   datME=data.frame(datME)
   output=list()
-  if (dim(as.matrix(datME))[[1]] != dim(as.matrix(datExpr))[[1]] ) 
+  if (dim(as.matrix(datME))[[1]] != dim(as.matrix(datExpr))[[1]] )
      stop("Number of samples (rows) in 'datExpr' and 'datME' must be the same.")
   varianceZeroIndicatordatExpr=as.vector(apply(as.matrix(datExpr),2,var, na.rm = TRUE))==0
   varianceZeroIndicatordatME =as.vector(apply(as.matrix(datME),2,var, na.rm = TRUE))==0
-  if (sum(varianceZeroIndicatordatExpr,na.rm = TRUE)>0 ) 
+  if (sum(varianceZeroIndicatordatExpr,na.rm = TRUE)>0 )
     warning("Some genes are constant. Hint: consider removing constant columns from datExpr." )
-  if (sum(varianceZeroIndicatordatME,na.rm = TRUE)>0 ) 
+  if (sum(varianceZeroIndicatordatME,na.rm = TRUE)>0 )
     warning(paste("Some module eigengenes are constant, which is suspicious.\n",
             "    Hint: consider removing constant columns from datME." ))
   no.presentdatExpr=as.vector(apply(!is.na(as.matrix(datExpr)),2, sum) )
-  if (min(no.presentdatExpr)<..minNSamples ) 
+  if (min(no.presentdatExpr)<..minNSamples )
     warning(paste("Some gene expressions have fewer than 4 observations.\n",
             "    Hint: consider removing genes with too many missing values or collect more arrays."))
 
@@ -2552,19 +2636,19 @@ signedKME = function(datExpr, datME, outputColumnName="kME",
   output = eval(corExpr);
 
   output[no.presentdatExpr<..minNSamples, ]=NA
-  names(output)=paste(outputColumnName, substring(names(datME), first=3, last=100), sep="")  
-  dimnames(output)[[1]] = names(datExpr) 
+  names(output)=paste(outputColumnName, substring(names(datME), first=3, last=100), sep="")
+  dimnames(output)[[1]] = names(datExpr)
   output
 } # end of function signedKME
- 
- 
+
+
 
 
 # ===================================================
 # The function clusterCoef computes the cluster coefficients.
-# Input is an adjacency matrix 
+# Input is an adjacency matrix
 
-clusterCoef=function(adjMat) 
+clusterCoef=function(adjMat)
 {
   checkAdjMat(adjMat);
   diag(adjMat)=0
@@ -2572,8 +2656,8 @@ clusterCoef=function(adjMat)
   computeLinksInNeighbors <- function(x, imatrix){x %*% imatrix %*% x}
   nolinksNeighbors <- c(rep(-666,nNodes))
   total.edge <- c(rep(-666,nNodes))
-  maxh1=max(as.dist(adjMat) ); minh1=min(as.dist(adjMat) ); 
-  if (maxh1>1 | minh1 < 0 ) 
+  maxh1=max(as.dist(adjMat) ); minh1=min(as.dist(adjMat) );
+  if (maxh1>1 | minh1 < 0 )
     stop(paste("The adjacency matrix contains entries that are larger than 1 or smaller than 0: max =",
                 maxh1,", min =",minh1))
   nolinksNeighbors <- apply(adjMat, 1, computeLinksInNeighbors, imatrix=adjMat)
@@ -2595,8 +2679,8 @@ addErrorBars<-function(means, errors, two.side=FALSE)
  if(!is.numeric(means)) {
       stop("All arguments must be numeric")}
 
- if(is.null(dim(means)) || length(dim(means))==1){ 
-    xval<-(cumsum(c(0.7,rep(1.2,length(means)-1)))) 
+ if(is.null(dim(means)) || length(dim(means))==1){
+    xval<-(cumsum(c(0.7,rep(1.2,length(means)-1))))
  }else{
     if (length(dim(means))==2){
       xval<-cumsum(array(c(1,rep(0,dim(means)[1]-1)),
@@ -2604,7 +2688,7 @@ dim=c(1,length(means))))+0:(length(means)-1)+.5
     }else{
       stop("First argument must either be a vector or a matrix") }
  }
- MW<-0.25*(max(xval)/length(xval)) 
+ MW<-0.25*(max(xval)/length(xval))
  ERR1<-means+errors
  ERR2<-means-errors
  for(i in 1:length(means)){
@@ -2613,9 +2697,9 @@ dim=c(1,length(means))))+0:(length(means)-1)+.5
     if(two.side){
       segments(xval[i],means[i],xval[i],ERR2[i])
       segments(xval[i]-MW,ERR2[i],xval[i]+MW,ERR2[i])
-    } 
- } 
-} 
+    }
+ }
+}
 
 # ===================================================
 # this function computes the standard error
@@ -2636,9 +2720,9 @@ stdErr <- function(x){ sqrt( var(x,na.rm = TRUE)/sum(!is.na(x))   ) }
 }
 
 # ===================================================
-# This function is used in "pairs()" function. The problem of the original  panel.cor is that 
-# when the correlation coefficient is very small, the lower panel will have a large font 
-# instead of a mini-font in a saved .ps file. This new function uses a format for corr=0.2 
+# This function is used in "pairs()" function. The problem of the original  panel.cor is that
+# when the correlation coefficient is very small, the lower panel will have a large font
+# instead of a mini-font in a saved .ps file. This new function uses a format for corr=0.2
 # when corr<0.2, but it still reports the original value of corr, with a minimum format.
 
 .panel.cor=function(x, y, digits=2, prefix="", cex.cor){
@@ -2666,7 +2750,7 @@ stdErr <- function(x){ sqrt( var(x,na.rm = TRUE)/sum(!is.na(x))   ) }
 # This function collects garbage
 # collect_garbage=function(){collectGarbage()}
 
- 
+
 #---------------------------------------------------------------------------------------------------------
 # This function plots a barplot with all colors given. If Colors are not given, GlobalStandardColors are
 # used, i.e. if you want to see the GlobalStandardColors, just call this function without parameters.
@@ -2687,15 +2771,15 @@ displayColors = function(colors = NULL)
 #
 #---------------------------------------------------------------------------------------------
 
-dynamicMergeCut = function(n, mergeCor=.9, Zquantile=2.35) 
+dynamicMergeCut = function(n, mergeCor=.9, Zquantile=2.35)
 {
   if (mergeCor>1 | mergeCor<0 ) stop("'mergeCor' must be between 0 and 1.")
-  if (mergeCor==1) 
-  { 
-    printFlush("dynamicMergeCut: given mergeCor=1 will be set to .999."); 
+  if (mergeCor==1)
+  {
+    printFlush("dynamicMergeCut: given mergeCor=1 will be set to .999.");
     mergeCor=.999
   }
-  if (n<4 ) 
+  if (n<4 )
   {
     printFlush(paste("Warning in function dynamicMergeCut: too few observations for the dynamic",
                 "assignment of the merge threshold.\n    Will set the threshold to .35"));
@@ -2708,7 +2792,7 @@ dynamicMergeCut = function(n, mergeCor=.9, Zquantile=2.35)
     mergethreshold=1- LowerBoundCIcor
   }
   if (mergethreshold>1) 1 else mergethreshold
-}# end of function dynamicMergeCut 
+}# end of function dynamicMergeCut
 
 
 
@@ -2728,17 +2812,17 @@ dynamicMergeCut = function(n, mergeCor=.9, Zquantile=2.35)
 # I) GENERAL STATISTICAL FUNCTIONS
 ##############################################################################################
 
-verboseScatterplot = function(x, y, 
+verboseScatterplot = function(x, y,
                              sample = NULL,
                              corFnc = "cor", corOptions = "use = 'p'",
                              main ="", xlab = NA, ylab = NA, cex=1, cex.axis = 1.5,
-                             cex.lab = 1.5, cex.main = 1.5, abline = FALSE, 
+                             cex.lab = 1.5, cex.main = 1.5, abline = FALSE,
                              abline.color = 1, abline.lty = 1,
-                             corLabel = corFnc, 
+                             corLabel = corFnc,
                              displayAsZero = 1e-5,
-                             col = 1, bg = 0, 
+                             col = 1, bg = 0,
                              lmFnc = lm,
-                             ...) 
+                             ...)
 {
   if ( is.na(xlab) ) xlab= as.character(match.call(expand.dots = FALSE)$x)
   if ( is.na(ylab) ) ylab= as.character(match.call(expand.dots = FALSE)$y)
@@ -2764,13 +2848,13 @@ verboseScatterplot = function(x, y,
     if (length(sample) == 1)
     {
       sample = sample(length(x), sample)
-    } 
+    }
     if (length(col)<length(x)) col = rep(col, ceiling(length(x)/length(col)));
     if (length(bg )<length(x))  bg = rep(bg,  ceiling(length(x)/length(bg)));
-    plot(x[sample], y[sample], main=mainX, xlab=xlab, ylab=ylab, cex=cex, 
+    plot(x[sample], y[sample], main=mainX, xlab=xlab, ylab=ylab, cex=cex,
          cex.axis=cex.axis, cex.lab=cex.lab, cex.main=cex.main, col = col[sample], bg = bg[sample], ...)
   } else {
-    plot(x, y, main=mainX, xlab=xlab, ylab=ylab, cex=cex, 
+    plot(x, y, main=mainX, xlab=xlab, ylab=ylab, cex=cex,
          cex.axis=cex.axis, cex.lab=cex.lab, cex.main=cex.main, col = col, bg = bg, ...)
   }
   if (abline)
@@ -2784,7 +2868,7 @@ verboseScatterplot = function(x, y,
 
 verboseBoxplot = function(x, g,
                           main ="", xlab = NA, ylab = NA, cex=1, cex.axis = 1.5,
-                          cex.lab = 1.5, cex.main = 1.5, notch = TRUE, varwidth = TRUE, ...) 
+                          cex.lab = 1.5, cex.main = 1.5, notch = TRUE, varwidth = TRUE, ...)
 {
   if ( is.na(xlab) ) xlab= as.character(match.call(expand.dots = FALSE)$g)
   #print(xlab1)
@@ -2800,14 +2884,14 @@ verboseBoxplot = function(x, g,
 verboseBarplot = function (x, g,  main = "",
     xlab = NA, ylab = NA, cex = 1, cex.axis = 1.5, cex.lab = 1.5,
     cex.main = 1.5, color="grey", numberStandardErrors=1,
-    KruskalTest=TRUE,  AnovaTest=FALSE, two.sided=TRUE, 
-    addCellCounts=FALSE, horiz = FALSE, ...) 
+    KruskalTest=TRUE,  AnovaTest=FALSE, two.sided=TRUE,
+    addCellCounts=FALSE, horiz = FALSE, ...)
 {
    stderr1 = function(x) {
         sqrt(var(x, na.rm = TRUE)/sum(!is.na(x)))
     }
     SE = tapply(x, factor(g), stderr1)
-    err.bp = function(dd, error, two.sided = FALSE, numberStandardErrors, 
+    err.bp = function(dd, error, two.sided = FALSE, numberStandardErrors,
         horiz = FALSE) {
         if (!is.numeric(dd)) {
             stop("All arguments must be numeric")
@@ -2817,8 +2901,8 @@ verboseBarplot = function (x, g,  main = "",
         }
         else {
             if (is.matrix(dd)) {
-                xval = cumsum(array(c(1, rep(0, dim(dd)[1] - 
-                  1)), dim = c(1, length(dd)))) + 0:(length(dd) - 
+                xval = cumsum(array(c(1, rep(0, dim(dd)[1] -
+                  1)), dim = c(1, length(dd)))) + 0:(length(dd) -
                   1) + 0.5
             }
             else {
@@ -2832,11 +2916,11 @@ verboseBarplot = function (x, g,  main = "",
         if (horiz) {
             for (i in 1:length(dd)) {
                 segments(dd[i], xval[i], ERR1[i], xval[i])
-                segments(ERR1[i], xval[i] - MW, ERR1[i], xval[i] + 
+                segments(ERR1[i], xval[i] - MW, ERR1[i], xval[i] +
                   MW)
                 if (two.sided) {
                   segments(dd[i], xval[i], ERR2[i], xval[i])
-                  segments(ERR2[i], xval[i] - MW, ERR2[i], xval[i] + 
+                  segments(ERR2[i], xval[i] - MW, ERR2[i], xval[i] +
                     MW)
                 }
             }
@@ -2844,37 +2928,37 @@ verboseBarplot = function (x, g,  main = "",
         else {
             for (i in 1:length(dd)) {
                 segments(xval[i], dd[i], xval[i], ERR1[i])
-                segments(xval[i] - MW, ERR1[i], xval[i] + MW, 
+                segments(xval[i] - MW, ERR1[i], xval[i] + MW,
                   ERR1[i])
                 if (two.sided) {
                   segments(xval[i], dd[i], xval[i], ERR2[i])
-                  segments(xval[i] - MW, ERR2[i], xval[i] + MW, 
+                  segments(xval[i] - MW, ERR2[i], xval[i] + MW,
                     ERR2[i])
                 }
             }
         }
     }
-    if (is.na(ylab)) 
+    if (is.na(ylab))
         ylab = as.character(match.call(expand.dots = FALSE)$x)
-    if (is.na(xlab)) 
+    if (is.na(xlab))
         xlab = as.character(match.call(expand.dots = FALSE)$g)
     Means1 = tapply(x, factor(g), mean, na.rm = TRUE)
 
     if (length(unique(x)) > 2) {
         p1 = signif(kruskal.test(x ~ factor(g))$p.value, 2)
-        if (AnovaTest) 
+        if (AnovaTest)
             p1 = signif(anova(lm(x ~ factor(g)))$Pr[[1]], 2)
     }
     else {
-        p1 = tryCatch(signif(fisher.test(x, g, alternative = "two.sided")$p.value, 
+        p1 = tryCatch(signif(fisher.test(x, g, alternative = "two.sided")$p.value,
             2), error = function(e) {
             NA
         })
     }
-    if (AnovaTest | KruskalTest) 
+    if (AnovaTest | KruskalTest)
         main = paste(main, "p =", p1)
-    ret = barplot(Means1, main = main, col = color, xlab = xlab, 
-        ylab = ylab, cex = cex, cex.axis = cex.axis, cex.lab = cex.lab, 
+    ret = barplot(Means1, main = main, col = color, xlab = xlab,
+        ylab = ylab, cex = cex, cex.axis = cex.axis, cex.lab = cex.lab,
         cex.main = cex.main, horiz = horiz, ...)
     if (addCellCounts) {
        cellCountsF = function(x) {  sum(!is.na(x)) }
@@ -2883,7 +2967,7 @@ verboseBarplot = function (x, g,  main = "",
     } # end of if (addCellCounts)
     abline(h = 0)
     if (numberStandardErrors > 0) {
-        err.bp(as.vector(Means1), as.vector(SE), two.sided = two.sided, 
+        err.bp(as.vector(Means1), as.vector(SE), two.sided = two.sided,
             numberStandardErrors = numberStandardErrors, horiz = horiz)
     }
     attr(ret, "height") = as.vector(Means1)
@@ -2907,15 +2991,15 @@ corPvalueFisher = function(cor, nSamples, twoSided = TRUE)
      2 * pnorm(-z);
   } else {
      # return a small p-value for positive correlations
-     z = -0.5 * log((1+cor)/(1-cor)) * sqrt(nSamples-3); 
+     z = -0.5 * log((1+cor)/(1-cor)) * sqrt(nSamples-3);
      pnorm(-z);
   }
 }
 
-# this function compute an asymptotic p-value for a given correlation (r) and sample size (n) 
+# this function compute an asymptotic p-value for a given correlation (r) and sample size (n)
 # Needs a new name before we commit it to the package.
 
-corPvalueStudent = function(cor, nSamples) 
+corPvalueStudent = function(cor, nSamples)
 {
   T=sqrt(nSamples-2) * cor/sqrt(1-cor^2)
   2*pt(abs(T),nSamples-2, lower.tail = FALSE)
@@ -2931,7 +3015,7 @@ propVarExplained = function(datExpr, colors, MEs, corFnc = "cor", corOptions = "
   nMods = nlevels(fc);
   nGenes = ncol(datExpr);
   if (nMods!=ncol(MEs))
-    stop(paste("Input error: number of distinct 'colors' differs from\n", 
+    stop(paste("Input error: number of distinct 'colors' differs from\n",
                "     the number of module eigengenes given in ME."));
 
   if (ncol(datExpr)!=length(colors))
@@ -2958,14 +3042,14 @@ propVarExplained = function(datExpr, colors, MEs, corFnc = "cor", corOptions = "
   names(PVE) = paste("PVE", mods, sep = "");
   PVE
 }
- 
+
 
 #===================================================================================
 #
 # addGrid
 #
 #===================================================================================
-# This function adds a horizontal grid to a plot 
+# This function adds a horizontal grid to a plot
 
 addGrid = function(linesPerTick = NULL, horiz = TRUE, vert = FALSE, col = "grey30", lty = 3)
 {
@@ -2981,10 +3065,10 @@ addGrid = function(linesPerTick = NULL, horiz = TRUE, vert = FALSE, col = "grey3
     spacing = (ticks[2]-ticks[1])/(linesPerTick*nTicks);
     first = ceiling((box[3] - ticks[1])/spacing);
     last = floor((box[4] - ticks[1])/spacing);
-    #print(paste("addGrid: first=", first, ", last =", last, "box = ", paste(signif(box,2), collapse = ", "), 
+    #print(paste("addGrid: first=", first, ", last =", last, "box = ", paste(signif(box,2), collapse = ", "),
                 #"ticks = ", paste(signif(ticks, 2), collapse = ", "), "spacing =", spacing ));
     for (k in first:last)
-      lines(x = box[c(1,2)], y = rep(ticks[1] + spacing * k, 2), 
+      lines(x = box[c(1,2)], y = rep(ticks[1] + spacing * k, 2),
             col = col, lty = lty);
   }
   if (vert)
@@ -2998,7 +3082,7 @@ addGrid = function(linesPerTick = NULL, horiz = TRUE, vert = FALSE, col = "grey3
     spacing = (ticks[2]-ticks[1])/(linesPerTick*ticks[3]);
     first = ceiling((box[1] - ticks[1])/spacing);
     last = floor((box[2] - ticks[1])/spacing);
-    #print(paste("addGrid: first=", first, ", last =", last, "box = ", paste(signif(box,2), collapse = ", "), 
+    #print(paste("addGrid: first=", first, ", last =", last, "box = ", paste(signif(box,2), collapse = ", "),
     #            "ticks = ", paste(signif(ticks, 2), collapse = ", "), "spacing =", spacing ));
     for (l in first:last)
       lines(x = rep(ticks[1] + spacing * l, 2), y = box[c(3,4)],
@@ -3049,7 +3133,7 @@ addGuideLines = function(dendro, all = FALSE, count = 50, positions = NULL, col 
 
 nearestNeighborConnectivity = function(datExpr, nNeighbors = 50, power = 6,
                              type = "unsigned", corFnc = "cor", corOptions = "use = 'p'",
-                             blockSize = 1000,  
+                             blockSize = 1000,
                              sampleLinks = NULL, nLinks = 5000,
                              setSeed = 38457,
                              verbose=1, indent=0)
@@ -3064,7 +3148,7 @@ nearestNeighborConnectivity = function(datExpr, nNeighbors = 50, power = 6,
   }
 
   if (sampleLinks) nLinks = min(nLinks, nGenes) else nLinks = nGenes;
-  
+
   #printFlush(paste("blockSize =", blockSize));
   #printFlush(paste("nGenes =", nGenes));
   #printFlush(paste(".largestBlockSize =", .largestBlockSize));
@@ -3079,13 +3163,13 @@ nearestNeighborConnectivity = function(datExpr, nNeighbors = 50, power = 6,
   subtract = rep(1, nGenes);
   if (sampleLinks)
   {
-    if (verbose > 0) 
+    if (verbose > 0)
       printFlush(paste(spaces, "nearestNeighborConnectivity: selecting sample pool of size",
                        nLinks, ".."))
     sd = apply(datExpr, 2, sd, na.rm = TRUE);
     order = order(-sd);
     saved = FALSE;
-    if (exists(".Random.seed")) 
+    if (exists(".Random.seed"))
     {
       saved = TRUE;
       savedSeed = .Random.seed
@@ -3095,9 +3179,9 @@ nearestNeighborConnectivity = function(datExpr, nNeighbors = 50, power = 6,
     if (saved) .Random.seed <<- savedSeed;
     poolExpr = datExpr[, samplePool];
     subtract[-samplePool] = 0;
-  } 
-      
-  if (verbose>0) 
+  }
+
+  if (verbose>0)
   {
      printFlush(paste(spaces, "nearestNeighborConnectivity: received",
                       "dataset with nGenes =", as.character(nGenes)));
@@ -3155,7 +3239,7 @@ nearestNeighborConnectivity = function(datExpr, nNeighbors = 50, power = 6,
 # correlations to get the network adjacency matrix, and returns an array of dimensions
 # nGenes * nSets containing the connectivities of each gene in each subset.
 
-nearestNeighborConnectivityMS = function(multiExpr, nNeighbors = 50, power=6, 
+nearestNeighborConnectivityMS = function(multiExpr, nNeighbors = 50, power=6,
                                type = "unsigned", corFnc = "cor", corOptions = "use = 'p'",
                                blockSize = 1000,
                                sampleLinks = NULL, nLinks = 5000, setSeed = 36492,
@@ -3183,7 +3267,7 @@ nearestNeighborConnectivityMS = function(multiExpr, nNeighbors = 50, power=6,
   if (length(power)==1)
   {
     power = rep(power, nSets);
-  } else if (length(power)!=nSets) 
+  } else if (length(power)!=nSets)
       stop("Invalid arguments: length of 'power' must equal number sets in 'multiExpr'");
 
   intNetworkType = charmatch(type, .networkTypes);
@@ -3193,14 +3277,14 @@ nearestNeighborConnectivityMS = function(multiExpr, nNeighbors = 50, power=6,
 
   subtract = rep(1, nGenes);
   if (sampleLinks)
-  { 
-    if (verbose > 0) 
+  {
+    if (verbose > 0)
       printFlush(paste(spaces, "nearestNeighborConnectivityMS: selecting sample pool of size",
                        nLinks, ".."))
     sd = apply(multiExpr[[1]]$data, 2, sd, na.rm = TRUE);
     order = order(-sd);
     saved = FALSE;
-    if (exists(".Random.seed")) 
+    if (exists(".Random.seed"))
     {
       saved = TRUE;
       savedSeed = .Random.seed
@@ -3211,7 +3295,7 @@ nearestNeighborConnectivityMS = function(multiExpr, nNeighbors = 50, power=6,
     subtract[-samplePool] = 0;
   }
 
-  if (verbose>0) printFlush(paste(spaces, "nearestNeighborConnectivityMS: received", nSets, 
+  if (verbose>0) printFlush(paste(spaces, "nearestNeighborConnectivityMS: received", nSets,
                       "datasets with nGenes =", as.character(nGenes)));
   if (verbose>0) printFlush(paste(spaces, "  Using nNeighbors =", nNeighbors));
 
@@ -3219,16 +3303,16 @@ nearestNeighborConnectivityMS = function(multiExpr, nNeighbors = 50, power=6,
 
   if (sampleLinks)
   {
-    corEval = parse(text = paste(corFnc, 
+    corEval = parse(text = paste(corFnc,
           "(multiExpr[[set]]$data[, samplePool], multiExpr[[set]]$data[, blockIndex] ",
                     prepComma(corOptions), ")"))
   } else {
-    corEval = parse(text = paste(corFnc, "(multiExpr[[set]]$data, multiExpr[[set]]$data[, blockIndex] ", 
+    corEval = parse(text = paste(corFnc, "(multiExpr[[set]]$data, multiExpr[[set]]$data[, blockIndex] ",
                                  prepComma(corOptions), ")"))
   }
 
 
-  for (set in 1:nSets) 
+  for (set in 1:nSets)
   {
     if (verbose>0) {
        cat(paste(spaces, "  Working on set", set));
@@ -3273,7 +3357,7 @@ nearestNeighborConnectivityMS = function(multiExpr, nNeighbors = 50, power=6,
 
 initProgInd = function( leadStr = "..", trailStr = "", quiet = !interactive())
 {
-  oldStr = " "; 
+  oldStr = " ";
   cat(oldStr);
   progInd = list(oldStr = oldStr, leadStr = leadStr, trailStr = trailStr);
   class(progInd) = "progressIndicator";
@@ -3282,14 +3366,14 @@ initProgInd = function( leadStr = "..", trailStr = "", quiet = !interactive())
 
 updateProgInd = function(newFrac, progInd, quiet = !interactive())
 {
-  if (class(progInd)!="progressIndicator") 
+  if (class(progInd)!="progressIndicator")
     stop("Parameter progInd is not of class 'progressIndicator'. Use initProgInd() to initialize",
          "it prior to use.");
 
   newStr = paste(progInd$leadStr, as.integer(newFrac*100), "% ", progInd$trailStr, sep = "");
   if (newStr!=progInd$oldStr)
   {
-    if (quiet) 
+    if (quiet)
     {
       progInd$oldStr = newStr;
     } else {
@@ -3305,22 +3389,22 @@ updateProgInd = function(newFrac, progInd, quiet = !interactive())
 #======================================================================================================
 #
 # Plot a dendrogram and a set of labels underneath
-# 
+#
 # =====================================================================================================
 #
 
-plotDendroAndColors = function(dendro, colors, groupLabels = NULL, rowText = NULL, 
+plotDendroAndColors = function(dendro, colors, groupLabels = NULL, rowText = NULL,
                                rowTextAlignment = c("left", "center", "right"),
                                rowTextIgnore = NULL,
                                textPositions = NULL,
                                setLayout = TRUE, autoColorHeight = TRUE, colorHeight = 0.2,
                                rowWidths = NULL,
-                               dendroLabels = NULL, 
-                               addGuide = FALSE, guideAll = FALSE, guideCount = 50, 
+                               dendroLabels = NULL,
+                               addGuide = FALSE, guideAll = FALSE, guideCount = 50,
                                guideHang = 0.20, addTextGuide = FALSE,
-                               cex.colorLabels = 0.8, cex.dendroLabels = 0.9,  
+                               cex.colorLabels = 0.8, cex.dendroLabels = 0.9,
                                cex.rowText = 0.8, marAll = c(1,5,3,1),
-                               saveMar = TRUE, 
+                               saveMar = TRUE,
                                abHeight = NULL, abCol = "red", ...)
 {
   oldMar = par("mar");
@@ -3333,7 +3417,7 @@ plotDendroAndColors = function(dendro, colors, groupLabels = NULL, rowText = NUL
   if (setLayout) layout(matrix(c(1:2), 2, 1), heights = c(1-colorHeight, colorHeight));
   par(mar = c(0, marAll[2], marAll[3], marAll[4]));
   plot(dendro, labels = dendroLabels, cex = cex.dendroLabels, ...);
-  if (addGuide) 
+  if (addGuide)
     addGuideLines(dendro, count = if(guideAll) length(dendro$height)+1 else guideCount, hang = guideHang);
   if (!is.null(abHeight)) abline(h=abHeight, col = abCol);
   par(mar = c(marAll[1], marAll[2], 0, marAll[4]));
@@ -3351,34 +3435,34 @@ plotDendroAndColors = function(dendro, colors, groupLabels = NULL, rowText = NUL
 ####################################################################################################
 
 # this function creates pairwise scatter plots between module eigengenes (above the diagonal)
-# Below the diagonal are the absolute values of the Pearson correlation coefficients. 
+# Below the diagonal are the absolute values of the Pearson correlation coefficients.
 # The diagonal contains histograms of the module eigengene expressions.
 
 plotMEpairs=function(datME, y=NULL, main="Relationship between module eigengenes", clusterMEs=TRUE, ...)
 {
-  if ( dim(as.matrix(datME))[[2]]==1 & is.null(y) ) 
+  if ( dim(as.matrix(datME))[[2]]==1 & is.null(y) )
   {
     hist( datME, ...)
   } else {
     datMEordered=datME
-    if (clusterMEs & dim(as.matrix(datME))[[1]] >1 ) 
+    if (clusterMEs & dim(as.matrix(datME))[[1]] >1 )
     {
       dissimME=(1-t(cor(datME, method="p", use="p")))/2
       hclustdatME=fastcluster::hclust(as.dist(dissimME), method="average" )
       datMEordered=datME[,hclustdatME$order]
     } # end of if
-    if ( !is.null(y) ) 
+    if ( !is.null(y) )
     {
-       if ( length(y)  != dim(as.matrix(datMEordered))[[1]] ) 
+       if ( length(y)  != dim(as.matrix(datMEordered))[[1]] )
          stop(paste("The length of the outcome vector 'y' does not match the number of rows of 'datME'.\n",
-             "     The columns of datME should correspond to the module eigengenes.\n", 
+             "     The columns of datME should correspond to the module eigengenes.\n",
              "     The rows correspond to the array samples. Hint: consider transposing datME."));
        datMEordered=data.frame(y, datMEordered)
     } # end of if
-    pairs( datMEordered,  upper.panel = panel.smooth,     
+    pairs( datMEordered,  upper.panel = panel.smooth,
            lower.panel = .panel.cor , diag.panel=.panel.hist ,main=main, ...)
   } # end if
-} # end of function 
+} # end of function
 
 
 #--------------------------------------------------------------------------------------------------
@@ -3387,16 +3471,16 @@ plotMEpairs=function(datME, y=NULL, main="Relationship between module eigengenes
 #
 #--------------------------------------------------------------------------------------------------
 
-# The function corPredictionSuccess can be used to determine which method is best for predicting correlations 
-# in a new test set. corTestSet should be a vector of correlations in the test set. 
-# The parameter topNumber specifies that the top number most positive and the top most negative 
-# predicted correlations 
+# The function corPredictionSuccess can be used to determine which method is best for predicting correlations
+# in a new test set. corTestSet should be a vector of correlations in the test set.
+# The parameter topNumber specifies that the top number most positive and the top most negative
+# predicted correlations
 # TopNumber is a vector of integers.
 # corPrediction should be a data frame of predictions for the correlations.
 # Output a list with the following components:
-# meancorTestSetPositive= mean test set correlation among the topNumber of genes 
+# meancorTestSetPositive= mean test set correlation among the topNumber of genes
 #    which are predicted to have positive correlations.
-# meancorTestSetNegative= mean test set correlation among the topNumber of genes 
+# meancorTestSetNegative= mean test set correlation among the topNumber of genes
 #    which are predicted to have negative correlations.
 # meancorTestSetOverall=(meancorTestSetPositive-meancorTestSetNegative)/2
 
@@ -3404,7 +3488,7 @@ corPredictionSuccess=function( corPrediction, corTestSet, topNumber=100 )
 {
   nPredictors=dim(as.matrix(corPrediction))[[2]]
   nGenes=dim(as.matrix(corPrediction))[[1]]
-  if (length(as.numeric(corTestSet))!=nGenes ) 
+  if (length(as.numeric(corTestSet))!=nGenes )
      stop("non-compatible dimensions of 'corPrediction' and 'corTestSet'")
   out1=rep(NA, nPredictors)
   meancorTestSetPositive=matrix(NA, ncol=nPredictors, nrow=length(topNumber)  )
@@ -3413,22 +3497,22 @@ corPredictionSuccess=function( corPrediction, corTestSet, topNumber=100 )
   {
     rankpositive=rank(-as.matrix(corPrediction)[,i], ties.method="first")
     ranknegative=rank(as.matrix(corPrediction)[,i], ties.method="first")
-    for (j in c(1:length(topNumber) ) ) 
+    for (j in c(1:length(topNumber) ) )
     {
       meancorTestSetPositive[j,i]=mean(corTestSet[rankpositive<= topNumber[j]],na.rm = TRUE)
       meancorTestSetNegative[j,i]= mean(corTestSet[ranknegative<=topNumber[j]],na.rm = TRUE)
     } # end of j loop over topNumber
   } # end of i loop over predictors
   meancorTestSetOverall=data.frame((meancorTestSetPositive-meancorTestSetNegative)/2)
-  dimnames(meancorTestSetOverall)[[2]]=names(data.frame(corPrediction)) 
+  dimnames(meancorTestSetOverall)[[2]]=names(data.frame(corPrediction))
   meancorTestSetOverall=data.frame(topNumber=topNumber, meancorTestSetOverall)
   meancorTestSetPositive=data.frame(meancorTestSetPositive)
-  dimnames(meancorTestSetPositive)[[2]]=names(data.frame(corPrediction)) 
+  dimnames(meancorTestSetPositive)[[2]]=names(data.frame(corPrediction))
   meancorTestSetPositive=data.frame(topNumber=topNumber, meancorTestSetPositive)
   meancorTestSetNegative=data.frame(meancorTestSetNegative)
-  dimnames(meancorTestSetNegative)[[2]]=names(data.frame(corPrediction)) 
+  dimnames(meancorTestSetNegative)[[2]]=names(data.frame(corPrediction))
   meancorTestSetNegative=data.frame(topNumber=topNumber, meancorTestSetNegative)
-  datout=list(meancorTestSetOverall=meancorTestSetOverall, meancorTestSetPositive=meancorTestSetPositive, 
+  datout=list(meancorTestSetOverall=meancorTestSetOverall, meancorTestSetPositive=meancorTestSetPositive,
               meancorTestSetNegative =meancorTestSetNegative)
   datout
 } # end of function corPredictionSuccess
@@ -3441,13 +3525,13 @@ corPredictionSuccess=function( corPrediction, corTestSet, topNumber=100 )
 #
 #--------------------------------------------------------------------------------------------------
 
-# The function relativeCorPredictionSuccess can be used to test whether a gene screening method 
+# The function relativeCorPredictionSuccess can be used to test whether a gene screening method
 # is significantly better than a standard method.
-# For each gene screening method (column of corPredictionNew) it provides a Kruskal Wallis 
+# For each gene screening method (column of corPredictionNew) it provides a Kruskal Wallis
 # test p-value for comparison with the vector corPredictionStandard,
 # TopNumber is a vector of integers.
-# corTestSet should be a vector of correlations in the test set. 
-# corPredictionNew should be a data frame of predictions for the 
+# corTestSet should be a vector of correlations in the test set.
+# corPredictionNew should be a data frame of predictions for the
 # correlations.  corPredictionStandard should be the standard prediction (correlation in the training data).
 # The function outputs a p-value for the Kruskal test that
 # the new correlation prediction methods outperform the standard correlation prediction method.
@@ -3456,9 +3540,9 @@ relativeCorPredictionSuccess=function(corPredictionNew, corPredictionStandard, c
 {
   nPredictors=dim(as.matrix(corPredictionNew))[[2]]
   nGenes=dim(as.matrix(corPredictionNew))[[1]]
-  if (length(as.numeric(corTestSet))!=nGenes ) 
+  if (length(as.numeric(corTestSet))!=nGenes )
      stop("non-compatible dimensions of 'corPrediction' and 'corTestSet'.")
-  if (length(as.numeric(corTestSet))!=length(corPredictionStandard) ) 
+  if (length(as.numeric(corTestSet))!=length(corPredictionStandard) )
      stop("non-compatible dimensions of 'corTestSet' and 'corPredictionStandard'.")
   kruskalp=matrix(NA,nrow=length(topNumber), ncol=nPredictors)
   for (i in c(1:nPredictors) )
@@ -3468,9 +3552,9 @@ relativeCorPredictionSuccess=function(corPredictionNew, corPredictionStandard, c
     for (j in c(1:length(topNumber)) ){
       highCorNew=as.numeric(corTestSet[rankhighNew <= topNumber[j] ])
       lowCorNew=as.numeric(corTestSet[ranklowNew  <= topNumber[j] ])
-      highCorStandard=as.numeric(corTestSet[rank(-as.numeric(corPredictionStandard), 
+      highCorStandard=as.numeric(corTestSet[rank(-as.numeric(corPredictionStandard),
                                                  ties.method="first") <= topNumber[j]])
-      lowCorStandard=as.numeric(corTestSet[rank(as.numeric(corPredictionStandard), 
+      lowCorStandard=as.numeric(corTestSet[rank(as.numeric(corPredictionStandard),
                                                 ties.method="first") <= topNumber[j]])
       signedCorNew=c(highCorNew,-lowCorNew)
       signedCorStandard=c(highCorStandard,-lowCorStandard)
@@ -3480,7 +3564,7 @@ relativeCorPredictionSuccess=function(corPredictionNew, corPredictionStandard, c
       if (sign1==0) sign1=1
       kruskalp[j,i]=kruskal.test(x=x1, g=Grouping)$p.value*sign1
       #print(names(data.frame(corPredictionNew))[[i]])
-      #print(paste("This correlation is positive if the new method is better than the old method" , 
+      #print(paste("This correlation is positive if the new method is better than the old method" ,
                    # signif(cor(Grouping,x1, use="p"),3)))
     } # end of j loop
   } # end of i loop
@@ -3500,11 +3584,11 @@ relativeCorPredictionSuccess=function(corPredictionNew, corPredictionStandard, c
 # If y is supplied, it multiplies columns of datExpr by +/-1 to make all correlations with y positive.
 # If y is not supplied, the first column of datExpr is used as the reference direction.
 
-alignExpr=function(datExpr, y = NULL) 
+alignExpr=function(datExpr, y = NULL)
 {
-  if ( !is.null(y) & dim(as.matrix(datExpr))[[1]] != length(y) ) 
+  if ( !is.null(y) & dim(as.matrix(datExpr))[[1]] != length(y) )
     stop("Incompatible number of samples in 'datExpr' and 'y'.")
-  if (is.null(y) ) y=as.numeric(datExpr[,1]) 
+  if (is.null(y) ) y=as.numeric(datExpr[,1])
   sign1=sign(as.numeric(cor(y, datExpr, use="p" )))
   as.data.frame(scale(t(t(datExpr)*sign1)))
 } # end of function alignExpr
@@ -3539,7 +3623,7 @@ alignExpr=function(datExpr, y = NULL)
   Child_ind = apply(as.matrix(abs(causeMat[, parents])), 1, sum)>0;
   if (sum(Child_ind)>0)
   {
-     children = c(1:nNodes)[Child_ind] 
+     children = c(1:nNodes)[Child_ind]
   } else {
      children = NULL;
   }
@@ -3555,7 +3639,7 @@ alignExpr=function(datExpr, y = NULL)
 #
 # Given a set of causal anchors, this function creates a network of vectors that should satisfy the
 # causal relations encoded in the causal matrix causeMat, i.e. causeMat[j,i] is the causal effect of
-# vector i on vector j. 
+# vector i on vector j.
 
 # The function starts by initializing all vectors to noise given in the noise specification. (The noise
 # can be specified for each vector separately.) Then it runs the standard causal network signal
@@ -3569,7 +3653,7 @@ simulateEigengeneNetwork = function(causeMat, anchorIndex, anchorVectors, noise 
   nNodes = dim(causeMat)[[1]];
   nSamples = dim(anchorVectors)[[1]];
 
-  
+
   if (length(anchorIndex)!=dim(anchorVectors)[[2]])
     stop(paste("Length of anchorIndex must equal the number of vectors in anchorVectors."));
 
@@ -3597,7 +3681,7 @@ simulateEigengeneNetwork = function(causeMat, anchorIndex, anchorVectors, noise 
     # print(paste("   parents:", parents));
     # print(paste("   Children:", Children));
     level = level + 1;
-    if ((verbose>1) & (level/10 == as.integer(level/10))) 
+    if ((verbose>1) & (level/10 == as.integer(level/10)))
           printFlush(paste(spaces, "  ..Detected level", level));
     #printFlush(paste("Detected level", level));
     Levels[Children] = level;
@@ -3613,11 +3697,11 @@ simulateEigengeneNetwork = function(causeMat, anchorIndex, anchorVectors, noise 
   NodeVectors[,anchorIndex] = NodeVectors[,anchorIndex] + anchorVectors;
   for (level in (1:HighestLevel))
   {
-    if ( (verbose>1) & (level/10 == as.integer(level/10)) ) 
+    if ( (verbose>1) & (level/10 == as.integer(level/10)) )
       printFlush(paste(spaces, " .Working on level", level));
     #printFlush(paste("Working on level", level));
     LevelChildren = c(1:nNodes)[Levels==level]
-    for (child in LevelChildren) 
+    for (child in LevelChildren)
     {
       LevelParents = c(1:nNodes)[causeMat[child, ]!=0]
       for (parent in LevelParents)
@@ -3627,7 +3711,7 @@ simulateEigengeneNetwork = function(causeMat, anchorIndex, anchorVectors, noise 
 
   Nodes = list(eigengenes = NodeVectors, causeMat = causeMat, levels = Levels, anchorIndex = anchorIndex);
   Nodes;
-}  
+}
 
 #--------------------------------------------------------------------------------------------
 #
@@ -3636,18 +3720,18 @@ simulateEigengeneNetwork = function(causeMat, anchorIndex, anchorVectors, noise 
 #--------------------------------------------------------------------------------------------
 # The resulting data is normalized.
 # Attributes contain the component trueKME giving simulated correlation with module eigengene for
-# both module genes and near-module genes. 
+# both module genes and near-module genes.
 # corPower controls how fast the correlation drops with index i in the module; the curve is roughly
 # x^{1/corPower} with x<1 and x~0 near the "center", so the higher the power, the faster the curve rises.
 
-simulateModule = function(ME, nGenes, nNearGenes = 0, minCor = 0.3, maxCor = 1, 
+simulateModule = function(ME, nGenes, nNearGenes = 0, minCor = 0.3, maxCor = 1,
                           corPower = 1,
-                          signed = FALSE, propNegativeCor = 0.3, geneMeans = NULL, 
+                          signed = FALSE, propNegativeCor = 0.3, geneMeans = NULL,
                           verbose = 0, indent = 0)
 {
     nSamples = length(ME);
 
-    datExpr = matrix(rnorm((nGenes+nNearGenes)*nSamples), nrow = nSamples, 
+    datExpr = matrix(rnorm((nGenes+nNearGenes)*nSamples), nrow = nSamples,
                             ncol = nGenes+nNearGenes)
 
     VarME = var(ME)
@@ -3656,9 +3740,9 @@ simulateModule = function(ME, nGenes, nNearGenes = 0, minCor = 0.3, maxCor = 1,
     CorME = maxCor - (c(1:nGenes)/nGenes)^(1/corPower) * (maxCor-minCor);
     noise = sqrt(VarME * (1-CorME^2)/CorME^2);
     sign = rep(1, nGenes);
-    if (!signed) 
+    if (!signed)
     {
-      negGenes = as.integer(seq(from = 1/propNegativeCor, by = 1/propNegativeCor, 
+      negGenes = as.integer(seq(from = 1/propNegativeCor, by = 1/propNegativeCor,
                                 length.out = nGenes * propNegativeCor))
       negGenes = negGenes[negGenes <=nGenes];
       sign[negGenes] = -1;
@@ -3671,14 +3755,14 @@ simulateModule = function(ME, nGenes, nNearGenes = 0, minCor = 0.3, maxCor = 1,
     trueKME = CorME;
     # generate the near-module genes
 
-    if (nNearGenes>0) 
+    if (nNearGenes>0)
     {
       CorME = c(1:nNearGenes)/nNearGenes * minCor;
       noise = sqrt(VarME * (1-CorME^2)/CorME^2);
       sign = rep(1, nNearGenes);
-      if (!signed) 
+      if (!signed)
       {
-        negGenes = as.integer(seq(from = 1/propNegativeCor, by = 1/propNegativeCor, 
+        negGenes = as.integer(seq(from = 1/propNegativeCor, by = 1/propNegativeCor,
                                   length.out = nNearGenes * propNegativeCor))
         negGenes = negGenes[negGenes <=nNearGenes];
         sign[negGenes] = -1;
@@ -3722,9 +3806,9 @@ simulateModule = function(ME, nGenes, nNearGenes = 0, minCor = 0.3, maxCor = 1,
 # simulateSmallLayer
 #
 #--------------------------------------------------------------------------------------------
-# Simulates a bunch of small and weakly expressed modules. 
+# Simulates a bunch of small and weakly expressed modules.
 
-simulateSmallLayer = function(order, nSamples, 
+simulateSmallLayer = function(order, nSamples,
                               minCor = 0.3, maxCor = 0.5, corPower = 1,
                               averageModuleSize, averageExpr, moduleSpacing,
                               verbose = 4, indent = 0)
@@ -3736,7 +3820,7 @@ simulateSmallLayer = function(order, nSamples,
   maxCorN0 = averageModuleSize;
 
   if (verbose>0) printFlush(paste(spaces, "simulateSmallLayer: simulating modules with min corr",
-          minCor, ", average expression", averageExpr, ", average module size", averageModuleSize, 
+          minCor, ", average expression", averageExpr, ", average module size", averageModuleSize,
           ", inverse density", moduleSpacing));
 
   index = 0;
@@ -3748,22 +3832,22 @@ simulateSmallLayer = function(order, nSamples,
      if (ModSize>2)   # Otherwise don't bother :)
      {
        ModuleExpr = rexp(1, 1/averageExpr);
-       if (verbose>4) printFlush(paste(spaces, "  Module of size", ModSize, ", expression", ModuleExpr, 
-                                  ", min corr", minCor, 
+       if (verbose>4) printFlush(paste(spaces, "  Module of size", ModSize, ", expression", ModuleExpr,
+                                  ", min corr", minCor,
                                   "inserted at index", index+1));
        ME = rnorm(nSamples, sd = ModuleExpr);
        NInModule = as.integer(ModSize*2/3);
        nNearModule = ModSize - NInModule;
        EffMinCor = minCor * maxCor;
-       datExpr[, order[(index+1):(index + ModSize)]] = 
+       datExpr[, order[(index+1):(index + ModSize)]] =
            ModuleExpr * simulateModule(ME, NInModule, nNearModule, EffMinCor, maxCor, corPower);
      }
      index = index + ModSize * moduleSpacing;
   }
   datExpr;
 }
-         
-     
+
+
 #--------------------------------------------------------------------------------------------
 #
 # simulateDatExpr
@@ -3780,13 +3864,13 @@ simulateSmallLayer = function(order, nSamples,
 # ScatteredModuleLayers: Layers of small modules whose order is random.
 
 simulateDatExpr=function(eigengenes, nGenes, modProportions,
-                          minCor = 0.3, maxCor = 1, 
-                          corPower = 1, 
+                          minCor = 0.3, maxCor = 1,
+                          corPower = 1,
                           signed = FALSE, propNegativeCor = 0.3,
                           geneMeans = NULL,
                           backgroundNoise = 0.1, leaveOut = NULL,
-			  nSubmoduleLayers = 0, nScatteredModuleLayers = 0, 
-                          averageNGenesInSubmodule = 10, averageExprInSubmodule = 0.2, 
+			  nSubmoduleLayers = 0, nScatteredModuleLayers = 0,
+                          averageNGenesInSubmodule = 10, averageExprInSubmodule = 0.2,
                           submoduleSpacing = 2,
                           verbose = 1, indent = 0)
 {
@@ -3814,21 +3898,21 @@ simulateDatExpr=function(eigengenes, nGenes, modProportions,
   if (is.null(geneMeans)) geneMeans = rep(0, nGenes);
   if (length(geneMeans)!=nGenes)
     stop("Length of 'geneMeans' must equal 'nGenes'.");
- 
+
   if (any(is.na(geneMeans)))
     stop("All entries of 'geneMeans' must be finite.");
-       
+
   grey = 0;
   moduleLabels = c(1:nMods);
 
   if(sum(modProportions)>1) stop("Input error: the sum of Mod.Props must be less than 1");
-  #if(sum(modProportions[c(1:(length(modProportions)-1))])>=0.5) 
+  #if(sum(modProportions[c(1:(length(modProportions)-1))])>=0.5)
          #print(paste("SimulateExprData: Input warning: the sum of modProportions for proper modules",
                                        #"should ideally be less than 0.5."));
 
   no.in.modules = as.integer(nGenes*modProportions);
   no.in.proper.modules = no.in.modules[c(1:(length(modProportions)-1))];
-  no.near.modules = as.integer((nGenes - sum(no.in.modules)) * 
+  no.near.modules = as.integer((nGenes - sum(no.in.modules)) *
                          no.in.proper.modules/sum(no.in.proper.modules));
 
   simulate.module = rep(TRUE, times = nMods);
@@ -3843,23 +3927,23 @@ simulateDatExpr=function(eigengenes, nGenes, modProportions,
   if (verbose>0) printFlush(paste(spaces, "simulateDatExpr: simulating", nGenes, "genes in",
                         nMods, "modules."));
 
-  if (verbose>1) 
+  if (verbose>1)
   {
-  #  printFlush(paste(spaces, "    Minimum correlation in a module is", minCor, 
+  #  printFlush(paste(spaces, "    Minimum correlation in a module is", minCor,
   #                            " and its dropoff is characterized by power", corPower));
-    printFlush(paste(spaces, "    Simulated labels:", 
+    printFlush(paste(spaces, "    Simulated labels:",
                        paste(labelOrder[1:nMods], collapse = ", "), " and ", grey));
     printFlush(paste(spaces, "    Module sizes:", paste(no.in.modules, collapse = ", ")));
     printFlush(paste(spaces, "    near module sizes:", paste(no.near.modules, collapse = ", ")));
     printFlush(paste(spaces, "    Min correaltion:", paste(minCor, collapse = ", ")));
-    if (!is.null(leaveOut)) printFlush(paste(spaces, "    _leaving out_ modules", 
+    if (!is.null(leaveOut)) printFlush(paste(spaces, "    _leaving out_ modules",
                                               paste(labelOrder[leaveOut], collapse = ", ")));
-    
+
   }
 
   truemodule=rep(grey, nGenes);
   allLabels=rep(grey, nGenes);	# These have the colors for left-out modules as well.
-  
+
   # This matrix contains the simulated expression values (rows are genes, columns samples)
   # Each simulated cluster has a distinct mean expression across the samples
 
@@ -3869,18 +3953,18 @@ simulateDatExpr=function(eigengenes, nGenes, modProportions,
 
   gene.index = 0;		# Where to put the current gene into datExpr
 
-  for(mod in c(1:nMods)) 
+  for(mod in c(1:nMods))
   {
      nModGenes = no.in.modules[mod];
      nNearGenes = no.near.modules[mod];
      if (simulate.module[mod])
      {
        ME = eigengenes[, mod];
-       EffMaxCor = maxCor[mod]; 
-       EffMinCor = minCor[mod]; 
+       EffMaxCor = maxCor[mod];
+       EffMinCor = minCor[mod];
        range = (gene.index+1):(gene.index+nModGenes+nNearGenes);
-       temp = simulateModule(ME, nModGenes, nNearGenes, minCor[mod], maxCor[mod], 
-                         corPower, 
+       temp = simulateModule(ME, nModGenes, nNearGenes, minCor[mod], maxCor[mod],
+                         corPower,
                          signed = signed, propNegativeCor = propNegativeCor,
                          geneMeans = NULL,
                          verbose = verbose-2, indent = indent+2);
@@ -3888,32 +3972,32 @@ simulateDatExpr=function(eigengenes, nGenes, modProportions,
        truemodule[(gene.index+1):(gene.index+nModGenes)] = labelOrder[mod];
        trueKME[range] = attributes(temp)$trueKME;
        trueKME.whichMod[range] = mod;
-     } 
+     }
      allLabels[(gene.index+1):(gene.index+nModGenes)] = labelOrder[mod];
      gene.index = gene.index + nModGenes + nNearGenes;
   }
 
-  if (nSubmoduleLayers>0) 
+  if (nSubmoduleLayers>0)
   {
     OrderVector = c(1:nGenes)
     for (layer in 1:nSubmoduleLayers)
     {
-      if (verbose>1) printFlush(paste(spaces, "Simulating ordereded extra layer", layer)); 
-      datExpr = datExpr + simulateSmallLayer(OrderVector, nSamples, minCor[1], 
+      if (verbose>1) printFlush(paste(spaces, "Simulating ordereded extra layer", layer));
+      datExpr = datExpr + simulateSmallLayer(OrderVector, nSamples, minCor[1],
                                     maxCor[1],
-                                    corPower, averageNGenesInSubmodule, 
+                                    corPower, averageNGenesInSubmodule,
                                     averageExprInSubmodule, submoduleSpacing,
                                     verbose-1, indent+1);
     }
   }
   if (nScatteredModuleLayers>0) for (layer in 1:nScatteredModuleLayers)
   {
-    if (verbose>1) printFlush(paste(spaces, "Simulating unordereded extra layer", layer)); 
+    if (verbose>1) printFlush(paste(spaces, "Simulating unordereded extra layer", layer));
     OrderVector = sample(nGenes)
     datExpr = datExpr + simulateSmallLayer(OrderVector, nSamples, minCor[1],
-                                    maxCor[1], corPower, 
-                                    averageNGenesInSubmodule, 
-                                    averageExprInSubmodule, submoduleSpacing, 
+                                    maxCor[1], corPower,
+                                    averageNGenesInSubmodule,
+                                    averageExprInSubmodule, submoduleSpacing,
                                     verbose = verbose-1, indent = indent+1);
   }
   collectGarbage();
@@ -3926,7 +4010,7 @@ simulateDatExpr=function(eigengenes, nGenes, modProportions,
   colnames(datExpr) = spaste("Gene.", c(1:nGenes));
   rownames(datExpr) = spaste("Sample.", c(1:nSamples));
 
-  list(datExpr = datExpr, setLabels = truemodule, allLabels = allLabels, 
+  list(datExpr = datExpr, setLabels = truemodule, allLabels = allLabels,
        labelOrder = labelOrder, trueKME = trueKME, trueKME.whichMod = trueKME.whichMod)
 } # end of function
 
@@ -3935,7 +4019,7 @@ simulateDatExpr=function(eigengenes, nGenes, modProportions,
 # simulateMultiExpr
 #
 #--------------------------------------------------------------------------------------
-# simulate several sets with some of the modules left out. 
+# simulate several sets with some of the modules left out.
 # eigengenes are specified in a standard multi-set data format.
 # leaveOut must be a matrix of No.Modules x No.Sets of TRUE/FALSE values;
 # minCor must be a single number here; modProportions are a single vector, since the proportions should be the
@@ -3944,12 +4028,12 @@ simulateDatExpr=function(eigengenes, nGenes, modProportions,
 # dimensions of the eigengenes.
 
 simulateMultiExpr = function(eigengenes, nGenes, modProportions,
-                          minCor = 0.5, maxCor = 1, 
+                          minCor = 0.5, maxCor = 1,
                           corPower = 1, backgroundNoise = 0.1, leaveOut = NULL,
                           signed = FALSE, propNegativeCor = 0.3,
                           geneMeans = NULL,
-			  nSubmoduleLayers = 0, nScatteredModuleLayers = 0, 
-                          averageNGenesInSubmodule = 10, averageExprInSubmodule = 0.2, 
+			  nSubmoduleLayers = 0, nScatteredModuleLayers = 0,
+                          averageNGenesInSubmodule = 10, averageExprInSubmodule = 0.2,
                           submoduleSpacing = 2,
                           verbose = 1, indent = 0)
 {
@@ -3977,7 +4061,7 @@ simulateMultiExpr = function(eigengenes, nGenes, modProportions,
 
   if (any(is.na(geneMeans)))
     stop("All entries of 'geneMeans' must be finite.");
-       
+
   d2 = length(modProportions)-1;
   if (d2 != nMods) stop(paste("Incompatible numbers of modules in 'eigengenes' and 'modProportions'"));
   if (is.null(leaveOut))
@@ -3985,7 +4069,7 @@ simulateMultiExpr = function(eigengenes, nGenes, modProportions,
     leaveOut = matrix(FALSE, nMods, nSets);
   } else {
     d3 = dim(leaveOut);
-    if ( (d3[1] != nMods) | (d3[2] != nSets) ) 
+    if ( (d3[1] != nMods) | (d3[2] != nSets) )
       stop(paste("Incompatible dimensions of 'leaveOut' and set eigengenes."))
   }
 
@@ -4003,14 +4087,14 @@ simulateMultiExpr = function(eigengenes, nGenes, modProportions,
     # SetMaxCor = rep(maxCor, nMods);
     SetLO = c(1:nMods)[setLeaveOut];
     setData = simulateDatExpr(SetEigengenes, nGenes, modProportions,
-                          minCor = minCor, maxCor = maxCor, 
-                          corPower = corPower, 
+                          minCor = minCor, maxCor = maxCor,
+                          corPower = corPower,
                           signed = signed, propNegativeCor = propNegativeCor,
                           backgroundNoise = backgroundNoise, leaveOut = SetLO,
 			  nSubmoduleLayers = nSubmoduleLayers,
-                          nScatteredModuleLayers  = nScatteredModuleLayers , 
-                          averageNGenesInSubmodule = averageNGenesInSubmodule, 
-                          averageExprInSubmodule = averageExprInSubmodule, 
+                          nScatteredModuleLayers  = nScatteredModuleLayers ,
+                          averageNGenesInSubmodule = averageNGenesInSubmodule,
+                          averageExprInSubmodule = averageExprInSubmodule,
                           submoduleSpacing = submoduleSpacing,
                           verbose = verbose-1, indent = indent+1);
     multiExpr[[set]] = list(data = setData$datExpr);
@@ -4018,18 +4102,18 @@ simulateMultiExpr = function(eigengenes, nGenes, modProportions,
     allLabels = cbind(allLabels, setData$allLabels);
     labelOrder = cbind(labelOrder, setData$labelOrder);
   }
-  list(multiExpr = multiExpr, setLabels = setLabels, allLabels = allLabels, 
+  list(multiExpr = multiExpr, setLabels = setLabels, allLabels = allLabels,
        labelOrder = labelOrder);
-} 
+}
 
 #--------------------------------------------------------------------------------------------------
 #
-# simulateDatExpr5Modules 
+# simulateDatExpr5Modules
 #
 #--------------------------------------------------------------------------------------------------
 
 simulateDatExpr5Modules = function(
-     nGenes=2000, 
+     nGenes=2000,
      colorLabels=c("turquoise","blue", "brown", "yellow", "green"),
      simulateProportions=c(0.10,0.08, 0.06, 0.04, 0.02),
      MEturquoise,
@@ -4037,44 +4121,44 @@ simulateDatExpr5Modules = function(
      MEbrown,
      MEyellow,
      MEgreen,
-     SDnoise=1,   
+     SDnoise=1,
      backgroundCor=0.3)
 {
    nSamples=length(MEturquoise)
-   if( length(MEturquoise) != length(MEblue) | length(MEturquoise) != length(MEbrown) | 
-       length(MEturquoise) != length(MEyellow) | length(MEturquoise) != length(MEgreen) ) 
+   if( length(MEturquoise) != length(MEblue) | length(MEturquoise) != length(MEbrown) |
+       length(MEturquoise) != length(MEyellow) | length(MEturquoise) != length(MEgreen) )
      stop("Numbers of samples in module eigengenes (MEs) are not consistent" );
-   if ( sum(simulateProportions)>1 ) 
-   { 
-     stop("Sum of module proportions is larger than 1. Please ensure sum(simulateProportions)<=1. " ); 
+   if ( sum(simulateProportions)>1 )
+   {
+     stop("Sum of module proportions is larger than 1. Please ensure sum(simulateProportions)<=1. " );
      # simulateProportions=rep(1/10,5)
-   } 
+   }
    modulesizes=round(nGenes*c(simulateProportions, 1-sum(simulateProportions)))
    truemodule=rep(c( as.character(colorLabels),"grey") , modulesizes )
    ModuleEigengenes = data.frame(MEturquoise,MEblue,MEbrown,MEyellow,MEgreen)
    no.MEs=dim(ModuleEigengenes)[[2]]
-   # This matrix contains the simulated expression values 
+   # This matrix contains the simulated expression values
    #(rows are samples, columns genes)
-   # it contains some background noise 
+   # it contains some background noise
    datExpr=matrix(rnorm(nSamples*nGenes,mean=0,sd=SDnoise),nrow=nSamples,ncol=nGenes)
 
    if (is.logical(backgroundCor)) backgroundCor = 0.3 * as.numeric(backgroundCor);
 
-   if (as.numeric(backgroundCor) > 0)  
+   if (as.numeric(backgroundCor) > 0)
    {
      MEbackground=MEturquoise
      datSignal= (matrix(MEbackground,nrow=length(MEturquoise) ,ncol=nGenes,byrow=FALSE))
      datExpr= datExpr+ as.numeric(backgroundCor)*datSignal
    }# end of if backgroundCor
 
-   for (i in c(1:no.MEs) ) 
+   for (i in c(1:no.MEs) )
    {
      restrict1= truemodule== colorLabels[i]
      datModule = simulateModule(ModuleEigengenes[,i] , nGenes = modulesizes[i], corPower = 2.5)
      datExpr[,restrict1]= datModule
    } # end of for loop
    # this is the output of the function
-   list(datExpr =datExpr, truemodule =truemodule, datME = ModuleEigengenes ) 
+   list(datExpr =datExpr, truemodule =truemodule, datME = ModuleEigengenes )
 } # end of simulation function
 
 
@@ -4086,31 +4170,31 @@ simulateDatExpr5Modules = function(
 
 
 automaticNetworkScreening = function(
-       datExpr, y,   
-       power=6, 
-       networkType="unsigned", 
+       datExpr, y,
+       power=6,
+       networkType="unsigned",
        detectCutHeight = 0.995,
-       minModuleSize = min(20, ncol(as.matrix(datExpr))/2 ), 
-       datME=NULL,  
-       getQValues = TRUE, ...) 
+       minModuleSize = min(20, ncol(as.matrix(datExpr))/2 ),
+       datME=NULL,
+       getQValues = TRUE, ...)
 {
   y = as.numeric(as.character(y))
-  if (length(y) != dim(as.matrix(datExpr))[[1]] ) 
+  if (length(y) != dim(as.matrix(datExpr))[[1]] )
     stop("Number of samples in 'y' and 'datExpr' disagree: length(y) != dim(as.matrix(datExpr))[[1]] ")
 
   nAvailable=apply(as.matrix(!is.na(datExpr)), 2,sum)
-  ExprVariance=apply(as.matrix(datExpr),2,var, na.rm = TRUE ) 
+  ExprVariance=apply(as.matrix(datExpr),2,var, na.rm = TRUE )
   restrictGenes = (nAvailable>=..minNSamples) & (ExprVariance>0)
-  numberUsefulGenes=sum(restrictGenes,na.rm = TRUE) 
-  if ( numberUsefulGenes<3 ) 
+  numberUsefulGenes=sum(restrictGenes,na.rm = TRUE)
+  if ( numberUsefulGenes<3 )
   {
-    stop(paste("IMPORTANT: there are not enough useful genes. \n", 
+    stop(paste("IMPORTANT: there are not enough useful genes. \n",
        "    Your input genes have fewer than 4 observations or they are constant.\n",
        "    WGCNA cannot be used for these data. Hint: collect more arrays or input genes that vary."));
-    #warning(paste("IMPORTANT: there are not enough useful genes. \n", 
+    #warning(paste("IMPORTANT: there are not enough useful genes. \n",
     #   "    Your input genes have fewer than 4 observations or they are constant.\n",
     #   "    WGCNA cannot be used for these data. Hint: collect more arrays or input genes that vary."));
-    #output=list(NetworkScreening=data.frame(NS1=rep(NA, dim(as.matrix(datExpr))[[2]] )), 
+    #output=list(NetworkScreening=data.frame(NS1=rep(NA, dim(as.matrix(datExpr))[[2]] )),
     #            datME=rep(NA, dim(as.matrix(datExpr))[[1]] ), EigengeneSignificance=NA , AAcriterion=NA)
     #return(output);
   }
@@ -4119,14 +4203,14 @@ automaticNetworkScreening = function(
   if (is.null(datME) )
   {
     mergeCutHeight1 = dynamicMergeCut(n= dim(as.matrix(datExprUsefulGenes))[[1]])
-    B = blockwiseModules(datExprUsefulGenes, mergeCutHeight = mergeCutHeight1,  
+    B = blockwiseModules(datExprUsefulGenes, mergeCutHeight = mergeCutHeight1,
                          TOMType = "none", power = power, networkType=networkType,
                          detectCutHeight = detectCutHeight, minModuleSize = minModuleSize );
     datME=data.frame(B$MEs)
   }
 
-  if (dim(as.matrix(datME))[[1]] != dim(as.matrix(datExpr))[[1]] ) 
-     stop(paste("Numbers of samples in 'datME' and 'datExpr' are incompatible:", 
+  if (dim(as.matrix(datME))[[1]] != dim(as.matrix(datExpr))[[1]] )
+     stop(paste("Numbers of samples in 'datME' and 'datExpr' are incompatible:",
           "dim(as.matrix(datME))[[1]] != dim(as.matrix(datExpr))[[1]]"))
 
   MMdata=signedKME(datExpr=datExpr, datME=datME, outputColumnName="MM.")
@@ -4147,26 +4231,26 @@ automaticNetworkScreening = function(
 
   ESy=(1+max(abs(ES), na.rm = TRUE))/2
   ES=data.frame(ES, ESy=ESy)
-  
+
   # to avoid dividing by zero, we set correlation that are 1 equal to .9999
   ES.999=as.numeric(as.vector(ES))
   ES.999[!is.na(ES) &  ES>0.9999]=.9999
-  ES.pvalue=corPvalueStudent(cor=abs(ES.999), nSamples=sum(!is.na(y) )) 
+  ES.pvalue=corPvalueStudent(cor=abs(ES.999), nSamples=sum(!is.na(y) ))
   ES.pvalue[length(ES.999)]=0
   EigengeneSignificance.pvalue=data.frame(matrix(ES.pvalue, nrow=1)   )
   names(EigengeneSignificance.pvalue)=names(ES)
 
   datME=data.frame(datME,y=y)
   names(ES)=paste("ES", substr(names(ES),3,100), sep="")
-  
+
   print(signif(ES,2))
 
-  output=list(networkScreening=data.frame(NS1, MMdata, MMdataPvalue), datME=data.frame(datME), 
-              eigengeneSignificance=data.frame(ES) , 
+  output=list(networkScreening=data.frame(NS1, MMdata, MMdataPvalue), datME=data.frame(datME),
+              eigengeneSignificance=data.frame(ES) ,
               EScounts = EScounts,
-              eigengeneSignificance.pvalue=EigengeneSignificance.pvalue, 
+              eigengeneSignificance.pvalue=EigengeneSignificance.pvalue,
               AAcriterion=AAcriterion)
-  
+
   output
 } # end of function automaticNetworkScreening
 
@@ -4178,33 +4262,33 @@ automaticNetworkScreening = function(
 #--------------------------------------------------------------------------------------------------
 
 automaticNetworkScreeningGS = function(
-         datExpr, GS,   
+         datExpr, GS,
          power=6, networkType="unsigned",  detectCutHeight = 0.995,
-         minModuleSize = min(20, ncol(as.matrix(datExpr))/2 ), datME=NULL) 
+         minModuleSize = min(20, ncol(as.matrix(datExpr))/2 ), datME=NULL)
 {
-  if (!is.numeric(GS) ) 
+  if (!is.numeric(GS) )
      stop("Gene significance 'GS' is not numeric.")
-  if (  dim(as.matrix(datExpr))[[2]] != length(GS) ) 
+  if (  dim(as.matrix(datExpr))[[2]] != length(GS) )
      stop("length of gene significance variable GS does not equal the number of columns of datExpr.");
 
   mergeCutHeight1 = dynamicMergeCut(n= dim(as.matrix(datExpr))[[1]])
   nAvailable=apply(as.matrix(!is.na(datExpr)), 2,sum)
-  ExprVariance=apply(as.matrix(datExpr),2,var, na.rm = TRUE ) 
+  ExprVariance=apply(as.matrix(datExpr),2,var, na.rm = TRUE )
   restrictGenes=nAvailable>=4 & ExprVariance>0
-  numberUsefulGenes=sum(restrictGenes,na.rm = TRUE) 
-  if ( numberUsefulGenes<3 ) 
+  numberUsefulGenes=sum(restrictGenes,na.rm = TRUE)
+  if ( numberUsefulGenes<3 )
   {
-    stop(paste("IMPORTANT: there are not enough useful genes. \n", 
+    stop(paste("IMPORTANT: there are not enough useful genes. \n",
        "    Your input genes have fewer than 4 observations or they are constant.\n",
        "    WGCNA cannot be used for these data. Hint: collect more arrays or input genes that vary."));
     #output=list(NetworkScreening=data.frame(NS1=rep(NA, dim(as.matrix(datExpr))[[2]]))  , datME=rep(NA,
     #dim(as.matrix(datExpr))[[1]])    , hubGeneSignificance=NA);
-  } # end of if 
+  } # end of if
   datExprUsefulGenes=as.matrix(datExpr)[,restrictGenes & !is.na(restrictGenes)]
 
   if (is.null(datME) )
   {
-     B = blockwiseModules(datExprUsefulGenes, mergeCutHeight = mergeCutHeight1,  
+     B = blockwiseModules(datExprUsefulGenes, mergeCutHeight = mergeCutHeight1,
                         TOMType = "none", power = power, networkType = networkType,
                         detectCutHeight = detectCutHeight, minModuleSize= minModuleSize );
      datME = data.frame(B$MEs)
@@ -4212,7 +4296,7 @@ automaticNetworkScreeningGS = function(
   MMdata=signedKME(datExpr=datExpr, datME=datME, outputColumnName="MM.")
   MMdataPvalue=as.matrix(corPvalueStudent(as.matrix(MMdata), nSamples= dim(as.matrix(datExpr))[[1]]))
   dimnames( MMdataPvalue)[[2]]=paste("Pvalue",names(MMdata), sep=".")
-  
+
   NS1= networkScreeningGS(datExpr=datExpr, datME=datME,  GS=GS )
   # here we compute the eigengene significance measures
   HGS1=data.frame(as.matrix(t(hubGeneSignificance(MMdata ^3,GS^3)),nrow=1))
@@ -4220,7 +4304,7 @@ automaticNetworkScreeningGS = function(
   names(HGS1)=paste("HGS", substr(names(MMdata),4,100), sep="")
   # now we compute the AA criterion
   print(signif(HGS1,2))
-  output = list(networkScreening=data.frame(NS1, MMdata, MMdataPvalue), datME=data.frame(datME), 
+  output = list(networkScreening=data.frame(NS1, MMdata, MMdataPvalue), datME=data.frame(datME),
                 hubGeneSignificance=data.frame(HGS1))
   output
 } # end of function automaticNetworkScreeningGS
@@ -4239,11 +4323,11 @@ automaticNetworkScreeningGS = function(
 # GS=0 means that the gene is not significant, high positive or negative values mean
 # that it is significant.
 # The input to this function can include the sign of the correlation.
-hubGeneSignificance=function(datKME, GS ) 
+hubGeneSignificance=function(datKME, GS )
 {
   nMEs=dim(as.matrix(datKME))[[2]]
   nGenes= dim(as.matrix(datKME))[[1]]
-  if ( length(GS) !=  nGenes ) 
+  if ( length(GS) !=  nGenes )
     stop("Numbers of genes in 'datKME' and 'GS' are not compatible. ")
   Kmax=as.numeric(apply(as.matrix(abs(datKME)),2,max, na.rm = TRUE))
   Kmax[Kmax==0]=1
@@ -4262,7 +4346,7 @@ hubGeneSignificance=function(datKME, GS )
 #--------------------------------------------------------------------------------------------
 
 networkScreeningGS = function(datExpr , datME, GS ,
-           oddPower = 3, 
+           oddPower = 3,
            blockSize = 1000,
            minimumSampleSize = ..minNSamples,
            addGS=TRUE)
@@ -4273,30 +4357,30 @@ networkScreeningGS = function(datExpr , datME, GS ,
   nGenes=dim(as.matrix(datExpr))[[2]]
   GS.Weighted=rep(0,nGenes)
 
-  if ( dim(as.matrix(datExpr))[[1]] != dim(as.matrix(datME))[[1]]) 
+  if ( dim(as.matrix(datExpr))[[1]] != dim(as.matrix(datME))[[1]])
     stop(paste("Expression data and the module eigengenes have different\n",
                "      numbers of observations (arrays). Specifically:\n",
                "      dim(as.matrix(datExpr))[[1]] != dim(as.matrix(datME))[[1]] "))
 
-  if ( dim(as.matrix(datExpr))[[2]] != length(GS) ) 
+  if ( dim(as.matrix(datExpr))[[2]] != length(GS) )
     stop(paste("The number of genes in the expression data does not match\n",
            "      the length of the genes significance variable. Specifically:\n",
            "       dim(as.matrix(datExpr))[[2]] != length(GS)   "));
 
   nAvailable=apply(as.matrix(!is.na(datExpr)), 2,sum)
-  ExprVariance=apply(as.matrix(datExpr),2,var, na.rm = TRUE ) 
+  ExprVariance=apply(as.matrix(datExpr),2,var, na.rm = TRUE )
   restrictGenes=nAvailable>=4 & ExprVariance>0
-  numberUsefulGenes=sum(restrictGenes,na.rm = TRUE) 
-  if ( numberUsefulGenes<3 ) 
+  numberUsefulGenes=sum(restrictGenes,na.rm = TRUE)
+  if ( numberUsefulGenes<3 )
   {
-    stop(paste("IMPORTANT: there are fewer than 3 useful genes. \n", 
+    stop(paste("IMPORTANT: there are fewer than 3 useful genes. \n",
        "    Violations: either fewer than 4 observations or they are constant.\n",
        "    WGCNA cannot be used for these data. Hint: collect more arrays or input genes that vary."));
     # datout=data.frame(GS.Weighted=rep(NA, dim(as.matrix(datExpr))[[2]]), GS=GS)
-  } # end of if 
+  } # end of if
 
   nBlocks=as.integer(nMEs/blockSize)
-  if (nBlocks>0) for (i in 1:nBlocks) 
+  if (nBlocks>0) for (i in 1:nBlocks)
   {
     printFlush(paste("block number = ", i))
     index1=c(1:blockSize)+(i-1)* blockSize
@@ -4305,14 +4389,14 @@ networkScreeningGS = function(datExpr , datME, GS ,
     ESBatch=   hubGeneSignificance(datKMEBatch ^oddPower,GS^oddPower)
     # the following omits the diagonal when datME=datExpr
     if (nGenes==nMEs) {diag(datKMEBatch[index1,])=0
-      # missing values will not be used 
+      # missing values will not be used
       datKMEBatch[is.na(datKMEBatch)]=0
       ESBatch[is.na(ESBatch)]=0
     } # end of if
     GS.WeightedBatch= as.matrix(datKMEBatch)^oddPower %*%  as.matrix(ESBatch)
     GS.Weighted=GS.Weighted+GS.WeightedBatch
   } # end of for (i in 1:nBlocks
-  if (nMEs-nBlocks*blockSize>0 ) 
+  if (nMEs-nBlocks*blockSize>0 )
   {
     restindex=c((nBlocks*blockSize+1):nMEs)
     datMEBatch= datME[,restindex]
@@ -4320,10 +4404,10 @@ networkScreeningGS = function(datExpr , datME, GS ,
     ESBatch=   hubGeneSignificance(datKMEBatch ^oddPower,GS^oddPower)
     # the following omits the diagonal when datME=datExpr
     if (nGenes==nMEs) {diag(datKMEBatch[restindex,])=0
-        # missing values will not be used 
+        # missing values will not be used
         datKMEBatch[is.na(datKMEBatch)]=0
         ESBatch[is.na(ESBatch)]=0
-    } # end of if (nGenes==nMEs) 
+    } # end of if (nGenes==nMEs)
     GS.WeightedBatch= as.matrix(datKMEBatch)^oddPower %*% ESBatch
     GS.Weighted=GS.Weighted+GS.WeightedBatch
   } # end of if (nMEs-nBlocks*blockSize>0 )
@@ -4333,12 +4417,12 @@ networkScreeningGS = function(datExpr , datME, GS ,
   rankGS.Weighted=rank(-GS.Weighted, ties.method="first")
   rankGS=rank(-GS, ties.method="first")
   printFlush(paste("Proportion of agreement between GS.Weighted and GS:"))
-  for (i in c(10,20,50,100,200,500,1000)) 
+  for (i in c(10,20,50,100,200,500,1000))
   {
-    printFlush(paste("Top ", i, " list of genes: prop. of agreement = ", 
+    printFlush(paste("Top ", i, " list of genes: prop. of agreement = ",
                 signif(sum(rankGS.Weighted<=i & rankGS<=i,na.rm = TRUE)/i,3)   ))
   } # end of for loop
-  if (mean(abs(GS.Weighted),na.rm = TRUE)>0) 
+  if (mean(abs(GS.Weighted),na.rm = TRUE)>0)
   {
     GS.Weighted=GS.Weighted/mean(abs(GS.Weighted),na.rm = TRUE)*mean(abs(GS),na.rm = TRUE)
   }
@@ -4355,12 +4439,12 @@ networkScreeningGS = function(datExpr , datME, GS ,
 #--------------------------------------------------------------------------------------------------
 
 networkScreening = function(
-               y, datME, datExpr, 
+               y, datME, datExpr,
                corFnc = "cor", corOptions = "use = 'p'",
                oddPower = 3,
                blockSize = 1000,
                minimumSampleSize = ..minNSamples,
-               addMEy = TRUE, removeDiag = FALSE, 
+               addMEy = TRUE, removeDiag = FALSE,
                weightESy=0.5,
                getQValues = TRUE)
 {
@@ -4373,25 +4457,25 @@ networkScreening = function(
   nMEs=dim(as.matrix(datME))[[2]]
   RawCor.Weighted=rep(0,nGenes)
   #Cor.Standard= as.numeric(cor(y,datExpr,use= "p") )
-  corExpr = parse(text = paste("as.numeric( ", corFnc, "(y,datExpr ", prepComma(corOptions), "))")); 
+  corExpr = parse(text = paste("as.numeric( ", corFnc, "(y,datExpr ", prepComma(corOptions), "))"));
   Cor.Standard= eval(corExpr)
 
   NoAvailable=apply(!is.na(datExpr), 2,sum)
   Cor.Standard[NoAvailable< minimumSampleSize]=NA
-  if (nGenes==1) 
+  if (nGenes==1)
   {
     #RawCor.Weighted=as.numeric(cor(y,datExpr,use= "p") )
     corExpr = parse(text = paste("as.numeric(" , corFnc, "(y,datExpr ", prepComma(corOptions), "))"));
     RawCor.Weighted = eval(corExpr);
   }
-  start = 1; i = 1; 
+  start = 1; i = 1;
   while (start <= nMEs)
   {
     end = min(start + blockSize -1, nMEs);
     if (i>1 || end < nMEs) printFlush(paste("block number = ", i))
     index1=c(start:end)
     datMEBatch= datME[,index1]
-    datKMEBatch=as.matrix(signedKME(datExpr,datMEBatch, outputColumnName="MM.", 
+    datKMEBatch=as.matrix(signedKME(datExpr,datMEBatch, outputColumnName="MM.",
                                     corFnc = corFnc, corOptions = corOptions))
     # ES.CorBatch= as.vector(cor(  as.numeric(as.character(y))  ,datMEBatch, use="p"))
     corExpr = parse(text = paste("as.vector( ", corFnc, "(  as.numeric(as.character(y))  ,datMEBatch",
@@ -4399,13 +4483,13 @@ networkScreening = function(
     ES.CorBatch = eval(corExpr);
 
     #weightESy
-    ES.CorBatch[ES.CorBatch>.999]= weightESy*1+ (1- weightESy)* 
+    ES.CorBatch[ES.CorBatch>.999]= weightESy*1+ (1- weightESy)*
                                     max(abs(ES.CorBatch[ES.CorBatch <.999 ]),na.rm = TRUE)
     # the following omits the diagonal when datME=datExpr
     if (nGenes==nMEs & removeDiag) {diag(datKMEBatch[index1,])=0}
     if (nGenes==nMEs )
     {
-      # missing values will not be used 
+      # missing values will not be used
       datKMEBatch[is.na(datKMEBatch)]=0
       ES.CorBatch[is.na(ES.CorBatch)]=0
     } # end of if
@@ -4420,11 +4504,11 @@ networkScreening = function(
   if (max(abs( Cor.Standard),na.rm = TRUE)==1)  Cor.Standard=Cor.Standard/1.0000001
   RawZ.Weighted=sqrt(NoAvailable -2)*RawCor.Weighted/sqrt(1-RawCor.Weighted^2)
   Z.Standard= sqrt(NoAvailable -2)* Cor.Standard/sqrt(1-Cor.Standard^2)
-  
-  if (sum(abs(Z.Standard),na.rm = TRUE) >0 ) 
+
+  if (sum(abs(Z.Standard),na.rm = TRUE) >0 )
   {
     Z.Weighted=RawZ.Weighted/sum(abs(RawZ.Weighted),na.rm = TRUE)*sum(abs(Z.Standard),na.rm = TRUE)
-  } # end of if 
+  } # end of if
   h1=Z.Weighted/sqrt(NoAvailable-2)
   Cor.Weighted=h1/sqrt(1+h1^2)
   p.Weighted=as.numeric(2*(1-pt(abs(Z.Weighted),NoAvailable-2)))
@@ -4437,11 +4521,11 @@ networkScreening = function(
     p.Standard2=p.Standard
     p.Weighted2[is.na(p.Weighted)]=1
     p.Standard2[is.na(p.Standard)]=1
-    
+
     q.Weighted=try(qvalue(p.Weighted2)$qvalues, silent = TRUE)
     q.Standard=try(qvalue(p.Standard2)$qvalues, silent = TRUE)
-  
-    if (class(q.Weighted)=="try-error") 
+
+    if (class(q.Weighted)=="try-error")
     {
       warning("Calculation of weighted q-values failed; the q-values will be returned as NAs.");
       q.Weighted=rep(NA, length(p.Weighted) )
@@ -4460,9 +4544,9 @@ networkScreening = function(
   rankCor.Weighted=rank(-abs(Cor.Weighted), ties.method="first")
   rankCor.Standard=rank(-abs(Cor.Standard), ties.method="first")
   printFlush(paste("Proportion of agreement between lists based on abs(Cor.Weighted) and abs(Cor.Standard):"))
-  for (i in c(10,20,50,100,200,500,1000)) 
+  for (i in c(10,20,50,100,200,500,1000))
   {
-    printFlush(paste("Top ", i, " list of genes: prop. agree = ", 
+    printFlush(paste("Top ", i, " list of genes: prop. agree = ",
                 signif(sum(rankCor.Weighted<=i & rankCor.Standard<=i,na.rm = TRUE)/i,3)))
   } # end of for loop
 
@@ -4515,15 +4599,15 @@ networkScreening = function(
 }
 
 
-  
+
 #--------------------------------------------------------------------------
 #
-# labeledHeatmap = function ( Matrix, xLabels, yLabels, ... ) { 
+# labeledHeatmap = function ( Matrix, xLabels, yLabels, ... ) {
 #
 #--------------------------------------------------------------------------
-# This function plots a heatmap of the specified matrix 
+# This function plots a heatmap of the specified matrix
 # and labels the x and y axes wit the given labels.
-# It is assumed that the number of entries in xLabels and yLabels is consistent 
+# It is assumed that the number of entries in xLabels and yLabels is consistent
 # with the dimensions in.
 # If colorLabels==TRUE, the labels are not printed and instead interpreted as colors --
 #  -- a simple symbol with the appropriate color is printed instead of the label.
@@ -4531,13 +4615,13 @@ networkScreening = function(
 # xSymbol, ySymbols are additional markers that can be placed next to color labels
 
 labeledHeatmap = function (
-  Matrix, 
-  xLabels, yLabels = NULL, 
-  xSymbols = NULL, ySymbols = NULL, 
-  colorLabels = NULL, 
+  Matrix,
+  xLabels, yLabels = NULL,
+  xSymbols = NULL, ySymbols = NULL,
+  colorLabels = NULL,
   xColorLabels = FALSE, yColorLabels = FALSE,
   checkColorsValid = TRUE,
-  invertColors = FALSE, 
+  invertColors = FALSE,
   setStdMargins = TRUE,
   xLabelsPosition = "bottom",
   xLabelsAngle = 45,
@@ -4547,37 +4631,37 @@ labeledHeatmap = function (
   xColorOffset = par("cxy")[1]/3,  # FIXME: For offsetting text, these two seem to be switched
   yColorOffset = par("cxy")[2]/3,
   # Content of heatmap
-  colors = NULL, 
+  colors = NULL,
   naColor = "grey",
-  textMatrix = NULL, cex.text = NULL, 
+  textMatrix = NULL, cex.text = NULL,
   textAdj = c(0.5, 0.5),
-  cex.lab = NULL, 
+  cex.lab = NULL,
   cex.lab.x = cex.lab,
   cex.lab.y = cex.lab,
   colors.lab.x = 1,
   colors.lab.y = 1,
   bg.lab.x = NULL,
   bg.lab.y = NULL,
-  plotLegend = TRUE, 
+  plotLegend = TRUE,
   keepLegendSpace = plotLegend,
-  # Separator line specification                   
+  # Separator line specification
   verticalSeparator.x = NULL,
-  verticalSeparator.col = 1,  
+  verticalSeparator.col = 1,
   verticalSeparator.lty = 1,
   verticalSeparator.lwd = 1,
   verticalSeparator.ext = 0,
 
   horizontalSeparator.y = NULL,
-  horizontalSeparator.col = 1,  
+  horizontalSeparator.col = 1,
   horizontalSeparator.lty = 1,
   horizontalSeparator.lwd = 1,
   horizontalSeparator.ext = 0,
-  ... ) 
+  ... )
 {
   if (!is.null(colorLabels)) {xColorLabels = colorLabels; yColorLabels = colorLabels; }
-  
-  if (is.null(yLabels) & (!is.null(xLabels)) & (dim(Matrix)[1]==dim(Matrix)[2])) 
-    yLabels = xLabels; 
+
+  if (is.null(yLabels) & (!is.null(xLabels)) & (dim(Matrix)[1]==dim(Matrix)[2]))
+    yLabels = xLabels;
 
   nCols = ncol(Matrix);
   nRows = nrow(Matrix);
@@ -4613,7 +4697,7 @@ labeledHeatmap = function (
 
   if (is.null(colors)) colors = heat.colors(30);
   if (invertColors) colors = .reverseVector(colors);
-  labPos = .heatmapWithLegend(Matrix, signed = FALSE, colors = colors, naColor = naColor, cex.legend = cex.lab, 
+  labPos = .heatmapWithLegend(Matrix, signed = FALSE, colors = colors, naColor = naColor, cex.legend = cex.lab,
                               plotLegend = plotLegend,  keepLegendSpace = keepLegendSpace, ...)
   #if (plotLegend)
   #{
@@ -4648,11 +4732,11 @@ labeledHeatmap = function (
   extension.left = par("mai")[2] * # left margin width in inches
                    par("cxy")[1] / par("cin")[1]   # charcter size in user corrdinates/character size in inches
 
-  extension.bottom = par("mai")[1] * 
+  extension.bottom = par("mai")[1] *
                    par("cxy")[2] / par("cin")[2]- # charcter size in user corrdinates/character size in inches
-                      offsety   
-                     
-  extension.top = par("mai")[3] * 
+                      offsety
+
+  extension.top = par("mai")[3] *
                    par("cxy")[2] / par("cin")[2]-   # charcter size in user corrdinates/character size in inches
                      offsety
 
@@ -4679,8 +4763,8 @@ labeledHeatmap = function (
     ext.y = sign * ext * sign(sin(angle))
     for (c in 1:nCols)
        polygon(x = c(xLeft[c], xLeft[c], xLeft[c] + ext.x, xRight[c] + ext.x, xRight[c], xRight[c]),
-               y = c(y0, y0-sign*offsety, y0-sign*offsety - ext.y, y0-sign*offsety - ext.y, 
-                     y0-sign*offsety, y0), 
+               y = c(y0, y0-sign*offsety, y0-sign*offsety - ext.y, y0-sign*offsety - ext.y,
+                     y0-sign*offsety, y0),
                border = bg.lab.x[c], col = bg.lab.x[c], xpd = TRUE);
   }
 
@@ -4698,7 +4782,7 @@ labeledHeatmap = function (
   }
 
 
-  
+
 
   # Write out labels
   if (sum(!xValidColors)>0)
@@ -4706,7 +4790,7 @@ labeledHeatmap = function (
     xLabYPos = ifelse(xLabPos==1, ymin - offsety, ymax + offsety)
     if (is.null(cex.lab)) cex.lab = 1;
     mapply(text, x = labPos$xMid[xTextLabInd], labels = xLabels[xTextLabInd],
-           MoreArgs = list(y = xLabYPos, srt = xLabelsAngle, 
+           MoreArgs = list(y = xLabYPos, srt = xLabelsAngle,
           adj = xLabelsAdj, xpd = TRUE, cex = cex.lab.x, col = colors.lab.x));
   }
   if (sum(xValidColors)>0)
@@ -4715,26 +4799,26 @@ labeledHeatmap = function (
     deltaY = ifelse(xLabPos==1, xColW, -xColW);
     rect(xleft = labPos$xMid[xColorLabInd] - xspacing/2, ybottom = baseY,
          xright = labPos$xMid[xColorLabInd] + xspacing/2, ytop = baseY + deltaY,
-         density = -1,  col = substring(xLabels[xColorLabInd], 3), 
+         density = -1,  col = substring(xLabels[xColorLabInd], 3),
          border = substring(xLabels[xColorLabInd], 3), xpd = TRUE)
     if (!is.null(xSymbols))
       mapply(text, x = labPos$xMid[xColorLabInd], labels = xSymbols[xColorLabInd],
-              MoreArgs = list(baseY - sign(deltaY)* offsety, 
-             adj = xLabelsAdj, 
+              MoreArgs = list(baseY - sign(deltaY)* offsety,
+             adj = xLabelsAdj,
              xpd = TRUE, srt = xLabelsAngle, cex = cex.lab.x, col = colors.lab.x));
   }
   if (sum(!yValidColors)>0)
   {
     if (is.null(cex.lab)) cex.lab = 1;
     mapply(text, y = labPos$yMid[yTextLabInd], labels = yLabels[yTextLabInd],
-              MoreArgs = list( x= xmin - offsetx, srt = 0, 
+              MoreArgs = list( x= xmin - offsetx, srt = 0,
          adj = c(1, 0.5), xpd = TRUE, cex = cex.lab.y, col = colors.lab.y ));
-  } 
+  }
   if (sum(yValidColors)>0)
   {
     rect(xleft = xmin- offsetx, ybottom = rev(labPos$yMid[yColorLabInd]) - yspacing/2,
-         xright = xmin- offsetx+yColW, ytop = rev(labPos$yMid[yColorLabInd]) + yspacing/2, 
-         density = -1,  col = substring(rev(yLabels[yColorLabInd]), 3), 
+         xright = xmin- offsetx+yColW, ytop = rev(labPos$yMid[yColorLabInd]) + yspacing/2,
+         density = -1,  col = substring(rev(yLabels[yColorLabInd]), 3),
          border = substring(rev(yLabels[yColorLabInd]), 3), xpd = TRUE)
     #for (i in yColorLabInd)
     #{
@@ -4743,7 +4827,7 @@ labeledHeatmap = function (
     #}
     if (!is.null(ySymbols))
       mapply(text, y = labPos$yMid[yColorLabInd], labels = ySymbols[yColorLabInd],
-          MoreArgs = list( xmin+ yColW - 2*offsetx, 
+          MoreArgs = list( xmin+ yColW - 2*offsetx,
             adj = c(1, 0.5), xpd = TRUE, cex = cex.lab.y, col = colors.lab.y));
   }
 
@@ -4763,7 +4847,7 @@ labeledHeatmap = function (
       lines(rep(x.lines[l], 2), c(ymin, ymax), col = vs.col[l], lty = vs.lty[l], lwd = vs.lwd[l]);
 
     angle = xLabelsAngle/180*pi;
-    if (xLabelsPosition =="bottom") 
+    if (xLabelsPosition =="bottom")
     {
       sign = 1;
       y0 = ymin;
@@ -4776,8 +4860,8 @@ labeledHeatmap = function (
     ext.x = -sign * extension.bottom * 1/tan(angle)/ratio;
     ext.y = sign * extension.bottom * sign(sin(angle))
     for (l in 1:nLines)
-         lines(c(x.lines[l], x.lines[l], x.lines[l] + vs.ext * ext.x), 
-               c(y0, y0-sign*offsety, y0-sign*offsety - vs.ext * ext.y),  
+         lines(c(x.lines[l], x.lines[l], x.lines[l] + vs.ext * ext.x),
+               c(y0, y0-sign*offsety, y0-sign*offsety - vs.ext * ext.y),
                  col = vs.col[l], lty = vs.lty[l], lwd = vs.lwd[l], xpd = TRUE);
   }
 
@@ -4786,7 +4870,7 @@ labeledHeatmap = function (
     if (any(horizontalSeparator.y < 0 | horizontalSeparator.y > nRows))
       stop("If given. 'horizontalSeparator.y' must all be between 0 and the number of rows.");
     reverseRows = TRUE;
-    if (reverseRows) 
+    if (reverseRows)
     {
       horizontalSeparator.y = nRows - horizontalSeparator.y+1;
       y.lines = ifelse( horizontalSeparator.y <=nRows, labPos$yBot[horizontalSeparator.y], labPos$yTop[nRows]);
@@ -4799,7 +4883,7 @@ labeledHeatmap = function (
     vs.lwd = .extend(horizontalSeparator.lwd, nLines);
     vs.ext = .extend(horizontalSeparator.ext, nLines);
     for (l in 1:nLines)
-      lines(c(xmin-vs.ext[l]*extension.left, xmax), rep(y.lines[l], 2), 
+      lines(c(xmin-vs.ext[l]*extension.left, xmax), rep(y.lines[l], 2),
             col = vs.col[l], lty = vs.lty[l], lwd = vs.lwd[l], xpd = TRUE);
   }
 
@@ -4869,17 +4953,17 @@ labeledHeatmap.multiPage = function(
   {
     nPages.rows = ceiling(nr/maxRowsPerPage);
     rowsPerPage = allocateJobs(nr, nPages.rows);
-  } else 
+  } else
     nPages.rows = length(rowsPerPage);
 
   if (is.null(colsPerPage))
   {
     nPages.cols = ceiling(nc/maxColsPerPage);
     colsPerPage = allocateJobs(nc, nPages.cols);
-  } else 
+  } else
     nPages.cols = length(colsPerPage);
 
-  if (is.null(zlim)) 
+  if (is.null(zlim))
   {
     zlim = range(Matrix, na.rm = TRUE)
     if (signed) zlim = c(-max(abs(zlim)), max(abs(zlim)));
@@ -4893,7 +4977,7 @@ labeledHeatmap.multiPage = function(
     verticalSeparator.lwd= .extend(verticalSeparator.lwd, nvs);
     verticalSeparator.ext= .extend(verticalSeparator.ext, nvs);
   }
-  
+
   if (!is.null(horizontalSeparator.y))
   {
     nhs = length(horizontalSeparator.y);
@@ -4902,7 +4986,7 @@ labeledHeatmap.multiPage = function(
     horizontalSeparator.lwd= .extend(horizontalSeparator.lwd, nhs);
     horizontalSeparator.ext= .extend(horizontalSeparator.ext, nhs);
   }
-  
+
 
   page = 1;
   multiPage = (nPages.cols > 1 | nPages.rows > 1)
@@ -4914,12 +4998,12 @@ labeledHeatmap.multiPage = function(
     if (!is.null(verticalSeparator.x))
     {
       keep.vs = verticalSeparator.x %in% cols;
-    } else 
+    } else
       keep.vs = numeric(0);
     if (!is.null(horizontalSeparator.y))
     {
       keep.hs = horizontalSeparator.y %in% cols;
-    } else 
+    } else
       keep.hs = numeric(0);
 
     main.1 = main;
@@ -4928,13 +5012,13 @@ labeledHeatmap.multiPage = function(
                    xLabels = xLabels[cols], xSymbols = xSymbols[cols],
                    yLabels = yLabels[rows], ySymbols = ySymbols[rows],
                    textMatrix = textMatrix[rows, cols, drop = FALSE],
-                   zlim = zlim, main = main.1, 
+                   zlim = zlim, main = main.1,
                    verticalSeparator.x = verticalSeparator.x[keep.vs] - min(cols) + 1,
                    verticalSeparator.col= verticalSeparator.col[keep.vs],
                    verticalSeparator.lty= verticalSeparator.lty[keep.vs],
                    verticalSeparator.lwd= verticalSeparator.lwd[keep.vs],
                    verticalSeparator.ext= verticalSeparator.ext[keep.vs],
- 
+
                    horizontalSeparator.y = horizontalSeparator.y[keep.hs] - min(rows) + 1,
                    horizontalSeparator.col= horizontalSeparator.col[keep.hs],
                    horizontalSeparator.lty= horizontalSeparator.lty[keep.hs],
@@ -4944,22 +5028,22 @@ labeledHeatmap.multiPage = function(
     page = page + 1;
   }
 }
-                   
+
 
 
 
 #--------------------------------------------------------------------------
 #
-# labeledBarplot = function ( Matrix, labels, ... ) { 
+# labeledBarplot = function ( Matrix, labels, ... ) {
 #
 #--------------------------------------------------------------------------
 #
 # Plots a barplot of the Matrix and writes the labels underneath such that they are readable.
 
-labeledBarplot = function ( Matrix, labels, colorLabels = FALSE, colored = TRUE, 
-                            setStdMargins = TRUE, stdErrors = NULL, cex.lab = NULL, 
-                            xLabelsAngle = 45, ... ) 
-{ 
+labeledBarplot = function ( Matrix, labels, colorLabels = FALSE, colored = TRUE,
+                            setStdMargins = TRUE, stdErrors = NULL, cex.lab = NULL,
+                            xLabelsAngle = 45, ... )
+{
   if (setStdMargins) par(mar=c(3,3,2,2)+0.2)
 
   if (colored)
@@ -4970,22 +5054,22 @@ labeledBarplot = function ( Matrix, labels, colorLabels = FALSE, colored = TRUE,
   }
 
   ValidColors = !is.na(match(substring(labels, 3), colors()));
-  
+
   if (sum(ValidColors)>0) ColorLabInd = c(1:length(labels))[ValidColors]
   if (sum(!ValidColors)>0) TextLabInd = c(1:length(labels))[!ValidColors]
 
   colors[!ValidColors] = "grey";
-  
+
   mp = barplot(Matrix, col = colors, xaxt = "n", xlab="", yaxt="n", ...)
 
   if (length(dim(Matrix))==2) {
      means = apply(Matrix, 2, sum);
   } else {
-     means = Matrix;  
+     means = Matrix;
   }
 
   if (!is.null(stdErrors)) addErrorBars(means, 1.96*stdErrors, two.side = TRUE);
-  
+
   # axis(1, labels = FALSE)
   nlabels = length(labels)
   plotbox = par("usr");
@@ -5010,18 +5094,18 @@ labeledBarplot = function ( Matrix, labels, colorLabels = FALSE, colored = TRUE,
     if (sum(!ValidColors)>0)
     {
       text( mp[!ValidColors] , ymin - 0.02, srt = 45,
-            adj = 1, labels = labels[TextLabInd], xpd = TRUE, cex = cex.lab, 
+            adj = 1, labels = labels[TextLabInd], xpd = TRUE, cex = cex.lab,
             srt = xLabelsAngle)
     }
     if (sum(ValidColors)>0)
     {
       rect(mp[ValidColors] - spacing/2.1, ymin - 2*spacing/2.1 * yrange/xrange - yoffset,
            mp[ValidColors] + spacing/2.1, ymin - yoffset,
-           density = -1,  col = substring(labels[ValidColors], 3), 
+           density = -1,  col = substring(labels[ValidColors], 3),
            border = substring(labels[ValidColors], 3), xpd = TRUE)
     }
   } else {
-    text(((1:nlabels)-1)*spacing +spacing/2 , ymin - 0.02*yrange, srt = 45, 
+    text(((1:nlabels)-1)*spacing +spacing/2 , ymin - 0.02*yrange, srt = 45,
           adj = 1, labels = labels, xpd = TRUE, cex = cex.lab, srt = xLabelsAngle)
   }
   axis(2, labels = TRUE)
@@ -5060,14 +5144,14 @@ greenBlackRed = function(n, gamma = 1)
 
 greenWhiteRed = function(n, gamma = 1, warn = TRUE)
 {
-  if (warn) 
+  if (warn)
       warning(spaste("WGCNA::greenWhiteRed: this palette is not suitable for people\n",
                      "with green-red color blindness (the most common kind of color blindness).\n",
                      "Consider using the function blueWhiteRed instead."));
   half = as.integer(n/2);
   red = c(seq(from=0, to=1, length.out = half)^(1/gamma), rep(1, times = half+1));
   green = c(rep(1, times = half+1), seq(from=1, to=0, length.out = half)^(1/gamma));
-  blue = c(seq(from=0, to=1, length.out = half)^(1/gamma), 1, 
+  blue = c(seq(from=0, to=1, length.out = half)^(1/gamma), 1,
           seq(from=1, to=0, length.out = half)^(1/gamma));
   col = rgb(red, green, blue, maxColorValue = 1);
   col;
@@ -5078,7 +5162,7 @@ redWhiteGreen = function(n, gamma = 1)
   half = as.integer(n/2);
   green = c(seq(from=0, to=1, length.out = half)^(1/gamma), rep(1, times = half+1));
   red = c(rep(1, times = half+1), seq(from=1, to=0, length.out = half)^(1/gamma));
-  blue = c(seq(from=0, to=1, length.out = half)^(1/gamma), 1, 
+  blue = c(seq(from=0, to=1, length.out = half)^(1/gamma), 1,
                seq(from=1, to=0, length.out = half)^(1/gamma));
   col = rgb(red, green, blue, maxColorValue = 1);
   col;
@@ -5139,7 +5223,7 @@ keepCommonProbes = function(multiExpr, orderBy = 1)
 
   if (nSets>1) for (set in (1:nSets))
   {
-    SetNames = data.frame(Names = names(multiExpr[[set]]$data), 
+    SetNames = data.frame(Names = names(multiExpr[[set]]$data),
                           index = c(1:dim(multiExpr[[set]]$data)[2]));
     Names = merge(Names, SetNames, by.x = "Names", by.y = "Names", all = FALSE, sort = FALSE);
   }
@@ -5149,7 +5233,7 @@ keepCommonProbes = function(multiExpr, orderBy = 1)
 
   multiExpr;
 }
-  
+
 #--------------------------------------------------------------------------------------
 #
 # addTraitToPCs
@@ -5157,7 +5241,7 @@ keepCommonProbes = function(multiExpr, orderBy = 1)
 #--------------------------------------------------------------------------------------
 
 # Adds a trait vector to a set of eigenvectors.
-# Caution: multiTraits is assumed to be a vector of lists with each list having an entry data which is 
+# Caution: multiTraits is assumed to be a vector of lists with each list having an entry data which is
 # a nSamples x nTraits data frame with an appropriate column name, not a vector.
 
 addTraitToMEs = function(multiME, multiTraits)
@@ -5208,7 +5292,7 @@ correlationPreservation = function(multiME, setLabels, excludeGrey = TRUE, greyL
   } else {
       Use = rep(TRUE, times = length(Names));
   }
-  No.Mods = ncol(multiME[[1]]$data[, Use]); 
+  No.Mods = ncol(multiME[[1]]$data[, Use]);
   CP = matrix(0, nrow = No.Mods, ncol = nSets*(nSets-1)/2);
   diag(CP) = 1;
   CPInd = 1;
@@ -5286,7 +5370,7 @@ setCorrelationPreservation = function(multiME, setLabels, excludeGrey = TRUE, gr
 #---------------------------------------------------------------------------------------
 
 #---------------------------------------------------------------------------------------
-# 
+#
 # preservationNetworkConnectivity
 #
 #---------------------------------------------------------------------------------------
@@ -5294,7 +5378,7 @@ setCorrelationPreservation = function(multiME, setLabels, excludeGrey = TRUE, gr
 # This function returns connectivities of nodes in preservation networks
 
 preservationNetworkConnectivity = function(
-   multiExpr, 
+   multiExpr,
    useSets = NULL, useGenes = NULL,
    corFnc = "cor", corOptions = "use='p'",
    networkType = "unsigned",
@@ -5342,13 +5426,13 @@ preservationNetworkConnectivity = function(
   subtract = rep(1, nGenes);
   if (sampleLinks)
   {
-    if (verbose > 0) 
+    if (verbose > 0)
       printFlush(paste(spaces, "preservationNetworkConnectivity: selecting sample pool of size",
                        nLinks, ".."))
     sd = apply(multiExpr[[1]]$data, 2, sd, na.rm = TRUE);
     order = order(-sd);
     saved = FALSE;
-    if (exists(".Random.seed")) 
+    if (exists(".Random.seed"))
     {
       saved = TRUE;
       savedSeed = .Random.seed
@@ -5357,10 +5441,10 @@ preservationNetworkConnectivity = function(
     samplePool = order[sample(x = nGenes, size = nLinks)]
     if (saved) .Random.seed <<- savedSeed;
     subtract[-samplePool] = 0;
-  } 
+  }
 
   nPairComps = nSets * (nSets -1)/2;
-  
+
   allPres = rep(NA, nGenes);
   allPresW = rep(NA, nGenes);
   allPresH = rep(NA, nGenes);
@@ -5381,7 +5465,7 @@ preservationNetworkConnectivity = function(
   dimnames(pairPresH) = list(names(multiExpr[[1]]$data), compNames);
   dimnames(pairPresWH) = list(names(multiExpr[[1]]$data), compNames);
 
-  if (verbose>0) 
+  if (verbose>0)
   {
      pind = initProgInd(trailStr = " done");
   }
@@ -5391,12 +5475,12 @@ preservationNetworkConnectivity = function(
   start = 1;
   if (sampleLinks)
   {
-    corEval = parse(text = paste(corFnc, 
-                       "(multiExpr[[set]]$data[, samplePool], multiExpr[[set]]$data[, blockIndex] ", 
+    corEval = parse(text = paste(corFnc,
+                       "(multiExpr[[set]]$data[, samplePool], multiExpr[[set]]$data[, blockIndex] ",
                        prepComma(corOptions), ")"))
   } else {
-    corEval = parse(text = paste(corFnc, 
-                       "(multiExpr[[set]]$data, multiExpr[[set]]$data[, blockIndex] ", 
+    corEval = parse(text = paste(corFnc,
+                       "(multiExpr[[set]]$data, multiExpr[[set]]$data[, blockIndex] ",
                         prepComma(corOptions), ")"))
   }
 
@@ -5449,7 +5533,7 @@ preservationNetworkConnectivity = function(
     for (set1 in 1:(nSets-1))
       for (set2 in (set1+1):nSets)
       {
-        diff = abs(blockAdj[set1, , ] - blockAdj[set2, , ]) 
+        diff = abs(blockAdj[set1, , ] - blockAdj[set2, , ])
         compNames = c(compNames, paste(set1, "vs", set2));
         pairPres[blockIndex, compInd] = (apply(1-diff, 2, sum) - subtract[blockIndex]) /
                                         (nLinks - subtract[blockIndex]);
@@ -5480,26 +5564,26 @@ preservationNetworkConnectivity = function(
 #
 #--------------------------------------------------------------------------------------
 # Plots a matrix plot of the ME(T)s. On the diagonal the heatmaps show correlation of MEs in the
-# particular subset; off-diagonal are differences in the correlation matrix. 
+# particular subset; off-diagonal are differences in the correlation matrix.
 # setLabels is a vector of titles for the diagonal diagrams; the off-diagonal will have no title
 # for now.
 
 plotEigengeneNetworks = function(
                       multiME, setLabels,
-                      letterSubPlots = FALSE, Letters = NULL, 
-                      excludeGrey = TRUE, greyLabel = "grey", 
+                      letterSubPlots = FALSE, Letters = NULL,
+                      excludeGrey = TRUE, greyLabel = "grey",
                       plotDendrograms = TRUE,
                       plotHeatmaps = TRUE,
-                      setMargins = TRUE, 
-                      marDendro = NULL, marHeatmap = NULL, 
+                      setMargins = TRUE,
+                      marDendro = NULL, marHeatmap = NULL,
                       colorLabels = TRUE, signed = TRUE,
                       heatmapColors = NULL,
-                      plotAdjacency = TRUE, 
+                      plotAdjacency = TRUE,
                       printAdjacency = FALSE, cex.adjacency = 0.9,
                       coloredBarplot = TRUE, barplotMeans = TRUE, barplotErrors = FALSE,
-                      plotPreservation = "standard", 
+                      plotPreservation = "standard",
                       zlimPreservation = c(0,1),
-                      printPreservation = FALSE, cex.preservation = 0.9, 
+                      printPreservation = FALSE, cex.preservation = 0.9,
                       ...)
 {
   # invertColors = FALSE;
@@ -5514,7 +5598,7 @@ plotEigengeneNetworks = function(
 
   if (is.null(Letters)) Letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-  if (is.null(heatmapColors)) 
+  if (is.null(heatmapColors))
     if (signed)
     {
       heatmapColors = blueWhiteRed(50);
@@ -5531,15 +5615,15 @@ plotEigengeneNetworks = function(
   par(mfrow = c(nPlotRows, nPlotCols));
   par(cex = cex);
   if (excludeGrey) for (set in 1:nSets)
-    multiME[[set]]$data = 
+    multiME[[set]]$data =
         multiME[[set]]$data[ , substring(names(multiME[[set]]$data),3)!=greyLabel]
 
   plotPresTypes = c("standard", "hyperbolic", "both")
   ipp = pmatch(plotPreservation, plotPresTypes);
   if (is.na(ipp))
-    stop(paste("Invalid 'plotPreservation'. Available choices are", 
+    stop(paste("Invalid 'plotPreservation'. Available choices are",
                paste(plotPresTypes, sep = ", ")));
-  
+
   letter.ind = 1;
   if (plotDendrograms) for (set in 1:nSets)
   {
@@ -5559,7 +5643,7 @@ plotEigengeneNetworks = function(
     #validColors = is.na(match(uselabels, colors()));
     #plotLabels = ifelse(validColors, substring(uselabels[validColors], 3), uselabels[!validColors]);
     plotLabels = uselabels;
-    plot(clust, main = main, sub="", xlab="", 
+    plot(clust, main = main, sub="", xlab="",
          labels = plotLabels, ylab="", ylim=c(0,1));
     letter.ind = letter.ind + 1;
   }
@@ -5567,7 +5651,7 @@ plotEigengeneNetworks = function(
   if (plotHeatmaps) for (i.row in (1:nSets)) for (i.col in (1:nSets))
   {
     letter.ind = i.row * nSets + i.col;
-    if (letterSubPlots) 
+    if (letterSubPlots)
     {
        #letter = paste("(", substring(Letters, first = letter.ind, last = letter.ind), ")", sep = "");
        letter = paste( substring(Letters, first = letter.ind, last = letter.ind), ".  ", sep = "");
@@ -5591,40 +5675,40 @@ plotEigengeneNetworks = function(
     textMat = NULL;
     if (i.row==i.col)
     {
-      corME = cor(multiME[[i.col]]$data, use="p") 
+      corME = cor(multiME[[i.col]]$data, use="p")
       pME = corPvalueFisher(corME, nrow(multiME[[i.col]]$data));
       if (printAdjacency)
       {
          textMat = paste(signif(corME, 2), "\n", signif(pME, 1));
          dim(textMat) = dim(corME)
-      } 
+      }
       if (signed)
       {
         if (plotAdjacency) {
-         if (printAdjacency) 
+         if (printAdjacency)
          {
             textMat = paste(signif((1+corME)/2, 2), "\n", signif(pME, 1));
             dim(textMat) = dim(corME)
-         } 
+         }
          labeledHeatmap((1+corME)/2, names(multiME[[i.col]]$data), names(multiME[[i.col]]$data),
                                main=paste(letter, setLabels[[i.col]]), invertColors=FALSE,
                                zlim=c(0,1.0),
-                               colorLabels = colorLabels, colors = heatmapColors, 
-                               setStdMargins = FALSE, 
+                               colorLabels = colorLabels, colors = heatmapColors,
+                               setStdMargins = FALSE,
                                textMatrix = textMat, cex.text = cex.adjacency, ...);
         } else {
          labeledHeatmap(corME, names(multiME[[i.col]]$data), names(multiME[[i.col]]$data),
                                main=paste(letter, setLabels[[i.col]]), invertColors=FALSE,
                                zlim=c(-1,1.0),
-                               colorLabels = colorLabels, colors = heatmapColors, setStdMargins = FALSE, 
+                               colorLabels = colorLabels, colors = heatmapColors, setStdMargins = FALSE,
                                textMatrix = textMat, cex.text = cex.adjacency, ...);
         }
       } else {
          labeledHeatmap(abs(corME), names(multiME[[i.col]]$data), names(multiME[[i.col]]$data),
                                main=paste(letter, setLabels[[i.col]]), invertColors=FALSE,
                                zlim=c(0,1.0),
-                               colorLabels = colorLabels, colors = heatmapColors, 
-                               setStdMargins = FALSE, 
+                               colorLabels = colorLabels, colors = heatmapColors,
+                               setStdMargins = FALSE,
                                textMatrix = textMat, cex.text = cex.adjacency, ...);
       }
     } else
@@ -5634,7 +5718,7 @@ plotEigengeneNetworks = function(
       cor.dif = (corME1 - corME2)/2;
       d = tanh((corME1 - corME2) / (abs(corME1) + abs(corME2))^2);
       # d = abs(corME1 - corME2) / (abs(corME1) + abs(corME2));
-      if (ipp==1 | ipp==3) 
+      if (ipp==1 | ipp==3)
       {
          dispd = cor.dif;
          main = paste(letter, "Preservation");
@@ -5651,31 +5735,31 @@ plotEigengeneNetworks = function(
         if (signed)
         {
           half = as.integer(length(heatmapColors)/2);
-          range = c(half:length(heatmapColors)); 
+          range = c(half:length(heatmapColors));
           halfColors = heatmapColors[range];
         } else {
           halfColors = heatmapColors;
         }
         if (printPreservation) {
-          printMtx = matrix(paste(".", as.integer((1-abs(dispd))*100), sep = ""), 
+          printMtx = matrix(paste(".", as.integer((1-abs(dispd))*100), sep = ""),
                              nrow = nrow(dispd), ncol = ncol(dispd));
           printMtx[printMtx==".100"] = "1";
-        } else { 
-          printMtx = NULL; 
+        } else {
+          printMtx = NULL;
         }
         if ( (sum( (1-abs(dispd))<zlimPreservation[1]) || ((1-abs(dispd))>zlimPreservation[2])) >0)
           warning("plotEigengeneNetworks: Correlation preservation data out of zlim range.");
-        labeledHeatmap(1-abs(dispd), names(multiME[[i.col]]$data), names(multiME[[i.col]]$data), 
+        labeledHeatmap(1-abs(dispd), names(multiME[[i.col]]$data), names(multiME[[i.col]]$data),
                        main = main, invertColors=FALSE,
                        colorLabels = colorLabels, zlim = zlimPreservation, colors = halfColors,
-                       setStdMargins = FALSE, 
+                       setStdMargins = FALSE,
                        textMatrix = printMtx, cex.text = cex.preservation, ...);
       } else {
         if (ipp==2) {
            dp = 1-abs(d);
            method = "Hyperbolic:";
         } else {
-           dp = 1-abs(cor.dif); 
+           dp = 1-abs(cor.dif);
            method = "Preservation:";
         }
         diag(dp) = 0;
@@ -5685,19 +5769,19 @@ plotEigengeneNetworks = function(
           if (barplotErrors) {
              errors = sqrt( (apply(dp^2, 2, sum)/(ncol(dp)-1) - means^2)/(ncol(dp)-2));
           } else {
-             errors = NULL; 
+             errors = NULL;
           }
-          labeledBarplot(means, names(multiME[[i.col]]$data), 
-                         main=paste(letter, "D=", signif(sum_dp,2)), 
+          labeledBarplot(means, names(multiME[[i.col]]$data),
+                         main=paste(letter, "D=", signif(sum_dp,2)),
                          ylim=c(0,1),
                          colorLabels = colorLabels, colored = coloredBarplot,
                          setStdMargins = FALSE, stdErrors = errors, ... )
         } else {
           sum_dp = sum(dp[upper.tri(dp)]);
           labeledBarplot(dp, names(multiME[[i.col]]$data),
-                         main=paste(letter, method, "sum = ", signif(sum_dp,3)), 
+                         main=paste(letter, method, "sum = ", signif(sum_dp,3)),
                          ylim=c(0,dim(dp)[[1]]),
-                         colorLabels = colorLabels, colored = coloredBarplot, 
+                         colorLabels = colorLabels, colored = coloredBarplot,
                          setStdMargins = FALSE, ... )
         }
       }
@@ -5714,10 +5798,10 @@ plotEigengeneNetworks = function(
 # Turn a numerical variable into a color indicator. x can be a matrix or a vector.
 # For discrete variables, consider also labels2colors.
 
-numbers2colors = function(x, 
-                     signed = NULL, 
+numbers2colors = function(x,
+                     signed = NULL,
                      centered = signed,
-                     lim = NULL, 
+                     lim = NULL,
                      commonLim = FALSE,
                      colors = if (signed) blueWhiteRed(100) else blueWhiteRed(100)[51:100],
                      naColor = "grey")
@@ -5744,7 +5828,7 @@ numbers2colors = function(x,
     } else {
       lim = as.matrix(cbind(apply(x, 2, min, na.rm = TRUE),  apply(x, 2, max, na.rm = TRUE)));
     }
-    if (commonLim) 
+    if (commonLim)
       lim = c(min(lim[, 1], na.rm = TRUE), max(lim[, 2], na.rm = TRUE));
   }
   if (is.null(dim(lim)))
@@ -5793,7 +5877,7 @@ numbers2colors = function(x,
   xInd[xInd==1] = 1-0.5/nColors;
   xCol[!mmEq] = colors[as.integer(xInd[!mmEq] * nColors) + 1];
   xCol[is.na(xCol)] = naColor;
-  
+
   xCol;
 }
 
@@ -5811,13 +5895,13 @@ numbers2colors = function(x,
   for (i in c(1:length(n)) ){
     if (n[i]<k) {out1[i] <- 0}
     else {out1[i] <- choose(n[i], k)}}
-  out1	
+  out1
 }
 
 
 # the following function computes the Rand index between 2 clusterings
 # assesses how similar two clusterings are
-randIndex <- function(tab, adjust=TRUE) 
+randIndex <- function(tab, adjust=TRUE)
 {
   a <- 0; b <- 0; c <- 0; d <- 0; nn <- 0
   m <- nrow(tab);
@@ -5858,7 +5942,7 @@ goodGenes = function(datExpr, useSamples = NULL, useGenes = NULL,
                      tol = NULL, verbose = 1, indent = 0)
 {
   datExpr = as.matrix(datExpr);
-  if (is.atomic(datExpr) && (mode(datExpr)!='numeric')) 
+  if (is.atomic(datExpr) && (mode(datExpr)!='numeric'))
      stop("datExpr must contain numeric data.");
 
   if (is.null(tol)) tol = 1e-10 * max(abs(datExpr), na.rm = TRUE)
@@ -5905,7 +5989,7 @@ goodSamples = function(datExpr, useSamples = NULL, useGenes = NULL,
   nGenes = sum(useGenes);
   nNAsSamples = rowSums(is.na(datExpr[useSamples, useGenes, drop = FALSE]));
   goodSamples = useSamples;
-  goodSamples[useSamples] = ((nNAsSamples < (1-minFraction)*nGenes) & 
+  goodSamples[useSamples] = ((nNAsSamples < (1-minFraction)*nGenes) &
                              (nGenes - nNAsSamples >= minNGenes));
   if (sum(goodSamples) < minNSamples)
     stop("Too few samples with valid expression levels for the required number of genes.");
@@ -5925,7 +6009,7 @@ goodGenesMS = function(multiExpr, useSamples = NULL, useGenes = NULL,
   dataSize = checkSets(multiExpr);
   nSets = dataSize$nSets;
   if (is.null(useGenes)) useGenes = rep(TRUE, dataSize$nGenes);
-  if (is.null(useSamples)) 
+  if (is.null(useSamples))
   {
     useSamples = list();
     for (set in 1:nSets) useSamples[[set]] = rep(TRUE, dataSize$nSamples[set]);
@@ -5958,7 +6042,7 @@ goodGenesMS = function(multiExpr, useSamples = NULL, useGenes = NULL,
     {
       var = colVars(expr1, na.rm = TRUE);
       nNAsGenes = colSums(is.na(expr1));
-      goodGenes[goodGenes][nNAsGenes > (1-minFraction)*nSamples[set] | var <= tol1^2 | 
+      goodGenes[goodGenes][nNAsGenes > (1-minFraction)*nSamples[set] | var <= tol1^2 |
                              (nSamples[set]-nNAsGenes < minNSamples)] = FALSE;
     }
   }
@@ -6002,7 +6086,7 @@ goodSamplesMS = function(multiExpr, useSamples = NULL, useGenes = NULL,
     if (sum(useGenes)==0) break;
     if (sum(goodSamples[[set]])==0) next;
     nNAsSamples = rowSums(is.na(multiExpr[[set]]$data[useSamples[[set]], useGenes, drop = FALSE]));
-    goodSamples[[set]][useSamples[[set]]] = 
+    goodSamples[[set]][useSamples[[set]]] =
           ((nNAsSamples < (1-minFraction) * nGenes) & (nGenes - nNAsSamples >= minNGenes));
     if (sum(goodSamples[[set]]) < minNSamples)
       stop("Too few samples with valid expression levels for the required number of genes in set", set);
@@ -6013,7 +6097,7 @@ goodSamplesMS = function(multiExpr, useSamples = NULL, useGenes = NULL,
   goodSamples;
 }
 
-goodSamplesGenes = function(datExpr, minFraction = 1/2, minNSamples = ..minNSamples, 
+goodSamplesGenes = function(datExpr, minFraction = 1/2, minNSamples = ..minNSamples,
                             minNGenes = ..minNGenes, tol = NULL,
                             verbose = 1, indent = 0)
 {
@@ -6045,7 +6129,7 @@ goodSamplesGenes = function(datExpr, minFraction = 1/2, minNSamples = ..minNSamp
   list(goodGenes = goodGenes, goodSamples = goodSamples, allOK = allOK);
 }
 
-goodSamplesGenesMS = function(multiExpr, minFraction = 1/2, minNSamples = ..minNSamples, 
+goodSamplesGenesMS = function(multiExpr, minFraction = 1/2, minNSamples = ..minNSamples,
                               minNGenes = ..minNGenes, tol = NULL, verbose = 2, indent = 0)
 {
   spaces = indentSpaces(indent)
@@ -6075,8 +6159,8 @@ goodSamplesGenesMS = function(multiExpr, minFraction = 1/2, minNSamples = ..minN
     nBadGenes = sum(!goodGenes);
     for (set in 1:nSets) nBadSamples[set] = sum(!goodSamples[[set]]);
     iter = iter + 1;
-    if (verbose > 2) 
-       printFlush(paste(spaces, "   ..bad gene count: ", nBadGenes, 
+    if (verbose > 2)
+       printFlush(paste(spaces, "   ..bad gene count: ", nBadGenes,
                         ", bad sample counts: ", paste(nBadSamples, collapse = ", "), sep=""));
   }
   allOK = (sum(c(nBadGenes, nBadSamples)) == 0)
@@ -6088,14 +6172,14 @@ goodSamplesGenesMS = function(multiExpr, minFraction = 1/2, minNSamples = ..minN
 # modified heatmap plot: allow specifying the hang parameter for both side and top dendrograms
 #
 #============================================================================================
-.heatmap = function (x, Rowv = NULL, Colv = if (symm) "Rowv" else NULL, 
-    distfun = dist, hclustfun = fastcluster::hclust, reorderfun = function(d, 
-        w) reorder(d, w), add.expr, symm = FALSE, revC = identical(Colv, 
-        "Rowv"), scale = c("row", "column", "none"), na.rm = TRUE, 
-    margins = c(1.2, 1.2), ColSideColors, RowSideColors, cexRow = 0.2 + 
-        1/log10(nr), cexCol = 0.2 + 1/log10(nc), labRow = NULL, 
-    labCol = NULL, main = NULL, xlab = NULL, ylab = NULL, keep.dendro = FALSE, 
-    verbose = getOption("verbose"), setLayout = TRUE, hang = 0.04, ...) 
+.heatmap = function (x, Rowv = NULL, Colv = if (symm) "Rowv" else NULL,
+    distfun = dist, hclustfun = fastcluster::hclust, reorderfun = function(d,
+        w) reorder(d, w), add.expr, symm = FALSE, revC = identical(Colv,
+        "Rowv"), scale = c("row", "column", "none"), na.rm = TRUE,
+    margins = c(1.2, 1.2), ColSideColors, RowSideColors, cexRow = 0.2 +
+        1/log10(nr), cexCol = 0.2 + 1/log10(nc), labRow = NULL,
+    labCol = NULL, main = NULL, xlab = NULL, ylab = NULL, keep.dendro = FALSE,
+    verbose = getOption("verbose"), setLayout = TRUE, hang = 0.04, ...)
 {
     scale <- if(symm && missing(scale)) "none" else match.arg(scale)
     if(length(di <- dim(x)) != 2 || !is.numeric(x))
@@ -6116,7 +6200,7 @@ goodSamplesGenesMS = function(multiExpr, minFraction = 1/2, minNSamples = ..minN
 
     ## get the dendrograms and reordering indices
     if (doRdend) {
-        if (inherits(Rowv, "dendrogram")) 
+        if (inherits(Rowv, "dendrogram"))
             ddr <- Rowv
         else {
             hcr <- hclustfun(distfun(x))
@@ -6125,15 +6209,15 @@ goodSamplesGenesMS = function(multiExpr, minFraction = 1/2, minNSamples = ..minN
               hcr$height = hcr$height-min(hcr$height) + hang * (max(hcr$height)-min(hcr$height));
             }
             ddr <- as.dendrogram(hcr, hang = hang)
-            if (!is.logical(Rowv) || Rowv) 
+            if (!is.logical(Rowv) || Rowv)
                 ddr <- reorderfun(ddr, Rowv)
         }
-        if (nr != length(rowInd <- order.dendrogram(ddr))) 
+        if (nr != length(rowInd <- order.dendrogram(ddr)))
             stop("row dendrogram ordering gave index of wrong length")
     }
     else rowInd <- 1:nr
     if (doCdend) {
-        if (inherits(Colv, "dendrogram")) 
+        if (inherits(Colv, "dendrogram"))
             ddc <- Colv
         else if (identical(Colv, "Rowv")) {
             if (nr != nc) stop("Colv = \"Rowv\" but nrow(x) != ncol(x)")
@@ -6148,7 +6232,7 @@ goodSamplesGenesMS = function(multiExpr, minFraction = 1/2, minNSamples = ..minN
             ddc <- as.dendrogram(hcc, hang = hang)
             if (!is.logical(Colv) || Colv) ddc <- reorderfun(ddc, Colv)
         }
-        if (nc != length(colInd <- order.dendrogram(ddc))) 
+        if (nc != length(colInd <- order.dendrogram(ddc)))
             stop("column dendrogram ordering gave index of wrong length")
     }
     else colInd <- 1:nc
@@ -6156,10 +6240,10 @@ goodSamplesGenesMS = function(multiExpr, minFraction = 1/2, minNSamples = ..minN
     ## reorder x
     x <- x[rowInd, colInd];
 
-    labRow <- if (is.null(labRow)) 
+    labRow <- if (is.null(labRow))
         if (is.null(rownames(x))) (1:nr)[rowInd] else rownames(x)
     else labRow[rowInd]
-    labCol <- if (is.null(labCol)) 
+    labCol <- if (is.null(labCol))
         if (is.null(colnames(x))) (1:nc)[colInd] else colnames(x)
     else labCol[colInd]
     if (scale == "row") {
@@ -6178,13 +6262,13 @@ goodSamplesGenesMS = function(multiExpr, minFraction = 1/2, minNSamples = ..minN
     lwid <- c(if (doRdend) 1 else 0.05, 4)
     lhei <- c((if (doCdend) 1 else 0.05) + if (!is.null(main)) 0.5 else 0, 4)
     if (!missing(ColSideColors)) {
-        if (!is.character(ColSideColors) || length(ColSideColors) != nc) 
+        if (!is.character(ColSideColors) || length(ColSideColors) != nc)
             stop("'ColSideColors' must be a character vector of length ncol(x)")
         lmat <- rbind(lmat[1, ] + 1, c(NA, 1), lmat[2, ] + 1)
         lhei <- c(lhei[1], 0.2, lhei[2])
     }
     if (!missing(RowSideColors)) {
-        if (!is.character(RowSideColors) || length(RowSideColors) != nr) 
+        if (!is.character(RowSideColors) || length(RowSideColors) != nr)
             stop("'RowSideColors' must be a character vector of length nrow(x)")
         lmat <- cbind(lmat[, 1] + 1, c(rep(NA, nrow(lmat) - 1), 1), lmat[, 2] + 1)
         lwid <- c(lwid[1], 0.2, lwid[2])
@@ -6214,7 +6298,7 @@ goodSamplesGenesMS = function(multiExpr, minFraction = 1/2, minNSamples = ..minN
         image(cbind(1:nc), col = ColSideColors[colInd], axes = FALSE)
     }
     par(mar = c(margins[1], 0, 0, margins[2]))
-    image(1:nc, 1:nr, x, xlim = 0.5 + c(0, nc), ylim = 0.5 + c(0, nr), axes = FALSE, 
+    image(1:nc, 1:nr, x, xlim = 0.5 + c(0, nc), ylim = 0.5 + c(0, nr), axes = FALSE,
           xlab = "", ylab = "", ...)
     axis(1, 1:nc, labels = labCol, las = 2, line = -0.5, tick = 0, cex.axis = cexCol)
     if (!is.null(xlab)) mtext(xlab, side = 1, line = margins[1] - 1.25)
@@ -6228,14 +6312,14 @@ goodSamplesGenesMS = function(multiExpr, minFraction = 1/2, minNSamples = ..minN
     }
     else frame()
     par(mar = c(0, 0, if (!is.null(main)) 1.8 else 0, margins[2]))
-    if (doCdend) 
+    if (doCdend)
     {
          .plotDendrogram(as.hclust(ddc), horiz = FALSE, labels = FALSE, axes = FALSE);
     #    plot(ddc, axes = FALSE, xaxs = "i", leaflab = "none" )
     }
     else if (!is.null(main)) frame()
     if (!is.null(main)) title(main, cex.main = 1.2 * op[["cex.main"]])
-    invisible(list(rowInd = rowInd, colInd = colInd, Rowv = if (keep.dendro && 
+    invisible(list(rowInd = rowInd, colInd = colInd, Rowv = if (keep.dendro &&
         doRdend) ddr, Colv = if (keep.dendro && doCdend) ddc))
 }
 
@@ -6247,7 +6331,7 @@ goodSamplesGenesMS = function(multiExpr, minFraction = 1/2, minNSamples = ..minN
 #If the option diag =TRUE, it also includes the diagonal elements of the symmetric #matrix. By default it
 # excludes the diagonal elements of a symmetric matrix.
 
-vectorizeMatrix=function(M, diag=FALSE) 
+vectorizeMatrix=function(M, diag=FALSE)
 {
   if ( is.null(dim(M)) )  stop("The input of the vectorize function is not a matrix or data frame.")
   if ( length(dim(M))!=2 )  stop("The input of the vectorize function is not a matrix or data frame.")
@@ -6257,9 +6341,9 @@ vectorizeMatrix=function(M, diag=FALSE)
       M=as.matrix(M)
       Mtranspose=t(M)
       abs.difference=max( abs(M-Mtranspose),na.rm = TRUE)
-      if (abs.difference<10^(-14) ) 
+      if (abs.difference<10^(-14) )
       {
-          out=M[upper.tri(M,diag)]  
+          out=M[upper.tri(M,diag)]
       }
       else
           out=as.vector(M);
@@ -6275,7 +6359,7 @@ scaleFreeFitIndex=function(k,nBreaks=10, removeFirst = FALSE)
         discretized.k = cut(k, nBreaks)
         dk = tapply(k, discretized.k, mean)
         p.dk = as.vector(tapply(k, discretized.k, length)/length(k))
-        breaks1 = seq(from = min(k), to = max(k), 
+        breaks1 = seq(from = min(k), to = max(k),
             length = nBreaks + 1)
         hist1 = hist(k, breaks = breaks1, plot = FALSE, right = TRUE)
         dk2 = hist1$mids
@@ -6291,7 +6375,7 @@ scaleFreeFitIndex=function(k,nBreaks=10, removeFirst = FALSE)
         lm1 = lm(log.p.dk ~ log.dk)
         lm2 = lm(log.p.dk ~ log.dk + I(10^log.dk))
    datout=data.frame(Rsquared.SFT=summary(lm1)$r.squared,
-                     slope.SFT=summary(lm1)$coefficients[2, 1], 
+                     slope.SFT=summary(lm1)$coefficients[2, 1],
                      truncatedExponentialAdjRsquared= summary(lm2)$adj.r.squared)
    datout
 } # end of function scaleFreeFitIndex
@@ -6310,26 +6394,26 @@ standardScreeningCensoredTime= function (
 datExpr=data.frame(datExpr)
     no.Columns = dim(as.matrix(datExpr))[[2]]
     m = dim(as.matrix(datExpr))[[1]]
-    if (length(time) != m) 
+    if (length(time) != m)
         stop("The length of the time variable does not equal the number of rows of datExpr.\nConsider transposing datExpr.")
-    if (length(event) != m) 
+    if (length(event) != m)
         stop("The length of the event variable does not equal the number of rows of datExpr.\nConsider transposing datExpr.")
     if (fastCalculation) {
         fittemp = summary(coxph(Surv(time, event) ~ 1, na.action = na.exclude))
         CumHazard = predict(fittemp, type = "expected")
         martingale1 = event - CumHazard
-        deviance0 = ifelse(event == 0, 2 * CumHazard, -2 * log(CumHazard) + 
+        deviance0 = ifelse(event == 0, 2 * CumHazard, -2 * log(CumHazard) +
             2 * CumHazard - 2)
         devianceresidual = sign(martingale1) * sqrt(deviance0)
-        corDeviance = as.numeric(cor(devianceresidual, datExpr, 
+        corDeviance = as.numeric(cor(devianceresidual, datExpr,
             use = "p"))
         no.nonMissing = sum(!is.na(time))
         pvalueDeviance = corPvalueFisher(cor = corDeviance, nSamples = no.nonMissing)
        qvalueDeviance=rep(NA, length(pvalueDeviance) )
-                   rest1= ! is.na( pvalueDeviance) 
+                   rest1= ! is.na( pvalueDeviance)
           qvalueDeviance [rest1] = qvalue(pvalueDeviance [rest1])$qvalues
 
-        datout = data.frame(ID = dimnames(datExpr)[[2]], pvalueDeviance, 
+        datout = data.frame(ID = dimnames(datExpr)[[2]], pvalueDeviance,
             qvalueDeviance, corDeviance)
     }
     if (!fastCalculation) {
@@ -6339,21 +6423,21 @@ datExpr=data.frame(datExpr)
         CI.LowerLimitHR = rep(NA, no.Columns)
         C.index = rep(NA, no.Columns)
         pvalueLogrank = rep(NA, no.Columns)
-        pValuesDichotomized = data.frame(matrix(NA, nrow = no.Columns, 
+        pValuesDichotomized = data.frame(matrix(NA, nrow = no.Columns,
             ncol = length(percentiles)))
-        names(pValuesDichotomized) = paste("pValueDichotPercentile", 
+        names(pValuesDichotomized) = paste("pValueDichotPercentile",
             as.character(percentiles), sep = "")
         fittemp = summary(coxph(Surv(time, event) ~ 1, na.action = na.exclude))
         CumHazard = predict(fittemp, type = "expected")
         martingale1 = event - CumHazard
-        deviance0 = ifelse(event == 0, 2 * CumHazard, -2 * log(CumHazard) + 
+        deviance0 = ifelse(event == 0, 2 * CumHazard, -2 * log(CumHazard) +
             2 * CumHazard - 2)
         devianceresidual = sign(martingale1) * sqrt(deviance0)
-        corDeviance = as.numeric(cor(devianceresidual, datExpr, 
+        corDeviance = as.numeric(cor(devianceresidual, datExpr,
             use = "p"))
         no.nonMissing = sum(!is.na(time))
         pvalueDeviance = corPvalueFisher(cor = corDeviance, nSamples = no.nonMissing)
-      
+
 
 for (i in 1:no.Columns) {
             Column = as.numeric(as.matrix(datExpr[, i]))
@@ -6367,18 +6451,18 @@ for (i in 1:no.Columns) {
                 C.index[i] = NA
                  }  # end of              if (var1 == 0 | is.na(var1))
             if (var1 != 0 & !is.na(var1)) {
-                cox1 = summary(coxph(Surv(time, event) ~ Column, 
+                cox1 = summary(coxph(Surv(time, event) ~ Column,
                   na.action = na.exclude))
                 pvalueWald[i] = cox1$coef[5]
                 pvalueLogrank[i] = cox1$sctest[[3]]
                 HazardRatio[i] = exp(cox1$coef[1])
-                CI.UpperLimitHR[i] = exp(cox1$coef[1] + 1.96 * 
+                CI.UpperLimitHR[i] = exp(cox1$coef[1] + 1.96 *
                   cox1$coef[3])
-                CI.LowerLimitHR[i] = exp(cox1$coef[1] - 1.96 * 
+                CI.LowerLimitHR[i] = exp(cox1$coef[1] - 1.96 *
                   cox1$coef[3])
-                C.index[i] = rcorr.cens(Column, Surv(time, event), 
+                C.index[i] = rcorr.cens(Column, Surv(time, event),
                   outx = TRUE)[[1]]
-            } # end of   if (var1 != 0 & !is.na(var1)) 
+            } # end of   if (var1 != 0 & !is.na(var1))
 
 
             if (dichotomizationResults) {
@@ -6390,49 +6474,49 @@ for (i in 1:no.Columns) {
                     pValuesDichotomized[i, j] = NA
                   } # end of if
                   if (var1 != 0 & !is.na(var1)) {
-                    coxh = summary(coxph(Surv(time, event) ~ 
+                    coxh = summary(coxph(Surv(time, event) ~
                       ColumnDichot, na.action = na.exclude))
                     pValuesDichotomized[i, j] = coxh$coef[5]
                   } # end of if
                 } # end of for (j
-                MinimumDichotPvalue = apply(pValuesDichotomized, 
+                MinimumDichotPvalue = apply(pValuesDichotomized,
                   1, min, na.rm = TRUE)
                } # end of if (dichotomizationResults)
-            
+
 
 
 if (!qValues) {
-                datout = data.frame(ID = dimnames(datExpr)[[2]], 
-                  pvalueWald, pvalueLogrank, pvalueDeviance, 
-                  corDeviance, HazardRatio, CI.LowerLimitHR, 
+                datout = data.frame(ID = dimnames(datExpr)[[2]],
+                  pvalueWald, pvalueLogrank, pvalueDeviance,
+                  corDeviance, HazardRatio, CI.LowerLimitHR,
                   CI.UpperLimitHR, C.index)
             }      # end of      if (!qValues) {
 
-        } # end of for (i in 1:no.Columns) 
+        } # end of for (i in 1:no.Columns)
 
 
   if (qValues) {
        qvalueWald=rep(NA, length(pvalueWald) )
-                   rest1= ! is.na( pvalueWald) 
+                   rest1= ! is.na( pvalueWald)
           qvalueWald [rest1] = qvalue(pvalueWald[rest1])$qvalues
 
        qvalueLogrank=rep(NA, length(pvalueLogrank) )
-                   rest1= ! is.na( pvalueLogrank) 
+                   rest1= ! is.na( pvalueLogrank)
           qvalueLogrank [rest1] = qvalue(pvalueLogrank[rest1])$qvalues
 
        qvalueDeviance=rep(NA, length(pvalueDeviance) )
-                   rest1= ! is.na( pvalueDeviance) 
+                   rest1= ! is.na( pvalueDeviance)
           qvalueDeviance [rest1] = qvalue(pvalueDeviance[rest1])$qvalues
 
-                datout = data.frame(ID = dimnames(datExpr)[[2]], 
-                  pvalueWald, qvalueWald, pvalueLogrank, qvalueLogrank, 
-                  pvalueDeviance,       qvalueDeviance , corDeviance, HazardRatio, CI.LowerLimitHR, 
+                datout = data.frame(ID = dimnames(datExpr)[[2]],
+                  pvalueWald, qvalueWald, pvalueLogrank, qvalueLogrank,
+                  pvalueDeviance,       qvalueDeviance , corDeviance, HazardRatio, CI.LowerLimitHR,
                   CI.UpperLimitHR, C.index)
             } # end of  if (qValues)
 
 
         if (dichotomizationResults) {
-            datout = data.frame(datout, MinimumDichotPvalue, 
+            datout = data.frame(datout, MinimumDichotPvalue,
                 pValuesDichotomized)
         }
     }
@@ -6446,12 +6530,12 @@ if (!qValues) {
 #
 #================================================================================
 
-standardScreeningNumericTrait= function (datExpr, yNumeric, corFnc = cor, 
+standardScreeningNumericTrait= function (datExpr, yNumeric, corFnc = cor,
                                          corOptions = list(use = 'p'),
                                          alternative = c("two.sided", "less", "greater"),
-                                         qValues = TRUE, 
-                                         areaUnderROC = TRUE) 
-{ 
+                                         qValues = TRUE,
+                                         areaUnderROC = TRUE)
+{
   datExpr=as.matrix(datExpr)
   nGenes = ncol(datExpr);
   nSamples = nrow(datExpr);
@@ -6461,7 +6545,7 @@ standardScreeningNumericTrait= function (datExpr, yNumeric, corFnc = cor,
   pvalueStudent = rep(NA, nGenes);
   AreaUnderROC = rep(NA, nGenes);
   nPresent = Z = rep(NA, nGenes);
-       
+
   corFnc = match.fun(corFnc);
   corOptions$y = yNumeric;
   corOptions$x = as.matrix(datExpr);
@@ -6488,13 +6572,13 @@ standardScreeningNumericTrait= function (datExpr, yNumeric, corFnc = cor,
 
   Z = 0.5 * log( (1+corPearson)/(1-corPearson) ) * sqrt(nPresent -2 );
 
-  if (areaUnderROC) for (i in 1:dim(datExpr)[[2]]) 
+  if (areaUnderROC) for (i in 1:dim(datExpr)[[2]])
   {
     AreaUnderROC[i] = rcorr.cens(datExpr[, i], yNumeric, outx = TRUE)[[1]]
   }
 
   q.Student=rep(NA, length(pvalueStudent) )
-  rest1= ! is.na(pvalueStudent) 
+  rest1= ! is.na(pvalueStudent)
   if (qValues)
   {
     x = try({ q.Student[rest1] = qvalue(pvalueStudent[rest1])$qvalues }, silent = TRUE)
@@ -6538,9 +6622,9 @@ spaste = function(...) { paste(..., sep = "") }
 
 metaZfunction=function(datZ, columnweights=NULL  )
 {
-  if ( ! is.null(columnweights) )  {datZ=   t(t(datZ)* columnweights)   } 
+  if ( ! is.null(columnweights) )  {datZ=   t(t(datZ)* columnweights)   }
   datZpresent= !is.na(datZ)+0.0
-  if ( ! is.null(columnweights) )  {datZpresent=   t(t(datZpresent)* columnweights)   } 
+  if ( ! is.null(columnweights) )  {datZpresent=   t(t(datZpresent)* columnweights)   }
   sumZ=as.numeric(rowSums(datZ, na.rm=TRUE))
   variance= as.numeric(rowSums(datZpresent^2))
   sumZ/sqrt(variance)
@@ -6552,12 +6636,12 @@ metaZfunction=function(datZ, columnweights=NULL  )
 #
 #================================================================================
 
-rankPvalue=function(datS, columnweights = NULL, na.last = "keep", ties.method = "average", 
-    calculateQvalue = TRUE, pValueMethod = "all") 
+rankPvalue=function(datS, columnweights = NULL, na.last = "keep", ties.method = "average",
+    calculateQvalue = TRUE, pValueMethod = "all")
 {
     no.rows = dim(datS)[[1]]
     no.cols = dim(datS)[[2]]
-    if (!is.null(columnweights) & no.cols != length(columnweights)) 
+    if (!is.null(columnweights) & no.cols != length(columnweights))
         stop("The number of components of the vector columnweights is unequal to the number of columns of datS. Hint: consider transposing datS. ")
 
 if (!is.null(columnweights) ) {
@@ -6574,7 +6658,7 @@ columnweights= columnweights/sum( columnweights)
             R1 = rank(x, ties.method = ties.method, na.last = na.last)
             (R1-.5)/max(R1, na.rm = TRUE)
         }
- 
+
         datrankslow = apply(datS, 2, percentilerank1)
         if (!is.null(columnweights)) {
             datrankslow = t(t(datrankslow) * columnweights)
@@ -6583,7 +6667,7 @@ columnweights= columnweights/sum( columnweights)
         if (!is.null(columnweights)) {
             datSpresent = t(t(datSpresent) * columnweights)
         }
-        expectedsum = rowSums(datSpresent, na.rm = TRUE) * 
+        expectedsum = rowSums(datSpresent, na.rm = TRUE) *
             0.5
         varsum = rowSums(datSpresent^2, na.rm = TRUE) * 1/12
         observed.sumPercentileslow = as.numeric(rowSums(datrankslow, na.rm = TRUE))
@@ -6610,7 +6694,7 @@ columnweights= columnweights/sum( columnweights)
             qValueExtreme = pmin(qValueLow, qValueHigh)
             datq = data.frame(qValueExtreme, qValueLow, qValueHigh)
             datoutrank = data.frame(datoutrank, datq)
-            names(datoutrank) = paste(names(datoutrank), "Rank", 
+            names(datoutrank) = paste(names(datoutrank), "Rank",
                 sep = "")
         }
     }
@@ -6648,7 +6732,7 @@ columnweights= columnweights/sum( columnweights)
             datq = data.frame(qValueExtreme, qValueLow, qValueHigh)
             datoutscale = data.frame(datoutscale, datq)
         }
-        names(datoutscale) = paste(names(datoutscale), "Scale", 
+        names(datoutscale) = paste(names(datoutscale), "Scale",
             sep = "")
     }
     if (pValueMethod == "rank") {
@@ -6657,7 +6741,7 @@ columnweights= columnweights/sum( columnweights)
     if (pValueMethod == "scale") {
         datout = datoutscale
     }
-    if (pValueMethod != "rank" & pValueMethod != "scale") 
+    if (pValueMethod != "rank" & pValueMethod != "scale")
         datout = data.frame(datoutrank, datoutscale)
     datout
 } # End of function
@@ -6689,7 +6773,7 @@ qvalue.restricted = function(p, trapErrors = TRUE, ...)
   if (inherits(qx, "try-error"))
   {
     if (!trapErrors) stop(qx);
-  } else 
+  } else
     q[fin] = qx;
   q;
 }
@@ -6735,7 +6819,7 @@ qvalue.restricted = function(p, trapErrors = TRUE, ...)
 consensusKME = function(multiExpr, moduleLabels, multiEigengenes = NULL, consensusQuantile = 0,
                         signed = TRUE,
                         useModules = NULL,
-                        metaAnalysisWeights = NULL, 
+                        metaAnalysisWeights = NULL,
                         corAndPvalueFnc = corAndPvalue, corOptions = list(),
                         corComponent = "cor", getQvalues = FALSE,
                         useRankPvalue = TRUE,
@@ -6756,7 +6840,7 @@ consensusKME = function(multiExpr, moduleLabels, multiEigengenes = NULL, consens
 
   if (!is.null(useModules))
   {
-    if (greyLabel %in% useModules) 
+    if (greyLabel %in% useModules)
       stop(paste("Grey module (or module 0) cannot be used with 'useModules'.\n",
                  "   Use 'excludeGrey = FALSE' to obtain results for the grey module as well. "));
     keep = moduleLabels %in% useModules;
@@ -6766,7 +6850,7 @@ consensusKME = function(multiExpr, moduleLabels, multiEigengenes = NULL, consens
   }
 
   if (is.null(multiEigengenes))
-    multiEigengenes = multiSetMEs(multiExpr, universalColors = moduleLabels, verbose = 0, 
+    multiEigengenes = multiSetMEs(multiExpr, universalColors = moduleLabels, verbose = 0,
                                   excludeGrey = excludeGrey, grey = greyLabel);
 
   modLevels = substring(colnames(multiEigengenes[[1]]$data), 3);
@@ -6775,7 +6859,7 @@ consensusKME = function(multiExpr, moduleLabels, multiEigengenes = NULL, consens
   kME = p = Z = nObs = array(NA, dim = c(nGenes, nModules, nSets));
 
   corOptions$alternative = c("two.sided", "greater")[signed+1];
-  
+
   haveZs = FALSE;
   for (set in 1:nSets)
   {
@@ -6789,7 +6873,7 @@ consensusKME = function(multiExpr, moduleLabels, multiEigengenes = NULL, consens
     kME[, , set] = cp[[corComp]]
     p[, , set] = cp[[pComp]];
     if (!is.null(cp$Z)) { Z[, , set] = cp$Z; haveZs = TRUE}
-    if (!is.null(cp$nObs)) 
+    if (!is.null(cp$nObs))
     {
        nObs[, , set] = cp$nObs;
     } else
@@ -6815,7 +6899,7 @@ consensusKME = function(multiExpr, moduleLabels, multiEigengenes = NULL, consens
     } else
       weights = array( rep(metaAnalysisWeights, rep(nGenes*nModules, nSets)),
                              dim = c(nGenes, nModules, nSets));
-    kME.weightedAverage[, m, ] = rowSums( kME * weights, na.rm = TRUE, dims = 2) / 
+    kME.weightedAverage[, m, ] = rowSums( kME * weights, na.rm = TRUE, dims = 2) /
                                     rowSums(weights, dims = 2, na.rm = TRUE)
   }
 
@@ -6827,10 +6911,10 @@ consensusKME = function(multiExpr, moduleLabels, multiEigengenes = NULL, consens
      kME.consensus.2 = apply(kME, c(1,2), quantile, prob = 1-consensusQuantile, na.rm = TRUE);
      kME.median = apply(kME, c(1,2), median, na.rm = TRUE);
   } else {
-    kME.consensus.1 = matrix( 
+    kME.consensus.1 = matrix(
                       colQuantileC(t(matrix(kME, nGenes * nModules, nSets)), p = consensusQuantile),
                       nGenes, nModules);
-    kME.consensus.2 = matrix( 
+    kME.consensus.2 = matrix(
                       colQuantileC(t(matrix(kME, nGenes * nModules, nSets)), p = 1-consensusQuantile),
                       nGenes, nModules);
     kME.median = matrix(colQuantileC(t(matrix(kME, nGenes * nModules, nSets)), p = 0.5),
@@ -6857,7 +6941,7 @@ consensusKME = function(multiExpr, moduleLabels, multiEigengenes = NULL, consens
       if (m<=nPowers) {
         weights = nObs^powers[m]
       } else
-        weights = array( rep(metaAnalysisWeights, rep(nGenes*nModules, nSets)), 
+        weights = array( rep(metaAnalysisWeights, rep(nGenes*nModules, nSets)),
                              dim = c(nGenes, nModules, nSets));
 
       Z1 = rowSums( Z * weights, na.rm = TRUE, dims = 2) / sqrt(rowSums(weights^2, na.rm = TRUE, dims = 2))
@@ -6875,10 +6959,10 @@ consensusKME = function(multiExpr, moduleLabels, multiEigengenes = NULL, consens
       }
     }
     dim(Z.kME.meta) = dim(p.kME.meta) = c(nGenes* nWeights, nModules);
-    if (getQvalues) 
+    if (getQvalues)
     {
         dim(q.kME.meta) = c(nGenes * nWeights, nModules);
-    } else 
+    } else
         q.kME.meta = NULL;
   } else {
     Z.kME.meta = p.kME.meta = q.kME.meta = NULL;
@@ -6908,7 +6992,7 @@ consensusKME = function(multiExpr, moduleLabels, multiEigengenes = NULL, consens
       colnames(rp1) = spaste(colnames(rp1), ".ME", modLevels[mod], ".", weightNames[m]);
       if (mod==1 && m==1) {
         rp = rp1;
-      } else 
+      } else
         rp = cbind(rp, rp1);
     }
   }
@@ -6928,19 +7012,19 @@ consensusKME = function(multiExpr, moduleLabels, multiEigengenes = NULL, consens
 
   dimnames(kME) = list( mtd.colnames(multiExpr), spaste("k", mtd.colnames(multiEigengenes)),
                                       setNames);
-                                     
+
   dimnames(p) = list( mtd.colnames(multiExpr), spaste("p.k", mtd.colnames(multiEigengenes)),
                                       setNames);
 
-  if (getQvalues) 
+  if (getQvalues)
     dimnames(q) = list( mtd.colnames(multiExpr), spaste("q.k", mtd.colnames(multiEigengenes)),
                                       setNames);
 
-  if (haveZs) 
+  if (haveZs)
     dimnames(Z) = list( mtd.colnames(multiExpr), spaste("Z.k", mtd.colnames(multiEigengenes)),
                                       setNames);
 
-                                     
+
   varList = list(kME = kME, p = p, q = if (getQvalues) q else NULL, Z = if (haveZs) Z else NULL);
   varList.interleaved = lapply(varList, function(arr)
   {
@@ -6966,22 +7050,22 @@ consensusKME = function(multiExpr, moduleLabels, multiEigengenes = NULL, consens
              p.kME.meta,
              q.kME.meta);
 
-  combinedMeta = matrix(combinedMeta.0, nGenes, 
+  combinedMeta = matrix(combinedMeta.0, nGenes,
                             (1 + nWeights + (2*haveZs + haveZs*getQvalues)*nWeights) * nModules);
-  metaNames = c("consensus.kME", 
-                spaste("weightedAverage.", weightNames, ".kME"), 
-                spaste("meta.Z.", weightNames, ".kME"), 
+  metaNames = c("consensus.kME",
+                spaste("weightedAverage.", weightNames, ".kME"),
+                spaste("meta.Z.", weightNames, ".kME"),
                 spaste("meta.p.", weightNames, ".kME"),
                 spaste("meta.q.", weightNames, ".kME")
-                )[ c(rep(TRUE, nWeights+1), rep(haveZs, nWeights), rep(haveZs, nWeights), 
+                )[ c(rep(TRUE, nWeights+1), rep(haveZs, nWeights), rep(haveZs, nWeights),
                                rep(haveZs && getQvalues, nWeights))];
   nMetaVars = length(metaNames);
-  colnames(combinedMeta) = spaste (rep(metaNames, nModules), 
+  colnames(combinedMeta) = spaste (rep(metaNames, nModules),
                                    rep(modLevels, rep(nMetaVars, nModules)));
 
   if (useRankPvalue) {
      out = data.frame(ID = ID, combinedMeta, rp, recast);
-  } else 
+  } else
      out = data.frame(ID = ID, combinedMeta, recast);
 
   out
@@ -7002,7 +7086,7 @@ consensusKME = function(multiExpr, moduleLabels, multiEigengenes = NULL, consens
   bin;
 }
 
-metaAnalysis = function(multiExpr, multiTrait, 
+metaAnalysis = function(multiExpr, multiTrait,
                         binary = NULL,
                         #consensusQuantile = 0,
                         metaAnalysisWeights = NULL,
@@ -7011,8 +7095,8 @@ metaAnalysis = function(multiExpr, multiTrait,
                         getAreaUnderROC = FALSE,
                         useRankPvalue = TRUE,
                         rankPvalueOptions = list(),
-                        setNames = NULL, 
-                        kruskalTest = FALSE, var.equal = FALSE, 
+                        setNames = NULL,
+                        kruskalTest = FALSE, var.equal = FALSE,
                         metaKruskal = kruskalTest,
                         na.action = "na.exclude")
 {
@@ -7042,7 +7126,7 @@ metaAnalysis = function(multiExpr, multiTrait,
   if (is.null(setNames))
      setNames = spaste("Set_", c(1:nSets));
 
-  if (metaKruskal && !kruskalTest) 
+  if (metaKruskal && !kruskalTest)
      stop("Kruskal statistic meta-analysis requires kruskal test. Use kruskalTest=TRUE.");
 
   if (is.null(binary)) binary = .isBinary(multiTrait);
@@ -7062,11 +7146,11 @@ metaAnalysis = function(multiExpr, multiTrait,
     if (binary)
     {
       setResults[[set]] = standardScreeningBinaryTrait(multiExpr[[set]]$data,
-                            as.vector(multiTrait[[set]]$data), kruskalTest = kruskalTest, 
+                            as.vector(multiTrait[[set]]$data), kruskalTest = kruskalTest,
                             qValues = getQvalues, var.equal = var.equal, na.action = na.action,
                             corFnc = corFnc, corOptions = corOptions);
       trafo = TRUE;
-      if (metaKruskal) 
+      if (metaKruskal)
       {
         metaStat = "stat.Kruskal.signed";
         metaP = "pvaluekruskal";
@@ -7076,8 +7160,8 @@ metaAnalysis = function(multiExpr, multiTrait,
       }
     } else {
       setResults[[set]] = standardScreeningNumericTrait(multiExpr[[set]]$data,
-                            as.vector(multiTrait[[set]]$data), qValues = getQvalues, 
-                            corFnc = corFnc, corOptions = corOptions, 
+                            as.vector(multiTrait[[set]]$data), qValues = getQvalues,
+                            corFnc = corFnc, corOptions = corOptions,
                             areaUnderROC = getAreaUnderROC);
       metaStat = "Z";
       trafo = FALSE;
@@ -7087,7 +7171,7 @@ metaAnalysis = function(multiExpr, multiTrait,
   comb = NULL;
   for (set in 1:nSets)
   {
-    if (set==1) 
+    if (set==1)
     {
       comb =  setResults[[set]] [, -1];
       ID = setResults[[set]] [, 1];
@@ -7181,7 +7265,7 @@ metaAnalysis = function(multiExpr, multiTrait,
       # Output a warning if the compression loses information.
       nDifferent = apply(weights, 2, function(x) {length(unique(x)) });
       if (any(nDifferent)>1)
-        printFlush(paste("Warning in metaAnalysis: rankPvalue requires compressed weights.\n", 
+        printFlush(paste("Warning in metaAnalysis: rankPvalue requires compressed weights.\n",
                          "Some weights may not be entirely accurate."));
       rankPvalueOptions$columnweights = colMeans(weights, na.rm = TRUE);
       rankPvalueOptions$columnweights = rankPvalueOptions$columnweights / sum(rankPvalueOptions$columnweights)
@@ -7309,7 +7393,7 @@ shortenStrings = function(strings, maxLength = 25, minLength = 10, split = " ", 
 {
   dims = dim(strings);
   dnames = dimnames(strings);
-  if (is.data.frame(strings)) 
+  if (is.data.frame(strings))
   {
     strings = as.matrix(strings);
     outputDF = TRUE;
@@ -7334,13 +7418,13 @@ shortenStrings = function(strings, maxLength = 25, minLength = 10, split = " ", 
   }
   for (l in 1:n)
   {
-    if (nchar(strings[l]) <= maxLength) 
+    if (nchar(strings[l]) <= maxLength)
     {
       newLabels[l] = strings[l];
     } else {
       splits.1 = splitPositions[[l]];
       suitableSplits = which(splits.1 > minLength & splits.1 <= maxLength);
-      if (length(suitableSplits) > 0) 
+      if (length(suitableSplits) > 0)
       {
         splitPosition = max(splits.1[suitableSplits]);
       } else {
@@ -7354,5 +7438,5 @@ shortenStrings = function(strings, maxLength = 25, minLength = 10, split = " ", 
   dimnames(newLabels) = dnames;
   if (outputDF) as.data.frame(newLabels) else newLabels;
 }
-  
+
 
