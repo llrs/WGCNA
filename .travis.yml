@@ -11,5 +11,4 @@ os:
 - linux
 
 r:
-- release
 - bioc-release
