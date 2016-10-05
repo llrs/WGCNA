@@ -1,0 +1,17 @@
+language: R
+r: bioc-release
+cache: packages
+r_packages:
+  - covr
+sudo: required
+after_success:
+  - Rscript -e 'library(covr); codecov()'
+
+os:
+- linux
+- osx
+
+r:
+- release
+- oldrelease
+- devel
