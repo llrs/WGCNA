@@ -617,9 +617,9 @@ modulePreservation = function(
             fixStatNames = colnames(datout[[1]]$accuracy[[2]])
             fixModuleNames = rownames(datout[[1]]$accuracy[[2]])
             dimnames(permOut[[iref]][[tnet]]$regStats) = list(regModuleNames[[iref]][[tnet]], regStatNames,
-                                                             spaste("Permutation.", c(1:nPermutations)))
+                                                             paste0("Permutation.", c(1:nPermutations)))
             dimnames(permOut[[iref]][[tnet]]$fixStats) = list(fixModuleNames, fixStatNames,
-                                                             spaste("Permutation.", c(1:nPermutations)))
+                                                             paste0("Permutation.", c(1:nPermutations)))
             permutationsPresent[tnet, iref] = TRUE
           } else {
             regModuleNames[[iref]][[tnet]] = NA
@@ -1437,14 +1437,14 @@ modulePreservation = function(
           if (dataIsExpr)
           {
             stats = .coreCalcForExpr(datRef, datRefP, datTest, colorRef_2, opt)
-            interPresNames = spaste(corFnc, c(".kIM", ".kME", ".kMEall", 
-                                             spaste(".", corFnc), ".clusterCoeff", ".MAR"))
+            interPresNames = paste0(corFnc, c(".kIM", ".kME", ".kMEall", 
+                                             paste0(".", corFnc), ".clusterCoeff", ".MAR"))
             measureNames = c("propVarExplained", "meanSignAwareKME", "separability", 
                              "meanSignAwareCorDat", "meanAdj", "meanClusterCoeff", "meanMAR")
  
           } else {
             stats = .coreCalcForAdj(datRef, datRefP, datTest, colorRef_2, opt)
-            interPresNames = spaste(corFnc, c(".kIM", ".kME", ".kIMall", ".adj", ".clusterCoeff", ".MAR"))
+            interPresNames = paste0(corFnc, c(".kIM", ".kME", ".kIMall", ".adj", ".clusterCoeff", ".MAR"))
             measureNames = c("propVarExplained", "meanKIM", "separability", 
                              "meanSignAwareCorDat", "meanAdj", "meanClusterCoeff", "meanMAR")
           }

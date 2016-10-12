@@ -8,7 +8,7 @@ nReq = length(reqPackages)
 
 for (r in 1:nReq)
 {
-  expression = spaste('require("', reqPackages[r], '", quietly = TRUE)');
+  expression = paste0('require("', reqPackages[r], '", quietly = TRUE)');
   ok = eval(parse(text = expression))
   if (!ok) stop("The function requires R package infotheo, minet and entropy. Please install these packages first.")
 }

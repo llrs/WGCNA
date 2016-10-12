@@ -98,7 +98,7 @@ votingLinearPredictor = function(x, y, xtest = NULL,
     
   if (is.null(rownames(x)))
   {
-    sampleNames = spaste("Sample.", c(1:nSamples))
+    sampleNames = paste0("Sample.", c(1:nSamples))
   } else
     sampleNames = rownames(x)
    
@@ -108,7 +108,7 @@ votingLinearPredictor = function(x, y, xtest = NULL,
     nTestSamples = nrow(xtest)
     if (is.null(rownames(xtest)))
     {
-      testSampleNames = spaste("testSample.", c(1:nTestSamples))
+      testSampleNames = paste0("testSample.", c(1:nTestSamples))
     } else
       testSampleNames = rownames(xtest)
     if (ncol(x)!=ncol(xtest))
@@ -117,17 +117,17 @@ votingLinearPredictor = function(x, y, xtest = NULL,
 
   if (is.null(colnames(y)))
   {
-    traitNames = spaste("Response.", c(1:nTraits))
+    traitNames = paste0("Response.", c(1:nTraits))
   } else
     traitNames = colnames(y)
 
   if (is.null(colnames(x)))
   {
-    featureNames = spaste("Feature.", c(1:nVars))
+    featureNames = paste0("Feature.", c(1:nVars))
   } else
     featureNames = colnames(x)
 
-  powerNames = spaste("Power.", featureWeightPowers)
+  powerNames = paste0("Power.", featureWeightPowers)
    
 
   spaces = indentSpaces(indent)
@@ -483,7 +483,7 @@ removePrincipalComponents = function(x, n)
   if (sum(is.na(x)) > 0) x = t(impute.knn(t(x))$data)
   svd = svd(x, nu = n, nv = 0)
   PCs = as.data.frame(svd$u)
-  names(PCs) = spaste("PC", c(1:n))
+  names(PCs) = paste0("PC", c(1:n))
   fit = lm(x~., data = PCs)
   res = residuals(fit)
   res

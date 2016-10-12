@@ -11,7 +11,7 @@
 
   if (.useNThreads()==1 && .nProcessorsOnline() > 1)
   {
-   printFlush(spaste(
+   printFlush(paste0(
          "*    Important note: It appears that your system supports multi-threading,\n",
          "*    but it is not enabled within WGCNA in R. \n",
          "*    To allow multi-threading within WGCNA with all available cores, use \n",
@@ -19,7 +19,7 @@
          "*          allowWGCNAThreads()\n",
          "*\n",
          "*    within R. Use disableWGCNAThreads() to disable threading if necessary.\n",
-         "*    Alternatively, set the following environment variable on your system:\n", 
+         "*    Alternatively, set the following environment variable on your system:\n",
          "*\n",
          "*          ", .threadAllowVar, "=<number_of_processors>\n",
          "*\n",
@@ -29,9 +29,9 @@
          "*\n",
          "*    To set the environment variable in linux bash shell, type \n",
          "*\n",
-         "*           export ", .threadAllowVar, "=", .nProcessorsOnline(), 
+         "*           export ", .threadAllowVar, "=", .nProcessorsOnline(),
          "\n*",
-         "\n*     before running R. Other operating systems or shells will", 
+         "\n*     before running R. Other operating systems or shells will",
          "\n*     have a similar command to achieve the same aim.\n*"))
   }
   printFlush("==========================================================================\n\n")

@@ -463,7 +463,7 @@ collapseRows <- function(datET, rowGroup, rowID, method="MaxMean", connectivityB
 		printFlush("       *Average* or *function* for a user-defined function.")
 		return(0)
 	}
-        if (imethod > 2) method = spaste(".", method)
+        if (imethod > 2) method = paste0(".", method)
 	if (method=="function")
         {
           method = methodFunction

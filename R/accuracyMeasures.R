@@ -79,11 +79,11 @@ accuracyMeasures = function(predicted, observed = NULL,
 
     neg = match(negativeLevel, colnames(tab));
     if (is.na(neg))
-      stop(spaste("Cannot find the negative level ", negativeLevel, 
+      stop(paste0("Cannot find the negative level ", negativeLevel, 
                   " among the colnames of the contingency table.\n   Please check the input and try again."))
     pos = match(positiveLevel, colnames(tab));
     if (is.na(pos))
-      stop(spaste("Cannot find the positive level ", positiveLevel, 
+      stop(paste0("Cannot find the positive level ", positiveLevel, 
                   " among the colnames of the contingency table.\n   Please check the input and try again."))
       
     if (  sum(is.na(tab) ) ) 

@@ -65,7 +65,7 @@
   rnDat = mtd.colnames(mdx)
 
   if ( sum(is.na(colID))>0 )
-      warning(spaste("The argument colID contains missing data. It is recommend you choose non-missing,\n",
+      warning(paste0("The argument colID contains missing data. It is recommend you choose non-missing,\n",
               "unique values for colID, e.g. character strings."))
 
    if ( sum(group=="",na.rm=TRUE)>0 ){
@@ -238,7 +238,7 @@ consensusRepresentatives = function(mdx,
 ##  Also, remove all probes with more than 90% missing data
    
    if (verbose > 0)
-     printFlush(spaste(spaces, "..selecting variables with lowest numbers of missing data.."))
+     printFlush(paste0(spaces, "..selecting variables with lowest numbers of missing data.."))
    keep = selectFewestConsensusMissing(mdx, colID, group, minProportionPresent, 
                                  consensusQuantile = consensusQuantile, verbose = verbose -1)
    mdx = mtd.subset(mdx, , keep)
@@ -264,7 +264,7 @@ consensusRepresentatives = function(mdx,
 
    if (imethod > 1) 
    {
-     selectionStatisticFnc = spaste(".cr.", method)
+     selectionStatisticFnc = paste0(".cr.", method)
      selStatFnc = get(selectionStatisticFnc, mode = "function")
    } else {
      selStatFnc = match.fun(selectionStatisticFnc)
@@ -376,7 +376,7 @@ consensusRepresentatives = function(mdx,
    if (length(twos) > 0)
    {
      if (verbose > 0)
-       printFlush(spaste(spaces, "..selecting representatives for 2-variable groups.."))
+       printFlush(paste0(spaces, "..selecting representatives for 2-variable groups.."))
      if (verbose > 1) pind = initProgInd(paste(spaces, ".."))
      repres = rep(NA, length(twos))
      for (ig in 1:length(twos))
@@ -394,7 +394,7 @@ consensusRepresentatives = function(mdx,
    if (length(more) > 0)
    {
      if (verbose > 0)
-       printFlush(spaste(spaces, "..selecting representatives for 3-variable groups.."))
+       printFlush(paste0(spaces, "..selecting representatives for 3-variable groups.."))
      if (verbose > 1) pind = initProgInd(paste(spaces, ".."))
      genes.more = genes[genes %in% more]
      nAll = length(genes.more)

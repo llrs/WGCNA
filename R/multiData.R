@@ -124,7 +124,7 @@ mtd.apply = function(
     if (calculate[set])
     {
       if (mdaVerbose > 0)
-        printFlush(spaste(printSpaces, "mtd.apply: working on set ", set)); 
+        printFlush(paste0(printSpaces, "mtd.apply: working on set ", set)); 
       out[[set]] = list(data = FUN(multiData[[set]]$data, ...))
     } else
       out[set] = mdaExistingResults[set]
@@ -135,7 +135,7 @@ mtd.apply = function(
   if (mdaSimplify) 
   {
     if (mdaVerbose > 0)
-      printFlush(spaste(printSpaces, "mtd.apply: attempting to simplify...")); 
+      printFlush(paste0(printSpaces, "mtd.apply: attempting to simplify...")); 
     return (mtd.simplify(out))
   } else if (returnList) {
     return (multiData2list(out))
@@ -200,7 +200,7 @@ mtd.applyToSubset = function(
     if (calculate[set])
     {
        if (mdaVerbose > 0)
-         printFlush(spaste(printSpaces, "mtd.applyToSubset: working on set ", set))
+         printFlush(paste0(printSpaces, "mtd.applyToSubset: working on set ", set))
        res[[set]] = list(data = fun( 
                 if (doSelection) multiData[[set]] $ data[mdaRowIndex[[set]], mdaColIndex, drop = FALSE] else
                                  multiData[[set]] $ data, ...))
@@ -213,7 +213,7 @@ mtd.applyToSubset = function(
   if (mdaSimplify) 
   {
     if (mdaVerbose > 0)
-      printFlush(spaste(printSpaces, "mtd.applyToSubset: attempting to simplify..."))
+      printFlush(paste0(printSpaces, "mtd.applyToSubset: attempting to simplify..."))
     return (mtd.simplify(res))
   } else if (returnList) {
     return (multiData2list(res))
@@ -238,18 +238,18 @@ mtd.simplify = function(multiData)
     if (is.null(dim)) {
        innerDim = len
        innerNames = names(multiData[[1]]$data)
-       if (is.null(innerNames)) innerNames = spaste("X", c(1:len))
+       if (is.null(innerNames)) innerNames = paste0("X", c(1:len))
     } else {
        innerDim = dim
        innerNames = dimnames(multiData[[1]]$data)
        if (is.null(innerNames)) 
-         innerNames = lapply(innerDim, function(x) {spaste("X", 1:x)})
+         innerNames = lapply(innerDim, function(x) {paste0("X", 1:x)})
        nullIN = sapply(innerNames, is.null)
        if (any(nullIN))
-         innerNames[nullIN] = lapply(innerDim[nullIN], function(x) {spaste("X", 1:x)})
+         innerNames[nullIN] = lapply(innerDim[nullIN], function(x) {paste0("X", 1:x)})
     }
     setNames = names(multiData)
-    if (is.null(setNames)) setNames = spaste("Set_", 1:nSets)
+    if (is.null(setNames)) setNames = paste0("Set_", 1:nSets)
     mtd.s = matrix(NA, prod(innerDim), nSets)
     for (set in 1:nSets)
       mtd.s[, set] = as.vector(multiData[[set]]$data)
@@ -297,7 +297,7 @@ mtd.mapply = function(
     stop("No arguments were specified. Please type ?mtd.mapply to see the help page.")
   dotLengths = sapply(dots, length)
   if (any(dotLengths!=dotLengths[1]))
-    stop(spaste("All arguments to vectorize over must have the same length.\n", 
+    stop(paste0("All arguments to vectorize over must have the same length.\n", 
                 "Scalar arguments should be put into the 'MoreArgs' argument.\n",
                 "Note: lengths of '...' arguments are: ", paste(dotLengths, collapse = ", ")))
   nArgs = length(dots)
@@ -314,7 +314,7 @@ mtd.mapply = function(
     if (calculate[set])
     {
       if (mdmaVerbose > 0)
-        printFlush(spaste(printSpaces, "mtd.mapply: working on set ", set))
+        printFlush(paste0(printSpaces, "mtd.mapply: working on set ", set))
 
       localArgs = list()
       for (arg in 1:nArgs)
@@ -331,7 +331,7 @@ mtd.mapply = function(
   if (mdmaSimplify)
   {
     if (mdmaVerbose > 0)
-      printFlush(spaste(printSpaces, "mtd.mapply: attempting to simplify..."))
+      printFlush(paste0(printSpaces, "mtd.mapply: attempting to simplify..."))
     return (mtd.simplify(res))
   } else if (returnList) {
     return (multiData2list(res))

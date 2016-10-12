@@ -405,14 +405,14 @@ nearestCentroidPredictor = function(
       # Back-substitution prediction: 
       wcps = centroidProfiles * featureWeight
       wxSel = t(xSel) * featureWeight
-      distExpr = spaste( simFnc, "( wcps, wxSel, ", simOptions, ")")
+      distExpr = paste0( simFnc, "( wcps, wxSel, ", simOptions, ")")
       sample.centroidSim = eval(parse(text = distExpr))
 
       # Actual prediction: for each sample, calculate distances to centroid profiles
       if (doTest)
       {
         wxtestSel = t(xtestSel) * featureWeight
-        distExpr = spaste( simFnc, "( wcps, wxtestSel, ", simOptions, ")")
+        distExpr = paste0( simFnc, "( wcps, wxtestSel, ", simOptions, ")")
         testSample.centroidSim = eval(parse(text = distExpr))
       }
     } else {
@@ -429,13 +429,13 @@ nearestCentroidPredictor = function(
   
       # Back-substitution prediction: 
       
-      distExpr = spaste( simFnc, "( wxSel.keepSamples, wxSel, ", simOptions, ")")
+      distExpr = paste0( simFnc, "( wxSel.keepSamples, wxSel, ", simOptions, ")")
       dst = eval(parse(text = distExpr))
       # Test prediction:
       if (doTest)
       {
         wxtestSel = t(xtestSel) * featureWeight
-        distExpr = spaste( simFnc, "( wxSel.keepSamples, wxtestSel, ", simOptions, ")")
+        distExpr = paste0( simFnc, "( wxSel.keepSamples, wxtestSel, ", simOptions, ")")
         dst.test = eval(parse(text = distExpr))
         sample.centroidSim = matrix(0, nClusters, nSamples)
         testSample.centroidSim = matrix(0, nClusters, nTestSamples)

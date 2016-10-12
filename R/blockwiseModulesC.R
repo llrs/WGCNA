@@ -276,7 +276,7 @@ blockwiseModules = function(
 
   fallback = pmatch(pearsonFallback, .pearsonFallbacks)
   if (is.na(fallback))
-      stop(spaste("Unrecognized value '", pearsonFallback, "' of argument 'pearsonFallback'.", 
+      stop(paste0("Unrecognized value '", pearsonFallback, "' of argument 'pearsonFallback'.", 
            "Recognized values are (unique abbreviations of)\n",
            paste(.pearsonFallbacks, collapse = ", ")))
 
@@ -406,7 +406,7 @@ blockwiseModules = function(
     block = c(1:nGGenes)[gBlocks==blockLevels[blockNo]];
     selExpr = as.matrix(datExpr[, block]);
     nBlockGenes = length(block);
-    TOMFiles[blockNo] = spaste(saveTOMFileBase, "-block.", blockNo, ".RData");
+    TOMFiles[blockNo] = paste0(saveTOMFileBase, "-block.", blockNo, ".RData");
     if (loadTOM)
     {
       if (verbose > 2)
@@ -415,19 +415,19 @@ blockwiseModules = function(
       if (x!="TOM") 
       {
         loadTOM = FALSE
-        printFlush(spaste("Loading of TOM in block ", blockNo, " failed:\n file ", 
+        printFlush(paste0("Loading of TOM in block ", blockNo, " failed:\n file ", 
                           TOMFiles[blockNo], 
                           "\n  either does not exist or does not contain the object 'TOM'.\n", 
                           "  Will recalculate TOM."));
       } else if (!inherits(TOM, "dist")) {
-         printFlush(spaste("TOM file ", TOMFiles[blockNo], 
+         printFlush(paste0("TOM file ", TOMFiles[blockNo], 
                            " does not contain object of the right type or size.\n",
                            " Will recalculate TOM."))
       } else {
         size.1 = attr(TOM, "Size");
         if (length(size.1)!=1 || size.1!=nBlockGenes)
         {
-           printFlush(spaste("TOM file ", TOMFiles[blockNo], 
+           printFlush(paste0("TOM file ", TOMFiles[blockNo], 
                              " does not contain object of the right type or size.\n",
                             " Will recalculate TOM."))
            loadTOM = FALSE
@@ -1471,8 +1471,8 @@ blockwiseIndividualTOMs = function(multiExpr,
     for (set in 1:nSets) for (b in 1:nBlocks)
       actualFileNames[set, b] = .processFileName(individualTOMFileNames, set, names(multiExpr), b);
   
-    rownames(actualFileNames) = spaste("Set.", c(1:nSets));
-    colnames(actualFileNames) = spaste("Block.", c(1:nBlocks));
+    rownames(actualFileNames) = paste0("Set.", c(1:nSets));
+    colnames(actualFileNames) = paste0("Block.", c(1:nBlocks));
     if (length(unique(as.vector(actualFileNames))) < nSets * nBlocks) 
     {
       printFlush("Error: File names for (some) set/block combinations are not unique:");
@@ -2935,7 +2935,7 @@ projectiveKMeans = function (
     blocks = allocateJobs(ncol(datExpr), nBlocks);
 
     if (verbose > 5) 
-      pind = initProgInd(spaste(spaces, "   ..centerGeneDist: "));
+      pind = initProgInd(paste0(spaces, "   ..centerGeneDist: "));
 
     for (b in 1:nBlocks)
     {
@@ -2998,11 +2998,11 @@ projectiveKMeans = function (
   {
     if (imputeMissing)
     {
-      printFlush(spaste(spaces, "projectiveKMeans: imputing missing data in 'datExpr'.\n",
+      printFlush(paste0(spaces, "projectiveKMeans: imputing missing data in 'datExpr'.\n",
                   "To reproduce older results, use 'imputeMissing = FALSE'. "));
       datExpr = t(impute.knn(t(datExpr))$data);
     } else {
-      printFlush(spaste(spaces, "projectiveKMeans: there are missing data in 'datExpr'.\n",
+      printFlush(paste0(spaces, "projectiveKMeans: there are missing data in 'datExpr'.\n",
           "SVD will not work; will use a weighted mean approximation."));
     }
   }

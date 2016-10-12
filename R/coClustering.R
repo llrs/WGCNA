@@ -27,7 +27,7 @@ coClustering.permutationTest = function(clusters.ref, clusters.test,
   permValues = matrix(NA, nPermutations, nModules)
 
   if (verbose > 0)
-    pind = initProgInd(spaste(spaces, "Running permutations: "), " done")
+    pind = initProgInd(paste0(spaces, "Running permutations: "), " done")
   for (p in 1:nPermutations)
   {
     ctPerm = sample(clusters.test)

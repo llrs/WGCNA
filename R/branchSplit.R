@@ -417,7 +417,7 @@ branchSplitFromStabilityLabels = function(
     commonLevels = setdiff(commonLevels, ignoreLabels);
     if (length(commonLevels) > 0) for (cl in commonLevels)
     {
-      #printFlush(spaste("Common level ", cl, " in clustering ", l))
+      #printFlush(paste0("Common level ", cl, " in clustering ", l))
       r1 = sum(lab1==cl)/n1;
       r2 = sum(lab2==cl)/n2;
       sim = sim + min(r1, r2)

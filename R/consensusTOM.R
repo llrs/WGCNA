@@ -433,7 +433,7 @@ consensusTOM = function(
     } else if (networkCalibration=="full quantile")
     {
       # Step 1: load each TOM, get order, split TOM into chunks according to order, and save.
-      if (verbose>1) printFlush(spaste(spaces, "..working on quantile normalization"))
+      if (verbose>1) printFlush(paste0(spaces, "..working on quantile normalization"))
       if (useDiskCache)
       {
         orderFiles = rep("", nSets)
@@ -453,12 +453,12 @@ consensusTOM = function(
         if (useDiskCache)
         {
           # Order TOM (this may take a long time...)
-          if (verbose > 3) printFlush(spaste(spaces, "......ordering TOM"))
+          if (verbose > 3) printFlush(paste0(spaces, "......ordering TOM"))
           time = system.time({order1 = .qorder(tomDS)})
           if (verbose > 1) { printFlush("Time to order TOM:"); print(time); }
           # save the order
-          orderFiles[set] = tempfile(pattern = spaste("orderForSet", set), tmpdir = cacheDir)
-          if (verbose > 3) printFlush(spaste(spaces, "......saving order and ordered TOM"))
+          orderFiles[set] = tempfile(pattern = paste0("orderForSet", set), tmpdir = cacheDir)
+          if (verbose > 3) printFlush(paste0(spaces, "......saving order and ordered TOM"))
           save(order1, file = orderFiles[set])
           # Save ordered tomDS into chunks
           tomDS.ordered = tomDS[order1]
@@ -472,10 +472,10 @@ consensusTOM = function(
       if (useDiskCache)
       {
         # Step 2: Load chunks one by one and quantile normalize
-        if (verbose > 2) printFlush(spaste(spaces, "....quantile normalizing chunks"))
+        if (verbose > 2) printFlush(paste0(spaces, "....quantile normalizing chunks"))
         for (c in 1:nChunks)
         {
-          if (verbose > 3) printFlush(spaste(spaces, "......QN for chunk ", c, " of ", nChunks))
+          if (verbose > 3) printFlush(paste0(spaces, "......QN for chunk ", c, " of ", nChunks))
           chunkData = matrix(NA, chunkLengths[c], nSets)
           for (set in 1:nSets)
             chunkData[, set] = .loadObject(chunkFileNames[c, set])
@@ -490,7 +490,7 @@ consensusTOM = function(
           }
         }
 
-        if (verbose > 2) printFlush(spaste(spaces, "....putting together full QN'ed TOMs"))
+        if (verbose > 2) printFlush(paste0(spaces, "....putting together full QN'ed TOMs"))
         # Put together full TOMs
         for (set in 1:nSets)
         {

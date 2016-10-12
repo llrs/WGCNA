@@ -68,7 +68,7 @@ multiData.eigengeneSignificance = function(multiData, multiTrait, moduleLabels,
      setNames = names(multiData)
 
   if (is.null(setNames))
-     setNames = spaste("Set_", c(1:nSets))
+     setNames = paste0("Set_", c(1:nSets))
 
   colnames(MES) = colnames(p) = colnames(Z) = colnames(nObs) = setNames
   rownames(MES) = rownames(p) = rownames(Z) = rownames(nObs) = colnames(multiEigengenes[[1]]$data)
