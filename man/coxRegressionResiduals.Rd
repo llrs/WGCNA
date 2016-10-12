@@ -8,7 +8,7 @@ coxRegressionResiduals(time, event, datCovariates = NULL)
 }
 \arguments{
 \item{time}{is a numeric variable that contains follow up time or time to
-event. %% ~~Describe \code{time} here~~}
+event.}
 
 \item{event}{is a binary variable that takes on values 1 and 0. 1 means that
 the event took place (e.g. person died, or tumor recurred). 0 means
@@ -88,9 +88,8 @@ cor(datResiduals,use="p")
 Steve Horvath
 }
 \references{
-%% ~put references to the literature/web site here ~ Thereneau
-TM, Grambsch PM, Fleming TR (1990) Martingale-based residuals for survival
-models. Biometrika (1990), 77, 1, pp. 147-60
+Thereneau TM, Grambsch PM, Fleming TR (1990) Martingale-based residuals for
+survival models. Biometrika (1990), 77, 1, pp. 147-60
 }
 \keyword{misc}
 

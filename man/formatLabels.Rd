@@ -13,7 +13,7 @@ formatLabels(labels, maxCharPerLine = 14, split = " ", fixed = TRUE,
 \item{maxCharPerLine}{Integer giving the maximum number of characters per
 line.}
 
-\item{split}{Pattern to be replaced by newline ('\n') characters.}
+\item{split}{Pattern to be replaced by newline (\code{'\n'}) characters.}
 
 \item{fixed}{Logical: Should the pattern be interpreted literally
 (\code{TRUE}) or as a regular expression (\code{FALSE})? See
@@ -48,8 +48,8 @@ occurrences of \code{split}) whose number of characters exceeds
 }
 \examples{
 
-s = "A quick hare jumps over the brown fox";
-formatLabels(s);
+s = "A quick hare jumps over the brown fox"
+formatLabels(s)
 
 }
 \author{

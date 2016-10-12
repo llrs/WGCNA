@@ -45,7 +45,6 @@ datE <- data.frame(x1,x2,x3,x4,x5)
 cor.data <- cor(datE, use = "p")
 AUV2 <- AFcorMI(r = cor.data, m = nrow(datE))
 
-
 }
 \author{
 Steve Horvath, Lin Song, Peter Langfelder

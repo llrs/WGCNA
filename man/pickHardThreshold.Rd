@@ -81,7 +81,7 @@ Horvath S, Dong J (2008) Geometric Interpretation of Gene Coexpression
 Network Analysis. PLoS Comput Biol 4(8): e1000117
 }
 \seealso{
-\code{\link{signumAdjacencyFunction}}
+\code{\link{signumAdjacency}}
 }
 \keyword{misc}
 
