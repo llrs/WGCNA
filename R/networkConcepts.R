@@ -4,8 +4,166 @@
 # power: for contruction of the weighted network
 # trait: the quantitative external trait
 #
-
-networkConcepts = function(datExpr, power=1, trait=NULL, networkType = "unsigned") 
+#' @name networkConcepts
+#' @rdname networkConcepts
+#' @title Calculations of network concepts
+#' @description
+#' This functions calculates various network concepts (topological properties,
+#' network indices) of a network calculated from expression data. See details
+#' for a detailed description.
+#' @inheritParams adjacency
+#' @param trait optional specification of a sample trait. A vector of length
+#' equal the number of samples in datExpr.
+#' @details
+#' This function computes various network concepts (also known as network
+#' statistics, topological properties, or network indices) for a weighted
+#' correlation network. The nodes of the weighted correlation network will be
+#' constructed between the columns (interpreted as nodes) of the input datExpr.
+#' If the option networkType="unsigned" then the adjacency between nodes i and j
+#'  is defined as A[i,j]=abs(cor(datExpr[,i],datExpr[,j]))^power. In the
+#'  following, we use the term gene and node interchangeably since these methods
+#'  were originally developed for gene networks. The function computes the
+#'  following 4 types of network concepts (introduced in Horvath and Dong 2008):
+#'
+#' \bold{Type I}: fundamental network concepts are defined as a function of the
+#' off-diagonal elements of an adjacency matrix A and/or a node significance
+#' measure GS. These network concepts can be defined for any network (not just
+#' correlation networks). The adjacency matrix of an unsigned weighted
+#' correlation network is given by A=abs(cor(datExpr,use="p"))^power and the
+#' trait based gene significance measure is given by GS= abs(cor(datExpr,trait,
+#' use="p"))^power where datExpr, trait, power are input parameters.
+#'
+#' \bold{Type II}: conformity-based network concepts are functions of the
+#' off-diagonal elements of the conformity based adjacency matrix A.CF=CF*t(CF)
+#' and/or the node significance measure. These network concepts are defined for
+#' any network for which a conformity vector can be defined. Details: For any
+#' adjacency matrix A, the conformity vector CF is calculated by requiring that
+#' A[i,j] is approximately equal to CF[i]*CF[j]. Using the conformity one can
+#' define the matrix A.CF=CF*t(CF) which is the outer product of the conformity
+#' vector with itself. In general, A.CF is not an adjacency matrix since its
+#' diagonal elements are different from 1. If the off-diagonal elements of A.CF
+#' are similar to those of A according to the Frobenius matrix norm, then A is
+#' approximately factorizable. To measure the factorizability of a network, one
+#' can calculate the Factorizability, which is a number between 0 and 1 (Dong
+#' and Horvath 2007). T he conformity is defined using a monotonic, iterative
+#' algorithm that maximizes the factorizability measure.
+#'
+#' \bold{Type III}: approximate conformity based network concepts are functions
+#' of all elements of the conformity based adjacency matrix A.CF (including the
+#' diagonal) and/or the node significance measure GS. These network concepts are
+#'  very useful for deriving relationships between network concepts in networks
+#'  that are approximately factorizable.
+#'
+#' \bold{Type IV}: eigengene-based (also known as eigennode-based) network
+#' concepts are functions of the eigengene-based adjacency matrix
+#' A.E=ConformityE*t(ConformityE) (diagonal included) and/or the corresponding
+#' eigengene-based gene significance measure GSE. These network concepts can
+#' only be defined for correlation networks. Details: The columns (nodes) of
+#' datExpr can be summarized with the first principal component, which is
+#' referred to as Eigengene in coexpression network analysis. In general
+#' correlation networks, it is called eigennode. The eigengene-based conformity
+#' ConformityE[i] is defined as abs(cor(datE[,i], Eigengene))^power where the
+#' power corresponds to the power used for defining the weighted adjacency
+#' matrix A. The eigengene-based conformity can also be used to define an
+#' eigengene-based adjacency matrix A.E=ConformityE*t(ConformityE). The
+#' eigengene based factorizability EF(datE) is a number between 0 and 1 that
+#' measures how well A.E approximates A when the power parameter equals 1.
+#' EF(datE) is defined with respect to the singular values of datExpr. For a
+#' trait based node significance measure GS=abs(cor(datE,trait))^power, one can
+#' also define an eigengene-based node significance measure
+#' GSE[i]=ConformityE[i]*EigengeneSignificance where the eigengene significance
+#' abs(cor(Eigengene,trait))^power is defined as power of the absolute value of
+#' the correlation between eigengene and trait. Eigengene-based network concepts
+#' are very useful for providing a geometric interpretation of network concepts
+#' and for deriving relationships between network concepts. For example, the
+#' hub gene significance measure and its eigengene-based analog have been used
+#' to characterize networks where highly connected hub genes are important with
+#' regard to a trait based gene significance measure (Horvath and Dong 2008).
+#' @return
+#' A list with the following components:
+#' @param Summary a data frame whose rows report network concepts that only
+#' depend on the adjacency matrix. Density (mean adjacency), Centralization,
+#' Heterogeneity (coefficient of variation of the connectivity), Mean
+#' ClusterCoef, Mean Connectivity. The columns of the data frame report the 4
+#' types of network concepts mentioned in the description: Fundamental concepts,
+#' eigengene-based concepts, conformity-based concepts, and approximate
+#' conformity-based concepts.
+#' @param Size reports the network size, i.e. the number of nodes, which equals
+#' the number of columns of the input data frame datExpr.
+#' @param Factorizability a number between 0 and 1. The closer it is to 1, the
+#' better the off-diagonal elements of the conformity based network A.CF
+#' approximate those of A (according to the Frobenius norm).
+#' @param Eigengene the first principal component of the standardized columns of
+#' datExpr. The number of components of this vector equals the number of rows of datExpr.
+#' @param VarExplained the proportion of variance explained by the first
+#' principal component (the Eigengene). It is numerically different from the
+#' eigengene based factorizability. While VarExplained is based on the squares
+#' of the singular values of datExpr, the eigengene-based factorizability is
+#' based on fourth powers of the singular values.
+#' @param Conformity numerical vector giving the conformity. The number of
+#' components of the conformity vector equals the number of columns in datExpr.
+#' The conformity is often highly correlated with the vector of node
+#' connectivities. The conformity is computed using an iterative algorithm for
+#' maximizing the factorizability measure. The algorithm and related network
+#' concepts are described in Dong and Horvath 2007.
+#' @param ClusterCoef a numerical vector that reports the cluster coefficient
+#' for each node. This fundamental network concept measures the cliquishness of
+#' each node.
+#' @param Connectivity a numerical vector that reports the connectivity (also
+#' known as degree) of each node. This fundamental network concept is also known
+#' as whole network connectivity. One can also define the scaled connectivity
+#' K=Connectivity/max(Connectivity) which is used for computing the hub gene
+#' significance.
+#' @param MAR a numerical vector that reports the maximum adjacency ratio for
+#' each node. MAR[i] equals 1 if all non-zero adjacencies between node i and the
+#' remaining network nodes equal 1. This fundamental network concept is always 1
+#' for nodes of an unweighted network. This is a useful measure for weighted
+#' networks since it allows one to determine whether a node has high connectivity
+#' because of many weak connections (small MAR) or because of strong (but few)
+#' connections (high MAR), see Horvath and Dong 2008.
+#' @param ConformityE a numerical vector that reports the eigengene based (aka
+#' eigenenode based) conformity for the correlation network. The number of
+#' components equals the number of columns of datExpr.
+#' @param GS a numerical vector that encodes the node (gene) significance. The
+#' i-th component equals the node significance of the i-th column of datExpr if
+#' a sample trait was supplied to the function (input trait).
+#' \code{GS[i]=abs(cor(datE[,i], trait, use="p"))^power}
+#' @param GSE a numerical vector that reports the eigengene based gene
+#' significance measure. Its i-th component is given by
+#' \code{GSE[i]=ConformityE[i]*EigengeneSignificance} where the eigengene
+#' \code{significance abs(cor(Eigengene,trait))^power} is defined as power of
+#' the absolute value of the correlation between eigengene and trait.
+#' @param Significance a data frame whose rows report network concepts that also
+#' depend on the trait based node significance measure. The rows correspond to
+#' network concepts and the columns correspond to the type of network concept
+#' (fundamental versus eigengene based). The first row of the data frame reports
+#' the network significance. The fundamental version of this network concepts is
+#' the average gene significance=mean(GS). The eigengene based analog of this
+#' concept is defined as mean(GSE). The second row reports the hub gene
+#' significance which is defined as slope of the intercept only regression model
+#' that regresses the gene significance on the scaled network connectivity K.
+#' The third row reports the eigengene significance
+#' \code{abs(cor(Eigengene,trait))^power}. More details can be found in Horvath
+#' and Dong (2008).
+#' @author
+#' Jun Dong, Steve Horvath, Peter Langfelder
+#' @references
+#' Bin Zhang and Steve Horvath (2005) "A General Framework for Weighted Gene
+#' Co-Expression Network Analysis", Statistical Applications in Genetics and
+#' Molecular Biology: Vol. 4: No. 1, Article 17
+#'
+#' Dong J, Horvath S (2007) Understanding Network Concepts in Modules, BMC
+#' Systems Biology 2007, 1:24
+#'
+#' Horvath S, Dong J (2008) Geometric Interpretation of Gene Coexpression
+#' Network Analysis. PLoS Comput Biol 4(8): e1000117
+#' @seealso
+#' \code{\link{conformityBasedNetworkConcepts}} for approximate conformity-based
+#' network concepts.
+#' \code{\link{fundamentalNetworkConcepts}} for calculation of fundamental
+#' network concepts only.
+#' @export
+networkConcepts = function(datExpr, power=1, trait=NULL, networkType = "unsigned")
 {
 
   networkTypeC = charmatch(networkType, .networkTypes)
@@ -25,7 +183,7 @@ networkConcepts = function(datExpr, power=1, trait=NULL, networkType = "unsigned
   	adj <- cor^power
   }
   diag(adj)=0 # Therefore adj=A-I.
-	
+
   ### Fundamental Network Concepts
   Size=dim(adj)[1]
   Connectivity=apply(adj, 2, sum) # Within Module Connectivities
@@ -33,12 +191,12 @@ networkConcepts = function(datExpr, power=1, trait=NULL, networkType = "unsigned
   Centralization=Size*(max(Connectivity)-mean(Connectivity))/((Size-1)*(Size-2))
   Heterogeneity=sqrt(Size*sum(Connectivity^2)/sum(Connectivity)^2-1)
   ClusterCoef=.ClusterCoef.fun(adj)
-  
+
   fMAR=function(v) sum(v^2)/sum(v)
   MAR=apply(adj, 1, fMAR)
   #CONNECTIVITY=Connectivity/max(Connectivity)
-  
-  ### Conformity-Based Network Concepts	
+
+  ### Conformity-Based Network Concepts
   ### Dong J, Horvath S (2007) Understanding Network Concepts in Modules, BMC Systems Biology 2007, 1:24
   Conformity=.NPC.iterate(adj)$v1
   Factorizability=1- sum( (adj-outer(Conformity,Conformity)+ diag(Conformity^2))^2 )/sum(adj^2)
@@ -52,7 +210,7 @@ networkConcepts = function(datExpr, power=1, trait=NULL, networkType = "unsigned
      ClusterCoef.CF[i]=( sum(Conformity[-i]^2)^2 - sum(Conformity[-i]^4) )/
        ( sum(Conformity[-i])^2 - sum(Conformity[-i]^2) )
 
-  ### Approximate Conformity-Based Network Concepts	
+  ### Approximate Conformity-Based Network Concepts
   Connectivity.CF.App=sum(Conformity)*Conformity
   Density.CF.App=sum(Connectivity.CF.App)/(Size*(Size-1))
   Centralization.CF.App=Size*(max(Connectivity.CF.App)-mean(Connectivity.CF.App))/((Size-1)*(Size-2))
@@ -62,7 +220,7 @@ networkConcepts = function(datExpr, power=1, trait=NULL, networkType = "unsigned
   ### Eigengene-based Network Concepts
   m1=moduleEigengenes(datExpr, colors = rep(1, Size))
   # Weighted Expression Conformity
-  ConformityE=cor(datExpr,m1[[1]][,1],use="pairwise.complete.obs"); ConformityE=abs(ConformityE)^power; 
+  ConformityE=cor(datExpr,m1[[1]][,1],use="pairwise.complete.obs"); ConformityE=abs(ConformityE)^power;
   ConnectivityE=sum(ConformityE)*ConformityE; #Expression Connectivity
   DensityE=sum(ConnectivityE)/(Size*(Size-1)); #Expression Density
   CentralizationE=Size*(max(ConnectivityE)-mean(ConnectivityE))/((Size-1)*(Size-2)); #Expression Centralization
@@ -124,7 +282,7 @@ MAR=MAR, ConformityE=ConformityE)
 
 # ===================================================
 # Check if adj is a valid adjacency matrix:  square matrix, non-negative entries, symmetric and no missing entries.
-# Parameters: 
+# Parameters:
 #   adj - the input adjacency matrix
 #   tol - the tolerence level to measure the difference from 0 (symmetric matrix: upper diagonal minus lower diagonal)
 # Remarks:
@@ -151,7 +309,7 @@ MAR=MAR, ConformityE=ConformityE)
 # ===================================================
 # .NPC.direct=function(adj)
 # Calculates the square root of Normalized Product Connectivity (.NPC), by way of definition of .NPC. ( \sqrt{t})
-# Parameters: 
+# Parameters:
 #   adj - the input adjacency matrix
 #   tol - the tolerence level to measure the difference from 0 (zero off-diagonal elements)
 # Output:
@@ -195,7 +353,7 @@ MAR=MAR, ConformityE=ConformityE)
 # ===================================================
 # .NPC.iterate=function(adj, loop=10^(10), tol=10^(-10))
 # Calculates the square root of Normalized Product Connectivity, by way of iteration algorithm. ( \sqrt{t})
-# Parameters: 
+# Parameters:
 #   adj - the input adjacency matrix
 #   loop - the maximum number of iterations before stopping the algorithm
 #   tol - the tolerence level to measure the difference from 0 (zero off-diagonal elements)
@@ -235,8 +393,8 @@ if( exists(".NPC.iterate") ) rm(.NPC.iterate)
 
 # ===================================================
 # The function .ClusterCoef.fun computes the cluster coefficients.
-# Input is an adjacency matrix 
-.ClusterCoef.fun=function(adjmat1) 
+# Input is an adjacency matrix
+.ClusterCoef.fun=function(adjmat1)
 {
   # diag(adjmat1)=0
   no.nodes=dim(adjmat1)[[1]]
@@ -244,12 +402,12 @@ if( exists(".NPC.iterate") ) rm(.NPC.iterate)
   computeSqDiagSum = function(x, vec) { sum(x^2 * vec) }
   nolinksNeighbors <- c(rep(-666,no.nodes))
   total.edge <- c(rep(-666,no.nodes))
-  maxh1=max(as.dist(adjmat1) ); minh1=min(as.dist(adjmat1) ); 
-  if (maxh1>1 | minh1 < 0 ) 
+  maxh1=max(as.dist(adjmat1) ); minh1=min(as.dist(adjmat1) );
+  if (maxh1>1 | minh1 < 0 )
   {
      stop(paste("ERROR: the adjacency matrix contains entries that are larger",
-                 "than 1 or smaller than 0: max=",maxh1,", min=",minh1)) 
-  } else { 
+                 "than 1 or smaller than 0: max=",maxh1,", min=",minh1))
+  } else {
     nolinksNeighbors <- apply(adjmat1, 1, computeLinksInNeighbors, imatrix=adjmat1)
     subTerm = apply(adjmat1, 1, computeSqDiagSum, vec = diag(adjmat1))
     plainsum  <- apply(adjmat1, 1, sum)
@@ -269,8 +427,8 @@ if( exists(".NPC.iterate") ) rm(.NPC.iterate)
 {
    if(!is.numeric(daten)) {
         stop("All arguments must be numeric")}
-   if(is.vector(daten)){ 
-      xval<-(cumsum(c(0.7,rep(1.2,length(daten)-1)))) 
+   if(is.vector(daten)){
+      xval<-(cumsum(c(0.7,rep(1.2,length(daten)-1))))
    }else{
       if (is.matrix(daten)){
         xval<-cumsum(array(c(1,rep(0,dim(daten)[1]-1)),
@@ -278,8 +436,8 @@ if( exists(".NPC.iterate") ) rm(.NPC.iterate)
       }else{
         stop("First argument must either be a vector or a matrix") }
    }
-   MW<-0.25*(max(xval)/length(xval)) 
-   ERR1<-daten+error 
+   MW<-0.25*(max(xval)/length(xval))
+   ERR1<-daten+error
    ERR2<-daten-error
    for(i in 1:length(daten)){
       segments(xval[i],daten[i],xval[i],ERR1[i])
@@ -287,24 +445,24 @@ if( exists(".NPC.iterate") ) rm(.NPC.iterate)
       if(two.side){
         segments(xval[i],daten[i],xval[i],ERR2[i])
         segments(xval[i]-MW,ERR2[i],xval[i]+MW,ERR2[i])
-      } 
-   } 
-} 
+      }
+   }
+}
 
 
 
 #========================================================================================
 
-conformityBasedNetworkConcepts = function(adj, GS=NULL) 
+conformityBasedNetworkConcepts = function(adj, GS=NULL)
 {
   if(!.is.adjmat(adj)) stop("The input matrix is not a valid adjacency matrix!")
-  diag(adj)=0 # Therefore adj=A-I.	
-  if (dim(adj)[[1]]<3) 
+  diag(adj)=0 # Therefore adj=A-I.
+  if (dim(adj)[[1]]<3)
     stop("The adjacency matrix has fewer than 3 rows. This network is trivial and will not be evaluated.")
-  if (!is.null(GS)) 
-  { 
+  if (!is.null(GS))
+  {
     if( length(GS) !=dim(adj)[[1]])
-    { 
+    {
        stop(paste("The length of the node significnce GS does not equal the number",
                   "of rows of the adjcency matrix. length(GS) != dim(adj)[[1]]. \n",
                   "Something is wrong with your input"))
@@ -313,14 +471,14 @@ conformityBasedNetworkConcepts = function(adj, GS=NULL)
 
 	### Fundamental Network Concepts
 	Size=dim(adj)[1]
-	Connectivity=apply(adj, 2, sum) 
+	Connectivity=apply(adj, 2, sum)
 	Density=sum(Connectivity)/(Size*(Size-1))
 	Centralization=Size*(max(Connectivity)-mean(Connectivity))/((Size-1)*(Size-2))
 	Heterogeneity=sqrt(Size*sum(Connectivity^2)/sum(Connectivity)^2-1)
 	ClusterCoef=.ClusterCoef.fun(adj)
 	fMAR=function(v) sum(v^2)/sum(v)
-	MAR=apply(adj, 1, fMAR)	
-	### Conformity-Based Network Concepts	
+	MAR=apply(adj, 1, fMAR)
+	### Conformity-Based Network Concepts
 	Conformity=.NPC.iterate(adj)$v1
 	Factorizability=1- sum( (adj-outer(Conformity,Conformity)+ diag(Conformity^2))^2 )/sum(adj^2)
 	Connectivity.CF=sum(Conformity)*Conformity-Conformity^2
@@ -335,19 +493,19 @@ conformityBasedNetworkConcepts = function(adj, GS=NULL)
   MAR.CF=ifelse(sum(Conformity,na.rm=T)-Conformity==0, NA,
                 Conformity*(sum(Conformity^2,na.rm=T)-Conformity^2)/(sum(Conformity,na.rm=T)-Conformity))
 
-	### Approximate Conformity-Based Network Concepts	
+	### Approximate Conformity-Based Network Concepts
 	Connectivity.CF.App=sum(Conformity)*Conformity
 	Density.CF.App=sum(Connectivity.CF.App)/(Size*(Size-1))
 	Centralization.CF.App=Size*(max(Connectivity.CF.App)-mean(Connectivity.CF.App))/((Size-1)*(Size-2))
 	Heterogeneity.CF.App=sqrt(Size*sum(Connectivity.CF.App^2)/sum(Connectivity.CF.App)^2-1)
-	
+
   if(sum(Conformity,na.rm=T)==0)
   {
       warning(paste("The sum of conformities equals zero.\n",
                     "Maybe you used an input adjacency matrix with lots of zeroes?\n",
                     "Specifically, sum(Conformity,na.rm=T)==0."))
-      MAR.CF.App= rep(NA,Size) 
-      ClusterCoef.CF.App= rep(NA,Size) 
+      MAR.CF.App= rep(NA,Size)
+      ClusterCoef.CF.App= rep(NA,Size)
   } #end of if
   if(sum(Conformity,na.rm=T) !=0)
   {
@@ -355,39 +513,39 @@ conformityBasedNetworkConcepts = function(adj, GS=NULL)
     ClusterCoef.CF.App=rep((sum(Conformity^2)/sum(Conformity))^2,Size)
   }# end of if
   output=list(
-              Factorizability =Factorizability, 
+              Factorizability =Factorizability,
               fundamentalNCs=list(
                   ScaledConnectivity=Connectivity/max(Connectivity,na.rm=T),
-                  Connectivity=Connectivity, 
-                  ClusterCoef=ClusterCoef, 
-                  MAR=MAR, 
+                  Connectivity=Connectivity,
+                  ClusterCoef=ClusterCoef,
+                  MAR=MAR,
                   Density=Density,
                   Centralization =Centralization,
                   Heterogeneity= Heterogeneity),
               conformityBasedNCs=list(
-                  Conformity=Conformity, 
-                  Connectivity.CF=Connectivity.CF, 
+                  Conformity=Conformity,
+                  Connectivity.CF=Connectivity.CF,
                   ClusterCoef.CF=ClusterCoef.CF,
                   MAR.CF=MAR.CF,
                   Density.CF=Density.CF,
                   Centralization.CF =Centralization.CF,
                   Heterogeneity.CF= Heterogeneity.CF),
               approximateConformityBasedNCs=list(
-                  Conformity=Conformity, 
+                  Conformity=Conformity,
                   Connectivity.CF.App= Connectivity.CF.App,
                   ClusterCoef.CF.App=ClusterCoef.CF.App,
                   MAR.CF.App=MAR.CF.App,
                   Density.CF.App= Density.CF.App,
                   Centralization.CF.App =Centralization.CF.App,
                   Heterogeneity.CF.App= Heterogeneity.CF.App))
-  if ( !is.null(GS) ) 
+  if ( !is.null(GS) )
   {
     output$FundamentalNC$NetworkSignificance = mean(GS,na.rm=T)
     K = Connectivity/max(Connectivity)
-    output$FundamentalNC$HubNodeSignificance = sum(GS * K,na.rm=T)/sum(K^2,na.rm=T)	
+    output$FundamentalNC$HubNodeSignificance = sum(GS * K,na.rm=T)/sum(K^2,na.rm=T)
   }
   output
-} # end of function 
+} # end of function
 
 
 
@@ -397,14 +555,14 @@ fundamentalNetworkConcepts=function(adj,GS=NULL)
 {
    if(!.is.adjmat(adj)) stop("The input matrix is not a valid adjacency matrix!")
    diag(adj)=0 # Therefore adj=A-I.
-	
+
    if (dim(adj)[[1]]<3) stop("The adjacency matrix has fewer than 3 rows. This network is trivial and will not be evaluated.")
 
 if (!is.null(GS)) { if( length(GS) !=dim(adj)[[1]]){ stop("The length of the node significnce GS does not
 equal the number of rows of the adjcency matrix. length(GS) unequal dim(adj)[[1]]. GS should be a vector whosecomponents correspond to the nodes.")}}
 
 	Size=dim(adj)[1]
-	
+
 ### Fundamental Network Concepts
 	Connectivity=apply(adj, 2, sum) # Within Module Connectivities
 	Density=sum(Connectivity)/(Size*(Size-1))
@@ -414,20 +572,20 @@ equal the number of rows of the adjcency matrix. length(GS) unequal dim(adj)[[1]
 	fMAR=function(v) sum(v^2)/sum(v)
 	MAR=apply(adj, 1, fMAR)
 	ScaledConnectivity=Connectivity/max(Connectivity,na.rm=T)
-	
+
 	output=list(
-                  Connectivity=Connectivity, 
-                  ScaledConnectivity=ScaledConnectivity, 
-                  ClusterCoef=ClusterCoef, MAR=MAR, 
+                  Connectivity=Connectivity,
+                  ScaledConnectivity=ScaledConnectivity,
+                  ClusterCoef=ClusterCoef, MAR=MAR,
                   Density=Density, Centralization =Centralization,
-                  Heterogeneity= Heterogeneity) 
+                  Heterogeneity= Heterogeneity)
 
    if ( !is.null(GS) ) {
         output$NetworkSignificance = mean(GS,na.rm=T)
         output$HubNodeSignificance = sum(GS * ScaledConnectivity,na.rm=T)/sum(ScaledConnectivity^2,na.rm=T)
    }
    output
-} # end of function 
+} # end of function
 
 #==========================================================================================================
 #
