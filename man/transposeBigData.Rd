@@ -12,6 +12,10 @@ transposeBigData(x, blocksize = 20000)
 \item{blocksize}{a positive integer larger than 1, which determines the
 block size. Default is 20k.}
 }
+\value{
+A matrix or data frame (depending on the input \code{x}) which is
+the transpose of \code{x}.
+}
 \description{
 This transpose command partitions a big matrix (or data frame) into blocks
 and applies the t() function to each block separately.

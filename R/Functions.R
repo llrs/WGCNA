@@ -10005,7 +10005,9 @@ randIndex <- function(tab, adjust = TRUE)
 # Check expression data: mark genes and samples with too many missing entries
 #
 #===============================================================================
-
+#' @rdname goodGenesMS
+#' @aliases goodGenes
+#' @export
 goodGenes <- function(datExpr,
                       useSamples = NULL,
                       useGenes = NULL,
@@ -10062,6 +10064,10 @@ goodGenes <- function(datExpr,
     gg
 }
 
+
+#' @aliases goodSamplesMS
+#' @rdname goodSamplesMS
+#' @export
 goodSamples <- function(datExpr,
                         useSamples = NULL,
                         useGenes = NULL,

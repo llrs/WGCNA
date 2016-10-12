@@ -2036,6 +2036,13 @@ recutBlockwiseTrees = function(datExpr,
 #' \code{names(multiExpr)}) if it exists, otherwise by set number; \code{%b}
 #' will be replaced by the block number. If the file names turn out to be
 #' non-unique, an error will be generated.
+#' @param individualTOMFileNames character string giving the file names to save
+#' individual TOMs into. The following tags should be used to make the file
+#' names unique for each set and block: \code{%s} will be replaced by the set
+#' number; \code{%N} will be replaced by the set name (taken from
+#' \code{names(multiExpr)}) if it exists, otherwise by set number; \code{%b}
+#' will be replaced by the block number. If the file names turn out to be
+#' non-unique, an error will be generated.
 #' @param nThreads non-negative integer specifying the number of parallel
 #' threads to be used by certain parts of correlation calculations. This option
 #' only has an effect on systems on which a POSIX thread library is available
@@ -2921,130 +2928,84 @@ lowerTri2matrix = function(x, diag = 1)
 #' the relationships between co-expression modules. BMC Systems Biology 2007,
 #' 1:54
 #' @keywords misc
-blockwiseConsensusModules = function(multiExpr,
-
+blockwiseConsensusModules <- function(multiExpr,
          # Data checking options
-
          checkMissingData = TRUE,
-
          # Blocking options
-
          blocks = NULL,
          maxBlockSize = 5000,
          blockSizePenaltyPower = 5,
          nPreclusteringCenters = NULL,
          randomSeed = 12345,
-
          # individual TOM information
-
          individualTOMInfo = NULL,
          useIndivTOMSubset = NULL,
-
          # Network construction arguments: correlation options
-
          corType = "pearson",
          maxPOutliers = 1,
          quickCor = 0,
          pearsonFallback = "individual",
          cosineCorrelation = FALSE,
-
          # Adjacency function options
-
          power = 6,
          networkType = "unsigned",
          checkPower = TRUE,
          replaceMissingAdjacencies = FALSE,
-
          # Topological overlap options
-
          TOMType = "unsigned",
          TOMDenom = "min",
-
          # Save individual TOMs?
-
          saveIndividualTOMs = TRUE,
          individualTOMFileNames = "individualTOM-Set%s-Block%b.RData",
-
          # Consensus calculation options: network calibration
-
          networkCalibration = c("single quantile", "full quantile", "none"),
-
-         ## Save scaled TOMs? <-- leave this option for users willing to run consensusTOM on its own
-         #saveScaledIndividualTOMs = FALSE,
-         #scaledIndividualTOMFilePattern = "scaledIndividualTOM-Set%s-Block%b.RData",
-
          # Simple quantile calibration options
-
          calibrationQuantile = 0.95,
-         sampleForCalibration = TRUE, sampleForCalibrationFactor = 1000,
+         sampleForCalibration = TRUE,
+         sampleForCalibrationFactor = 1000,
          getNetworkCalibrationSamples = FALSE,
-
          # Consensus definition
-
          consensusQuantile = 0,
          useMean = FALSE,
          setWeights = NULL,
-
          # Saving the consensus TOM
-
          saveConsensusTOMs = FALSE,
          consensusTOMFileNames = "consensusTOM-block.%b.RData",
-
          # Internal handling of TOMs
-
          useDiskCache = TRUE, chunkSize = NULL,
          cacheBase = ".blockConsModsCache",
          cacheDir = ".",
-
          # Alternative consensus TOM input from a previous calculation
-
          consensusTOMInfo = NULL,
-
          # Basic tree cut options
-
          deepSplit = 2,
          detectCutHeight = 0.995, minModuleSize = 20,
          checkMinModuleSize = TRUE,
-
          # Advanced tree cut opyions
-
          maxCoreScatter = NULL, minGap = NULL,
          maxAbsCoreScatter = NULL, minAbsGap = NULL,
          minSplitHeight = NULL, minAbsSplitHeight = NULL,
-
          useBranchEigennodeDissim = FALSE,
          minBranchEigennodeDissim = mergeCutHeight,
-
          stabilityLabels = NULL,
          minStabilityDissim = NULL,
-
          pamStage = TRUE,  pamRespectsDendro = TRUE,
-
          # Gene joining and removal from a module, and module "significance" criteria
-
          reassignThresholdPS = 1e-4,
          trimmingConsensusQuantile = consensusQuantile,
          # minKMEtoJoin =0.7,
          minCoreKME = 0.5, minCoreKMESize = minModuleSize/3,
          minKMEtoStay = 0.2,
-
          # Module eigengene calculation options
-
          impute = TRUE,
          trapErrors = FALSE,
-
          # Module merging options
-
          equalizeQuantilesForModuleMerging = FALSE,
          quantileSummaryForModuleMerging = "mean",
          mergeCutHeight = 0.15,
          mergeConsensusQuantile = consensusQuantile,
-
-
          # Output options
-
          numericLabels = FALSE,
-
          # General options
          nThreads = 0,
          verbose = 2, indent = 0,

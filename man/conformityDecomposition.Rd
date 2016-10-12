@@ -137,5 +137,9 @@ Springer Book. ISBN: 978-1-4419-8818-8 Ranola JMO, Langfelder P, Song L,
 Horvath S, Lange K (2011) An MM algorithm for the module- and propensity
 based decomposition of a network. Currently a draft.
 }
+\seealso{
+\code{\link{conformityBasedNetworkConcepts}}
+\code{\link{propensityDecomposition}}
+}
 \keyword{misc}
 
