@@ -1,5 +1,16 @@
 # first and last lib functions
-
+#
+#' @useDynLib WGCNA
+#' @import foreach
+#' @import doParallel
+#' @import dynamicTreeCut
+#' @import fastcluster
+#' @import GO.db
+#' @import AnnotationDbi
+#' @import matrixStats
+#' @import Hmisc
+#' @import parallel
+#' @import survival
 .onAttach = function(libname, pkgname) {
   ourVer = try(gsub("[^0-9_.-]", "", packageVersion("WGCNA"), fixed = FALSE))
 
