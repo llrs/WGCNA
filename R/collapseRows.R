@@ -2,32 +2,32 @@
 ## Collapse groups (ie. genes) with multiple ids (ie. probes) together using the following algorthim:
 # 1) If there is one id/group = keep
 # 2) If there are 2 ids/group = take the maximum mean expression, if their correlation is > thresh
-# 3) If there are 3+ ids/group = iteratively repeat (2) for the id with the highest 
+# 3) If there are 3+ ids/group = iteratively repeat (2) for the id with the highest
 #	correlation until all ids remaining have correlation < thresh for each group
 # datOut is an expression matrix with rows=ids (NOT group) and cols=samples
 # rowGroup and rowID are vectors of corresponding group and id names for the rows in datOut
 #	(note: all ids in datOut only need to be a subset of these vectors, not necessarily identical)
 # thresh is the Pearson correlation threshold to combine probes of similar expression.
-	
+
 	names(rowGroup) = rowID
-	ids    = rownames(datOut);  
+	ids    = rownames(datOut);
 	idsIn  = ids;   # For later
 	group  = rowGroup[ids]
 	tGroup = table(group)
 	twos   = sort(names(tGroup)[tGroup==2])
 	more   = sort(names(tGroup)[tGroup>2])
 	len    = dim(datOut)[2]
-	
+
 	testTwoAndCombine <- function (datIn, datTmp, thresh){
 	# Internal function for removing one of two genes if they have high enough correlation
 		if (cor(as.numeric(datTmp[1,]),as.numeric(datTmp[2,]))>thresh){
 			rMean = rowMeans(datTmp)
 			omit  = as.numeric(which(rMean==min(rMean)))
 			datIn = datIn[rownames(datIn)!=rownames(datTmp)[omit],]
-		} 
+		}
 		return(datIn)
 	} # End internal function "testTwoAndCombine"
-	
+
 	for (g in twos){
 		datTmp = datOut[ids[group==g],]
 		datOut = testTwoAndCombine(datOut, datTmp, thresh)
@@ -38,7 +38,7 @@
 			ids = rownames(datOut)
 			group  = rowGroup[ids]
 			datTmp = datOut[ids[group==g],]
-			corDat = cor(t(datTmp)); 
+			corDat = cor(t(datTmp));
 			if(length(datTmp)==len) { go=FALSE
 			} else {
 				diag(corDat)=-2
@@ -100,10 +100,10 @@
 ## For each gene, select the gene with the fewest missing probes, and return the results.
 #   If there is a tie, keep all probes involved in the tie.
 #   The main part of this function is run only if omitGroups=TRUE
-	
+
 	# First, return datET if there is no missing data, otherwise run the function
 	if (sum(is.na(datET))==0) return(rep(TRUE,nrow(datET)))
-	
+
 	# Set up the variables.
 	names(rowGroup)     = rowID
 	probes              = dimnames(datET)[[1]]
@@ -112,10 +112,10 @@
 	tGenes              = table(genes)
 	checkGenes          = sort(names(tGenes)[tGenes>1])
 	missingData         = rowSums(is.na(datET))
-	
+
 	# Omit all probes with at least omitPercent genes missing
         keep = missingData<(omitPercent*dim(datET)[2]/100)
-	
+
 	# Omit relevant genes and return results
 	if (omitGroups)
 		for (g in checkGenes){
@@ -128,8 +128,230 @@
 }
 
 # ----------------- Main Function ------------------- #
-
-collapseRows <- function(datET, rowGroup, rowID, method="MaxMean", connectivityBasedCollapsing=FALSE,	
+#' @name collapseRows
+#' @rdname collapseRows
+#' @title Select one representative row per group
+#' @description
+#' Abstractly speaking, the function allows one to collapse the rows of a
+#' numeric matrix, e.g. by forming an average or selecting one representative
+#' row for each group of rows specified by a grouping variable (referred to as
+#' rowGroup). The word "collapse" reflects the fact that the method yields a new
+#'  matrix whose rows correspond to other rows of the original input data. The
+#'  function implements several network-based and biostatistical methods for
+#'  finding a representative row for each group specified in rowGroup.
+#'  Optionally, the function identifies the representative row according to the
+#'  least number of missing data, the highest sample mean, the highest sample
+#'  variance, the highest connectivity. One of the advantages of this function
+#'  is that it implements default settings which have worked well in numerous
+#'  applications. Below, we describe these default settings in more detail.
+#' @param datET matrix or data frame containing numeric values where rows
+#' correspond to variables (e.g. microarray probes) and columns correspond to
+#' observations (e.g. microarrays). Each row of datET must have a unique row
+#' identifier (specified in the vector rowID). The group label of each row is
+#' encoded in the vector rowGroup. While rowID should have non-missing, unique
+#' values (identifiers), the values of the vector rowGroup will typically not be
+#'  unique since the function aims to pick a representative row for each group.
+#' @param rowGroup character vector whose components contain the group label
+#' (e.g. a character string) for each row of datET. This vector needs to have
+#' the same length as the vector rowID. In gene expression applications, this
+#' vector could contain the gene symbol (or a co-expression module label).
+#' @param selectCols For correlation networks only (see below) can be used to
+#' select genes whose adjacencies will be calculated.
+#' Should be either a numeric vector giving the indices of the genes to be used,
+#'  or a boolean vector indicating which genes are to be used.
+#' @param rowID character vector of row identifiers. This should include all the
+#'  rows from rownames(datET), but can include other rows. Its entries should be
+#'   unique (no duplicates) and no missing values are permitted. If the row
+#'   identifier is missing for a given row, we suggest you remove this row from
+#'   datET before applying the function.
+#' @param method character string for determining which method is used to choose
+#'  a probe among exactly 2 corresponding rows or when
+#'  connectivityBasedCollapsing=FALSE. These are the options:
+#'  "MaxMean" (default) or "MinMean" = choose the row with the highest or
+#'  lowest mean value, respectively. "maxRowVariance" = choose the row with the
+#'  highest variance (across the columns of datET). "absMaxMean" or
+#'  "absMinMean" = choose the row with the highest or lowest mean absolute
+#'  value. "ME" = choose the eigenrow (first principal component of the rows in
+#'  each group). Note that with this method option, connectivityBasedCollapsing
+#'  is automatically set to FALSE. "Average" = for each column, take the average
+#'   value of the rows in each group "function" = use this method for a
+#'   user-input function (see the description of the argument "methodFunction").
+#'   \bold{Note}: if method="ME", "Average" or "function", the output parameters
+#'   "group2row" and "selectedRow" are not informative.
+#' @param connectivityBasedCollapsing ogical value. If TRUE, groups with 3 or
+#' more corresponding rows will be represented by the row with the highest
+#' connectivity according to a signed weighted correlation network adjacency
+#' matrix among the corresponding rows. Recall that the connectivity is defined
+#' as the rows sum of the adjacency matrix. The signed weighted adjacency matrix
+#'  is defined as A=(0.5+0.5*COR)^power where power is determined by the
+#'  argument connectivityPower and COR denotes the matrix of pairwise Pearson
+#'  correlation coefficients among the corresponding rows.
+#' @param methodFunction character string. It only needs to be specified if
+#' method="function" otherwise its input is ignored. Must be a function that
+#' takes a Nr x Nc matrix of numbers as input and outputs a vector with the
+#' length Nc (e.g., colMeans). This will then be the method used for collapsing
+#' values for multiple rows into a single value for the row.
+#' @param connectivityPower Positive number (typically integer) for specifying
+#' the threshold (power) used to construct the signed weighted adjacency matrix,
+#'  see the description of connectivityBasedCollapsing. This option is only used
+#'   if connectivityBasedCollapsing=TRUE.
+#' @param selectFewestMissing ogical values. If TRUE (default), the input
+#' expression matrix is trimmed such that for each group only the rows with the
+#' fewest number of missing values are retained. In situations where an equal
+#' number of values are missing (or where there is no missing data), all rows
+#' for a given group are retained. Whether this value is set to TRUE or FALSE,
+#' all rows with >90% missing data are omitted from the analysis.
+#' @param thresholdCombine Number between -1 and 1, or NA. If NA (default),
+#' this input is ignored. If a number between -1 and 1 is input, this value is
+#' taken as a threshold value, and collapseRows proceeds following the "maxMean"
+#' method, but ONLY for ids with correlations of R>thresholdCombine.
+#' Specifically: ...1) If there is one id/group, keep the id ...2) If there are
+#' 2 ids/group, take the maximum mean expression if their correlation is >
+#' thresholdCombine ...3) If there are 3+ ids/group, iteratively repeat (2) for
+#' the 2 ids with the highest correlation until all ids remaining have
+#' correlation < thresholdCombine for each group Note that this option usually
+#' results in more than one id per group; therefore, one must use care when
+#' implementing this option for use in comparisons between multiple matrices /
+#' data frames.
+#' @details
+#' The function is robust to missing data. Also, if rowIDs are missing, they
+#' are inferred according to the rownames of datET when possible. When a group
+#' corresponds to only 1 row then it is represented by this row since there is
+#' no other choice. Having said this, the row may be removed if it contains an
+#' excessive amount of missing data (90 percent or more missing values), see the
+#'  description of the argument selectFewestMissing for more details.
+#'
+#' A group is represented by a corresponding row with the fewest number of
+#' missing data if selectFewestMissing has been set to TRUE. Often several rows
+#' have the same minimum number of missing values (or no missing values) and a
+#' representative must be chosen among those rows. In this case we distinguish 2
+#'  situations: (1) If a group corresponds to exactly 2 rows then the
+#'  corresponding row with the highest average is selected if method="maxMean".
+#'  Alternative methods can be chosen as described in method. (2) If a group
+#'  corresponds to more than 2 rows, then the function calculates a signed
+#'  weighted correlation network (with power specified in connectivityPower)
+#'  among the corresponding rows if connectivityBasedCollapsing=TRUE. Next the
+#'  function calculates the network connectivity of each row (closely related
+#'  to the sum or correlations with the other matching rows). Next it chooses
+#'  the most highly connected row as representative. If
+#'  connectivityBasedCollapsing=FALSE, then method is used. For both situations,
+#'   if more than one row has the same value, the first such row is chosen.
+#'
+#' Setting thresholdCombine is a special case of this function, as not all ids
+#' for a single group are necessarily collapsed–only those with similar
+#' expression patterns are collapsed. We suggest using this option when the goal
+#' is to decrease the number of ids for computational reasons, but when ALL ids
+#' for a single group should not be combined (for example, if two probes could
+#' represent different splice variants for the same gene for many genes on a
+#' microarray).
+#'
+#' Example application: when dealing with microarray gene expression data then
+#' the rows of datET may correspond to unique probe identifiers and rowGroup
+#' may contain corresponding gene symbols. Recall that multiple probes
+#' (specified using rowID=ProbeID) may correspond to the same gene symbol
+#' (specified using rowGroup=GeneSymbol). In this case, datET contains the
+#' input expression data with rows as rowIDs and output expression data with
+#' rows as gene symbols, collapsing all probes for a given gene symbol into one
+#' representative.
+#' @return
+#' The output is a list with the following components.
+#' @param datETcollapsed is a numeric matrix with the same columns as the input
+#' matrix datET, but with rows corresponding to the different row groups rather
+#' than individual row identifiers. (If thresholdCombine is set, then rows still
+#'  correspond to individual row identifiers.)
+#' @param group2row is a matrix whose rows correspond to the unique group labels
+#' and whose 2 columns report which group label (first column called group) is
+#' represented by what row label (second column called selectedRowID). Set to
+#' NULL if method="ME" or "function".
+#' @examples
+#' ########################################################################
+#' # EXAMPLE 1:
+#' # The code simulates a data frame (called dat1) of correlated rows.
+#' # You can skip this part and start at the line called Typical Input Data
+#' # The first column of the data frame will contain row identifiers
+#' # number of columns (e.g. observations or microarrays)
+#' m=60
+#' # number of rows (e.g. variables or probes on a microarray)
+#' n=500
+#' # seed module eigenvector for the simulateModule function
+#' MEtrue=rnorm(m)
+#' # numeric data frame of n rows and m columns
+#' datNumeric=data.frame(t(simulateModule(MEtrue,n)))
+#' RowIdentifier=paste("Probe", 1:n, sep="")
+#' ColumnName=paste("Sample",1:m, sep="")
+#' dimnames(datNumeric)[[2]]=ColumnName
+#' # Let us now generate a data frame whose first column contains the rowID
+#' dat1=data.frame(RowIdentifier, datNumeric)
+#' #we simulate a vector with n/5 group labels, i.e. each row group corresponds to 5 rows
+#' rowGroup=rep(  paste("Group",1:(n/5),  sep=""), 5 )
+#'
+#' # Typical Input Data
+#' # Since the first column of dat1 contains the RowIdentifier, we use the following code
+#' datET=dat1[,-1]
+#' rowID=dat1[,1]
+#'
+#' # assign row names according to the RowIdentifier
+#' dimnames(datET)[[1]]=rowID
+#' # run the function and save it in an object
+#'
+#' collapse.object=collapseRows(datET=datET, rowGroup=rowGroup, rowID=rowID)
+#'
+#' # this creates the collapsed data where
+#' # the first column contains the group name
+#' # the second column reports the corresponding selected row name (the representative)
+#' # and the remaining columns report the values of the representative row
+#' dat1Collapsed=data.frame( collapse.object$group2row, collapse.object$datETcollapsed)
+#' dat1Collapsed[1:5,1:5]
+#'
+#' ########################################################################
+#' # EXAMPLE 2:
+#' # Using the same data frame as above, run collapseRows with a user-inputted function.
+#' # In this case we will use the mean.  Note that since we are choosing some combination
+#' #   of the probe values for each gene, the group2row and selectedRow output
+#' #   parameters are not meaningful.
+#'
+#' collapse.object.mean=collapseRows(datET=datET, rowGroup=rowGroup, rowID=rowID,
+#'                                   method="function", methodFunction=colMeans)[[1]]
+#' # Note that in this situation, running the following code produces the identical results:
+#'
+#' collapse.object.mean.2=collapseRows(datET=datET, rowGroup=rowGroup, rowID=rowID,
+#'                                     method="Average")[[1]]
+#'
+#' ########################################################################
+#' # EXAMPLE 3:
+#' # Using collapseRows to calculate the module eigengene.
+#' # First we create some sample data as in example 1 (or use your own!)
+#' m=60
+#' n=500
+#' MEtrue=rnorm(m)
+#' datNumeric=data.frame(t(simulateModule(MEtrue,n)))
+#'
+#' # In this example, rows are genes, and groups are modules.
+#' RowIdentifier=paste("Gene", 1:n, sep="")
+#' ColumnName=paste("Sample",1:m, sep="")
+#' dimnames(datNumeric)[[2]]=ColumnName
+#' dat1=data.frame(RowIdentifier, datNumeric)
+#' # We simulate a vector with n/100 modules, i.e. each row group corresponds to 100 rows
+#' rowGroup=rep(  paste("Module",1:(n/100),  sep=""), 100 )
+#' datET=dat1[,-1]
+#' rowID=dat1[,1]
+#' dimnames(datET)[[1]]=rowID
+#'
+#' # run the function and save it in an object
+#' collapse.object.ME=collapseRows(datET=datET, rowGroup=rowGroup, rowID=rowID, method="ME")[[1]]
+#'
+#' # Note that in this situation, running the following code produces the identical results:
+#' collapse.object.ME.2 = t(moduleEigengenes(expr=t(datET),colors=rowGroup)$eigengene)
+#' colnames(collapse.object.ME.2) = ColumnName
+#' rownames(collapse.object.ME.2) = sort(unique(rowGroup))
+#' @author
+#' Jeremy A. Miller, Steve Horvath, Peter Langfelder, Chaochao Cai
+#' @references
+#' Miller JA, Langfelder P, Cai C, Horvath S (2010) Strategies for optimally
+#' aggregating gene expression data: The collapseRows R function. Technical
+#' Report.
+#' @export
+collapseRows <- function(datET, rowGroup, rowID, method="MaxMean", connectivityBasedCollapsing=FALSE,
 	methodFunction=NULL, connectivityPower=1, selectFewestMissing=TRUE, thresholdCombine=NA)
 {
 
@@ -147,14 +369,14 @@ collapseRows <- function(datET, rowGroup, rowID, method="MaxMean", connectivityB
 
 	# datET is a numeric matrix whose rows correspond to variables
 	# e.g. probes of a microarray and whose columns to observations
-	# e.g. microarrays 
+	# e.g. microarrays
 
 	if ( sum(is.na(rowGroup))>0 ){
        warning(paste("The argument rowGroup contains missing data. It is strongly recommended\n",
               "   that you remove these rows before calling the function. Or redefine rowGroup\n",
 			  "   so that it has no missing data. But for convenience, we remove these data."))
-	}	
-	
+	}
+
     ## Test to make sure the variables are the right length.
     #     if not, fix it if possible, or return 0 if not possible
 	rowID  = as.character(rowID)
@@ -164,13 +386,13 @@ collapseRows <- function(datET, rowGroup, rowID, method="MaxMean", connectivityB
 		write("Error: rowGroup and rowID not the same length... exiting.","")
 		return(0)
 	}
-	
+
 	if (length(unique(rowID)) !=length(rowID) ){stop("rowID contains duplicate entries. Make sure that the argument rowID contains unique entries")}
-	
+
 	names(rowGroup) = rowID
-	
+
     if ( sum(is.na(rowID))>0 ){warning("The argument rowID contains missing data. I recommend you choose non-missing, unique values for rowID, e.g. character strings.")}
-	
+
 	if ((is.null(rnDat))&(dim(datET)[1]==length(rowID))){
 		write("Warning: *datET* does not have row names.  Assigning *rowID* as row names.","")
 		rnDat <- rownames(datET) <- rowID
@@ -199,23 +421,23 @@ collapseRows <- function(datET, rowGroup, rowID, method="MaxMean", connectivityB
 
 ## For each group, select the row with the fewest missing values (if selectFewestMissing==TRUE)
 ##  Also, remove all rows with more than 90% missing data
-	
+
 	datET_in = datET  # This will be used as a reference later
-		
+
 ## For each gene, select the gene with the fewest missing probes (if selectFewestMissing==TRUE)
 ##  Also, remove all probes with more than 90% missing data
-	
+
 	keep = .selectFewestMissing(datET, rowID, rowGroup, selectFewestMissing)
         datET = datET[keep, ]
         rowGroup = rowGroup[keep]
         rowID = rowID[keep]
 
 	rnDat = rownames(datET)
-	
-##   If 0 < thresholdCombine < 1, only combine ids into their corresponding group if their 
-#    correlation is greater than thresholdCombine.  This parameter supercedes all remaining 
+
+##   If 0 < thresholdCombine < 1, only combine ids into their corresponding group if their
+#    correlation is greater than thresholdCombine.  This parameter supercedes all remaining
 #    parameters.
-	
+
 	if(!is.na(thresholdCombine)){
 		if(!is.numeric(thresholdCombine)){
 			write("thresholdCombine is not between -1 and 1 and is therefore being treated as NA","")
@@ -223,18 +445,18 @@ collapseRows <- function(datET, rowGroup, rowID, method="MaxMean", connectivityB
 			write("thresholdCombine is not between -1 and 1 and is therefore being treated as NA","")
 		} else {
 			output = .filterSimilarPS(datET, rowGroup, rowID, thresholdCombine)
-			return(output)	
+			return(output)
 		}
 	}
-	
+
 ##   If method="function", use the function "methodFunction" as a way of combining genes
-#    Alternatively, use one of the built-in functions 
+#    Alternatively, use one of the built-in functions
 #    Note: methodFunction must be a function that takes a vector of numbers as input and
 #     outputs a single number. This function will return(0) or crash otherwise.
 
         recMethods = c("function","ME","MaxMean","maxRowVariance","MinMean","absMinMean","absMaxMean","Average")
         imethod = pmatch(method, recMethods)
-        
+
 	if (is.na(imethod)) {
 		printFlush("Error: entered method is not a legal option. Recognized options are *maxRowVariance*,")
 		printFlush("       *maxRowVariance*, *MaxMean*, *MinMean*, *absMaxMean*, *absMinMean*, *ME*,")
@@ -242,7 +464,7 @@ collapseRows <- function(datET, rowGroup, rowID, method="MaxMean", connectivityB
 		return(0)
 	}
         if (imethod > 2) method = spaste(".", method)
-	if (method=="function") 
+	if (method=="function")
         {
           method = methodFunction
 	  if((!is.function(methodFunction))&(!is.null(methodFunction))){
@@ -251,7 +473,7 @@ collapseRows <- function(datET, rowGroup, rowID, method="MaxMean", connectivityB
 	  }
         }
 	if (!is.function(method)) if (method!="ME") method = get(method, mode = "function")
-		
+
 ## Format the variables for use by this function
 	rowID[is.na(rowID)] = rowGroup[is.na(rowID)]    # Use group if row is missing
 	rownames(datET)[is.na(rnDat)]   = rowGroup[is.na(rnDat)]
@@ -276,13 +498,13 @@ collapseRows <- function(datET, rowGroup, rowID, method="MaxMean", connectivityB
 	rownames(datETOut) = sort(names(tGenes))
 	rowsOut = rownames(datETOut)
 	names(rowsOut) = rowsOut
-	
+
 ##  If !is.null(connectivityPower), default to the connectivity method with power=method
 #      Collapse genes with multiple probe sets together using the following algorthim:
 #      1) If there is one ps/g = keep
 #      2) If there are 2 ps/g = (use "method" or "methodFunction")
 #      3) If there are 3+ ps/g = take the max connectivity
-#   Otherwise, use "method" if there are 3+ ps/g as well. 
+#   Otherwise, use "method" if there are 3+ ps/g as well.
 	if(!is.null(connectivityPower)){
 	  if(!is.numeric(connectivityPower)){
 		write("Error: if entered, connectivityPower must be numeric... exiting.","")
@@ -297,13 +519,13 @@ collapseRows <- function(datET, rowGroup, rowID, method="MaxMean", connectivityB
 	    write("...Running anyway, but we suggest trying another method (for example, *mean*).","")
 	  }
 	}
-	
+
 	whichTestFn <- function(x){
 		d    = datETOut[g,]
 		test = (!is.na(x))&(!is.na(d))
 		return(sum(x[test]==d[test]))
 	}
-	
+
 # If method=ME, this function acts as the function moduleEigengene from the WGCNA library
 	if (!is.function(method)) if (method=="ME"){
 		datETOut = t(moduleEigengenes(t(datET),genes)$eigengenes)
@@ -313,9 +535,9 @@ collapseRows <- function(datET, rowGroup, rowID, method="MaxMean", connectivityB
 		colnames(out2) = c("group","selectedRowID")
 		out3 = is.element(rownames(datET_in),"@#$%^&*")
 		names(out3) = rownames(datET_in)
-		return(list(datETcollapsed = datETOut, group2row = out2, selectedRow = out3))		
+		return(list(datETcollapsed = datETOut, group2row = out2, selectedRow = out3))
 	}
-	
+
 # Actually run the collapse now!!!
 	if (!is.null(methodFunction))
 		write("Comment: make sure methodFunction takes a matrix as input.","")
@@ -323,7 +545,7 @@ collapseRows <- function(datET, rowGroup, rowID, method="MaxMean", connectivityB
 	if(connectivityBasedCollapsing){
 		twos = sort(names(tGenes)[tGenes==2]) # use "method" and connectivity
 		more = sort(names(tGenes)[tGenes>2])
-	} else { 
+	} else {
 		twos = sort(names(tGenes)[tGenes>1]) # only use "method"
 		more = character(0)
 	}
@@ -352,21 +574,21 @@ collapseRows <- function(datET, rowGroup, rowID, method="MaxMean", connectivityB
 	if (!is.null(methodFunction))
 		write("...Ignore previous comment.  Function completed properly!","")
 
-		
+
 # Retreive the information about which probes were saved, and include that information
 #   as part of the output.  If method="function" or "Average" output placeholder values.
 	if (!is.null(methodFunction)) {
 		out2 = cbind(rownames(datETOut),paste("function",rownames(datETOut),sep="."))
 		colnames(out2) = c("group","selectedRowID")
 		out3 = is.element(rownames(datET_in),"@#$%^&*")
-		names(out3) = rownames(datET_in)		
+		names(out3) = rownames(datET_in)
 		return(list(datETcollapsed = datETOut, group2row = out2, selectedRow = out3))
 	}
 	if (methodAverage) {
 		out2 = cbind(rownames(datETOut),paste("Average",rownames(datETOut),sep="."))
 		colnames(out2) = c("group","selectedRowID")
 		out3 = is.element(rownames(datET_in),"@#$%^&*")
-		names(out3) = rownames(datET_in)		
+		names(out3) = rownames(datET_in)
 		return(list(datETcollapsed = datETOut, group2row = out2, selectedRow = out3))
 	}
 	out2 = cbind(rownames(datETOut),rowsOut)
@@ -375,6 +597,6 @@ collapseRows <- function(datET, rowGroup, rowID, method="MaxMean", connectivityB
 	names(out3) = rownames(datET_in)
 	output = list(datETcollapsed = datETOut, group2row = out2, selectedRow = out3)
 	return(output)
-		
+
 # End of function
-} 
+}
