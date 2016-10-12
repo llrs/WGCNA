@@ -116,3 +116,26 @@ standardColors <- function(n = NULL){
         stop("Invalid number of standard colors requested.")
     }
 }
+
+#' Show colors used to label modules
+#'
+#' The function plots a barplot using colors that label modules.
+#'
+#' To see the first \code{n} colors, use argument \code{colors =
+#' standardColors(n)}.
+#'
+#' @param colors colors to be displayed. Defaults to all colors available for
+#' module labeling.
+#' @return None.
+#' @author Peter Langfelder
+#' @seealso \code{\link{standardColors}}
+#' @keywords misc
+#' @examples
+#'
+#' displayColors(standardColors(10))
+#'
+displayColors <- function(colors = NULL) {
+    if (is.null(colors))
+        colors = standardColors()
+    barplot(rep(1, length(colors)), col = colors, border = colors)
+}

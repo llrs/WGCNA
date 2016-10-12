@@ -69,7 +69,7 @@
 #' \code{moreNetworkConcepts} is \code{TRUE}, 3 additional columns containing
 #' network density, centralization, and heterogeneity.}
 #' @author Steve Horvath
-#' @seealso \code{\link{signumAdjacencyFunction}}
+#' @seealso \code{\link{signumAdjacency}}
 #' @references Bin Zhang and Steve Horvath (2005) "A General Framework for
 #' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
 #' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17

@@ -2,10 +2,10 @@
 
 
 #' Topological overlap matrix
-#' 
+#'
 #' Calculation of the topological overlap matrix from given expression data.
-#' 
-#' 
+#'
+#'
 #' @param datExpr expression data. A data frame in which columns are genes and
 #' rows ar samples. NAs are allowed, but not too many.
 #' @param corType character string specifying the correlation to be used.
@@ -140,24 +140,24 @@ TOMsimilarityFromExpr = function(datExpr, corType = "pearson",
 
 
 #' Topological overlap matrix similarity and dissimilarity
-#' 
+#'
 #' Calculation of the topological overlap matrix from a given adjacency matrix.
-#' 
-#' 
+#'
+#'
 #' The functions perform basically the same calculations of topological
 #' overlap. \code{TOMdist} turns the overlap (which is a measure of similarity)
 #' into a measure of dissimilarity by subtracting it from 1.
-#' 
+#'
 #' Basic checks on the adjacency matrix are performed and missing entries are
 #' replaced by zeros.  If \code{TOMType = "unsigned"}, entries of the adjacency
 #' matrix are required to lie between 0 and 1; for \code{TOMType = "signed"}
 #' they can be between -1 and 1. In both cases the resulting TOM entries, as
 #' well as the corresponding dissimilarities, lie between 0 and 1.
-#' 
+#'
 #' The underlying C code assumes that the diagonal of the adjacency matrix
 #' equals 1. If this is not the case, the diagonal of the input is set to 1
 #' before the calculation begins.
-#' 
+#'
 #' @aliases TOMsimilarity TOMdist
 #' @param adjMat adjacency matrix, that is a square, symmetric matrix with
 #' entries between 0 and 1 (negative values are allowed if
@@ -237,21 +237,21 @@ TOMdist = function(adjMat, TOMType = "unsigned", TOMDenom = "min", verbose = 1, 
 
 
 #' Automatic network construction and module detection
-#' 
+#'
 #' This function performs automatic network construction and module detection
 #' on large expression datasets in a block-wise manner.
-#' 
+#'
 #' Before module detection starts, genes and samples are optionally checked for
 #' the presence of \code{NA}s. Genes and/or samples that have too many
 #' \code{NA}s are flagged as bad and removed from the analysis; bad genes will
 #' be automatically labeled as unassigned, while the returned eigengenes will
 #' have \code{NA} entries for all bad samples.
-#' 
+#'
 #' If \code{blocks} is not given and the number of genes exceeds
 #' \code{maxBlockSize}, genes are pre-clustered into blocks using the function
 #' \code{\link{projectiveKMeans}}; otherwise all genes are treated in a single
 #' block.
-#' 
+#'
 #' For each block of genes, the network is constructed and (if requested)
 #' topological overlap is calculated. If requested, the topological overlaps
 #' are returned as part of the return value list. Genes are then clustered
@@ -261,20 +261,20 @@ TOMdist = function(adjMat, TOMType = "unsigned", TOMDenom = "min", verbose = 1, 
 #' \code{minKMEtoStay}. Modules in which fewer than \code{minCoreKMESize} genes
 #' have KME higher than \code{minCoreKME} are disbanded, i.e., their
 #' constituent genes are pronounced unassigned.
-#' 
+#'
 #' After all blocks have been processed, the function checks whether there are
 #' genes whose KME in the module they assigned is lower than KME to another
 #' module. If p-values of the higher correlations are smaller than those of the
 #' native module by the factor \code{reassignThresholdPS}, the gene is
 #' re-assigned to the closer module.
-#' 
+#'
 #' In the last step, modules whose eigengenes are highly correlated are merged.
 #' This is achieved by clustering module eigengenes using the dissimilarity
 #' given by one minus their correlation, cutting the dendrogram at the height
 #' \code{mergeCutHeight} and merging all modules on each branch. The process is
 #' iterated until no modules are merged. See \code{\link{mergeCloseModules}}
 #' for more details on module merging.
-#' 
+#'
 #' The argument \code{quick} specifies the precision of handling of missing
 #' data in the correlation calculations. Zero will cause all calculations to be
 #' executed precisely, which may be significantly slower than calculations
@@ -293,7 +293,7 @@ TOMdist = function(adjMat, TOMType = "unsigned", TOMDenom = "min", verbose = 1, 
 #' that will be tolerated before a recalculation is triggered. The hope is that
 #' if only a few missing data are treated approximately, the error introduced
 #' will be small but the potential speedup can be significant.
-#' 
+#'
 #' @param datExpr expression data. A data frame in which columns are genes and
 #' rows ar samples. NAs are allowed, but not too many.
 #' @param checkMissingData logical: should data be checked for excessive
@@ -460,41 +460,41 @@ TOMdist = function(adjMat, TOMType = "unsigned", TOMDenom = "min", verbose = 1, 
 #' indentation, each unit adds two spaces.
 #' @param ... Other arguments.
 #' @return A list with the following components:
-#' 
+#'
 #' \item{colors }{ a vector of color or numeric module labels for all genes.}
-#' 
+#'
 #' \item{unmergedColors }{ a vector of color or numeric module labels for all
 #' genes before module merging.}
-#' 
+#'
 #' \item{MEs }{ a data frame containing module eigengenes of the found modules
 #' (given by \code{colors}).}
-#' 
+#'
 #' \item{goodSamples}{numeric vector giving indices of good samples, that is
 #' samples that do not have too many missing entries. }
-#' 
+#'
 #' \item{goodGenes}{ numeric vector giving indices of good genes, that is genes
 #' that do not have too many missing entries.}
-#' 
+#'
 #' \item{dendrograms}{ a list whose components conatain hierarchical clustering
 #' dendrograms of genes in each block. }
-#' 
+#'
 #' \item{TOMFiles}{ if \code{saveTOMs==TRUE}, a vector of character strings,
 #' one string per block, giving the file names of files (relative to current
 #' directory) in which blockwise topological overlaps were saved. }
-#' 
+#'
 #' \item{blockGenes}{ a list whose components give the indices of genes in each
 #' block. }
-#' 
+#'
 #' \item{blocks}{if input \code{blocks} was given, its copy; otherwise a vector
 #' of length equal number of genes giving the block label for each gene. Note
 #' that block labels are not necessarilly sorted in the order in which the
 #' blocks were processed (since we do not require this for the input
 #' \code{blocks}). See \code{blockOrder} below. }
-#' 
+#'
 #' \item{blockOrder}{ a vector giving the order in which blocks were processed
 #' and in which \code{blockGenes} above is returned. For example,
 #' \code{blockOrder[1]} contains the label of the first-processed block. }
-#' 
+#'
 #' \item{MEsOK}{logical indicating whether the module eigengenes were
 #' calculated without errors. }
 #' @note If the input dataset has a large number of genes, consider carefully
@@ -507,23 +507,23 @@ TOMdist = function(adjMat, TOMType = "unsigned", TOMDenom = "min", verbose = 1, 
 #' will be able to work with blocks larger than 8000 genes.
 #' @author Peter Langfelder
 #' @seealso
-#' 
+#'
 #' \code{\link{goodSamplesGenes}} for basic quality control and filtering;
-#' 
+#'
 #' \code{\link{adjacency}}, \code{\link{TOMsimilarity}} for network
 #' construction;
-#' 
+#'
 #' \code{\link[stats]{hclust}} for hierarchical clustering;
-#' 
+#'
 #' \code{\link[dynamicTreeCut]{cutreeDynamic}} for adaptive branch cutting in
 #' hierarchical clustering dendrograms;
-#' 
+#'
 #' \code{\link{mergeCloseModules}} for merging of close modules.
 #' @references Bin Zhang and Steve Horvath (2005) "A General Framework for
 #' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
 #' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 #' @keywords misc
-blockwiseModules = function(
+blockwiseModules <- function(
   # Input data
 
   datExpr,
@@ -1194,17 +1194,17 @@ blockwiseModules = function(
 
 
 #' Filter samples with too many missing entries
-#' 
+#'
 #' This function checks data for missing entries and returns a list of samples
 #' that pass two criteria on maximum number of missing values: the fraction of
 #' missing values must be below a given threshold and the total number of
 #' missing genes must be below a given threshold.
-#' 
+#'
 #' The constants \code{..minNSamples} and \code{..minNGenes} are both set to
 #' the value 4.  For most data sets, the fraction of missing samples criterion
 #' will be much more stringent than the absolute number of missing samples
 #' criterion.
-#' 
+#'
 #' @param datExpr expression data. A data frame in which columns are genes and
 #' rows ar samples.
 #' @param useSamples optional specifications of which samples to use for the
@@ -1235,18 +1235,18 @@ blockwiseModules = function(
 
 
 #' Filter genes with too many missing entries
-#' 
+#'
 #' This function checks data for missing entries and returns a list of genes
 #' that have non-zero variance and pass two criteria on maximum number of
 #' missing values: the fraction of missing values must be below a given
 #' threshold and the total number of missing samples must be below a given
 #' threshold.
-#' 
+#'
 #' The constants \code{..minNSamples} and \code{..minNGenes} are both set to
 #' the value 4.  For most data sets, the fraction of missing samples criterion
 #' will be much more stringent than the absolute number of missing samples
 #' criterion.
-#' 
+#'
 #' @param datExpr expression data. A data frame in which columns are genes and
 #' rows ar samples.
 #' @param useSamples optional specifications of which samples to use for the
@@ -1320,14 +1320,14 @@ blockwiseModules = function(
 
 
 #' Repeat blockwise module detection from pre-calculated data
-#' 
+#'
 #' Given consensus networks constructed for example using
 #' \code{\link{blockwiseModules}}, this function (re-)detects modules in them
 #' by branch cutting of the corresponding dendrograms. If repeated branch cuts
 #' of the same gene network dendrograms are desired, this function can save
 #' substantial time by re-using already calculated networks and dendrograms.
-#' 
-#' 
+#'
+#'
 #' For details on blockwise module detection, see
 #' \code{\link{blockwiseModules}}. This function implements the module
 #' detection subset of the functionality of \code{\link{blockwiseModules}};
@@ -1335,7 +1335,7 @@ blockwiseModules = function(
 #' primary use of this function is to experiment with module detection settings
 #' without having to re-execute long network and clustering calculations whose
 #' results are not affected by the cutting parameters.
-#' 
+#'
 #' This function takes as input the networks and dendrograms that are produced
 #' by \code{\link{blockwiseModules}}.  Working block by block, modules are
 #' identified in the dendrogram by the Dynamic Hybrid Tree Cut algorithm. Found
@@ -1343,20 +1343,20 @@ blockwiseModules = function(
 #' is less than \code{minKMEtoStay}. Modules in which fewer than
 #' \code{minCoreKMESize} genes have KME higher than \code{minCoreKME} are
 #' disbanded, i.e., their constituent genes are pronounced unassigned.
-#' 
+#'
 #' After all blocks have been processed, the function checks whether there are
 #' genes whose KME in the module they assigned is lower than KME to another
 #' module. If p-values of the higher correlations are smaller than those of the
 #' native module by the factor \code{reassignThresholdPS}, the gene is
 #' re-assigned to the closer module.
-#' 
+#'
 #' In the last step, modules whose eigengenes are highly correlated are merged.
 #' This is achieved by clustering module eigengenes using the dissimilarity
 #' given by one minus their correlation, cutting the dendrogram at the height
 #' \code{mergeCutHeight} and merging all modules on each branch. The process is
 #' iterated until no modules are merged. See \code{\link{mergeCloseModules}}
 #' for more details on module merging.
-#' 
+#'
 #' @param datExpr expression data. A data frame in which columns are genes and
 #' rows ar samples. NAs are allowed, but not too many.
 #' @param goodSamples a logical vector specifying which samples are considered
@@ -1447,25 +1447,25 @@ blockwiseModules = function(
 #' indentation, each unit adds two spaces.
 #' @param ... Other arguments.
 #' @return A list with the following components:
-#' 
+#'
 #' \item{colors }{ a vector of color or numeric module labels for all genes.}
-#' 
+#'
 #' \item{unmergedColors }{ a vector of color or numeric module labels for all
 #' genes before module merging.}
-#' 
+#'
 #' \item{MEs }{ a data frame containing module eigengenes of the found modules
 #' (given by \code{colors}).}
-#' 
+#'
 #' \item{MEsOK}{logical indicating whether the module eigengenes were
 #' calculated without errors. }
 #' @author Peter Langfelder
 #' @seealso
-#' 
+#'
 #' \code{\link{blockwiseModules}} for full module calculation;
-#' 
+#'
 #' \code{\link[dynamicTreeCut]{cutreeDynamic}} for adaptive branch cutting in
 #' hierarchical clustering dendrograms;
-#' 
+#'
 #' \code{\link{mergeCloseModules}} for merging of close modules.
 #' @references Bin Zhang and Steve Horvath (2005) "A General Framework for
 #' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
@@ -1922,22 +1922,22 @@ recutBlockwiseTrees = function(datExpr,
 
 
 #' Calculation of block-wise topological overlaps
-#' 
+#'
 #' Calculates topological overlaps in the given (expression) data. If the
 #' number of variables (columns) in the input data is too large, the data is
 #' first split using pre-clustering, then topological overlaps are calculated
 #' in each block.
-#' 
+#'
 #' The function starts by optionally filtering out samples that have too many
 #' missing entries and genes that have either too many missing entries or zero
 #' variance in at least one set. Genes that are filtered out are excluded from
 #' the TOM calculations.
-#' 
+#'
 #' If \code{blocks} is not given and the number of genes exceeds
 #' \code{maxBlockSize}, genes are pre-clustered into blocks using the function
 #' \code{\link{consensusProjectiveKMeans}}; otherwise all genes are treated in
 #' a single block.
-#' 
+#'
 #' For each block of genes, the network is constructed and (if requested)
 #' topological overlap is calculated in each set. The topological overlaps can
 #' be saved to disk as RData files, or returned directly within the return
@@ -1945,7 +1945,7 @@ recutBlockwiseTrees = function(datExpr,
 #' within the return value can quickly exhaust the system's memory. In
 #' particular, if the block-wise calculation is necessary, it is nearly certain
 #' that returning all matrices via the return value will be impossible.
-#' 
+#'
 #' @param multiExpr expression data in the multi-set format (see
 #' \code{\link{checkSets}}). A vector of lists, one per set. Each set must
 #' contain a component \code{data} that contains the expression data, with rows
@@ -2047,12 +2047,12 @@ recutBlockwiseTrees = function(datExpr,
 #' @param indent indentation for diagnostic messages. Zero means no
 #' indentation, each unit adds two spaces.
 #' @return A list with the following components:
-#' 
+#'
 #' \item{actualTOMFileNames}{Only returned if input \code{saveTOMs} is
 #' \code{TRUE}. A matrix of character strings giving the file names in which
 #' each block TOM is saved. Rows correspond to data sets and columns to
 #' blocks.}
-#' 
+#'
 #' \item{TOMSimilarities}{Only returned if input \code{saveTOMs} is
 #' \code{FALSE}. A list in which each component corresponds to one block. Each
 #' component is a matrix of dimensions (N times (number of sets)), where N is
@@ -2061,17 +2061,17 @@ recutBlockwiseTrees = function(datExpr,
 #' the topological overlap of variables in the corresponding set ( and the
 #' corresponding block), arranged as a distance structure. Do note however that
 #' the topological overlap is a similarity (not a distance). }
-#' 
+#'
 #' \item{blocks}{if input \code{blocks} was given, its copy; otherwise a vector
 #' of length equal number of genes giving the block label for each gene. Note
 #' that block labels are not necessarilly sorted in the order in which the
 #' blocks were processed (since we do not require this for the input
 #' \code{blocks}). See \code{blockOrder} below. }
-#' 
+#'
 #' \item{blockGenes}{a list with one component for each block of genes. Each
 #' component is a vector giving the indices (relative to the input
 #' \code{multiExpr}) of genes in the corresponding block. }
-#' 
+#'
 #' \item{goodSamplesAndGenes}{if input \code{checkMissingData} is \code{TRUE},
 #' the output of the function \code{\link{goodSamplesGenesMS}}.  A list with
 #' components \code{goodGenes} (logical vector indicating which genes passed
@@ -2082,42 +2082,42 @@ recutBlockwiseTrees = function(datExpr,
 #' \code{checkMissingData} is \code{FALSE}, \code{goodSamplesAndGenes} contains
 #' a list of the same type but indicating that all genes and all samples passed
 #' the missing data filters.}
-#' 
+#'
 #' The following components are present mostly to streamline the interaction of
 #' this function with \code{\link{blockwiseConsensusModules}}.
-#' 
+#'
 #' \item{nGGenes}{ Number of genes that passed missing data filters (if input
 #' \code{checkMissingData} is \code{TRUE}), or the number of all genes (if
 #' \code{checkMissingData} is \code{FALSE}).}
-#' 
+#'
 #' \item{gBlocks}{ the vector \code{blocks} (above), restricted to good genes
 #' only. }
-#' 
+#'
 #' \item{nThreads}{ number of threads used to calculate correlation and TOM
 #' matrices. }
-#' 
+#'
 #' \item{saveTOMs}{ logical: were calculated matrices saved in files
 #' (\code{TRUE}) or returned in the return value (\code{FALSE})?}
-#' 
+#'
 #' \item{intNetworkType, intCorType}{integer codes for network and correlation
 #' type. }
-#' 
+#'
 #' \item{nSets}{number of sets in input data.}
-#' 
+#'
 #' \item{setNames}{the \code{names} attribute of input \code{multiExpr}.}
 #' @author Peter Langfelder
 #' @seealso
-#' 
+#'
 #' \code{\link{blockwiseConsensusModules}}
 #' @references For a general discussion of the weighted network formalism, see
-#' 
+#'
 #' Bin Zhang and Steve Horvath (2005) "A General Framework for Weighted Gene
 #' Co-Expression Network Analysis", Statistical Applications in Genetics and
 #' Molecular Biology: Vol. 4: No. 1, Article 17
-#' 
+#'
 #' The blockwise approach is briefly described in the article describing this
 #' package,
-#' 
+#'
 #' Langfelder P, Horvath S (2008) "WGCNA: an R package for weighted correlation
 #' network analysis".  BMC Bioinformatics 2008, 9:559
 #' @keywords misc
@@ -2173,11 +2173,11 @@ blockwiseIndividualTOMs = function(multiExpr,
 
 
 #' Number of sets in a multi-set variable
-#' 
+#'
 #' A convenience function that returns the number of sets in a multi-set
 #' variable.
-#' 
-#' 
+#'
+#'
 #' @param multiData vector of lists; in each list there must be a component
 #' named \code{data} whose content is a matrix or dataframe or array of
 #' dimension 2.
@@ -2419,46 +2419,46 @@ blockwiseIndividualTOMs = function(multiExpr,
 
 #' Reconstruct a symmetric matrix from a distance (lower-triangular)
 #' representation
-#' 
+#'
 #' Assuming the input vector contains a vectorized form of the distance
 #' representation of a symmetric matrix, this function creates the
 #' corresponding matrix. This is useful when re-forming symmetric matrices that
 #' have been vectorized to save storage space.
-#' 
+#'
 #' The function assumes that \code{x} contains the vectorized form of the
 #' distance representation of a symmetric matrix. In particular, \code{x} must
 #' have a length that can be expressed as n*(n-1)/2, with n an integer. The
 #' result of the function is then an n times n matrix.
-#' 
+#'
 #' @param x a numeric vector
 #' @param diag value to be put on the diagonal. Recycled if necessary.
 #' @return A symmetric matrix whose lower triangle is given by \code{x}.
 #' @author Peter Langfelder
 #' @keywords misc
 #' @examples
-#' 
+#'
 #'   # Create a symmetric matrix
 #'   m = matrix(c(1:16), 4,4)
 #'   mat = (m + t(m));
 #'   diag(mat) = 0;
-#' 
+#'
 #'   # Print the matrix
 #'   mat
-#' 
+#'
 #'   # Take the lower triangle and vectorize it (in two ways)
 #'   x1 = mat[lower.tri(mat)]
 #'   x2 = as.vector(as.dist(mat))
-#' 
+#'
 #'   all.equal(x1, x2) # The vectors are equal
-#' 
+#'
 #'   # Turn the vectors back into matrices
 #'   new.mat = lowerTri2matrix(x1, diag = 0);
-#' 
+#'
 #'   # Did we get back the same matrix?
-#' 
+#'
 #'   all.equal(mat, new.mat)
-#' 
-#' 
+#'
+#'
 lowerTri2matrix = function(x, diag = 1)
 {
   if (class(x)=="dist")
@@ -2497,54 +2497,54 @@ lowerTri2matrix = function(x, diag = 1)
 
 
 #' Find consensus modules across several datasets.
-#' 
+#'
 #' Perform network construction and consensus module detection across several
 #' datasets.
-#' 
+#'
 #' The function starts by optionally filtering out samples that have too many
 #' missing entries and genes that have either too many missing entries or zero
 #' variance in at least one set. Genes that are filtered out are left
 #' unassigned by the module detection. Returned eigengenes will contain
 #' \code{NA} in entries corresponding to filtered-out samples.
-#' 
+#'
 #' If \code{blocks} is not given and the number of genes exceeds
 #' \code{maxBlockSize}, genes are pre-clustered into blocks using the function
 #' \code{\link{consensusProjectiveKMeans}}; otherwise all genes are treated in
 #' a single block.
-#' 
+#'
 #' For each block of genes, the network is constructed and (if requested)
 #' topological overlap is calculated in each set. To minimize memory usage,
 #' calculated topological overlaps are optionally saved to disk in chunks until
 #' they are needed again for the calculation of the consensus network
 #' topological overlap.
-#' 
+#'
 #' Before calculation of the consensus Topological Overlap, individual TOMs are
 #' optionally calibrated. Calibration methods include single quantile scaling
 #' and full quantile normalization.
-#' 
+#'
 #' Single quantile scaling raises individual TOM in sets 2,3,... to a power
 #' such that the quantiles given by \code{calibrationQuantile} agree with the
 #' quantile in set 1. Since the high TOMs are usually the most important for
 #' module identification, the value of \code{calibrationQuantile} is close to
 #' (but not equal) 1. To speed up quantile calculation, the quantiles can be
 #' determined on a randomly-chosen component subset of the TOM matrices.
-#' 
+#'
 #' Full quantile normalization, implemented in
 #' \code{\link[preprocessCore]{normalize.quantiles}}, adjusts the TOM matrices
 #' such that all quantiles equal each other (and equal to the quantiles of the
 #' component-wise average of the individual TOM matrices).
-#' 
+#'
 #' Note that network calibration is performed separately in each block, i.e.,
 #' the normalizing transformation may differ between blocks. This is necessary
 #' to avoid manipulating a full TOM in memory.
-#' 
+#'
 #' The consensus TOM is calculated as the component-wise
 #' \code{consensusQuantile} quantile of the individual (set) TOMs; that is, for
 #' each gene pair (TOM entry), the \code{consensusQuantile} quantile across all
 #' input sets. Alternatively, one can also use (weighted) component-wise mean
 #' across all imput data sets. If requested, the consensus topological overlaps
 #' are saved to disk for later use.
-#' 
+#'
 #' Genes are then clustered using average linkage hierarchical clustering and
 #' modules are identified in the resulting dendrogram by the Dynamic Hybrid
 #' tree cut. Found modules are trimmed of genes whose consensus module
@@ -2552,20 +2552,20 @@ lowerTri2matrix = function(x, diag = 1)
 #' \code{minKMEtoStay}. Modules in which fewer than \code{minCoreKMESize} genes
 #' have consensus KME higher than \code{minCoreKME} are disbanded, i.e., their
 #' constituent genes are pronounced unassigned.
-#' 
+#'
 #' After all blocks have been processed, the function checks whether there are
 #' genes whose KME in the module they assigned is lower than KME to another
 #' module. If p-values of the higher correlations are smaller than those of the
 #' native module by the factor \code{reassignThresholdPS} (in every set), the
 #' gene is re-assigned to the closer module.
-#' 
+#'
 #' In the last step, modules whose eigengenes are highly correlated are merged.
 #' This is achieved by clustering module eigengenes using the dissimilarity
 #' given by one minus their correlation, cutting the dendrogram at the height
 #' \code{mergeCutHeight} and merging all modules on each branch. The process is
 #' iterated until no modules are merged. See \code{\link{mergeCloseModules}}
 #' for more details on module merging.
-#' 
+#'
 #' The argument \code{quick} specifies the precision of handling of missing
 #' data in the correlation calculations. Zero will cause all calculations to be
 #' executed precisely, which may be significantly slower than calculations
@@ -2584,7 +2584,7 @@ lowerTri2matrix = function(x, diag = 1)
 #' that will be tolerated before a recalculation is triggered. The hope is that
 #' if only a few missing data are treated approximately, the error introduced
 #' will be small but the potential speedup can be significant.
-#' 
+#'
 #' @param multiExpr expression data in the multi-set format (see
 #' \code{\link{checkSets}}). A vector of lists, one per set. Each set must
 #' contain a component \code{data} that contains the expression data, with rows
@@ -2827,56 +2827,56 @@ lowerTri2matrix = function(x, diag = 1)
 #' reproduce a bug in branch eigennode dissimilarity calculations for purposes
 #' if reproducing old reults.
 #' @return A list with the following components:
-#' 
+#'
 #' \item{colors}{ module assignment of all input genes. A vector containing
 #' either character strings with module colors (if input \code{numericLabels}
 #' was unset) or numeric module labels (if \code{numericLabels} was set to
 #' \code{TRUE}). The color "grey" and the numeric label 0 are reserved for
 #' unassigned genes.  }
-#' 
+#'
 #' \item{unmergedColors }{ module colors or numeric labels before the module
 #' merging step. }
-#' 
+#'
 #' \item{multiMEs}{ module eigengenes corresponding to the modules returned in
 #' \code{colors}, in multi-set format. A vector of lists, one per set,
 #' containing eigengenes, proportion of variance explained and other
 #' information. See \code{\link{multiSetMEs}} for a detailed description. }
-#' 
+#'
 #' \item{goodSamples}{ a list, with one component per input set. Each component
 #' is a logical vector with one entry per sample from the corresponding set.
 #' The entry indicates whether the sample in the set passed basic quality
 #' control criteria. }
-#' 
+#'
 #' \item{goodGenes}{a logical vector with one entry per input gene indicating
 #' whether the gene passed basic quality control criteria in all sets.}
-#' 
+#'
 #' \item{dendrograms}{a list with one component for each block of genes. Each
 #' component is the hierarchical clustering dendrogram obtained by clustering
 #' the consensus gene dissimilarity in the corresponding block. }
-#' 
+#'
 #' \item{TOMFiles}{ if \code{saveConsensusTOMs==TRUE}, a vector of character
 #' strings, one string per block, giving the file names of files (relative to
 #' current directory) in which blockwise topological overlaps were saved. }
-#' 
+#'
 #' \item{blockGenes}{a list with one component for each block of genes. Each
 #' component is a vector giving the indices (relative to the input
 #' \code{multiExpr}) of genes in the corresponding block. }
-#' 
+#'
 #' \item{blocks}{if input \code{blocks} was given, its copy; otherwise a vector
 #' of length equal number of genes giving the block label for each gene. Note
 #' that block labels are not necessarilly sorted in the order in which the
 #' blocks were processed (since we do not require this for the input
 #' \code{blocks}). See \code{blockOrder} below. }
-#' 
+#'
 #' \item{blockOrder}{ a vector giving the order in which blocks were processed
 #' and in which \code{blockGenes} above is returned. For example,
 #' \code{blockOrder[1]} contains the label of the first-processed block. }
-#' 
+#'
 #' \item{originCount}{if the input \code{consensusQuantile==0}, this vector
 #' will contain counts of how many times each set contributed the consensus
 #' gene similarity value. If the counts are highly unbalanced, the consensus
 #' may be biased. }
-#' 
+#'
 #' \item{networkCalibrationSamples}{if the input
 #' \code{getNetworkCalibrationSamples} is \code{TRUE}, this component is a list
 #' with one component per block. Each component is again a list with two
@@ -2896,7 +2896,7 @@ lowerTri2matrix = function(x, diag = 1)
 #' and often the only way to work with large numbers of genes. As a rough
 #' guide, it is unlikely a standard desktop computer with 4GB memory or less
 #' will be able to work with blocks larger than 7000 genes.
-#' 
+#'
 #' %Topological overlap calculations can be speeded up substantially (several
 #' 10-fold times on multi-core %systems) if R is compiled with a dedicated BLAS
 #' (Basic Linear Algebra Subroutines) %library such as ATLAS or GotoBLAS and
@@ -2905,17 +2905,17 @@ lowerTri2matrix = function(x, diag = 1)
 #' systems).
 #' @author Peter Langfelder
 #' @seealso
-#' 
+#'
 #' \code{\link{goodSamplesGenesMS}} for basic quality control and filtering;
-#' 
+#'
 #' \code{\link{adjacency}}, \code{\link{TOMsimilarity}} for network
 #' construction;
-#' 
+#'
 #' \code{\link{hclust}} for hierarchical clustering;
-#' 
+#'
 #' \code{\link[dynamicTreeCut]{cutreeDynamic}} for adaptive branch cutting in
 #' hierarchical clustering dendrograms;
-#' 
+#'
 #' \code{\link{mergeCloseModules}} for merging of close modules.
 #' @references Langfelder P, Horvath S (2007) Eigengene networks for studying
 #' the relationships between co-expression modules. BMC Systems Biology 2007,
@@ -3726,15 +3726,15 @@ blockwiseConsensusModules = function(multiExpr,
 
 
 #' Repeat blockwise consensus module detection from pre-calculated data
-#' 
+#'
 #' Given consensus networks constructed for example using
 #' \code{\link{blockwiseConsensusModules}}, this function (re-)detects modules
 #' in them by branch cutting of the corresponding dendrograms. If repeated
 #' branch cuts of the same gene network dendrograms are desired, this function
 #' can save substantial time by re-using already calculated networks and
 #' dendrograms.
-#' 
-#' 
+#'
+#'
 #' For details on blockwise consensus module detection, see
 #' \code{\link{blockwiseConsensusModules}}. This function implements the module
 #' detection subset of the functionality of
@@ -3743,7 +3743,7 @@ blockwiseConsensusModules = function(multiExpr,
 #' experiment with module detection settings without having to re-execute long
 #' network and clustering calculations whose results are not affected by the
 #' cutting parameters.
-#' 
+#'
 #' This function takes as input the networks and dendrograms that are produced
 #' by \code{\link{blockwiseConsensusModules}}.  Working block by block, modules
 #' are identified in the dendrograms by the Dynamic Hybrid tree cut.  Found
@@ -3752,20 +3752,20 @@ blockwiseConsensusModules = function(multiExpr,
 #' in which fewer than \code{minCoreKMESize} genes have consensus KME higher
 #' than \code{minCoreKME} are disbanded, i.e., their constituent genes are
 #' pronounced unassigned.
-#' 
+#'
 #' After all blocks have been processed, the function checks whether there are
 #' genes whose KME in the module they assigned is lower than KME to another
 #' module. If p-values of the higher correlations are smaller than those of the
 #' native module by the factor \code{reassignThresholdPS} (in every set), the
 #' gene is re-assigned to the closer module.
-#' 
+#'
 #' In the last step, modules whose eigengenes are highly correlated are merged.
 #' This is achieved by clustering module eigengenes using the dissimilarity
 #' given by one minus their correlation, cutting the dendrogram at the height
 #' \code{mergeCutHeight} and merging all modules on each branch. The process is
 #' iterated until no modules are merged. See \code{\link{mergeCloseModules}}
 #' for more details on module merging.
-#' 
+#'
 #' @param multiExpr expression data in the multi-set format (see
 #' \code{\link{checkSets}}). A vector of lists, one per set. Each set must
 #' contain a component \code{data} that contains the expression data, with rows
@@ -3867,16 +3867,16 @@ blockwiseConsensusModules = function(multiExpr,
 #' @param indent indentation for diagnostic messages. Zero means no
 #' indentation, each unit adds two spaces.
 #' @return A list with the following components:
-#' 
+#'
 #' \item{colors}{ module assignment of all input genes. A vector containing
 #' either character strings with module colors (if input \code{numericLabels}
 #' was unset) or numeric module labels (if \code{numericLabels} was set to
 #' \code{TRUE}). The color "grey" and the numeric label 0 are reserved for
 #' unassigned genes.  }
-#' 
+#'
 #' \item{unmergedColors }{ module colors or numeric labels before the module
 #' merging step. }
-#' 
+#'
 #' \item{multiMEs}{ module eigengenes corresponding to the modules returned in
 #' \code{colors}, in multi-set format. A vector of lists, one per set,
 #' containing eigengenes, proportion of variance explained and other
@@ -3885,13 +3885,13 @@ blockwiseConsensusModules = function(multiExpr,
 #' to the user's responsibility to provide valid input.
 #' @author Peter Langfelder
 #' @seealso
-#' 
+#'
 #' \code{\link{blockwiseConsensusModules}} for the full blockwise modules
 #' calculation. Parts of its output are natural input for this function.
-#' 
+#'
 #' \code{\link[dynamicTreeCut]{cutreeDynamic}} for adaptive branch cutting in
 #' hierarchical clustering dendrograms;
-#' 
+#'
 #' \code{\link{mergeCloseModules}} for merging of close modules.
 #' @references Langfelder P, Horvath S (2007) Eigengene networks for studying
 #' the relationships between co-expression modules. BMC Systems Biology 2007,
@@ -4394,14 +4394,14 @@ recutConsensusTrees = function(multiExpr,
 
 
 #' Projective K-means (pre-)clustering of expression data
-#' 
+#'
 #' Implementation of a variant of K-means clustering for expression data.
-#' 
-#' 
+#'
+#'
 #' The principal aim of this function within WGCNA is to pre-cluster a large
 #' number of genes into smaller blocks that can be handled using standard WGCNA
 #' techniques.
-#' 
+#'
 #' This function implements a variant of K-means clustering that is suitable
 #' for co-expression analysis. Cluster centers are defined by the first
 #' principal component, and distances by correlation (more precisely,
@@ -4415,14 +4415,14 @@ recutConsensusTrees = function(multiExpr,
 #' nearest center until the clustering becomes stable. Before returning, nearby
 #' clusters are iteratively combined if their combined size is below
 #' \code{preferredSize}.
-#' 
+#'
 #' The standard principal component calculation via the function \code{svd}
 #' fails from time to time (likely a convergence problem of the underlying
 #' lapack functions). Such errors are trapped and the principal component is
 #' approximated by a weighted average of expression profiles in the cluster. If
 #' \code{verbose} is set above 2, an informational message is printed whenever
 #' this approximation is used.
-#' 
+#'
 #' @param datExpr expression data. A data frame in which columns are genes and
 #' rows ar samples. NAs are allowed, but not too many.
 #' @param preferredSize preferred maximum size of clusters.
@@ -4761,15 +4761,15 @@ projectiveKMeans = function (
 
 
 #' Consensus projective K-means (pre-)clustering of expression data
-#' 
+#'
 #' Implementation of a consensus variant of K-means clustering for expression
 #' data across multiple data sets.
-#' 
-#' 
+#'
+#'
 #' The principal aim of this function within WGCNA is to pre-cluster a large
 #' number of genes into smaller blocks that can be handled using standard WGCNA
 #' techniques.
-#' 
+#'
 #' This function implements a variant of K-means clustering that is suitable
 #' for co-expression analysis. Cluster centers are defined by the first
 #' principal component, and distances by correlation. Consensus distance across
@@ -4785,20 +4785,20 @@ projectiveKMeans = function (
 #' nearest (in the consensus sense) center until the clustering becomes stable.
 #' Before returning, nearby clusters are iteratively combined if their combined
 #' size is below \code{preferredSize}.
-#' 
+#'
 #' Consensus distance defined as maximum of distances in all sets is consistent
 #' with the approach taken in \code{\link{blockwiseConsensusModules}}, but the
 #' procedure may not converge. Hence it is advisable to use the mean as
 #' consensus in cases where there are multiple data sets (4 or more, say)
 #' and/or if the input data sets are very different.
-#' 
+#'
 #' The standard principal component calculation via the function \code{svd}
 #' fails from time to time (likely a convergence problem of the underlying
 #' lapack functions). Such errors are trapped and the principal component is
 #' approximated by a weighted average of expression profiles in the cluster. If
 #' \code{verbose} is set above 2, an informational message is printed whenever
 #' this approximation is used.
-#' 
+#'
 #' @param multiExpr expression data in the multi-set format (see
 #' \code{\link{checkSets}}). A vector of lists, one per set. Each set must
 #' contain a component \code{data} that contains the expression data, with rows
@@ -4833,15 +4833,15 @@ projectiveKMeans = function (
 #' @return A list with the following components: \item{clusters}{ a numerical
 #' vector with one component per input gene, giving the cluster number in which
 #' the gene is assigned. }
-#' 
+#'
 #' \item{centers}{ a vector of lists, one list per set. Each list contains a
 #' component \code{data} that contains a matrix whose columns are the cluster
 #' centers in the corresponding set. }
-#' 
+#'
 #' \item{unmergedClusters}{ a numerical vector with one component per input
 #' gene, giving the cluster number in which the gene was assigned before the
 #' final merging step. }
-#' 
+#'
 #' \item{unmergedCenters}{ a vector of lists, one list per set. Each list
 #' contains a component \code{data} that contains a matrix whose columns are
 #' the cluster centers before merging in the corresponding set. }

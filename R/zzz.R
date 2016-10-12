@@ -11,6 +11,7 @@
 #' @import Hmisc
 #' @import parallel
 #' @import survival
+#' @import utils
 .onAttach = function(libname, pkgname) {
   ourVer = try(gsub("[^0-9_.-]", "", packageVersion("WGCNA"), fixed = FALSE))
 

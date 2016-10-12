@@ -68,7 +68,7 @@
        out = setTomMat %*% setWeightMat
      }
      out.list = list(consensus = out)
-  } else if (consensusQuantile == 0) 
+  } else if (consensusQuantile == 0)
   {
       min = rep(0, nrow(setTomMat))
       which = rep(0, nrow(setTomMat))
@@ -110,53 +110,53 @@
 
 
 #' Consensus network (topological overlap).
-#' 
+#'
 #' Calculation of a consensus network (topological overlap).
-#' 
+#'
 #' The function starts by optionally filtering out samples that have too many
 #' missing entries and genes that have either too many missing entries or zero
 #' variance in at least one set. Genes that are filtered out are left
 #' unassigned by the module detection. Returned eigengenes will contain
 #' \code{NA} in entries corresponding to filtered-out samples.
-#' 
+#'
 #' If \code{blocks} is not given and the number of genes exceeds
 #' \code{maxBlockSize}, genes are pre-clustered into blocks using the function
 #' \code{\link{consensusProjectiveKMeans}}; otherwise all genes are treated in
 #' a single block.
-#' 
+#'
 #' For each block of genes, the network is constructed and (if requested)
 #' topological overlap is calculated in each set. To minimize memory usage,
 #' calculated topological overlaps are optionally saved to disk in chunks until
 #' they are needed again for the calculation of the consensus network
 #' topological overlap.
-#' 
+#'
 #' Before calculation of the consensus Topological Overlap, individual TOMs are
 #' optionally calibrated. Calibration methods include single quantile scaling
 #' and full quantile normalization.
-#' 
+#'
 #' Single quantile scaling raises individual TOM in sets 2,3,... to a power
 #' such that the quantiles given by \code{calibrationQuantile} agree with the
 #' quantile in set 1. Since the high TOMs are usually the most important for
 #' module identification, the value of \code{calibrationQuantile} is close to
 #' (but not equal) 1. To speed up quantile calculation, the quantiles can be
 #' determined on a randomly-chosen component subset of the TOM matrices.
-#' 
+#'
 #' Full quantile normalization, implemented in
 #' \code{\link[preprocessCore]{normalize.quantiles}}, adjusts the TOM matrices
 #' such that all quantiles equal each other (and equal to the quantiles of the
 #' component-wise average of the individual TOM matrices).
-#' 
+#'
 #' Note that network calibration is performed separately in each block, i.e.,
 #' the normalizing transformation may differ between blocks. This is necessary
 #' to avoid manipulating a full TOM in memory.
-#' 
+#'
 #' The consensus TOM is calculated as the component-wise
 #' \code{consensusQuantile} quantile of the individual (set) TOMs; that is, for
 #' each gene pair (TOM entry), the \code{consensusQuantile} quantile across all
 #' input sets. Alternatively, one can also use (weighted) component-wise mean
 #' across all imput data sets. If requested, the consensus topological overlaps
 #' are saved to disk for later use.
-#' 
+#'
 #' @param multiExpr expression data in the multi-set format (see
 #' \code{\link{checkSets}}). A vector of lists, one per set. Each set must
 #' contain a component \code{data} that contains the expression data, with rows
@@ -313,46 +313,48 @@
 #' make the output progressively more and more verbose.
 #' @param indent indentation for diagnostic messages. Zero means no
 #' indentation, each unit adds two spaces.
+#' @param individualTOMFileNames Load a previously saved TOM?
+#' @param consensusTOMFileNames Load a previously saved TOM?
 #' @return List with the following components:
-#' 
+#'
 #' \item{consensusTOM}{only present if input \code{returnTOMs} is \code{TRUE}.
 #' A list containing consensus TOM for each block, stored as a distance
 #' structure.}
-#' 
+#'
 #' \item{TOMFiles}{only present if input \code{saveConsensusTOMs} is
 #' \code{TRUE}. A vector of file names, one for each block, in which the TOM
 #' for the corresponding block is stored. TOM is saved as a distance structure
 #' to save space.}
-#' 
+#'
 #' \item{saveConsensusTOMs}{a copy of the inputsaveConsensusTOMs.}
-#' 
+#'
 #' \item{individualTOMInfo}{information about individual set TOMs. A copy of
 #' the input \code{individualTOMInfo} if given; otherwise the result of calling
 #' \code{blockwiseIndividualTOMs}. See \code{blockwiseIndividualTOMs} for
 #' details.}
-#' 
+#'
 #' Further components are retained for debugging and/or convenience.
-#' 
+#'
 #' \item{useIndivTOMSubset}{a copy of the input \code{useIndivTOMSubset}.}
-#' 
+#'
 #' \item{goodSamplesAndGenes}{a list containing information about which samples
 #' and genes are "good" in the sense that they do not contain more than a
 #' certain fraction of missing data and (for genes) have non-zero variance. See
 #' \code{\link{goodSamplesGenesMS}} for details.}
-#' 
+#'
 #' \item{nGGenes}{number of "good" genes in \code{goodSamplesGenes} above. }
-#' 
+#'
 #' \item{nSets}{number of input sets.}
-#' 
+#'
 #' \item{saveCalibratedIndividualTOMs}{a copy of the input
 #' \code{saveCalibratedIndividualTOMs}.}
-#' 
+#'
 #' \item{calibratedIndividualTOMFileNames}{if input
 #' \code{saveCalibratedIndividualTOMs} is \code{TRUE}, this component will
 #' contain the file names of calibrated individual networks. The file names are
 #' arranged in a character matrix with each row corresponding to one input set
 #' and each column to one block.}
-#' 
+#'
 #' \item{networkCalibrationSamples}{if input
 #' \code{getNetworkCalibrationSamples} is \code{TRUE}, a list with one
 #' component per block. Each component is in turn a list with two components:
@@ -360,9 +362,9 @@
 #' indices refer to a flattened distance structure), and \code{TOMSamples} is a
 #' matrix of TOM samples with each row corresponding to a sample in
 #' \code{sampleIndex}, and each column to one input set.}
-#' 
+#'
 #' \item{consensusQuantile}{a copy of the input \code{consensusQuantile}.}
-#' 
+#'
 #' \item{originCount}{a vector with one component per input set.  When
 #' \code{consensusQuantile} equals zero, \code{originCount} contains the number
 #' of entries in the consensus TOM that come from each set (i.e., the number of
@@ -372,23 +374,23 @@
 #' @seealso \code{\link{blockwiseIndividualTOMs}} for calculation of
 #' topological overlaps across multiple sets.
 #' @references WGCNA methodology has been described in
-#' 
+#'
 #' Bin Zhang and Steve Horvath (2005) "A General Framework for Weighted Gene
 #' Co-Expression Network Analysis", Statistical Applications in Genetics and
 #' Molecular Biology: Vol. 4: No. 1, Article 17 PMID: 16646834
-#' 
+#'
 #' The original reference for the WGCNA package is
-#' 
+#'
 #' Langfelder P, Horvath S (2008) WGCNA: an R package for weighted correlation
 #' network analysis. BMC Bioinformatics 2008, 9:559 PMID: 19114008
-#' 
+#'
 #' For consensus modules, see
-#' 
+#'
 #' Langfelder P, Horvath S (2007) "Eigengene networks for studying the
 #' relationships between co-expression modules", BMC Systems Biology 2007, 1:54
-#' 
+#'
 #' This function uses quantile normalization described, for example, in
-#' 
+#'
 #' Bolstad BM1, Irizarry RA, Astrand M, Speed TP (2003) "A comparison of
 #' normalization methods for high density oligonucleotide array data based on
 #' variance and bias", Bioinformatics. 2003 Jan 22;19(2):1
@@ -439,7 +441,7 @@ consensusTOM = function(
       individualTOMInfo = NULL,
       useIndivTOMSubset = NULL,
 
-   ##### Consensus calculation options 
+   ##### Consensus calculation options
 
       useBlocks = NULL,
 
@@ -485,7 +487,7 @@ consensusTOM = function(
     {
        seedSaved = TRUE
        savedSeed = .Random.seed
-    } 
+    }
     set.seed(randomSeed)
   }
 
@@ -508,10 +510,10 @@ consensusTOM = function(
       power = rep(power, nSets.all)
     }
 
-    if ( (consensusQuantile < 0) | (consensusQuantile > 1) ) 
+    if ( (consensusQuantile < 0) | (consensusQuantile > 1) )
       stop("'consensusQuantile' must be between 0 and 1.")
 
-    time = system.time({individualTOMInfo = blockwiseIndividualTOMs(multiExpr = multiExpr, 
+    time = system.time({individualTOMInfo = blockwiseIndividualTOMs(multiExpr = multiExpr,
                          checkMissingData = checkMissingData,
                          blocks = blocks,
                          maxBlockSize = maxBlockSize,
@@ -525,7 +527,7 @@ consensusTOM = function(
                          cosineCorrelation = cosineCorrelation,
                          replaceMissingAdjacencies = replaceMissingAdjacencies,
                          power = power,
-                         networkType = networkType, 
+                         networkType = networkType,
                          TOMType = TOMType,
                          TOMDenom = TOMDenom,
                          saveTOMs = useDiskCache | saveIndividualTOMs,
@@ -534,7 +536,7 @@ consensusTOM = function(
                          verbose = verbose, indent = indent);})
     if (verbose > 1) { printFlush("Timimg for individual TOMs:"); print(time); }
 
-    if (!saveIndividualTOMs & useDiskCache) 
+    if (!saveIndividualTOMs & useDiskCache)
        on.exit(.checkAndDelete(individualTOMInfo$actualTOMFileNames), add = TRUE)
 
   } else {
@@ -551,7 +553,7 @@ consensusTOM = function(
   setWeightMat = as.matrix(setWeights/sum(setWeights))
 
   if (is.null(useIndivTOMSubset))
-  {  
+  {
     if (individualTOMInfo$nSets != nSets.all)
       stop(paste("Number of sets in individualTOMInfo and in multiExpr do not agree.\n",
                  "  To use a subset of individualTOMInfo, set useIndivTOMSubset appropriately."))
@@ -583,7 +585,7 @@ consensusTOM = function(
   if (getNetworkCalibrationSamples)
   {
     if (!sampleForCalibration)
-      stop(paste("Incompatible input options: networkCalibrationSamples can only be returned", 
+      stop(paste("Incompatible input options: networkCalibrationSamples can only be returned",
                  "if sampleForCalibration is TRUE."))
     networkCalibrationSamples = list()
   }
@@ -615,7 +617,7 @@ consensusTOM = function(
   {
     calibratedIndividualTOMFileNames = matrix("", nSets, nBlocks)
     for (set in 1:nSets) for (b in 1:nBlocks)
-      calibratedIndividualTOMFileNames[set, b] = .processFileName(calibratedIndividualTOMFilePattern, set, 
+      calibratedIndividualTOMFileNames[set, b] = .processFileName(calibratedIndividualTOMFilePattern, set,
                                                               individualTOMInfo$setNames, b)
   }
   collectGarbage()
@@ -647,7 +649,7 @@ consensusTOM = function(
     {
       # Note: setTomDS will contained the scaled set TOM matrices.
       setTomDS = array(0, dim = c(nBlockGenes*(nBlockGenes-1)/2, nSets))
-    } 
+    }
 
     # create an empty consTomDS distance structure.
 
@@ -678,33 +680,33 @@ consensusTOM = function(
           tomDS = consTomDS
           tomDS[] = individualTOMInfo$TOMSimilarities[[blockNo]] [, useIndivTOMSubset[set]]
         }
-        
+
         if (networkCalibration=="single quantile")
         {
           # Scale TOMs so that calibrationQuantile agree in each set
           if (sampleForCalibration)
           {
             if (getNetworkCalibrationSamples)
-            { 
+            {
               networkCalibrationSamples[[blockIndex]]$TOMSamples[, set] = tomDS[scaleSample]
-              scaleQuant[set] = quantile(networkCalibrationSamples[[blockIndex]]$TOMSamples[, set], 
+              scaleQuant[set] = quantile(networkCalibrationSamples[[blockIndex]]$TOMSamples[, set],
                                          probs = calibrationQuantile, type = 8)
             } else {
               scaleQuant[set] = quantile(tomDS[scaleSample], probs = calibrationQuantile, type = 8)
             }
           } else
             scaleQuant[set] = quantile(x = tomDS, probs = calibrationQuantile, type = 8)
-          if (set>1) 
+          if (set>1)
           {
              scalePowers[set] = log(scaleQuant[1])/log(scaleQuant[set])
              tomDS = tomDS^scalePowers[set]
           }
           if (saveCalibratedIndividualTOMs)
              save(tomDS, file = calibratedIndividualTOMFileNames[set, blockNo])
-        } 
+        }
 
         # Save the calculated TOM either to disk in chunks or to memory.
-      
+
         if (useDiskCache)
         {
           if (verbose > 3) printFlush(paste(spaces, "......saving TOM similarity to disk cache.."))
@@ -830,9 +832,9 @@ consensusTOM = function(
                                              consensusQuantile = consensusQuantile)
           consTomDS[start:end] = tmp$consensus
           countIndex = as.numeric(names(tmp$originCount))
-          originCount[countIndex] = originCount[countIndex] + tmp$originCount; 
+          originCount[countIndex] = originCount[countIndex] + tmp$originCount;
           rm(tmp)
-        } 
+        }
         start = end + 1
       }
     } else {
@@ -845,11 +847,11 @@ consensusTOM = function(
                                              consensusQuantile = consensusQuantile)
           consTomDS[] = tmp$consensus
           countIndex = as.numeric(names(tmp$originCount))
-          originCount[countIndex] = originCount[countIndex] + tmp$originCount; 
+          originCount[countIndex] = originCount[countIndex] + tmp$originCount;
           rm(tmp)
       }
     }
-    
+
     # Save the consensus TOM if requested
 
     if (saveConsensusTOMs)
@@ -876,8 +878,8 @@ consensusTOM = function(
         # individual TOMs are contained in the individualTOMInfo list; remove them.
         individualTOMInfo$TOMSimilarities = NULL
      }
-  } 
-        
+  }
+
 
   if (seedSaved) .Random.seed <<- savedSeed
 
@@ -895,7 +897,7 @@ consensusTOM = function(
        calibratedIndividualTOMFileNames = calibratedIndividualTOMFileNames,
        networkCalibrationSamples = if (getNetworkCalibrationSamples) networkCalibrationSamples else NULL,
 
-       consensusQuantile = consensusQuantile, 
+       consensusQuantile = consensusQuantile,
        originCount = originCount
 
       )

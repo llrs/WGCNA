@@ -4088,55 +4088,6 @@ stdErr <- function(x) {
     text(0.5, 0.5, txt, cex = cex)
 }
 
-#===============================================================================
-# This function collects garbage
-# collect_garbage <- function(){collectGarbage()}
-
-
-#-------------------------------------------------------------------------------
-# This function plots a barplot with all colors given. If Colors are not given,
-# GlobalStandardColors are
-# used, i.e. if you want to see the GlobalStandardColors, just call this
-# function without parameters.
-
-
-#' Show colors used to label modules
-#'
-#' The function plots a barplot using colors that label modules.
-#'
-#' To see the first \code{n} colors, use argument \code{colors =
-#' standardColors(n)}.
-#'
-#' @param colors colors to be displayed. Defaults to all colors available for
-#' module labeling.
-#' @return None.
-#' @author Peter Langfelder
-#' @seealso \code{\link{standardColors}}
-#' @keywords misc
-#' @examples
-#'
-#'   displayColors(standardColors(10))
-#'
-displayColors <- function(colors = NULL) {
-    if (is.null(colors))
-        colors = standardColors()
-    barplot(rep(1, length(colors)), col = colors, border = colors)
-}
-
-
-###############################################################################
-# I) Functions for merging modules based on a high correlation of the module
-# eigengenes
-###############################################################################
-
-#-------------------------------------------------------------------------------
-#
-# dynamicMergeCut
-#
-#-------------------------------------------------------------------------------
-
-
-
 #' Threshold for module merging
 #'
 #' Calculate a suitable threshold for module merging based on the number of
@@ -6882,9 +6833,7 @@ automaticNetworkScreening <- function(datExpr,
 #' @seealso \code{\link{networkScreening}}, \code{\link{hubGeneSignificance}},
 #' \code{\link{networkScreening}}, \code{\link[dynamicTreeCut]{cutreeDynamic}}
 #' @keywords misc
-automaticNetworkScreeningGS <- function(datExpr,
-                                        GS,
-                                        power = 6,
+automaticNetworkScreeningGS <- function(datExpr, GS, power = 6,
                                         networkType = "unsigned",
                                         detectCutHeight = 0.995,
                                         minModuleSize = min(20, ncol(as.matrix(datExpr)) / 2),
@@ -6950,23 +6899,6 @@ automaticNetworkScreeningGS <- function(datExpr,
         networkScreening = data.frame(NS1, MMdata, MMdataPvalue),
         datME = data.frame(datME),
 
-
-        #' Hubgene significance
-        #'
-        #' Calculate approximate hub gene significance for all modules in network.
-        #'
-        #' In \code{datKME} rows correspond to genes and columns to modules.
-        #'
-        #' @param datKME a data frame (or a matrix-like object) containing
-        #' eigengene-based connectivities of all genes in the network.
-        #' @param GS a vector with one entry for every gene containing its gene
-        #' significance.
-        #' @return A vector whose entries are the hub gene significances for each
-        #' module.
-        #' @author Steve Horvath
-        #' @references Dong J, Horvath S (2007) Understanding Network Concepts in
-        #' Modules, BMC Systems Biology 2007, 1:24
-        #' @keywords misc
         hubGeneSignificance = data.frame(HGS1)
     )
     output
@@ -6986,6 +6918,22 @@ automaticNetworkScreeningGS <- function(datExpr,
 # GS = 0 means that the gene is not significant, high positive or negative values
 #  mean that it is significant.
 # The input to this function can include the sign of the correlation.
+#' Hubgene significance
+#'
+#' Calculate approximate hub gene significance for all modules in network.
+#'
+#' In \code{datKME} rows correspond to genes and columns to modules.
+#'
+#' @param datKME a data frame (or a matrix-like object) containing
+#' eigengene-based connectivities of all genes in the network.
+#' @param GS a vector with one entry for every gene containing its gene
+#' significance.
+#' @return A vector whose entries are the hub gene significances for each
+#' module.
+#' @author Steve Horvath
+#' @references Dong J, Horvath S (2007) Understanding Network Concepts in
+#' Modules, BMC Systems Biology 2007, 1:24
+#' @keywords misc
 hubGeneSignificance <- function(datKME, GS) {
     nMEs = dim(as.matrix(datKME))[[2]]
     nGenes = dim(as.matrix(datKME))[[1]]
@@ -13064,7 +13012,7 @@ prependZeros <- function(x, width = max(nchar(x))) {
 #' @param labels Character strings to be formatted.
 #' @param maxCharPerLine Integer giving the maximum number of characters per
 #' line.
-#' @param split Pattern to be replaced by newline ('\n') characters.
+#' @param split Pattern to be replaced by newline (\code{'\n'}) characters.
 #' @param fixed Logical: Should the pattern be interpreted literally
 #' (\code{TRUE}) or as a regular expression (\code{FALSE})? See
 #' \code{\link{strsplit}} and its argument \code{fixed}.
@@ -13078,16 +13026,11 @@ prependZeros <- function(x, width = max(nchar(x))) {
 #' @keywords misc
 #' @examples
 #'
-#' s = "A quick hare jumps over the brown fox";
-#' formatLabels(s);
+#' s = "A quick hare jumps over the brown fox"
+#' formatLabels(s)
 #'
-formatLabels <-
-    function(labels,
-             maxCharPerLine = 14,
-             split = " ",
-             fixed = TRUE,
-             newsplit = split,
-             keepSplitAtEOL = TRUE) {
+formatLabels <-function(labels, maxCharPerLine = 14, split = " ", fixed = TRUE,
+             newsplit = split, keepSplitAtEOL = TRUE) {
         n = length(labels)
         splitX = strsplit(labels, split = split, fixed = fixed)
         newLabels = rep("", n)

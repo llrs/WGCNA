@@ -42,8 +42,8 @@
 #' If sample above is given, the indices of the plotted points are returned
 #' invisibly.
 #' @note
-#' This funtion is based on \code{\link{verboseScatterplot}},
-#' \code{\link{iplot}} and \code{\link{greenWhiteRed}}.
+#' This funtion is based on \code{\link{verboseScatterplot}} and
+#' \code{\link{greenWhiteRed}}.
 #' @author
 #' Chaochao Cai, Steve Horvath
 #' @seealso
@@ -52,13 +52,13 @@
 
 
 #' Scatterplot with density
-#' 
+#'
 #' Produce a scatterplot that shows density with color and is annotated by the
 #' correlation, MSE, and regression line.
-#' 
+#'
 #' Irrespective of the specified correlation function, the MSE is always
 #' calculated based on the residuals of a linear model.
-#' 
+#'
 #' @param x numerical vector to be plotted along the x axis.
 #' @param y numerical vector to be plotted along the y axis.
 #' @param xlim define the range in x axis

@@ -28,8 +28,7 @@
 #' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 #' @keywords misc
 unsignedAdjacency <- function(datExpr, datExpr2 = NULL, power = 6,
-                              corFnc = "cor", corOptions = "use = 'p'")
-{
+                              corFnc = "cor", corOptions = "use = 'p'") {
     corExpr = parse(text = paste(corFnc, "(datExpr, datExpr2 ",
                                  prepComma(corOptions), ")"))
     # abs(cor(datExpr, datExpr2, use = "p"))^power
@@ -94,7 +93,7 @@ unsignedAdjacency <- function(datExpr, datExpr2 = NULL, power = 6,
 #' calculate co - expression similarity for distance networks. Defaults to the
 #' function \code{\link{dist}}. Any function returning non - negative values
 #' can be used.
-#' @param distOption Character string specifying additional arguments to be
+#' @param distOptions Character string specifying additional arguments to be
 #' passed to the function given by \code{distFnc}. For example, when the
 #' function \code{\link{dist}} is used, the argument \code{method} can be used
 #' to specify various ways of computing the distance..
@@ -125,14 +124,13 @@ adjacency <- function(datExpr, selectCols = NULL, type = "unsigned",
                       corFnc = "cor", corOptions = "use = 'p'",
                       distFnc = "dist", distOptions = "method = 'euclidean'") {
     intType = charmatch(type, .adjacencyTypes)
-    if (is.na(intType))
+    if (is.na(intType)) {
         stop(paste("Unrecognized 'type'. Recognized values are",
                    paste(.adjacencyTypes, collapse = ", ")))
+    }
 
-    if (intType < 4)
-    {
-        if (is.null(selectCols))
-        {
+    if (intType < 4) {
+        if (is.null(selectCols)) {
             corExpr = parse(text = paste(corFnc,
                                          "(datExpr ",
                                          prepComma(corOptions), ")"))
@@ -146,16 +144,18 @@ adjacency <- function(datExpr, selectCols = NULL, type = "unsigned",
             cor_mat = eval(corExpr)
         }
     } else {
-        if (!is.null(selectCols))
+        if (!is.null(selectCols)) {
             stop("The argument 'selectCols' cannot
                  be used for distance adjacency.")
+        }
         corExpr = parse(text = paste(distFnc, "(t(datExpr) ",
                                      prepComma(distOptions), ")"))
         # cor_mat = cor(datExpr, use = "p")
         d = eval(corExpr)
-        if (any(d < 0))
+        if (any(d < 0)) {
             warning("Function WGCNA::adjacency: Distance function
                     returned (some) negative values.")
+        }
         cor_mat = 1 - as.matrix((d/max(d, na.rm = TRUE))^2)
     }
 
@@ -201,8 +201,7 @@ adjacency <- function(datExpr, selectCols = NULL, type = "unsigned",
 #' A.ave(ij)=(R.squared(ij)+R.squared(ji))/2,
 #' A.max(ij)=max(R.squared(ij),R.squared(ji)).
 #'
-#' @param datExpr data frame containing numeric variables. Example: Columns may
-#' correspond to genes and rows to observations (samples).
+#' @inheritParams adjacency
 #' @param degree the degree of the polynomial. Must be less than the number of
 #' unique points.
 #' @param symmetrizationMethod character string (eg "none", "min","max","mean")
@@ -223,10 +222,13 @@ adjacency <- function(datExpr, selectCols = NULL, type = "unsigned",
 #' #Simulate a data frame datE which contains 5 columns and 50 observations
 #' m=50
 #' x1=rnorm(m)
-#' r=.5; x2=r*x1+sqrt(1-r^2)*rnorm(m)
-#' r=.3; x3=r*(x1-.5)^2+sqrt(1-r^2)*rnorm(m)
+#' r=.5
+#' x2=r*x1+sqrt(1-r^2)*rnorm(m)
+#' r=.3
+#' x3=r*(x1-.5)^2+sqrt(1-r^2)*rnorm(m)
 #' x4=rnorm(m)
-#' r=.3; x5=r*x4+sqrt(1-r^2)*rnorm(m)
+#' r=.3
+#' x5=r*x4+sqrt(1-r^2)*rnorm(m)
 #' datE=data.frame(x1,x2,x3,x4,x5)
 #' #calculate adjacency by symmetrizing using max
 #' A.max=adjacency.polyReg(datE, symmetrizationMethod="max")
@@ -253,7 +255,7 @@ adjacency.polyReg = function(datExpr, degree=3, symmetrizationMethod = "mean") {
             del = is.na(datExpr[, i]+datExpr[,j])
             if (sum(del)>=(n-1) | var(datExpr[, i], na.rm=T)==0 | var(datExpr[, j], na.rm=T)==0) {
                 polyRsquare[i, j] = polyRsquare[j, i]=NA
-            }else{
+            } else {
                 dati = datExpr[!del, i]; datj = datExpr[!del, j];
                 lmPij=glm( dati ~ poly( datj, degree))
                 polyRsquare[i, j] = cor( dati, predict(lmPij))^2
@@ -266,11 +268,13 @@ adjacency.polyReg = function(datExpr, degree=3, symmetrizationMethod = "mean") {
 
     diag(polyRsquare) = rep(1,n)
 
-    if (symmetrizationMethod =="none") {adj= polyRsquare} else
-    {  adj = switch(symmetrizationMethod,
-                    min = pmin(polyRsquare, t(polyRsquare)),
-                    max = pmax(polyRsquare, t(polyRsquare)),
-                    mean = (polyRsquare + t(polyRsquare))/2)
+    if (symmetrizationMethod =="none") {
+        adj= polyRsquare
+    } else {
+        adj = switch(symmetrizationMethod,
+                     min = pmin(polyRsquare, t(polyRsquare)),
+                     max = pmax(polyRsquare, t(polyRsquare)),
+                     mean = (polyRsquare + t(polyRsquare))/2)
     }
     adj
 
@@ -308,8 +312,7 @@ adjacency.polyReg = function(datExpr, degree=3, symmetrizationMethod = "mean") {
 #' A.max(ij)=max(R.squared(ij),R.squared(ji)). For more information about
 #' natural cubic spline regression, please refer to functions "ns" and "glm".
 #'
-#' @param datExpr data frame containing numeric variables. Example: Columns may
-#' correspond to genes and rows to observations (samples).
+#' @inheritParams adjacency
 #' @param df degrees of freedom in generating natural cubic spline. The default
 #' is as follows: if nrow(datExpr)>100 use 6, if nrow(datExpr)>30 use 4,
 #' otherwise use 5.
@@ -407,8 +410,7 @@ adjacency.splineReg = function(datExpr,
 #' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
 #' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 #' @keywords misc
-sigmoidAdjacency <- function(ss, mu = 0.8, alpha = 20)
-{
+sigmoidAdjacency <- function(ss, mu = 0.8, alpha = 20) {
     1/(1 + exp(- alpha * (ss - mu)))
 }
 
@@ -431,8 +433,7 @@ sigmoidAdjacency <- function(ss, mu = 0.8, alpha = 20)
 #' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
 #' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 #' @keywords misc
-signumAdjacency <- function(corMat, threshold)
-{
+signumAdjacency <- function(corMat, threshold) {
     adjmat = as.matrix(abs(corMat) >= threshold)
     dimnames(adjmat) <- dimnames(corMat)
     diag(adjmat) <- 0
