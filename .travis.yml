@@ -4,6 +4,9 @@ cache: packages
 r_packages:
   - covr
 sudo: required
+before_script:
+  - Rscript -e 'library(devtools); document()'
+
 after_success:
   - Rscript -e 'library(covr); codecov()'
 
