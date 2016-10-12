@@ -33,8 +33,9 @@
 #' datE <- data.frame(x1,x2,x3,x4,x5)
 #' #calculate predicted AUV2
 #' cor.data <- cor(datE, use = "p")
+#' \dontrun{
 #' AUV2 <- AFcorMI(r = cor.data, m = nrow(datE))
-#'
+#'}
 AFcorMI <- function(r, m) {
 	D <- 0.43*m^(-0.3)
 	epsilon <- D^2.2
