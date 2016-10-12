@@ -139,7 +139,7 @@ based decomposition of a network. Currently a draft.
 }
 \seealso{
 \code{\link{conformityBasedNetworkConcepts}}
-\code{\link{propensityDecomposition}}
+\code{propensityDecomposition}
 }
 \keyword{misc}
 

@@ -5,10 +5,10 @@
 \title{Calculate module eigengenes}
 \usage{
 moduleEigengenes(datExpr, colors, impute = TRUE, nPC = 1,
-  align = "along average", excludeGrey = FALSE, grey = if
-  (is.numeric(colors)) 0 else "grey", subHubs = TRUE, trapErrors = FALSE,
-  returnValidOnly = trapErrors, softPower = 6, scale = TRUE,
-  verbose = 0, indent = 0)
+  align = "along average", excludeGrey = FALSE,
+  grey = ifelse(is.numeric(colors), 0, "grey"), subHubs = TRUE,
+  trapErrors = FALSE, returnValidOnly = trapErrors, softPower = 6,
+  scale = TRUE, verbose = 0, indent = 0)
 }
 \arguments{
 \item{datExpr}{data.frame containing expression data. Columns correspond to

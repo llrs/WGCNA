@@ -200,25 +200,12 @@ moduleColor.getMEprefix <- function() {
 #' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
 #' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 #' @keywords misc
-moduleEigengenes <-
-    function(datExpr,
-             colors,
-             impute = TRUE,
-             nPC = 1,
-             align = "along average",
-             excludeGrey = FALSE,
-             grey = if (is.numeric(colors))
-                 0
-             else
-                 "grey",
-             subHubs = TRUE,
-             trapErrors = FALSE,
-             returnValidOnly = trapErrors,
-             softPower = 6,
-             scale = TRUE,
-             verbose = 0,
-             indent = 0)
-    {
+moduleEigengenes <- function(datExpr, colors, impute = TRUE, nPC = 1,
+                             align = "along average", excludeGrey = FALSE,
+                             grey = ifelse(is.numeric(colors), 0, "grey"),
+                             subHubs = TRUE, trapErrors = FALSE,
+                             returnValidOnly = trapErrors, softPower = 6,
+                             scale = TRUE, verbose = 0, indent = 0) {
         spaces = indentSpaces(indent)
 
         if (verbose == 1) {
@@ -1093,8 +1080,7 @@ consensusMEDissimilarity <-
                                       quantileSummary = "mean",
                                       consensusQuantile = 0,
                                       useAbs = FALSE,
-                                      greyMEname = "ME0")
-{
+                                      greyMEname = "ME0") {
     nSets = checkSets(multiMEs)$nSets
     useMEs = c(1:ncol(multiMEs[[1]]$data))[names(multiMEs[[1]]$data) != greyMEname]
     useNames = names(multiMEs[[1]]$data)[useMEs]
@@ -4894,12 +4880,10 @@ nearestNeighborConnectivityMS <-
 # Nifty display of progress.
 #
 #===============================================================================
-
-initProgInd <-
-    function(leadStr = "..",
-             trailStr = "",
-             quiet = !interactive())
-    {
+#' @rdname initProgInd
+#' @export
+#' @aliases initProgInd
+initProgInd <-function(leadStr = "..", trailStr = "", quiet = !interactive()) {
         oldStr = " "
         cat(oldStr)
         progInd = list(oldStr = oldStr,
@@ -4908,7 +4892,9 @@ initProgInd <-
         class(progInd) = "progressIndicator"
         updateProgInd(0, progInd, quiet)
     }
-
+#' @rdname initProgInd
+#' @export
+#' @aliases updateProgInd
 updateProgInd <- function(newFrac, progInd, quiet = !interactive())
 {
     if (class(progInd) != "progressIndicator")
@@ -5655,18 +5641,9 @@ simulateEigengeneNetwork <-
 #' The material is posted at
 #' http://www.genetics.ucla.edu/labs/horvath/CoexpressionNetwork/EigengeneNetwork/SupplementSimulations.pdf.
 #' @keywords misc
-simulateModule <-
-    function(ME,
-             nGenes,
-             nNearGenes = 0,
-             minCor = 0.3,
-             maxCor = 1,
-             corPower = 1,
-             signed = FALSE,
-             propNegativeCor = 0.3,
-             geneMeans = NULL,
-             verbose = 0,
-             indent = 0) {
+simulateModule <- function(ME, nGenes, nNearGenes = 0, minCor = 0.3, maxCor = 1,
+             corPower = 1, signed = FALSE, propNegativeCor = 0.3,
+             geneMeans = NULL, verbose = 0, indent = 0) {
         nSamples = length(ME)
 
         datExpr = matrix(rnorm((nGenes + nNearGenes) * nSamples),

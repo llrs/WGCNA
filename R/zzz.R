@@ -6,12 +6,21 @@
 #' @import dynamicTreeCut
 #' @import fastcluster
 #' @import GO.db
-#' @import AnnotationDbi
 #' @import matrixStats
-#' @import Hmisc
-#' @import parallel
 #' @import survival
+#' @import parallel
+#' @import AnnotationDbi
+#' @import parallel
+#' @import Hmisc
+#' @import impute
+#' @import splines
+#' @import preprocessCore
+#' @import grDevices
+#' @import graphics
+#' @import stats
 #' @import utils
+#' @exportPattern "^[^\\.]"
+#'
 .onAttach = function(libname, pkgname) {
   ourVer = try(gsub("[^0-9_.-]", "", packageVersion("WGCNA"), fixed = FALSE))
 

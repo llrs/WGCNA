@@ -87,7 +87,7 @@
 #' @author Steve Horvath
 #' @seealso
 #' \code{\link{conformityBasedNetworkConcepts}}
-#' \code{\link{propensityDecomposition}}
+#' \code{propensityDecomposition}
 #' @references Dong J, Horvath S (2007) Understanding Network Concepts in
 #' Modules. BMC Systems Biology 2007, June 1:24 Horvath S, Dong J (2008)
 #' Geometric Interpretation of Gene Co-Expression Network Analysis. PloS

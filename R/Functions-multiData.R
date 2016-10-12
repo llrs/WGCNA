@@ -3,26 +3,26 @@
 # multiData.eigengeneSignificance
 #
 #======================================================================================================
-             
+
 
 
 #' Eigengene significance across multiple sets
-#' 
+#'
 #' This function calculates eigengene significance and the associated
 #' significance statistics (p-values, q-values etc) across several data sets.
-#' 
+#'
 #' This is a convenience function that calculates module eigengene
 #' significances (i.e., correlations of module eigengenes with a given trait)
 #' across all sets in a multi-set analysis. Also returned are p-values, Z
 #' scores, numbers of present (i.e., non-missing) observations for each
 #' significance, and optionally the q-values (false discovery rates)
 #' corresponding to the p-values.
-#' 
+#'
 #' The function \code{corAndPvalueFnc} is currently is expected to accept
 #' arguments \code{x} (gene expression profiles) and \code{y} (eigengene
 #' expression profiles).  Any additional arguments can be passed via
 #' \code{corOptions}.
-#' 
+#'
 #' The function \code{corAndPvalueFnc} should return a list which at the least
 #' contains (1) a matrix of associations of genes and eigengenes (this
 #' component should have the name given by \code{corComponent}), and (2) a
@@ -33,7 +33,7 @@
 #' vary from association to association), and (4) \code{Z} giving a Z static
 #' for each observation. If these are missing, \code{nObs} is calculated in the
 #' main function, and calculations using the Z statistic are skipped.
-#' 
+#'
 #' @param multiData Expression data (or other data) in multi-set format (see
 #' \code{\link{checkSets}}). A vector of lists; in each list there must be a
 #' component named \code{data} whose content is a matrix or dataframe or array
@@ -75,7 +75,7 @@
 #' @author Peter Langfelder
 #' @keywords misc
 multiData.eigengeneSignificance = function(multiData, multiTrait, moduleLabels,
-                        multiEigengenes = NULL, 
+                        multiEigengenes = NULL,
                         useModules = NULL,
                         corAndPvalueFnc = corAndPvalue, corOptions = list(),
                         corComponent = "cor", getQvalues = FALSE,
@@ -106,7 +106,7 @@ multiData.eigengeneSignificance = function(multiData, multiTrait, moduleLabels,
     if (any( ! (useModules %in% substring(colnames(multiEigengenes[[1]]$data), 3))))
       stop("Some entries in 'useModules' do not exist in the module labels or eigengenes.")
     for (set in 1:nSets)
-      multiEigengenes[[set]]$data = multiEigengenes[[set]]$data[, keep, drop = FALSE]; 
+      multiEigengenes[[set]]$data = multiEigengenes[[set]]$data[, keep, drop = FALSE];
   }
 
   modLevels = substring(colnames(multiEigengenes[[1]]$data), 3)
@@ -155,21 +155,16 @@ multiData.eigengeneSignificance = function(multiData, multiTrait, moduleLabels,
   list(eigengeneSignificance = MES,
        p.value = p,
        q.value = q,
-       Z = Z, 
+       Z = Z,
        nObservations = nObs)
 }
 
-#==============================================================================================
-#
-# nSets
-#
-#==============================================================================================
-
-nSets = function(multiData, ...) 
-{
+#' Count the number of sets
+#'
+#' From a given multiset object calculates the numbers of sets present
+#' @return The number of sets of a multisets object
+#' @export
+nSets = function(multiData, ...) {
   size = checkSets(multiData, ...)
   size$nSets
 }
-  
-             
-

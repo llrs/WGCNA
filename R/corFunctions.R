@@ -3,15 +3,15 @@
 
 
 #' Biweight Midcorrelation
-#' 
+#'
 #' Calculate biweight midcorrelation efficiently for matrices.
-#' 
+#'
 #' This function implements biweight midcorrelation calculation (see
 #' references). If \code{y} is not supplied, midcorrelation of columns of
 #' \code{x} will be calculated; otherwise, the midcorrelation between columns
 #' of \code{x} and \code{y} will be calculated. Thus, \code{bicor(x)} is
 #' equivalent to \code{bicor(x,x)} but is more efficient.
-#' 
+#'
 #' The options \code{robustX}, \code{robustY} allow the user to revert the
 #' calculation to standard correlation calculation. This is important, for
 #' example, if any of the variables is binary (or, more generally, discrete) as
@@ -19,7 +19,7 @@
 #' \code{robustX}, \code{robustY} are set to \code{FALSE}, the function
 #' calculates the standard Pearson correlation (but is slower than the function
 #' \code{\link{cor}}).
-#' 
+#'
 #' The argument \code{quick} specifies the precision of handling of missing
 #' data in the correlation calculations. Value \code{quick = 0} will cause all
 #' calculations to be executed accurately, which may be significantly slower
@@ -38,7 +38,7 @@
 #' the other hand that will be tolerated before a recalculation is triggered.
 #' The hope is that if only a few missing data are treated approximately, the
 #' error introduced will be small but the potential speedup can be significant.
-#' 
+#'
 #' The choice \code{"all"} for \code{pearsonFallback} is not fully implemented
 #' in the sense that there are rare but possible cases in which the calculation
 #' is equivalent to \code{"individual"}. This may happen if the \code{use}
@@ -47,7 +47,7 @@
 #' analyzed together, the missing data from both columns may make a mad zero.
 #' In such a case, the calculation is treated as Pearson, but other columns
 #' will be treated as bicor.
-#' 
+#'
 #' @param x a vector or matrix-like numeric object
 #' @param y a vector or matrix-like numeric object
 #' @param robustX use robust calculation for \code{x}?
@@ -97,22 +97,22 @@
 #' appropriately.
 #' @author Peter Langfelder
 #' @references
-#' 
+#'
 #' Peter Langfelder, Steve Horvath (2012) Fast R Functions for Robust
 #' Correlations and Hierarchical Clustering. Journal of Statistical Software,
 #' 46(11), 1-17. \url{http://www.jstatsoft.org/v46/i11/}
-#' 
+#'
 #' "Dealing with Outliers in Bivariate Data: Robust Correlation", Rich
 #' Herrington, http://www.unt.edu/benchmarks/archives/2001/december01/rss.htm
-#' 
+#'
 #' "Introduction to Robust Estimation and Hypothesis Testing", Rand Wilcox,
 #' Academic Press, 1997.
-#' 
+#'
 #' "Data Analysis and Regression: A Second Course in Statistics", Mosteller and
 #' Tukey, Addison-Wesley, 1977, pp. 203-209.
 #' @keywords robust
 bicor = function(x, y = NULL, robustX = TRUE, robustY = TRUE, use = 'all.obs', maxPOutliers = 1, quick = 0,
-                 pearsonFallback = "individual", 
+                 pearsonFallback = "individual",
                  cosine = FALSE,
                  cosineX = cosine, cosineY = cosine,
                  nThreads = 0, verbose = 0, indent = 0)
@@ -144,7 +144,7 @@ bicor = function(x, y = NULL, robustX = TRUE, robustY = TRUE, use = 'all.obs', m
   if (is.null(nThreads) || (nThreads==0)) nThreads = .useNThreads()
 
   x = as.matrix(x)
-  if (prod(dim(x))==0) stop("'x' has a zero dimension."); 
+  if (prod(dim(x))==0) stop("'x' has a zero dimension.");
   nNA = 0
   err = 0
   warnX = 0
@@ -157,12 +157,12 @@ bicor = function(x, y = NULL, robustX = TRUE, robustY = TRUE, use = 'all.obs', m
     } else {
       bi = matrix(0, ncol(x), ncol(x))
       res = .C("bicor1Fast", x = as.double(x), nrow = as.integer(nrow(x)), ncol = as.integer(ncol(x)),
-               maxPOutliers = as.double(maxPOutliers), 
-               quick = as.double(quick), 
+               maxPOutliers = as.double(maxPOutliers),
+               quick = as.double(quick),
                fallback = as.integer(fallback),
-               cosine = as.integer(cosineX), 
+               cosine = as.integer(cosineX),
                res = as.double(bi), nNA = as.integer(nNA),
-               err = as.integer(err), 
+               err = as.integer(err),
                warn = as.integer(warnX), nThreads = as.integer(nThreads),
                verbose = as.integer(verbose), indent = as.integer(indent),
                NAOK = TRUE, PACKAGE = "WGCNA")
@@ -176,21 +176,21 @@ bicor = function(x, y = NULL, robustX = TRUE, robustY = TRUE, use = 'all.obs', m
     }
   } else {
     y = as.matrix(y)
-    if (prod(dim(y))==0) stop("'y' has a zero dimension."); 
+    if (prod(dim(y))==0) stop("'y' has a zero dimension.");
     if (nrow(x)!=nrow(y))
       stop("'x' and 'y' have incompatible dimensions (unequal numbers of rows).")
     bi = matrix(0, ncol(x), ncol(y))
     res = .C("bicorFast", x = as.double(x), nrow = as.integer(nrow(x)), ncolx = as.integer(ncol(x)),
              y = as.double(y), ncoly = as.integer(ncol(y)),
              robustX = as.integer(robustX), robustY = as.integer(robustY),
-             maxPOutliers = as.double(maxPOutliers), 
-             quick = as.double(quick), 
+             maxPOutliers = as.double(maxPOutliers),
+             quick = as.double(quick),
              fallback = as.integer(fallback),
              cosineX = as.integer(cosineX),
              cosineY = as.integer(cosineY),
              res = as.double(bi), nNA = as.integer(nNA), err = as.integer(err),
-             warnX = as.integer(warnX), 
-             warnY = as.integer(warnY), 
+             warnX = as.integer(warnX),
+             warnY = as.integer(warnY),
              nThreads = as.integer(nThreads),
              verbose = as.integer(verbose), indent = as.integer(indent), NAOK = TRUE,
              PACKAGE = "WGCNA")
@@ -221,22 +221,22 @@ bicor = function(x, y = NULL, robustX = TRUE, robustY = TRUE, use = 'all.obs', m
 
 # Code to call my implementation of correlation
 # For less than 100 correlations, use stats::cor since that is usually faster, particularly when no missing
-# data are present, likely due to the complicated threading I do in the WGCNA correlations.  
+# data are present, likely due to the complicated threading I do in the WGCNA correlations.
 
 cor = function(x, y = NULL, use = "all.obs", method = c("pearson", "kendall", "spearman"),
-               quick = 0, 
-               cosine = FALSE, 
+               quick = 0,
+               cosine = FALSE,
                cosineX = cosine, cosineY = cosine,
                drop = FALSE,
                nThreads = 0, verbose = 0, indent = 0)
 {
-    na.method <- pmatch(use, c("all.obs", "complete.obs", "pairwise.complete.obs", 
+    na.method <- pmatch(use, c("all.obs", "complete.obs", "pairwise.complete.obs",
         "everything", "na.or.complete"), nomatch = 0)
     method <- match.arg(method)
 
     x = as.matrix(x)
     nx = ncol(x)
-    if (!is.null(y)) 
+    if (!is.null(y))
     {
       y = as.matrix(y)
       ny = ncol(y)
@@ -260,12 +260,12 @@ cor = function(x, y = NULL, use = "all.obs", method = c("pearson", "kendall", "s
              stop("Missing values present in input variable 'y'. Consider using use = 'pairwise.complete.obs'.")
          }
       }
-      
+
       if (quick < 0) stop("quick must be non-negative.")
       if (nThreads < 0) stop("nThreads must be non-negative.")
       if (is.null(nThreads) || (nThreads==0)) nThreads = .useNThreads()
- 
-      if (prod(dim(x))==0) stop("'x' has a zero dimension."); 
+
+      if (prod(dim(x))==0) stop("'x' has a zero dimension.");
       nNA = as.integer(0)
       err = as.integer(0)
       cosine = as.integer(cosine)
@@ -281,14 +281,14 @@ cor = function(x, y = NULL, use = "all.obs", method = c("pearson", "kendall", "s
          if (!is.null(dimnames(x)[[2]])) dimnames(res) = list(dimnames(x)[[2]],  dimnames(x)[[2]] )
       } else {
          y = as.matrix(y)
-         if (prod(dim(y))==0) stop("'y' has a zero dimension."); 
+         if (prod(dim(y))==0) stop("'y' has a zero dimension.");
          if (nrow(x)!=nrow(y))
             stop("'x' and 'y' have incompatible dimensions (unequal numbers of rows).")
          bi = matrix(0, ncol(x), ncol(y))
          res = .C("corFast", x = as.double(x), nrow = as.integer(nrow(x)), ncolx = as.integer(ncol(x)),
                  y = as.double(y), ncoly = as.integer(ncol(y)),
-                 quick = as.double(quick), 
-                 cosineX = as.integer(cosineX), 
+                 quick = as.double(quick),
+                 cosineX = as.integer(cosineX),
                  cosineY = as.integer(cosineY),
                  res = as.double(bi), nNA = as.integer(nNA), err = as.integer(err),
                  nThreads = as.integer(nThreads),
@@ -321,17 +321,18 @@ cor = function(x, y = NULL, use = "all.obs", method = c("pearson", "kendall", "s
 
 
 # Wrappers for compatibility with older scripts
-
-cor1 = function(x, use = "all.obs", verbose = 0, indent = 0) 
-{
+#' @rdname cor
+#' @name cor
+#' @title Correlation functions optimized
+#' @aliases cor1
+#' @export
+cor1 <- function(x, use = "all.obs", verbose = 0, indent = 0) {
    cor(x, use = use, verbose = verbose, indent = indent)
 }
-
+#' @rdname cor
+#' @aliases corFast
+#' @export
 corFast = function(x, y = NULL, use = "all.obs",
-                quick = 0, nThreads = 0, verbose = 0, indent = 0)
-{
+                quick = 0, nThreads = 0, verbose = 0, indent = 0) {
   cor(x,y, use, method = "pearson", quick, nThreads, verbose, indent)
 }
-
-
-      
