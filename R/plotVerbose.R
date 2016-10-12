@@ -10,7 +10,7 @@
 #' @param displayAsZero Correlations whose absolute value is smaller than this
 #' number will be displayed as zero. This can result in a more intuitive display
 #' (for example, cor=0 instead of cor=2.6e-17).
-#' @paramm col color of the plotted symbols. Recycled as necessary.
+#' @param col color of the plotted symbols. Recycled as necessary.
 #' @param bg fill color of the plotted symbols (used for certain symbols).
 #' Recycled as necessary.
 #' @param lmFnc linear model fit function. Used to calculate the linear model

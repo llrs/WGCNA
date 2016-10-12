@@ -108,15 +108,6 @@ adjacency.fromSimilarity <- function(similarity, type = "unsigned",
             distOptions = "")
 }
 
-softConnectivity.fromSimilarity <- function(similarity, type = "unsigned",
-                          power = if (type ==  "signed") 15 else 6,
-                          blockSize = 1500, verbose = 2, indent = 0) {
-  checkSimilarity(similarity)
-  softConnectivity(similarity, corFnc = "I", corOptions = "",
-                   type = type, power = power,
-                   blockSize = blockSize, verbose = verbose, indent = indent)
-}
-
 pickHardThreshold.fromSimilarity <- function(similarity,
                                              RsquaredCut = 0.85,
                                              cutVector = seq(0.1, 0.9,

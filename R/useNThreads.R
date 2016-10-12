@@ -34,9 +34,9 @@
   n
 }
 
-#' @name allowWGNCAThreads
 #' @rdname allowWGNCAThreads
-#' @title Allow and disable multi-threading for certain WGCNA calculations
+#' @name allowWGNCAThreads
+#' @title Allow and disable multi-threading for certain WGCNA calculations.
 #' @description
 #' These functions allow and disable multi-threading for WGCNA calculations that
 #' can optionally be multi-threaded, which includes all functions using cor or

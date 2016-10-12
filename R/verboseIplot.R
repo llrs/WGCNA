@@ -1,5 +1,5 @@
-#' @name verboselplot
-#' @rdname verboselplot
+#' @name verboseIplot
+#' @rdname verboseIplot
 #' @title Scatterplot with density
 #' @description
 #' Produce a scatterplot that shows density with color and is annotated by the

@@ -644,6 +644,7 @@ conformityBasedNetworkConcepts = function(adj, GS=NULL)
 #' elements of an adjacency matrix adj and/or a node significance measure GS.
 #' @inheritParams conformityBasedNetworkConcepts
 #' @return
+#' A list of elements:
 #' @param Connectivity a  numerical vector that reports the connectivity (also
 #' known as degree) of each node. This fundamental network concept is also known
 #' as whole network connectivity. One can also define the scaled connectivity
