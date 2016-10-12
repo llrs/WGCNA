@@ -16,6 +16,27 @@
 
 .moduleColorOptions = list(MEprefix = "ME")
 
+
+
+#' Get the prefix used to label module eigengenes.
+#' 
+#' Returns the currently used prefix used to label module eigengenes.  When
+#' returning module eigengenes in a dataframe, names of the corresponding
+#' columns will start with the given prefix.
+#' 
+#' Returns the prefix used to label module eigengenes. When returning module
+#' eigengenes in a dataframe, names of the corresponding columns will consist
+#' of the corresponfing color label preceded by the given prefix. For example,
+#' if the prefix is "PC" and the module is turquoise, the corresponding module
+#' eigengene will be labeled "PCturquoise". Most of old code assumes "PC", but
+#' "ME" is more instructive and used in some newer analyses.
+#' 
+#' @return A character string.
+#' @note Currently the standard prefix is \code{"ME"} and there is no way to
+#' change it.
+#' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
+#' @seealso \code{\link{moduleEigengenes}}
+#' @keywords misc
 moduleColor.getMEprefix <- function() {
     .moduleColorOptions$MEprefix
 }
@@ -26,8 +47,160 @@ moduleColor.getMEprefix <- function() {
 # The theoretical underpinnings are described in Horvath, Dong, Yip (2005)
 # http://www.genetics.ucla.edu/labs/horvath/ModuleConformity/
 # This requires the R library impute
+#' @rdname moduleEigengenes
+#' @name moduleEigengenes
+#' @title Calculate module eigengenes
+#' @description
+#' Calculates module eigengenes (1st principal component) of modules in a given
+#' single dataset.
+#' @inheritParams adjacency
+#' @param align Controls whether eigengenes, whose orientation is undetermined,
+#' should be aligned with average expression (align = "along average", the
+#' default) or left as they are (align = ""). Any other value will trigger an
+#' error.
+#' @param nPc
+#'
 
-moduleEigengenes <- function(expr, colors, impute = TRUE, nPC = 1,
+
+
+#' Calculate module eigengenes.
+#' 
+#' Calculates module eigengenes (1st principal component) of modules in a given
+#' single dataset.
+#' 
+#' Module eigengene is defined as the first principal component of the
+#' expression matrix of the corresponding module. The calculation may fail if
+#' the expression data has too many missing entries. Handling of such errors is
+#' controlled by the arguments \code{subHubs} and \code{trapErrors}.  If
+#' \code{subHubs==TRUE}, errors in principal component calculation will be
+#' trapped and a substitute calculation of hubgenes will be attempted. If this
+#' fails as well, behaviour depends on \code{trapErrors}: if \code{TRUE}, the
+#' offending module will be ignored and the return value will allow the user to
+#' remove the module from further analysis; if \code{FALSE}, the function will
+#' stop.
+#' 
+#' From the user's point of view, setting \code{trapErrors=FALSE} ensures that
+#' if the function returns normally, there will be a valid eigengene (principal
+#' component or hubgene) for each of the input colors. If the user sets
+#' \code{trapErrors=TRUE}, all calculational (but not input) errors will be
+#' trapped, but the user should check the output (see below) to make sure all
+#' modules have a valid returned eigengene.
+#' 
+#' While the principal component calculation can fail even on relatively sound
+#' data (it does not take all that many "well-placed" \code{NA} to torpedo the
+#' calculation), it takes many more irregularities in the data for the hubgene
+#' calculation to fail. In fact such a failure signals there likely is
+#' something seriously wrong with the data.
+#' 
+#' @param expr Expression data for a single set in the form of a data frame
+#' where rows are samples and columns are genes (probes).
+#' @param colors A vector of the same length as the number of probes in
+#' \code{expr}, giving module color for all probes (genes). Color \code{"grey"}
+#' is reserved for unassigned genes.
+#' @param impute If \code{TRUE}, expression data will be checked for the
+#' presence of \code{NA} entries and if the latter are present, numerical data
+#' will be imputed, using function \code{impute.knn} and probes from the same
+#' module as the missing datum. The function \code{impute.knn} uses a fixed
+#' random seed giving repeatable results.
+#' @param nPC Number of principal components and variance explained entries to
+#' be calculated. Note that only the first principal component is returned; the
+#' rest are used only for the calculation of proportion of variance explained.
+#' The number of returned variance explained entries is currently
+#' \code{min(nPC, 10)}. If given \code{nPC} is greater than 10, a warning is
+#' issued.
+#' @param align Controls whether eigengenes, whose orientation is undetermined,
+#' should be aligned with average expression (\code{align = "along average"},
+#' the default) or left as they are (\code{align = ""}). Any other value will
+#' trigger an error.
+#' @param excludeGrey Should the improper module consisting of 'grey' genes be
+#' excluded from the eigengenes?
+#' @param grey Value of \code{colors} designating the improper module. Note
+#' that if \code{colors} is a factor of numbers, the default value will be
+#' incorrect.
+#' @param subHubs Controls whether hub genes should be substituted for missing
+#' eigengenes. If \code{TRUE}, each missing eigengene (i.e., eigengene whose
+#' calculation failed and the error was trapped) will be replaced by a weighted
+#' average of the most connected hub genes in the corresponding module. If this
+#' calculation fails, or if \code{subHubs==FALSE}, the value of
+#' \code{trapErrors} will determine whether the offending module will be
+#' removed or whether the function will issue an error and stop.
+#' @param trapErrors Controls handling of errors from that may arise when there
+#' are too many \code{NA} entries in expression data. If \code{TRUE}, errors
+#' from calling these functions will be trapped without abnormal exit.  If
+#' \code{FALSE}, errors will cause the function to stop. Note, however, that
+#' \code{subHubs} takes precedence in the sense that if \code{subHubs==TRUE}
+#' and \code{trapErrors==FALSE}, an error will be issued only if both the
+#' principal component and the hubgene calculations have failed.
+#' @param returnValidOnly logical; controls whether the returned data frame of
+#' module eigengenes contains columns corresponding only to modules whose
+#' eigengenes or hub genes could be calculated correctly (\code{TRUE}), or
+#' whether the data frame should have columns for each of the input color
+#' labels (\code{FALSE}).
+#' @param softPower The power used in soft-thresholding the adjacency matrix.
+#' Only used when the hubgene approximation is necessary because the principal
+#' component calculation failed. It must be non-negative. The default value
+#' should only be changed if there is a clear indication that it leads to
+#' incorrect results.
+#' @param scale logical; can be used to turn off scaling of the expression data
+#' before calculating the singular value decomposition. The scaling should only
+#' be turned off if the data has been scaled previously, in which case the
+#' function can run a bit faster. Note however that the function first imputes,
+#' then scales the expression data in each module. If the expression contain
+#' missing data, scaling outside of the function and letting the function
+#' impute missing data may lead to slightly different results than if the data
+#' is scaled within the function.
+#' @param verbose Controls verbosity of printed progress messages. 0 means
+#' silent, up to (about) 5 the verbosity gradually increases.
+#' @param indent A single non-negative integer controlling indentation of
+#' printed messages. 0 means no indentation, each unit above that adds two
+#' spaces.
+#' @return A list with the following components: \item{eigengenes}{Module
+#' eigengenes in a dataframe, with each column corresponding to one eigengene.
+#' The columns are named by the corresponding color with an \code{"ME"}
+#' prepended, e.g., \code{MEturquoise} etc. If \code{returnValidOnly==FALSE},
+#' module eigengenes whose calculation failed have all components set to
+#' \code{NA}.} \item{averageExpr}{If \code{align == "along average"}, a
+#' dataframe containing average normalized expression in each module. The
+#' columns are named by the corresponding color with an \code{"AE"} prepended,
+#' e.g., \code{AEturquoise} etc.} \item{varExplained}{A dataframe in which each
+#' column corresponds to a module, with the component \code{varExplained[PC,
+#' module]} giving the variance of module \code{module} explained by the
+#' principal component no. \code{PC}. The calculation is exact irrespective of
+#' the number of computed principal components. At most 10 variance explained
+#' values are recorded in this dataframe.} \item{nPC}{A copy of the input
+#' \code{nPC}.} \item{validMEs}{A boolean vector. Each component (corresponding
+#' to the columns in \code{data}) is \code{TRUE} if the corresponding eigengene
+#' is valid, and \code{FALSE} if it is invalid. Valid eigengenes include both
+#' principal components and their hubgene approximations. When
+#' \code{returnValidOnly==FALSE}, by definition all returned eigengenes are
+#' valid and the entries of \code{validMEs} are all \code{TRUE}. }
+#' \item{validColors}{A copy of the input colors with entries corresponding to
+#' invalid modules set to \code{grey} if given, otherwise 0 if \code{colors} is
+#' numeric and "grey" otherwise.} \item{allOK}{Boolean flag signalling whether
+#' all eigengenes have been calculated correctly, either as principal
+#' components or as the hubgene average approximation.} \item{allPC}{Boolean
+#' flag signalling whether all returned eigengenes are principal components.}
+#' \item{isPC}{Boolean vector. Each component (corresponding to the columns in
+#' \code{eigengenes}) is \code{TRUE} if the corresponding eigengene is the
+#' first principal component and \code{FALSE} if it is the hubgene
+#' approximation or is invalid.} \item{isHub}{Boolean vector. Each component
+#' (corresponding to the columns in \code{eigengenes}) is \code{TRUE} if the
+#' corresponding eigengene is the hubgene approximation and \code{FALSE} if it
+#' is the first principal component or is invalid.} \item{validAEs}{Boolean
+#' vector. Each component (corresponding to the columns in \code{eigengenes})
+#' is \code{TRUE} if the corresponding module average expression is valid.}
+#' \item{allAEOK}{Boolean flag signalling whether all returned module average
+#' expressions contain valid data. Note that \code{returnValidOnly==TRUE} does
+#' not imply \code{allAEOK==TRUE}: some invalid average expressions may be
+#' returned if their corresponding eigengenes have been calculated correctly.}
+#' @author Steve Horvath \email{SHorvath@@mednet.ucla.edu}, Peter Langfelder
+#' \email{Peter.Langfelder@@gmail.com}
+#' @seealso \code{\link{svd}}, \code{impute.knn}
+#' @references Zhang, B. and Horvath, S. (2005), "A General Framework for
+#' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
+#' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
+#' @keywords misc
+moduleEigengenes <- function(datExpr, colors, impute = TRUE, nPC = 1,
                              align = "along average", excludeGrey = FALSE,
                              grey = if (is.numeric(colors))  0 else "grey",
                              subHubs = TRUE, trapErrors = FALSE,
@@ -42,17 +215,17 @@ moduleEigengenes <- function(expr, colors, impute = TRUE, nPC = 1,
                          nlevels(as.factor(colors)),
                          "module eigengenes in given set."))
     }
-    if (is.null(expr)) {
-        stop("moduleEigengenes: Error: expr is NULL.")
+    if (is.null(datExpr)) {
+        stop("moduleEigengenes: Error: datExpr is NULL.")
     }
     if (is.null(colors)) {
         stop("moduleEigengenes: Error: colors is NULL.")
     }
-    if (is.null(dim(expr)) || length(dim(expr)) != 2)
-        stop("moduleEigengenes: Error: expr must be two - dimensional.")
+    if (is.null(dim(datExpr)) || length(dim(datExpr)) != 2)
+        stop("moduleEigengenes: Error: datExpr must be two - dimensional.")
 
-    if (dim(expr)[2] != length(colors)) {
-        stop("moduleEigengenes: Error: ncol(expr) and length(colors)",
+    if (dim(datExpr)[2] != length(colors)) {
+        stop("moduleEigengenes: Error: ncol(datExpr) and length(colors)",
              "must be equal (one color per gene).")
     }
 
@@ -95,8 +268,8 @@ moduleEigengenes <- function(expr, colors, impute = TRUE, nPC = 1,
         }
     }
     lml <- length(modlevels)
-    PrinComps <- data.frame(matrix(nrow = dim(expr)[[1]], ncol = lml))
-    averExpr <- data.frame(matrix(nrow = dim(expr)[[1]], ncol = lml))
+    PrinComps <- data.frame(matrix(nrow = dim(datExpr)[[1]], ncol = lml))
+    averExpr <- data.frame(matrix(nrow = dim(datExpr)[[1]], ncol = lml))
     varExpl <- data.frame(matrix(nrow = nVarExplained, ncol = lml))
     validMEs <- rep(TRUE, lml)
     validAEs <- rep(FALSE, lml)
@@ -115,7 +288,7 @@ moduleEigengenes <- function(expr, colors, impute = TRUE, nPC = 1,
         if (verbose > 2) {
             printFlush(paste(spaces, " ...", sum(restrict1), "genes"))
         }
-        datModule <- as.matrix(t(expr[, restrict1]))
+        datModule <- as.matrix(t(datExpr[, restrict1]))
         n <- nrow(datModule)
         p <- ncol(datModule)
         pc <- try(
@@ -300,10 +473,26 @@ moduleEigengenes <- function(expr, colors, impute = TRUE, nPC = 1,
 #
 #-------------------------------------------------------------------------------
 # This function removes the grey eigengene from supplied module eigengenes.
-#' @rdname removeGreyME
-#' @name removeGreyME
-#'
-#' @export
+
+
+#' Removes the grey eigengene from a given collection of eigengenes.
+#' 
+#' Given module eigengenes either in a single data frame or in a multi-set
+#' format, removes the grey eigengenes from each set. If the grey eigengenes
+#' are not found, a warning is issued.
+#' 
+#' 
+#' @param MEs Module eigengenes, either in a single data frame (typicaly for a
+#' single set), or in a multi-set format. See \code{\link{checkSets}} for a
+#' description of the multi-set format.
+#' @param greyMEName Name of the module eigengene (in each corresponding data
+#' frame) that corresponds to the grey color. This will typically be "PCgrey"
+#' or "MEgrey". If the module eigengenes were calculated using standard
+#' functions in this library, the default should work.
+#' @return Module eigengenes in the same format as input (either a single data
+#' frame or a vector of lists) with the grey eigengene removed.
+#' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
+#' @keywords misc
 removeGreyME <- function(MEs,
                          greyMEName = paste0(moduleColor.getMEprefix(),
                                              "grey")) {
@@ -353,6 +542,16 @@ removeGreyME <- function(MEs,
 #===============================================================================
 # This function collects garbage
 
+
+
+#' Iterative garbage collection.
+#' 
+#' Performs garbage collection until free memory idicators show no change.
+#' 
+#' 
+#' @return None.
+#' @author Steve Horvath
+#' @keywords utilities
 collectGarbage <- function(){
     while (gc()[2, 4]  != gc()[2, 4] | gc()[1, 4]  != gc()[1, 4]){}
 }
@@ -365,6 +564,47 @@ collectGarbage <- function(){
 #
 # performs hierarchical clustering on MEs and returns the order suitable for plotting.
 
+
+
+#' Put close eigenvectors next to each other
+#' 
+#' Reorder given (eigen-)vectors such that similar ones (as measured by
+#' correlation) are next to each other.
+#' 
+#' Ordering module eigengenes is useful for plotting purposes. For this
+#' function the order can be specified explicitly, or a set can be given in
+#' which the correlations of the eigengenes will determine the order. For the
+#' latter, a hierarchical dendrogram is calculated and the order given by the
+#' dendrogram is used for the eigengenes in all other sets.
+#' 
+#' @param MEs Module eigengenes in a multi-set format (see
+#' \code{\link{checkSets}}). A vector of lists, with each list corresponding to
+#' one dataset and the module eigengenes in the component \code{data}, that is
+#' \code{MEs[[set]]$data[sample, module]} is the expression of the eigengene of
+#' module \code{module} in sample \code{sample} in dataset \code{set}. The
+#' number of samples can be different between the sets, but the modules must be
+#' the same.
+#' @param greyLast Normally the color grey is reserved for unassigned genes;
+#' hence the grey module is not a proper module and it is conventional to put
+#' it last. If this is not desired, set the parameter to \code{FALSE}.
+#' @param greyName Name of the grey module eigengene.
+#' @param orderBy Specifies the set by which the eigengenes are to be ordered
+#' (in all other sets as well). Defaults to the first set in \code{useSets} (or
+#' the first set, if \code{useSets} is not given).
+#' @param order Allows the user to specify a custom ordering.
+#' @param useSets Allows the user to specify for which sets the eigengene
+#' ordering is to be performed.
+#' @param verbose Controls verbostity of printed progress messages. 0 means
+#' silent, nonzero verbose.
+#' @param indent A single non-negative integer controling indentation of
+#' printed messages. 0 means no indentation, each unit above zero adds two
+#' spaces.
+#' @return A vector of lists of the same type as \code{MEs} containing the
+#' re-ordered eigengenes.
+#' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
+#' @seealso \code{\link{moduleEigengenes}}, \code{\link{multiSetMEs}},
+#' \code{\link{consensusOrderMEs}}
+#' @keywords misc
 orderMEs <- function(MEs, greyLast = TRUE,
                      greyName = paste0(moduleColor.getMEprefix(), "grey"),
                      orderBy = 1, order = NULL,
@@ -509,50 +749,50 @@ orderMEs <- function(MEs, greyLast = TRUE,
 #
 #-------------------------------------------------------------------------------
 # Orders MEs by the dendrogram of their consensus dissimilarity.
-#' @rdname consensusOrderMEs
-#' @name consensusOrderMEs
-#' @title Put close eigenvectors next to each other in several sets.
-#' @description
+
+
+#' Put close eigenvectors next to each other in several sets.
+#' 
 #' Reorder given (eigen-)vectors such that similar ones (as measured by
-#' correlation) are next to each other. This is a multi-set version of orderMEs;
-#' the dissimilarity used can be of consensus type (for each pair of
-#' eigenvectors the consensus dissimilarity is the maximum of individual set
-#' dissimilarities over all sets) or of majority type (for each pair of
-#' eigenvectors the consensus dissimilarity is the average of individual set
-#' dissimilarities over all sets).
-#' @param MEs Module eigengenes of several sets in a multi-set format (see
-#' \code{\link{checkSets}}). A vector of lists, with each list corresponding to
-#' one dataset and the module eigengenes in the component data, that is
-#' MEs[[set]]$data[sample, module] is the expression of the eigengene of module
-#' module in sample sample in dataset set. The number of samples can be
-#' different between the sets, but the modules must be the same.
-#' @param useAbs Controls whether vector similarity should be given by absolute
-#' value of correlation or plain correlation.
-#' @param useSets Allows to specify for which sets the eigengene ordering is to
-#' be performed.
-#' @param greyLast Normally the color grey is reserved for unassigned genes;
-#' hence the grey module is not a proper module and it is conventional to put it
-#' last. If this is not desired, set the parameter to FALSE.
-#' @param greyNAme Name of the grey module eigengene.
-#' @param method A character string giving the method to be used calculating the
-#' consensus dissimilarity. Allowed values are (abbreviations of) "consensus"
-#' and "majority". The consensus dissimilarity is calculated as the maximum of
-#' given set dissimilarities for "consensus" and as the average for "majority".
-#' @details
+#' correlation) are next to each other. This is a multi-set version of
+#' \code{\link{orderMEs}}; the dissimilarity used can be of consensus type (for
+#' each pair of eigenvectors the consensus dissimilarity is the maximum of
+#' individual set dissimilarities over all sets) or of majority type (for each
+#' pair of eigenvectors the consensus dissimilarity is the average of
+#' individual set dissimilarities over all sets).
+#' 
 #' Ordering module eigengenes is useful for plotting purposes. This function
 #' calculates the consensus or majority dissimilarity of given eigengenes over
-#' the sets specified by useSets (defaults to all sets). A hierarchical
+#' the sets specified by \code{useSets} (defaults to all sets). A hierarchical
 #' dendrogram is calculated using the dissimilarity and the order given by the
 #' dendrogram is used for the eigengenes in all other sets.
-#' @return
-#' A vector of lists of the same type as MEs containing the re-ordered
-#' eigengenes.
-#' @author
-#' Peter Langfelder
-#' @seealso
-#' \code{\link{moduleEigengenes}}, \code{\link{multiSetMEs}},
+#' 
+#' @param MEs Module eigengenes of several sets in a multi-set format (see
+#' \code{\link{checkSets}}). A vector of lists, with each list corresponding to
+#' one dataset and the module eigengenes in the component \code{data}, that is
+#' \code{MEs[[set]]$data[sample, module]} is the expression of the eigengene of
+#' module \code{module} in sample \code{sample} in dataset \code{set}. The
+#' number of samples can be different between the sets, but the modules must be
+#' the same.
+#' @param useAbs Controls whether vector similarity should be given by absolute
+#' value of correlation or plain correlation.
+#' @param useSets Allows the user to specify for which sets the eigengene
+#' ordering is to be performed.
+#' @param greyLast Normally the color grey is reserved for unassigned genes;
+#' hence the grey module is not a proper module and it is conventional to put
+#' it last. If this is not desired, set the parameter to \code{FALSE}.
+#' @param greyName Name of the grey module eigengene.
+#' @param method A character string giving the method to be used calculating
+#' the consensus dissimilarity. Allowed values are (abbreviations of)
+#' \code{"consensus"} and \code{"majority"}. The consensus dissimilarity is
+#' calculated as the maximum of given set dissimilarities for
+#' \code{"consensus"} and as the average for \code{"majority"}.
+#' @return A vector of lists of the same type as \code{MEs} containing the
+#' re-ordered eigengenes.
+#' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
+#' @seealso \code{\link{moduleEigengenes}}, \code{\link{multiSetMEs}},
 #' \code{\link{orderMEs}}
-#' @export
+#' @keywords misc
 consensusOrderMEs <- function(MEs, useAbs = FALSE, useSets = NULL,
                               greyLast = TRUE,
                               greyName = paste0(moduleColor.getMEprefix(),
@@ -582,6 +822,34 @@ consensusOrderMEs <- function(MEs, useAbs = FALSE, useSets = NULL,
 # CAUTION: when not using absolute value, the minimum similarity will favor the
 # large negative values!
 
+
+
+#' Consensus dissimilarity of module eigengenes.
+#' 
+#' Calculates consensus dissimilarity \code{(1-cor)} of given module eigengenes
+#' relaized in several sets.
+#' 
+#' This function calculates the individual set dissimilarities of the given
+#' eigengenes in each set, then takes the (parallel) maximum or average over
+#' all sets. For details on the structure of imput data, see
+#' \code{\link{checkSets}}.
+#' 
+#' @param MEs Module eigengenes of the same modules in several sets.
+#' @param useAbs Controls whether absolute value of correlation should be used
+#' instead of correlation in the calculation of dissimilarity.
+#' @param useSets If the consensus is to include only a selection of the given
+#' sets, this vector (or scalar in the case of a single set) can be used to
+#' specify the selection. If \code{NULL}, all sets will be used.
+#' @param method A character string giving the method to use. Allowed values
+#' are (abbreviations of) \code{"consensus"} and \code{"majority"}. The
+#' consensus dissimilarity is calculated as the minimum of given set
+#' dissimilarities for \code{"consensus"} and as the average for
+#' \code{"majority"}.
+#' @return A dataframe containing the matrix of dissimilarities, with
+#' \code{names} and \code{rownames} set appropriately.
+#' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
+#' @seealso \code{\link{checkSets}}
+#' @keywords misc
 consensusMEDissimilarity <- function(MEs, useAbs = FALSE, useSets = NULL,
                                      method = "consensus")
 {
@@ -757,6 +1025,24 @@ nExtras <- length(ExtraColors)
 .GlobalStandardColors = c(BaseColors, ExtraColors[
     rank(sin(13 * c(1:nExtras) + sin(13 * c(1:nExtras))))])
 
+
+
+#' Colors this library uses for labeling modules.
+#' 
+#' Returns the vector of color names in the order they are assigned by other
+#' functions in this library.
+#' 
+#' 
+#' @param n Number of colors requested. If \code{NULL}, all (approx. 450)
+#' colors will be returned. Any other invalid argument such as less than one or
+#' more than maximum (\code{length(standardColors())}) will trigger an error.
+#' @return A vector of character color names of the requested length.
+#' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
+#' @keywords color misc
+#' @examples
+#' 
+#' standardColors(10);
+#' 
 standardColors <- function(n = NULL){
     if (is.null(n)) {
         return(.GlobalStandardColors)
@@ -778,6 +1064,20 @@ rm(BaseColors, RColors, ExtraColors, nExtras, InBase)
 # "Normalizes" numerical labels such that the largest group is labeled 1, the
 # next largest 2 etc. If KeepZero == TRUE, label zero is preserved.
 
+
+
+#' Transform numerical labels into normal order.
+#' 
+#' Transforms numerical labels into normal order, that is the largest group
+#' will be labeled 1, next largest 2 etc. Label 0 is optionally preserved.
+#' 
+#' 
+#' @param labels Numerical labels.
+#' @param keepZero If \code{TRUE} (the default), labels 0 are preserved.
+#' @return A vector of the same length as input, containing the normalized
+#' labels.
+#' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
+#' @keywords misc
 normalizeLabels <- function(labels, keepZero = TRUE) {
     if (keepZero) {
         NonZero = (labels != 0)
@@ -804,6 +1104,52 @@ normalizeLabels <- function(labels, keepZero = TRUE) {
 # presence of labels below 1 will trigger an error. dimensions of labels (if
 # present) are preserved.
 
+
+
+#' Convert numerical labels to colors.
+#' 
+#' Converts a vector or array of numerical labels into a corresponding vector
+#' or array of colors corresponding to the labels.
+#' 
+#' If \code{labels} is numeric, it is used directly as index to the standard
+#' color sequence. If 0 is present among the labels and \code{zeroIsGrey=TRUE},
+#' labels 0 are given grey color.
+#' 
+#' If \code{labels} is not numeric, its columns are turned into factors and the
+#' numeric representation of each factor is used to assign the corresponding
+#' colors. In this case \code{commonColorCode} governs whether each column gets
+#' its own color code, or whether the color code will be universal.
+#' 
+#' The standard sequence start with well-distinguishable colors, and after
+#' about 40 turns into a quasi-random sampling of all colors available in R
+#' with the exception of all shades of grey (and gray).
+#' 
+#' If the input \code{labels} have a dimension attribute, it is copied into the
+#' output, meaning the dimensions of the returned value are the same as those
+#' of the input \code{labels}.
+#' 
+#' @param labels Vector or matrix of non-negative integer or other (such as
+#' character) labels. See details.
+#' @param zeroIsGrey If TRUE, labels 0 will be assigned color grey. Otherwise,
+#' labels below 1 will trigger an error.
+#' @param colorSeq Color sequence corresponding to labels. If not given, a
+#' standard sequence will be used.
+#' @param naColor Color that will encode missing values.
+#' @param commonColorCode logical: if \code{labels} is a matrix, should each
+#' column have its own colors?
+#' @return A vector or array of character strings of the same length or
+#' dimensions as \code{labels}.
+#' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
+#' @keywords color
+#' @examples
+#' 
+#' labels = c(0:20);
+#' labels2colors(labels);
+#' labels = matrix(letters[1:9], 3,3);
+#' labels2colors(labels)
+#' # Note the difference when commonColorCode = FALSE
+#' labels2colors(labels, commonColorCode = FALSE)
+#' 
 labels2colors <- function(labels, zeroIsGrey = TRUE, colorSeq = NULL,
                           naColor = "grey",
                           commonColorCode = TRUE) {
@@ -868,6 +1214,29 @@ labels2colors <- function(labels, zeroIsGrey = TRUE, colorSeq = NULL,
 # guarranteed fact is that grey probes are labeled by 0 and all probes belonging
 # to the same module have the same number.
 
+
+
+#' Fixed-height cut of a dendrogram.
+#' 
+#' Detects branches of on the input dendrogram by performing a fixed-height
+#' cut.
+#' 
+#' All contiguous branches below the height \code{cutHeight} that contain at
+#' least \code{minSize} objects are assigned unique positive numerical labels;
+#' all unassigned objects are assigned label 0.
+#' 
+#' @param dendro a hierarchical clustering dendorgram such as one returned by
+#' \code{hclust}.
+#' @param cutHeight Maximum joining heights that will be considered.
+#' @param minSize Minimum cluster size.
+#' @return A vector of numerical labels giving the assigment of each object.
+#' @note The numerical labels may not be sequential. See
+#' \code{\link{normalizeLabels}} for a way to put the labels into a standard
+#' order.
+#' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
+#' @seealso \code{\link{hclust}}, \code{\link{cutree}},
+#' \code{\link{normalizeLabels}}
+#' @keywords cluster
 moduleNumber <- function(dendro, cutHeight = 0.9, minSize = 50) {
     Branches = cutree(dendro, h = cutHeight)
     NOnBranches = table(Branches)
@@ -885,6 +1254,42 @@ moduleNumber <- function(dendro, cutHeight = 0.9, minSize = 50) {
 # Check input data: if they are not a vector of lists, put them into the form of
 # a vector of lists.
 
+
+
+#' Put single-set data into a form useful for multiset calculations.
+#' 
+#' Encapsulates single-set data in a wrapper that makes the data suitable for
+#' functions working on multiset data collections.
+#' 
+#' For multiset calculations, many quantities (such as expression data, traits,
+#' module eigengenes etc) are presented by a common structure, a vector of
+#' lists (one list for each set) where each list has a component \code{data}
+#' that contains the actual (expression, trait, eigengene) data for the
+#' corresponding set in the form of a dataframe. This funtion creates a vector
+#' of lists of length 1 and fills the component \code{data} with the content of
+#' parameter \code{data}.
+#' 
+#' @param data A dataframe, matrix or array with two dimensions to be
+#' encapsulated.
+#' @param verbose Controls verbosity. 0 is silent.
+#' @param indent Controls indentation of printed progress messages. 0 means no
+#' indentation, every unit adds two spaces.
+#' @return As described above, input data in a format suitable for functions
+#' operating on multiset data collections.
+#' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
+#' @seealso \code{\link{checkSets}}
+#' @keywords misc
+#' @examples
+#' 
+#' 
+#' singleSetData = matrix(rnorm(100), 10,10);
+#' encapsData = fixDataStructure(singleSetData);
+#' length(encapsData)
+#' names(encapsData[[1]])
+#' dim(encapsData[[1]]$data)
+#' all.equal(encapsData[[1]]$data, singleSetData);
+#' 
+#' 
 fixDataStructure <- function(data, verbose = 0, indent = 0) {
     spaces = indentSpaces(indent)
     if ((class(data) != "list") || (class(data[[1]]) != "list")) {
@@ -912,6 +1317,39 @@ fixDataStructure <- function(data, verbose = 0, indent = 0) {
     return(d)
 }
 
+
+
+#' Check structure and retrieve sizes of a group of datasets.
+#' 
+#' Checks whether given sets have the correct format and retrieves dimensions.
+#' 
+#' For multiset calculations, many quantities (such as expression data, traits,
+#' module eigengenes etc) are presented by a common structure, a vector of
+#' lists (one list for each set) where each list has a component \code{data}
+#' that contains the actual (expression, trait, eigengene) data for the
+#' corresponding set in the form of a dataframe. This funtion checks whether
+#' \code{data} conforms to this convention and retrieves some basic dimension
+#' information (see output).
+#' 
+#' @param data A vector of lists; in each list there must be a component named
+#' \code{data} whose content is a matrix or dataframe or array of dimension 2.
+#' @param checkStructure If \code{FALSE}, incorrect structure of \code{data}
+#' will trigger an error. If \code{TRUE}, an appropriate flag (see output) will
+#' be set to indicate whether \code{data} has correct structure.
+#' @param useSets Optional specification of entries of the vector \code{data}
+#' that are to be checked. Defaults to all components. This may be useful when
+#' \code{data} only contains information for some of the sets.
+#' @return A list with components \item{nSets}{Number of sets (length of the
+#' vector \code{data}).} \item{nGenes}{Number of columns in the \code{data}
+#' components in the lists. This number must be the same for all sets.}
+#' \item{nSamples}{A vector of length \code{nSets} giving the number of rows in
+#' the \code{data} components.} \item{structureOK}{Only set if the argument
+#' \code{checkStructure} equals \code{TRUE}.  The value is \code{TRUE} if the
+#' paramter \code{data} passes a few tests of its structure, and \code{FALSE}
+#' otherwise. The tests are not exhaustive and are meant to catch obvious user
+#' errors rather than be bulletproof.}
+#' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
+#' @keywords misc
 checkSets <- function(data, checkStructure = FALSE, useSets = NULL) {
     nSets = length(data)
     if (is.null(useSets)) useSets = c(1:nSets)
@@ -954,6 +1392,155 @@ checkSets <- function(data, checkStructure = FALSE, useSets = NULL) {
 #
 #-------------------------------------------------------------------------------
 
+
+
+#' Calculate module eigengenes.
+#' 
+#' Calculates module eigengenes for several sets.
+#' 
+#' This function calls \code{\link{moduleEigengenes}} for each set in
+#' \code{exprData}.
+#' 
+#' Module eigengene is defined as the first principal component of the
+#' expression matrix of the corresponding module. The calculation may fail if
+#' the expression data has too many missing entries. Handling of such errors is
+#' controlled by the arguments \code{subHubs} and \code{trapErrors}. If
+#' \code{subHubs==TRUE}, errors in principal component calculation will be
+#' trapped and a substitute calculation of hubgenes will be attempted. If this
+#' fails as well, behaviour depends on \code{trapErrors}: if \code{TRUE}, the
+#' offending module will be ignored and the return value will allow the user to
+#' remove the module from further analysis; if \code{FALSE}, the function will
+#' stop. If \code{universalColors} is given, any offending module will be
+#' removed from all sets (see \code{validMEs} in return value below).
+#' 
+#' From the user's point of view, setting \code{trapErrors=FALSE} ensures that
+#' if the function returns normally, there will be a valid eigengene (principal
+#' component or hubgene) for each of the input colors. If the user sets
+#' \code{trapErrors=TRUE}, all calculational (but not input) errors will be
+#' trapped, but the user should check the output (see below) to make sure all
+#' modules have a valid returned eigengene.
+#' 
+#' While the principal component calculation can fail even on relatively sound
+#' data (it does not take all that many "well-placed" \code{NA} to torpedo the
+#' calculation), it takes many more irregularities in the data for the hubgene
+#' calculation to fail. In fact such a failure signals there likely is
+#' something seriously wrong with the data.
+#' 
+#' @param exprData Expression data in a multi-set format (see
+#' \code{\link{checkSets}}). A vector of lists, with each list corresponding to
+#' one microarray dataset and expression data in the component \code{data},
+#' that is \code{expr[[set]]$data[sample, probe]} is the expression of probe
+#' \code{probe} in sample \code{sample} in dataset \code{set}. The number of
+#' samples can be different between the sets, but the probes must be the same.
+#' @param colors A matrix of dimensions (number of probes, number of sets)
+#' giving the module assignment of each gene in each set. The color "grey" is
+#' interpreted as unassigned.
+#' @param universalColors Alternative specification of module assignment. A
+#' single vector of length (number of probes) giving the module assignment of
+#' each gene in all sets (that is the modules are common to all sets). If
+#' given, takes precedence over \code{color}.
+#' @param useSets If calculations are requested in (a) selected set(s) only,
+#' the set(s) can be specified here. Defaults to all sets.
+#' @param useGenes Can be used to restrict calculation to a subset of genes
+#' (the same subset in all sets). If given, \code{validColors} in the returned
+#' list will only contain colors for the genes specified in \code{useGenes}.
+#' @param impute Logical. If \code{TRUE}, expression data will be checked for
+#' the presence of \code{NA} entries and if the latter are present, numerical
+#' data will be imputed, using function \code{impute.knn} and probes from the
+#' same module as the missing datum. The function \code{impute.knn} uses a
+#' fixed random seed giving repeatable results.
+#' @param nPC Number of principal components to be calculated. If only
+#' eigengenes are needed, it is best to set it to 1 (default). If variance
+#' explained is needed as well, use value \code{NULL}. This will cause all
+#' principal components to be computed, which is slower.
+#' @param align Controls whether eigengenes, whose orientation is undetermined,
+#' should be aligned with average expression (\code{align = "along average"},
+#' the default) or left as they are (\code{align = ""}). Any other value will
+#' trigger an error.
+#' @param excludeGrey Should the improper module consisting of 'grey' genes be
+#' excluded from the eigengenes?
+#' @param grey Value of \code{colors} or \code{universalColors} (whichever
+#' applies) designating the improper module. Note that if the appropriate
+#' colors argument is a factor of numbers, the default value will be incorrect.
+#' @param subHubs Controls whether hub genes should be substituted for missing
+#' eigengenes. If \code{TRUE}, each missing eigengene (i.e., eigengene whose
+#' calculation failed and the error was trapped) will be replaced by a weighted
+#' average of the most connected hub genes in the corresponding module. If this
+#' calculation fails, or if \code{subHubs==FALSE}, the value of
+#' \code{trapErrors} will determine whether the offending module will be
+#' removed or whether the function will issue an error and stop.
+#' @param trapErrors Controls handling of errors from that may arise when there
+#' are too many \code{NA} entries in expression data. If \code{TRUE}, errors
+#' from calling these functions will be trapped without abnormal exit. If
+#' \code{FALSE}, errors will cause the function to stop. Note, however, that
+#' \code{subHubs} takes precedence in the sense that if \code{subHubs==TRUE}
+#' and \code{trapErrors==FALSE}, an error will be issued only if both the
+#' principal component and the hubgene calculations have failed.
+#' @param returnValidOnly Boolean. Controls whether the returned data frames of
+#' module eigengenes contain columns corresponding only to modules whose
+#' eigengenes or hub genes could be calculated correctly in every set
+#' (\code{TRUE}), or whether the data frame should have columns for each of the
+#' input color labels (\code{FALSE}).
+#' @param softPower The power used in soft-thresholding the adjacency matrix.
+#' Only used when the hubgene approximation is necessary because the principal
+#' component calculation failed. It must be non-negative. The default value
+#' should only be changed if there is a clear indication that it leads to
+#' incorrect results.
+#' @param verbose Controls verbosity of printed progress messages. 0 means
+#' silent, up to (about) 5 the verbosity gradually increases.
+#' @param indent A single non-negative integer controlling indentation of
+#' printed messages. 0 means no indentation, each unit above that adds two
+#' spaces.
+#' @return A vector of lists similar in spirit to the input \code{exprData}.
+#' For each set there is a list with the following components:
+#' \item{data}{Module eigengenes in a data frame, with each column
+#' corresponding to one eigengene. The columns are named by the corresponding
+#' color with an \code{"ME"} prepended, e.g., \code{MEturquoise} etc. Note
+#' that, when \code{trapErrors == TRUE} and \code{returnValidOnly==FALSE}, this
+#' data frame also contains entries corresponding to removed modules, if any.
+#' (\code{validMEs} below indicates which eigengenes are valid and \code{allOK}
+#' whether all module eigengens were successfully calculated.) }
+#' \item{averageExpr}{If \code{align == "along average"}, a dataframe
+#' containing average normalized expression in each module. The columns are
+#' named by the corresponding color with an \code{"AE"} prepended, e.g.,
+#' \code{AEturquoise} etc.} \item{varExplained}{A dataframe in which each
+#' column corresponds to a module, with the component \code{varExplained[PC,
+#' module]} giving the variance of module \code{module} explained by the
+#' principal component no. \code{PC}. This is only accurate if all principal
+#' components have been computed (input \code{nPC = NULL}). At most 5 principal
+#' components are recorded in this dataframe.} \item{nPC}{A copy of the input
+#' \code{nPC}.} \item{validMEs}{A boolean vector. Each component (corresponding
+#' to the columns in \code{data}) is \code{TRUE} if the corresponding eigengene
+#' is valid, and \code{FALSE} if it is invalid. Valid eigengenes include both
+#' principal components and their hubgene approximations. When
+#' \code{returnValidOnly==FALSE}, by definition all returned eigengenes are
+#' valid and the entries of \code{validMEs} are all \code{TRUE}. }
+#' \item{validColors}{A copy of the input colors (\code{universalColors} if
+#' set, otherwise \code{colors[, set]}) with entries corresponding to invalid
+#' modules set to \code{grey} if given, otherwise 0 if the appropriate input
+#' colors are numeric and "grey" otherwise.} \item{allOK}{Boolean flag
+#' signalling whether all eigengenes have been calculated correctly, either as
+#' principal components or as the hubgene approximation. If
+#' \code{universalColors} is set, this flag signals whether all eigengenes are
+#' valid in all sets.} \item{allPC}{Boolean flag signalling whether all
+#' returned eigengenes are principal components. This flag (as well as the
+#' subsequent ones) is set independently for each set.} \item{isPC}{Boolean
+#' vector. Each component (corresponding to the columns in \code{eigengenes})
+#' is \code{TRUE} if the corresponding eigengene is the first principal
+#' component and \code{FALSE} if it is the hubgene approximation or is invalid.
+#' } \item{isHub}{Boolean vector. Each component (corresponding to the columns
+#' in \code{eigengenes}) is \code{TRUE} if the corresponding eigengene is the
+#' hubgene approximation and \code{FALSE} if it is the first principal
+#' component or is invalid.} \item{validAEs}{Boolean vector. Each component
+#' (corresponding to the columns in \code{eigengenes}) is \code{TRUE} if the
+#' corresponding module average expression is valid.} \item{allAEOK}{Boolean
+#' flag signalling whether all returned module average expressions contain
+#' valid data. Note that \code{returnValidOnly==TRUE} does not imply
+#' \code{allAEOK==TRUE}: some invalid average expressions may be returned if
+#' their corresponding eigengenes have been calculated correctly.}
+#' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
+#' @seealso \code{\link{moduleEigengenes}}
+#' @keywords misc
 multiSetMEs <- function(exprData, colors, universalColors = NULL,
                         useSets = NULL,
                         useGenes = NULL, impute = TRUE,
@@ -1085,6 +1672,131 @@ multiSetMEs <- function(exprData, colors, universalColors = NULL,
 #-------------------------------------------------------------------------------
 
 
+
+
+#' Merge close modules in gene expression data
+#' 
+#' Merges modules in gene expression networks that are too close as measured by
+#' the correlation of their eigengenes.
+#' 
+#' This function returns the color labels for modules that are obtained from
+#' the input modules by merging ones that are closely related. The
+#' relationships are quantified by correlations of module eigengenes; a
+#' ``consensus'' measure is defined as the ``consensus quantile'' over the
+#' corresponding relationship in each set. Once the (dis-)similarity is
+#' calculated, average linkage hierarchical clustering of the module eigengenes
+#' is performed, the dendrogram is cut at the height \code{cutHeight} and
+#' modules on each branch are merged. The process is (optionally) repeated
+#' until no more modules are merged.
+#' 
+#' If, for a particular module, the module eigengene calculation fails, a
+#' hubgene approximation will be used.
+#' 
+#' The user should be aware that if a computational error occurs and
+#' \code{trapErrors==TRUE}, the returned list (see below) will not contain all
+#' of the components returned upon normal execution.
+#' 
+#' @param exprData Expression data, either a single data frame with rows
+#' corresponding to samples and columns to genes, or in a multi-set format (see
+#' \code{\link{checkSets}}). See \code{checkDataStructure} below.
+#' @param colors A vector (numeric, character or a factor) giving module colors
+#' for genes.  The method only makes sense when genes have the same color label
+#' in all sets, hence a single vector.
+#' @param MEs If module eigengenes have been calculated before, the user can
+#' save some computational time by inputting them. \code{MEs} should have the
+#' same format as \code{exprData}.  If they are not given, they will be
+#' calculated.
+#' @param useSets A vector of scalar allowing the user to specify which sets
+#' will be used to calculate the consensus dissimilarity of module eigengenes.
+#' Defaults to all given sets.
+#' @param impute Should missing values be imputed in eigengene calculation? If
+#' imputation is disabled, the presence of \code{NA} entries will cause the
+#' eigengene calculation to fail and eigengenes will be replaced by their
+#' hubgene approximation. See \code{\link{moduleEigengenes}} for more details.
+#' @param checkDataFormat If TRUE, the function will check \code{exprData} and
+#' \code{MEs} for correct multi-set structure. If single set data is given, it
+#' will be converted into a format usable for the function. If FALSE, incorrect
+#' structure of input data will trigger an error.
+#' @param unassdColor Specifies the string that labels unassigned genes. Module
+#' of this color will not enter the module eigengene clustering and will not be
+#' merged with other modules.
+#' @param corFnc Correlation function to be used to calculate correlation of
+#' module eigengenes.
+#' @param corOptions Can be used to specify options to the correlation
+#' function, in addition to argument \code{x} which is used to pass the actual
+#' data to calculate the correlation of.
+#' @param useAbs Specifies whether absolute value of correlation or plain
+#' correlation (of module eigengenes) should be used in calculating module
+#' dissimilarity.
+#' @param equalizeQuantiles Logical: should quantiles of the eigengene
+#' dissimilarity matrix be equalized ("quantile normalized")? The default is
+#' \code{FALSE} for reproducibility of old code, but better results will
+#' probably be achieved if quantile equalizatio is used.
+#' @param quantileSummary One of \code{"mean"} or \code{"median"}. Controls how
+#' a reference dissimilarity is computed from the input ones (using mean or
+#' median, respectively).
+#' @param consensusQuantile A number giving the desired quantile to use in the
+#' consensus similarity calculation (see details).
+#' @param cutHeight Maximum dissimilarity (i.e., 1-correlation) that qualifies
+#' modules for merging.
+#' @param iterate Controls whether the merging procedure should be repeated
+#' until there is no change. If FALSE, only one iteration will be executed.
+#' @param relabel Controls whether, after merging, color labels should be
+#' ordered by module size.
+#' @param colorSeq Color labels to be used for relabeling. Defaults to the
+#' standard color order used in this package if \code{colors} are not numeric,
+#' and to integers starting from 1 if \code{colors} is numeric.
+#' @param getNewMEs Controls whether module eigengenes of merged modules should
+#' be calculated and returned.
+#' @param getNewUnassdME When doing module eigengene manipulations, the
+#' function does not normally calculate the eigengene of the 'module' of
+#' unassigned ('grey') genes. Setting this option to \code{TRUE} will force the
+#' calculation of the unassigned eigengene in the returned newMEs, but not in
+#' the returned oldMEs.
+#' @param trapErrors Controls whether computational errors in calculating
+#' module eigengenes, their dissimilarity, and merging trees should be trapped.
+#' If \code{TRUE}, errors will be trapped and the function will return the
+#' input colors. If \code{FALSE}, errors will cause the function to stop.
+#' @param verbose Controls verbosity of printed progress messages. 0 means
+#' silent, up to (about) 5 the verbosity gradually increases.
+#' @param indent A single non-negative integer controlling indentation of
+#' printed messages. 0 means no indentation, each unit above that adds two
+#' spaces.
+#' @return If no errors occurred, a list with components \item{colors}{Color
+#' labels for the genes corresponding to merged modules. The function attempts
+#' to mimic the mode of the input \code{colors}: if the input \code{colors} is
+#' numeric, character and factor, respectively, so is the output. Note,
+#' however, that if the fnction performs relabeling, a standard sequence of
+#' labels will be used: integers starting at 1 if the input \code{colors} is
+#' numeric, and a sequence of color labels otherwise (see \code{colorSeq}
+#' above).}
+#' 
+#' \item{dendro}{Hierarchical clustering dendrogram (average linkage) of the
+#' eigengenes of the most recently computed tree. If \code{iterate} was set
+#' TRUE, this will be the dendrogram of the merged modules, otherwise it will
+#' be the dendrogram of the original modules.}
+#' 
+#' \item{oldDendro}{Hierarchical clustering dendrogram (average linkage) of the
+#' eigengenes of the original modules.}
+#' 
+#' \item{cutHeight}{The input cutHeight.}
+#' 
+#' \item{oldMEs}{Module eigengenes of the original modules in the sets given by
+#' \code{useSets}.}
+#' 
+#' \item{newMEs}{Module eigengenes of the merged modules in the sets given by
+#' \code{useSets}.}
+#' 
+#' \item{allOK}{A boolean set to \code{TRUE}.}
+#' 
+#' If an error occurred and \code{trapErrors==TRUE}, the list only contains
+#' these components:
+#' 
+#' \item{colors}{A copy of the input colors.}
+#' 
+#' \item{allOK}{a boolean set to \code{FALSE}.}
+#' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
+#' @keywords misc
 mergeCloseModules <- function(
     # input data
     exprData, colors,
@@ -1416,6 +2128,27 @@ mergeCloseModules <- function(
 #===============================================================================
 #For hard thresholding, we use the signum (step) function
 
+
+
+#' Hard-thresholding adjacency function
+#' 
+#' This function transforms correlations or other measures of similarity into
+#' an unweighted network adjacency.
+#' 
+#' 
+#' @param corMat a matrix of correlations or other measures of similarity.
+#' @param threshold threshold for connecting nodes: all nodes whose
+#' \code{corMat} is above the threshold will be connected in the resulting
+#' network.
+#' @return An unweighted adjacency matrix of the same dimensions as the input
+#' \code{corMat}.
+#' @author Steve Horvath
+#' @seealso \code{\link{adjacency}} for soft-thresholding and creating weighted
+#' networks.
+#' @references Bin Zhang and Steve Horvath (2005) "A General Framework for
+#' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
+#' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
+#' @keywords misc
 signumAdjacencyFunction <- function(corMat, threshold)
 {
     adjmat = as.matrix(abs(corMat) >= threshold)
@@ -1427,6 +2160,28 @@ signumAdjacencyFunction <- function(corMat, threshold)
 #===============================================================================
 # For soft thresholding, one can use the sigmoid function
 # But we have focused on the power adjacency function in the tutorial...
+
+
+#' Sigmoid-type adacency function.
+#' 
+#' Sigmoid-type function that converts a similarity to a weighted network
+#' adjacency.
+#' 
+#' The sigmoid adjacency function is defined as \eqn{1/(1+\exp[-\alpha(ss -
+#' \mu)])}{1/(1 + exp(-alpha * (ss - mu)))}.
+#' 
+#' @param ss similarity, a number between 0 and 1. Can be given as a scalar,
+#' vector or a matrix.
+#' @param mu shift parameter.
+#' @param alpha slope parameter.
+#' @return
+#' 
+#' Adjacencies returned in the same form as the input \code{ss}
+#' @author Steve Horvath
+#' @references Bin Zhang and Steve Horvath (2005) "A General Framework for
+#' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
+#' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
+#' @keywords misc
 sigmoidAdjacencyFunction <- function(ss, mu = 0.8, alpha = 20)
 {
     1/(1 + exp(- alpha * (ss - mu)))
@@ -1454,6 +2209,64 @@ sigmoidAdjacencyFunction <- function(ss, mu = 0.8, alpha = 20)
 # nBreaks specifies how many intervals used to estimate the frequency p(k) i.e.
 # the no. of points in the scale free topology plot.
 
+
+
+#' Analysis of scale free topology for hard-thresholding.
+#' 
+#' Analysis of scale free topology for multiple hard thresholds. The aim is to
+#' help the user pick an appropriate threshold for network construction.
+#' 
+#' The function calculates unsigned networks by thresholding the correlation
+#' matrix using thresholds given in \code{cutVector}. For each power the scale
+#' free topology fit index is calculated and returned along with other
+#' information on connectivity.
+#' 
+#' @aliases pickHardThreshold pickHardThreshold.fromSimilarity
+#' @param data expression data in a matrix or data frame. Rows correspond to
+#' samples and columns to genes.
+#' @param dataIsExpr logical: should the data be interpreted as expression (or
+#' other numeric) data, or as a similarity matrix of network nodes?
+#' @param similarity similarity matrix: a symmetric matrix with entries between
+#' -1 and 1 and unit diagonal.
+#' @param RsquaredCut desired minimum scale free topology fitting index
+#' \eqn{R^2}.
+#' @param cutVector a vector of hard threshold cuts for which the scale free
+#' topology fit indices are to be calculated.
+#' @param moreNetworkConcepts logical: should additional network concepts be
+#' calculated? If \code{TRUE}, the function will calculate how the network
+#' density, the network heterogeneity, and the network centralization depend on
+#' the power. For the definition of these additional network concepts, see
+#' Horvath and Dong (2008).  PloS Comp Biol.
+#' @param removeFirst should the first bin be removed from the connectivity
+#' histogram?
+#' @param nBreaks number of bins in connectivity histograms
+#' @param corFnc a character string giving the correlation function to be used
+#' in adjacency calculation.
+#' @param corOptions further options to the correlation function specified in
+#' \code{corFnc}.
+#' @return A list with the following components:
+#' 
+#' \item{cutEstimate}{ estimate of an appropriate hard-thresholding cut: the
+#' lowest cut for which the scale free topology fit \eqn{R^2} exceeds
+#' \code{RsquaredCut}. If \eqn{R^2} is below \code{RsquaredCut} for all cuts,
+#' \code{NA} is returned. }
+#' 
+#' \item{fitIndices}{ a data frame containing the fit indices for scale free
+#' topology. The columns contain the hard threshold, Student p-value for the
+#' correlation threshold, adjusted \eqn{R^2} for the linear fit, the linear
+#' coefficient, adjusted \eqn{R^2} for a more complicated fit models, mean
+#' connectivity, median connectivity and maximum connectivity.  If input
+#' \code{moreNetworkConcepts} is \code{TRUE}, 3 additional columns containing
+#' network density, centralization, and heterogeneity.}
+#' @author Steve Horvath
+#' @seealso \code{\link{signumAdjacencyFunction}}
+#' @references Bin Zhang and Steve Horvath (2005) "A General Framework for
+#' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
+#' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
+#' 
+#' Horvath S, Dong J (2008) Geometric Interpretation of Gene Coexpression
+#' Network Analysis. PLoS Comput Biol 4(8): e1000117
+#' @keywords misc
 pickHardThreshold <- function(data, dataIsExpr = TRUE, RsquaredCut = 0.85,
                               cutVector = seq(0.1, 0.9,
                                               by = 0.05), moreNetworkConcepts = FALSE, removeFirst = FALSE, nBreaks = 10,
@@ -1557,6 +2370,82 @@ pickHardThreshold <- function(data, dataIsExpr = TRUE, RsquaredCut = 0.85,
 # selection index for columns is given.
 # Caution: no checking of selectCols validity is performed.
 
+
+
+#' Analysis of scale free topology for soft-thresholding
+#' 
+#' Analysis of scale free topology for multiple soft thresholding powers. The
+#' aim is to help the user pick an appropriate soft-thresholding power for
+#' network construction.
+#' 
+#' The function calculates weighted networks either by interpreting \code{data}
+#' directly as similarity, or first transforming it to similarity of the type
+#' specified by \code{networkType}. The weighted networks are obtained by
+#' raising the similarity to the powers given in \code{powerVector}.  For each
+#' power the scale free topology fit index is calculated and returned along
+#' with other information on connectivity.
+#' 
+#' On systems with multiple cores or processors, the function pickSoftThreshold
+#' takes advantage of parallel processing if the function
+#' \code{\link{enableWGCNAThreads}} has been called to allow parallel
+#' processing and set up the parallel calculation back-end.
+#' 
+#' @aliases pickSoftThreshold pickSoftThreshold.fromSimilarity
+#' @param data expression data in a matrix or data frame. Rows correspond to
+#' samples and columns to genes.
+#' @param dataIsExpr logical: should the data be interpreted as expression (or
+#' other numeric) data, or as a similarity matrix of network nodes?
+#' @param similarity similarity matrix: a symmetric matrix with entries between
+#' -1 and 1 and unit diagonal.
+#' @param RsquaredCut desired minimum scale free topology fitting index
+#' \eqn{R^2}.
+#' @param powerVector a vector of soft thresholding powers for which the scale
+#' free topology fit indices are to be calculated.
+#' @param removeFirst should the first bin be removed from the connectivity
+#' histogram?
+#' @param nBreaks number of bins in connectivity histograms
+#' @param blockSize block size into which the calculation of connectivity
+#' should be broken up. If not given, a suitable value will be calculated using
+#' function \code{blockSize} and printed if \code{verbose>0}. If R runs into
+#' memory problems, decrease this value.
+#' @param corFnc the correlation function to be used in adjacency calculation.
+#' @param corOptions a list giving further options to the correlation function
+#' specified in \code{corFnc}.
+#' @param networkType network type. Allowed values are (unique abbreviations
+#' of) \code{"unsigned"}, \code{"signed"}, \code{"signed hybrid"}. See
+#' \code{\link{adjacency}}.
+#' @param moreNetworkConcepts logical: should additional network concepts be
+#' calculated? If \code{TRUE}, the function will calculate how the network
+#' density, the network heterogeneity, and the network centralization depend on
+#' the power. For the definition of these additional network concepts, see
+#' Horvath and Dong (2008). PloS Comp Biol.
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @return A list with the following components:
+#' 
+#' \item{powerEstimate}{ estimate of an appropriate soft-thresholding power:
+#' the lowest power for which the scale free topology fit \eqn{R^2} exceeds
+#' \code{RsquaredCut}. If \eqn{R^2} is below \code{RsquaredCut} for all powers,
+#' \code{NA} is returned. }
+#' 
+#' \item{fitIndices}{ a data frame containing the fit indices for scale free
+#' topology. The columns contain the soft-thresholding power, adjusted
+#' \eqn{R^2} for the linear fit, the linear coefficient, adjusted \eqn{R^2} for
+#' a more complicated fit models, mean connectivity, median connectivity and
+#' maximum connectivity. If input \code{moreNetworkConcepts} is \code{TRUE}, 3
+#' additional columns containing network density, centralization, and
+#' heterogeneity.}
+#' @author Steve Horvath and Peter Langfelder
+#' @seealso \code{\link{adjacency}}, \code{\link{softConnectivity}}
+#' @references Bin Zhang and Steve Horvath (2005) "A General Framework for
+#' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
+#' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
+#' 
+#' Horvath S, Dong J (2008) Geometric Interpretation of Gene Coexpression
+#' Network Analysis. PLoS Comput Biol 4(8): e1000117
+#' @keywords misc
 pickSoftThreshold <- function(data, dataIsExpr = TRUE, RsquaredCut = 0.85,
                               powerVector = c(seq(1, 10, by = 1),
                                               seq(12, 20, by = 2)),
@@ -1722,6 +2611,32 @@ pickSoftThreshold <- function(data, dataIsExpr = TRUE, RsquaredCut = 0.85,
 
 # The function ScaleFreePlot1 creates a plot for checking scale free topology
 
+
+
+#' Visual check of scale-free topology
+#' 
+#' A simple visula check of scale-free network ropology.
+#' 
+#' The function plots a log-log plot of a histogram of the given
+#' \code{connectivities}, and fits a linear model plus optionally a truncated
+#' exponential model. The \eqn{R^2} of the fit can be considered an index of
+#' the scale freedom of the network topology.
+#' 
+#' @param connectivity vector containing network connectivities.
+#' @param nBreaks number of breaks in the connectivity dendrogram.
+#' @param truncated logical: should a truncated exponential fit be calculated
+#' and plotted in addition to the linear one?
+#' @param removeFirst logical: should the first bin be removed from the fit?
+#' @param main main title for the plot.
+#' @param \dots other graphical parameter to the \code{plot} function.
+#' @return None.
+#' @author Steve Horvath
+#' @seealso \code{\link{softConnectivity}} for connectivity calculation in
+#' weigheted networks.
+#' @references Bin Zhang and Steve Horvath (2005) "A General Framework for
+#' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
+#' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
+#' @keywords misc
 scaleFreePlot <- function(connectivity, nBreaks = 10, truncated = FALSE,
                           removeFirst = FALSE, main = "", ...) {
     k = connectivity
@@ -1781,6 +2696,21 @@ scaleFreePlot <- function(connectivity, nBreaks = 10, truncated = FALSE,
 # binary entries...
 # This function is explained in Yip and Horvath (2005)
 # http://www.genetics.ucla.edu/labs/horvath/GTOM/
+
+
+#' Generalized Topological Overlap Measure
+#' 
+#' Generalized Topological Overlap Measure, taking into account interactions of
+#' higher degree.
+#' 
+#' 
+#' @param adjMat adjacency matrix. See details below.
+#' @param degree integer specifying the maximum degree to be calculated.
+#' @return Matrix of the same dimension as the input \code{adjMat}.
+#' @author Steve Horvath and Andy Yip
+#' @references Yip A, Horvath S (2007) Gene network interconnectedness and the
+#' generalized topological overlap measure. BMC Bioinformatics 2007, 8:22
+#' @keywords misc
 GTOMdist <- function(adjMat, degree = 1)
 {
     maxh1 = max(as.dist(adjMat))
@@ -1825,6 +2755,50 @@ GTOMdist <- function(adjMat, degree = 1)
 #
 #===============================================================================
 
+
+
+#' Topological overlap for a subset of the whole set of genes
+#' 
+#' This function calculates topological overlap of a small set of vectors with
+#' respect to a whole data set.
+#' 
+#' Topological overlap can be viewed as the normalized count of shared
+#' neighbors encoded in an adjacency matrix. In this case, the adjacency matrix
+#' is calculated between the columns of \code{vect} and \code{datExpr} and the
+#' topological overlap of vectors in \code{vect} measures the number of shared
+#' neighbors in \code{datExpr} that vectors of \code{vect} share.
+#' 
+#' @param datExpr a data frame containing the expression data of the whole set,
+#' with rows corresponding to samples and columns to genes.
+#' @param vect a single vector or a matrix-like object containing vectors whose
+#' topological overlap is to be calculated.
+#' @param subtract1 logical: should calculation be corrected for
+#' self-correlation? Set this to \code{TRUE} if \code{vect} contains a subset
+#' of \code{datExpr}.
+#' @param blockSize maximum block size for correlation calculations. Only
+#' important if \code{vect} contains a large number of columns.
+#' @param corFnc character string giving the correlation function to be used
+#' for the adjacency calculation. Recommended choices are \code{"cor"} and
+#' \code{"bicor"}, but other functions can be used as well.
+#' @param corOptions character string giving further options to be passed to
+#' the correlation function.
+#' @param networkType character string giving network type. Allowed values are
+#' (unique abbreviations of) \code{"unsigned"}, \code{"signed"}, \code{"signed
+#' hybrid"}. See \code{\link{adjacency}}.
+#' @param power soft-thresholding power for network construction.
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @return A matrix of dimensions \code{n*n}, where \code{n} is the number of
+#' columns in \code{vect}.
+#' @author Peter Langfelder
+#' @seealso \code{\link{TOMsimilarity}} for standard calculation of topological
+#' overlap.
+#' @references Bin Zhang and Steve Horvath (2005) "A General Framework for
+#' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
+#' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
+#' @keywords misc
 vectorTOM <- function(datExpr, vect, subtract1 = FALSE, blockSize = 2000,
                       corFnc = "cor", corOptions = "use = 'p'",
                       networkType = "unsigned", power = 6,
@@ -1923,6 +2897,42 @@ vectorTOM <- function(datExpr, vect, subtract1 = FALSE, blockSize = 2000,
 #===============================================================================
 
 
+
+
+#' Topological overlap for a subset of a whole set of genes
+#' 
+#' This function calculates topological overlap of a subset of vectors with
+#' respect to a whole data set.
+#' 
+#' This function is designed to calculated topological overlaps of small
+#' subsets of large expression data sets, for example in individual modules.
+#' 
+#' @param datExpr a data frame containing the expression data of the whole set,
+#' with rows corresponding to samples and columns to genes.
+#' @param subset a single logical or numeric vector giving the indices of the
+#' nodes for which the TOM is to be calculated.
+#' @param corFnc character string giving the correlation function to be used
+#' for the adjacency calculation. Recommended choices are \code{"cor"} and
+#' \code{"bicor"}, but other functions can be used as well.
+#' @param corOptions character string giving further options to be passed to
+#' the correlation function.
+#' @param networkType character string giving network type. Allowed values are
+#' (unique abbreviations of) \code{"unsigned"}, \code{"signed"}, \code{"signed
+#' hybrid"}. See \code{\link{adjacency}}.
+#' @param power soft-thresholding power for network construction.
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @return A matrix of dimensions \code{n*n}, where \code{n} is the number of
+#' entries selected by \code{block}.
+#' @author Peter Langfelder
+#' @seealso \code{\link{TOMsimilarity}} for standard calculation of topological
+#' overlap.
+#' @references Bin Zhang and Steve Horvath (2005) "A General Framework for
+#' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
+#' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
+#' @keywords misc
 subsetTOM <- function(datExpr, subset,
                       corFnc = "cor", corOptions = "use = 'p'",
                       networkType = "unsigned", power = 6,
@@ -2015,65 +3025,92 @@ subsetTOM <- function(datExpr, subset,
 #' Pearson correlation. Any function returning values between  - 1 and 1 can
 #' be used.
 # TODO: This should be changed to passing the function without eval
+
+
+#' Calculate network adjacency
+#' 
+#' Calculates (correlation or distance) network adjacency from given expression
+#' data or from a similarity. Computes the adjacency from the expression data:
+#' takes cor, transforms it as appropriate and possibly adds a sign if
+#' requested.
+#' 
+#' The argument \code{type} determines whether a correlation (\code{type} one
+#' of \code{"unsigned"}, \code{"signed"}, \code{"signed hybrid"}), or a
+#' distance network (\code{type} equal \code{"distance"}) will be calculated.
+#' In correlation networks the adajcency is constructed from correlations
+#' (values between -1 and 1, with high numbers meaning high similarity). In
+#' distance networks, the adjacency is constructed from distances (non-negative
+#' values, high values mean low similarity).
+#' 
+#' The function calculates the similarity of columns (genes) in \code{datExpr}
+#' by calling the function given in \code{corFnc} (for correlation networks) or
+#' \code{distFnc} (for distance networks), transforms the similarity according
+#' to \code{type} and raises it to \code{power}, resulting in a weighted
+#' network adjacency matrix. If \code{selectCols} is given, the \code{corFnc}
+#' function will be given arguments \code{(datExpr, datExpr[selectCols], ...)};
+#' hence the returned adjacency will have rows corresponding to all genes and
+#' columns corresponding to genes selected by \code{selectCols}.
+#' 
+#' Correlation and distance are transformed as follows: for \code{type =
+#' "unsigned"}, adjacency = |cor|^power; for \code{type = "signed"} , adjacency
+#' = (0.5 * (1 + cor))^power; for \code{type = "signed hybrid"}, adjacency =
+#' cor^power if cor > 0 and 0 otherwise; and for \code{type = "distance"},
+#' adjacency = (1 - (dist/max(dist))^2)^power.
+#' 
+#' The function \code{adjacency.fromSimilarity} inputs a similarity matrix,
+#' that is it skips the correlation calculation step but is otherwise
+#' identical.
+#' 
+#' @aliases adjacency adjacency.fromSimilarity
+#' @param similarity A (signed) similarity matrix: square, symmetric matrix
+#' with entries between - 1 and 1.
+#' @param type Network type, allowed values are \code{"unsigned"},
+#' \code{"signed"}, \code{"signed hybrid"}, \code{"distance"}.
+#' @param power Soft thresholding power, integer used in the function of the
+#' network type.
+#' @param datExpr data.frame containing expression data. Columns correspond to
+#' genes and rows to samples.
+#' @param selectCols For correlation networks only (see below) can be used to
+#' select genes whose adjacencies will be calculated. Should be either a
+#' numeric vector giving the indices of the genes to be used, or a boolean
+#' vector indicating which genes are to be used.
+#' @param corFnc Character string specifying the function to be used to
+#' calculate co - expression similarity for correlation networks. Defaults to
+#' Pearson correlation. Any function returning values between - 1 and 1 can be
+#' used.
 #' @param corOptions Character string specifying additional arguments to be
-#' passed to the function given by \code{corFnc}. Use
-#' \code{"use = 'p', method = 'spearman'"} to obtain Spearman correlation.
+#' passed to the function given by \code{corFnc}. Use \code{"use = 'p', method
+#' = 'spearman'"} to obtain Spearman correlation.
 #' @param distFnc Character string specifying the function to be used to
 #' calculate co - expression similarity for distance networks. Defaults to the
 #' function \code{\link{dist}}. Any function returning non - negative values
 #' can be used.
-#' @param distOptions Character string specifying additional arguments to be
+#' @param distOption Character string specifying additional arguments to be
 #' passed to the function given by \code{distFnc}. For example, when the
-#' function  \code{\link{dist}} is used, the argument \code{method} can be used
+#' function \code{\link{dist}} is used, the argument \code{method} can be used
 #' to specify various ways of computing the distance..
-#' @details
-#' The argument \code{type} determines whether a correlation (\code{type} one of
-#'  \code{"unsigned"}, \code{"signed"}, \code{"signed hybrid"}), or a distance
-#'  network (\code{type} equal \code{"distance"}) will be calculated. In
-#'  correlation networks the adajcency is constructed from correlations (values
-#'  between -1 and 1, with high numbers meaning high similarity). In distance
-#'  networks, the adjacency is constructed from distances (non-negative values,
-#'  high values mean low similarity).
-#'
-#' The function calculates the similarity of columns (genes) in \code{datExpr}
-#' by calling the function given in \code{corFnc} (for correlation networks) or
-#' \code{distFnc} (for distance networks), transforms the similarity according
-#' to \code{type} and raises it to \code{power}, resulting in a weighted network
-#'  adjacency matrix. If \code{selectCols} is given, the \code{corFnc} function
-#' will be given arguments \code{(datExpr, datExpr[selectCols], ...)}; hence the
-#'  returned adjacency will have rows corresponding to all genes and columns
-#'  corresponding to genes selected by \code{selectCols}.
-#'
-#' Correlation and distance are transformed as follows: for
-#' \code{type = "unsigned"}, adjacency = |cor|^power; for \code{type = "signed"}
-#' , adjacency = (0.5 * (1 + cor))^power; for \code{type = "signed hybrid"},
-#' adjacency = cor^power if cor > 0 and 0 otherwise; and for
-#' \code{type = "distance"}, adjacency = (1 - (dist/max(dist))^2)^power.
-#'
-#' The function \code{adjacency.fromSimilarity} inputs a similarity matrix, that
-#'  is it skips the correlation calculation step but is otherwise identical.
-#' @return
-#' Adjacency matrix of dimensions \code{ncol(datExpr)} times
+#' @return Adjacency matrix of dimensions \code{ncol(datExpr)} times
 #' \code{ncol(datExpr)} (or the same dimensions as \code{similarity}). If
-#' \code{selectCols} was given, the number of columns will be the length
-#' (if numeric) or sum (if boolean) of \code{selectCols}.
-#' @note
-#' When calculated from the \code{datExpr}, the network is always calculated
-#' among the columns of \code{datExpr} irrespective of whether a correlation or
-#' a distance network is requested.
+#' \code{selectCols} was given, the number of columns will be the length (if
+#' numeric) or sum (if boolean) of \code{selectCols}.
+#' @note When calculated from the \code{datExpr}, the network is always
+#' calculated among the columns of \code{datExpr} irrespective of whether a
+#' correlation or a distance network is requested.
+#' @author Peter Langfelder and Steve Horvath
+#' @references Bin Zhang and Steve Horvath (2005) A General Framework for
+#' Weighted Gene Co-Expression Network Analysis, Statistical Applications in
+#' Genetics and Molecular Biology, Vol. 4 No. 1, Article 17
+#' 
+#' Langfelder P, Horvath S (2007) Eigengene networks for studying the
+#' relationships between co - expression modules. BMC Systems Biology 2007,
+#' 1:54
 #' @keywords array
 #' @examples
+#' 
+#' adj <-  adjacency.fromSimilarity(similarity)
 #' adj <- adjacency(datExpr)
-#' @author
-#' Peter Langfelder and Steve Horvath
-#' @references
-#' Bin Zhang and Steve Horvath (2005) A General Framework for Weighted Gene
-#' Co-Expression Network Analysis, Statistical Applications in Genetics and
-#' Molecular Biology, Vol. 4 No. 1, Article 17
-#'
-#' Langfelder P, Horvath S (2007) Eigengene networks for studying the
-#' relationships between co - expression modules. BMC Systems Biology 2007, 1:54
-#' @export
+#' 
+#' @export adjacency
 adjacency <- function(datExpr, selectCols = NULL, type = "unsigned",
                       power = if (type == "distance") 1 else 6,
                       corFnc = "cor", corOptions = "use = 'p'",
@@ -2189,6 +3226,37 @@ adjacency <- function(datExpr, selectCols = NULL, type = "unsigned",
 # A presumably faster and less memory - intensive version, only for "unsigned"
 # networks.
 
+
+
+#' Calculation of unsigned adjacency
+#' 
+#' Calculation of the unsigned network adjacency from expression data. The
+#' restricted set of parameters for this function should allow a faster and
+#' less memory-hungry calculation.
+#' 
+#' The correlation function will be called with arguments \code{datExpr,
+#' datExpr2} plus any extra arguments given in \code{corOptions}. If
+#' \code{datExpr2} is \code{NULL}, the standard correlation functions will
+#' calculate the corelation of columns in \code{datExpr}.
+#' 
+#' @param datExpr expression data. A data frame in which columns are genes and
+#' rows ar samples. Missing values are ignored.
+#' @param datExpr2 optional specification of a second set of expression data.
+#' See details.
+#' @param power soft-thresholding power for network construction.
+#' @param corFnc character string giving the correlation function to be used
+#' for the adjacency calculation. Recommended choices are \code{"cor"} and
+#' \code{"bicor"}, but other functions can be used as well.
+#' @param corOptions character string giving further options to be passed to
+#' the correlation function
+#' @return Adjacency matrix of dimensions \code{n*n}, where \code{n} is the
+#' number of genes in \code{datExpr}.
+#' @author Steve Horvath and Peter Langfelder
+#' @seealso \code{\link{adjacency}}
+#' @references Bin Zhang and Steve Horvath (2005) "A General Framework for
+#' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
+#' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
+#' @keywords misc
 unsignedAdjacency <- function(datExpr, datExpr2 = NULL, power = 6,
                               corFnc = "cor", corOptions = "use = 'p'")
 {
@@ -2205,15 +3273,136 @@ unsignedAdjacency <- function(datExpr, datExpr2 = NULL, power = 6,
 ################################################################################
 
 
+
+
+#' Constant-height tree cut
+#' 
+#' Module detection in hierarchical dendrograms using a constant-height tree
+#' cut. Only branches whose size is at least \code{minSize} are retained.
+#' 
+#' This function performs a straightforward constant-height cut as implemented
+#' by \code{\link{cutree}}, then calculates the number of objects on each
+#' branch and only keeps branches that have at least \code{minSize} objects on
+#' them.
+#' 
+#' @param dendro a hierarchical clustering dendrogram such as returned by
+#' \code{\link{hclust}}.
+#' @param cutHeight height at which branches are to be cut.
+#' @param minSize minimum number of object on a branch to be considered a
+#' cluster.
+#' @return A numeric vector giving labels of objects, with 0 meaning
+#' unassigned. The largest cluster is conventionally labeled 1, the next
+#' largest 2, etc.
+#' @author Peter Langfelder
+#' @seealso \code{\link{hclust}} for hierarchical clustering,
+#' \code{\link{cutree}} and \code{\link{cutreeStatic}} for other
+#' constant-height branch cuts, \code{\link{standardColors}} to convert the
+#' retuned numerical lables into colors for easier visualization.
+#' @keywords misc
 cutreeStatic <- function(dendro, cutHeight = 0.9, minSize = 50) {
     normalizeLabels(moduleNumber(dendro, cutHeight, minSize))
 }
 
+
+
+#' Constant height tree cut using color labels
+#' 
+#' Cluster detection by a constant height cut of a hierarchical clustering
+#' dendrogram.
+#' 
+#' This function performs a straightforward constant-height cut as implemented
+#' by \code{\link{cutree}}, then calculates the number of objects on each
+#' branch and only keeps branches that have at least \code{minSize} objects on
+#' them.
+#' 
+#' @param dendro a hierarchical clustering dendrogram such as returned by
+#' \code{\link{hclust}}.
+#' @param cutHeight height at which branches are to be cut.
+#' @param minSize minimum number of object on a branch to be considered a
+#' cluster.
+#' @return A character vector giving color labels of objects, with "grey"
+#' meaning unassigned. The largest cluster is conventionally labeled
+#' "turquoise", next "blue" etc. Run \code{standardColors()} to see the
+#' sequence of standard color labels.
+#' @author Peter Langfelder
+#' @seealso \code{\link{hclust}} for hierarchical clustering,
+#' \code{\link{cutree}} and \code{\link{cutreeStatic}} for other
+#' constant-height branch cuts, \code{\link{standardColors}} to see the
+#' sequence of color labels that can be assigned.
+#' @keywords misc
 cutreeStaticColor <- function(dendro, cutHeight = 0.9, minSize = 50) {
     labels2colors(normalizeLabels(moduleNumber(dendro, cutHeight, minSize)))
 }
 
 
+
+
+#' Plot color rows in a given order, for example under a dendrogram
+#' 
+#' Plot color rows encoding information about objects in a given order, for
+#' example the order of a clustering dendrogram, usually below the dendrogram
+#' or a barplot.
+#' 
+#' It is often useful to plot dendrograms or other plots (e.g., barplots) of
+#' objects together with additional information about the objects, for example
+#' module assignment (by color) that was obtained by cutting a hierarchical
+#' dendrogram or external color-coded measures such as gene significance. This
+#' function provides a way to do so. The calling code should section the screen
+#' into two (or more) parts, plot the dendrogram (via \code{plot(hclust)}) or
+#' other information in the upper section and use this function to plot color
+#' annotation in the order corresponding to the dendrogram in the lower
+#' section.
+#' 
+#' @aliases plotColorUnderTree plotOrderedColors
+#' @param order A vector giving the order of the objects. Must have the same
+#' length as \code{colors} if \code{colors} is a vector, or as the number of
+#' rows if \code{colors} is a matrix or data frame.
+#' @param dendro A hierarchical clustering dendrogram such one returned by
+#' \code{\link{hclust}}.
+#' @param colors Coloring of objects on the dendrogram. Either a vector (one
+#' color per object) or a matrix (can also be an array or a data frame) with
+#' each column giving one color per object. Each column will be plotted as a
+#' horizontal row of colors under the dendrogram.
+#' @param rowLabels Labels for the colorings given in \code{colors}. The labels
+#' will be printed to the left of the color rows in the plot. If the argument
+#' is given, it must be a vector of length equal to the number of columns in
+#' \code{colors}. If not given, \code{names(colors)} will be used if available.
+#' If not, sequential numbers starting from 1 will be used.
+#' @param rowWidths Optional specification of relative row widths for the color
+#' and text (if given) rows. Need not sum to 1.
+#' @param rowText Optional labels to identify colors in the color rows.  If
+#' given, must be of the same dimensions as \code{colors}. Each label that
+#' occurs will be displayed once.
+#' @param rowTextAlignment Character string specifying whether the labels
+#' should be left-justified to the start of the largest block of each label,
+#' centered in the middle, or right-justified to the end of the largest block.
+#' @param rowTextIgnore Optional specifications of labels that should be
+#' ignored when displaying them using \code{rowText} above.
+#' @param textPositions optional numeric vector of the same length as the
+#' number of columns in \code{rowText} giving the color rows under which the
+#' text rows should appear.
+#' @param addTextGuide logical: should guide lines be added for the text rows
+#' (if given)?
+#' @param cex.rowLabels Font size scale factor for the row labels. See
+#' \code{\link[graphics]{par}}.
+#' @param cex.rowText character expansion factor for text rows (if given).
+#' @param startAt A numeric value indicating where in relationship to the left
+#' edge of the plot the center of the first rectangle should be. Useful values
+#' are 0 if ploting color under a dendrogram, and 0.5 if ploting colors under a
+#' barplot.
+#' @param \dots Other parameters to be passed on to the plotting method (such
+#' as \code{main} for the main title etc).
+#' @return None.
+#' @note This function replaces \code{plotHclustColors} in package
+#' \code{moduleColor}.
+#' @author Steve Horvath \email{SHorvath@@mednet.ucla.edu} and Peter Langfelder
+#' \email{Peter.Langfelder@@gmail.com}
+#' @seealso \code{\link[dynamicTreeCut]{cutreeDynamic}} for module detection in
+#' a dendrogram;
+#' 
+#' \code{\link{plotDendroAndColors}} for automated plotting of dendrograms and
+#' colors in one step.
+#' @keywords hplot
 plotColorUnderTree <- function(
     dendro,
     colors,
@@ -2434,6 +3623,76 @@ plotOrderedColors <- function(
 # the columns to the genes
 # You can optionally input a quantitative microarray sample trait.
 
+
+
+#' Annotated clustering dendrogram of microarray samples
+#' 
+#' This function plots an annotated clustering dendorgram of microarray
+#' samples.
+#' 
+#' The function generates an average linkage hierarchical clustering dendrogram
+#' (see \code{\link[stats]{hclust}}) of samples from the given expression data,
+#' using Eclidean distance of samples. The dendrogram is plotted together with
+#' color annotation for the samples.
+#' 
+#' The trait \code{y} must be numeric. If \code{y} is integer, the colors will
+#' correspond to values. If \code{y} is continouos, it will be dichotomized to
+#' two classes, below and above median.
+#' 
+#' @param datExpr a data frame containing expression data, with rows
+#' corresponding to samples and columns to genes. Missing values are allowed
+#' and will be ignored.
+#' @param y microarray sample trait. Either a vector with one entry per sample,
+#' or a matrix in which each column corresponds to a (different) trait and each
+#' row to a sample.
+#' @param traitLabels labels to be printed next to the color rows depicting
+#' sample traits. Defaults to column names of \code{y}.
+#' @param yLabels Optional labels to identify colors in the row identifying the
+#' sample classes. If given, must be of the same dimensions as \code{y}. Each
+#' label that occurs will be displayed once.
+#' @param main title for the plot.
+#' @param setLayout logical: should the plotting device be partitioned into a
+#' standard layout?  If \code{FALSE}, the user is responsible for partitioning.
+#' The function expects two regions of the same width, the first one
+#' immediately above the second one.
+#' @param autoColorHeight logical: should the height of the color area below
+#' the dendrogram be automatically adjusted for the number of traits? Only
+#' effective if \code{setLayout} is \code{TRUE}.
+#' @param colorHeight Specifies the height of the color area under dendrogram
+#' as a fraction of the height of the dendrogram area. Only effective when
+#' \code{autoColorHeight} above is \code{FALSE}.
+#' @param dendroLabels dendrogram labels. Set to \code{FALSE} to disable
+#' dendrogram labels altogether; set to \code{NULL} to use row labels of
+#' \code{datExpr}.
+#' @param addGuide logical: should vertical "guide lines" be added to the
+#' dendrogram plot? The lines make it easier to identify color codes with
+#' individual samples.
+#' @param guideAll logical: add a guide line for every sample? Only effective
+#' for \code{addGuide} set \code{TRUE}.
+#' @param guideCount number of guide lines to be plotted. Only effective when
+#' \code{addGuide} is \code{TRUE} and \code{guideAll} is \code{FALSE}.
+#' @param guideHang fraction of the dendrogram height to leave between the top
+#' end of the guide line and the dendrogram merge height. If the guide lines
+#' overlap with dendrogram labels, increase \code{guideHang} to leave more
+#' space for the labels.
+#' @param cex.traitLabels character expansion factor for trait labels.
+#' @param cex.dendroLabels character expansion factor for dendrogram (sample)
+#' labels.
+#' @param marAll a 4-element vector giving the bottom, left, top and right
+#' margins around the combined plot. Note that this is not the same as setting
+#' the margins via a call to \code{\link{par}}, because the bottom margin of
+#' the dendrogram and the top margin of the color underneath are always zero.
+#' @param saveMar logical: save margins setting before starting the plot and
+#' restore on exit?
+#' @param abHeight optional specification of the height for a horizontal line
+#' in the dendrogram, see \code{\link{abline}}.
+#' @param abCol color for plotting the horizontal line.
+#' @param \dots other graphical parameters to \code{\link{plot.hclust}}.
+#' @return None.
+#' @author Steve Horvath and Peter Langfelder
+#' @seealso \code{\link[stats]{dist}}, \code{\link[stats]{hclust}},
+#' \code{\link{plotDendroAndColors}}
+#' @keywords hplot misc
 plotClusterTreeSamples <- function(datExpr, y = NULL, traitLabels = NULL,
                                    yLabels = NULL,
                                    main = if (is.null(y)) {
@@ -2508,6 +3767,35 @@ plotClusterTreeSamples <- function(datExpr, y = NULL, traitLabels = NULL,
 # The function TOMplot creates a TOM plot
 # Inputs:  distance measure, hierarchical (hclust) object, color label = colors
 
+
+
+#' Graphical representation of the Topological Overlap Matrix
+#' 
+#' Graphical representation of the Topological Overlap Matrix using a heatmap
+#' plot combined with the corresponding hierarchical clustering dendrogram and
+#' module colors.
+#' 
+#' The standard \code{heatmap} function uses the \code{\link{layout}} function
+#' to set the following layout (when \code{Colors} is given): \preformatted{ 0
+#' 0 5 0 0 2 4 1 3 } To get a meaningful heatmap plot, user-set layout must
+#' respect this geometry.
+#' 
+#' @param dissim a matrix containing the topological overlap-based
+#' dissimilarity
+#' @param dendro the corresponding hierarchical clustering dendrogram
+#' @param Colors optional specification of module colors to be plotted on top
+#' @param ColorsLeft optional specification of module colors on the left side.
+#' If \code{NULL}, \code{Colors} will be used.
+#' @param terrainColors logical: should terrain colors be used?
+#' @param setLayout logical: should layout be set? If \code{TRUE}, standard
+#' layout for one plot will be used. Note that this precludes multiple plots on
+#' one page. If \code{FALSE}, the user is responsible for setting the correct
+#' layout.
+#' @param \dots other graphical parameters to \code{\link{heatmap}}.
+#' @return None.
+#' @author Steve Horvath and Peter Langfelder
+#' @seealso \code{\link{heatmap}}, the workhorse function doing the plotting.
+#' @keywords misc
 TOMplot <- function(dissim, dendro, Colors = NULL, ColorsLeft = Colors,
                     terrainColors = FALSE, setLayout = TRUE, ...) {
     if (is.null(Colors)) Colors = rep("white", dim(as.matrix(dissim))[[1]])
@@ -2552,6 +3840,38 @@ TOMplot <- function(dissim, dendro, Colors = NULL, ColorsLeft = Colors,
     }
 }
 
+
+
+#' Network heatmap plot
+#' 
+#' Network heatmap plot.
+#' 
+#' The function constructs a network from the given expression data (selected
+#' by \code{plotGenes}) using the soft-thresholding procedure, optionally
+#' calculates Topological Overlap (TOM) and plots a heatmap of the network.
+#' 
+#' Note that all network calculations are done in one block and may fail due to
+#' memory allocation issues for large numbers of genes.
+#' 
+#' @param datExpr a data frame containing expression data, with rows
+#' corresponding to samples and columns to genes. Missing values are allowed
+#' and will be ignored.
+#' @param plotGenes a character vector giving the names of genes to be included
+#' in the plot. The names will be matched against \code{names(datExpr)}.
+#' @param useTOM logical: should TOM be plotted (\code{TRUE}), or
+#' correlation-based adjacency (\code{FALSE})?
+#' @param power soft-thresholding power for network construction.
+#' @param networkType a character string giving the newtork type. Recognized
+#' values are (unique abbreviations of) \code{"unsigned"}, \code{"signed"}, and
+#' \code{"signed hybrid"}.
+#' @param main main title for the plot.
+#' @return None.
+#' @author Steve Horvath
+#' @seealso \code{\link{adjacency}}, \code{\link{TOMsimilarity}}
+#' @references Bin Zhang and Steve Horvath (2005) "A General Framework for
+#' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
+#' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
+#' @keywords hplot
 plotNetworkHeatmap <- function(datExpr, plotGenes, useTOM = TRUE, power = 6 ,
                                networkType = "unsigned",
                                main = "Heatmap of the network") {
@@ -2607,6 +3927,38 @@ plotNetworkHeatmap <- function(datExpr, plotGenes, useTOM = TRUE, power = 6 ,
 # (CI = mean +/-  1.96 * standard error).
 # It also reports a Kruskal Wallis p-value.
 
+
+
+#' Barplot of module significance
+#' 
+#' Plot a barplot of gene significance.
+#' 
+#' Given individual gene significances and their module assigment, the function
+#' calculates the module significance for each module as the average gene
+#' significance of the genes within the module. The result is plotted in a
+#' barplot or boxplot form. Each bar or box is labeled by the corresponding
+#' module color.
+#' 
+#' @param geneSignificance a numeric vector giving gene significances.
+#' @param colors a character vector specifying module assignment for the genes
+#' whose significance is given in \code{geneSignificance }. The modules should
+#' be labeled by colors.
+#' @param boxplot logical: should a boxplot be produced instead of a barplot?
+#' @param main main title for the plot.
+#' @param ylab y axis label for the plot.
+#' @param \dots other graphical parameters to \code{\link{plot}}.
+#' @return None.
+#' @author Steve Horvath
+#' @seealso \code{\link{barplot}}, \code{\link{boxplot}}
+#' @references
+#' 
+#' Bin Zhang and Steve Horvath (2005) "A General Framework for Weighted Gene
+#' Co-Expression Network Analysis", Statistical Applications in Genetics and
+#' Molecular Biology: Vol. 4: No. 1, Article 17
+#' 
+#' Dong J, Horvath S (2007) Understanding Network Concepts in Modules, BMC
+#' Systems Biology 2007, 1:24
+#' @keywords hplot misc
 plotModuleSignificance <- function(geneSignificance, colors, boxplot = FALSE,
                                    main = "Gene significance across modules, ",
                                    ylab = "Gene Significance", ...)
@@ -2651,6 +4003,62 @@ plotModuleSignificance <- function(geneSignificance, colors, boxplot = FALSE,
 # When scaleByMax = TRUE, the within module connectivities are scaled to 1,
 # i.e. the max(K.Within) = 1 for each module
 
+
+
+#' Calculation of intramodular connectivity
+#' 
+#' Calculates intramodular connectivity, i.e., connectivity of nodes to other
+#' nodes within the same module.
+#' 
+#' The module labels can be numeric or character. For each node (gene), the
+#' function sums adjacency entries (excluding the diagonal) to other nodes
+#' within the same module. Optionally, the connectivities can be scaled by the
+#' maximum connectivy in each module.
+#' 
+#' @aliases intramodularConnectivity intramodularConnectivity.fromExpr
+#' @param adjMat adjacency matrix, a square, symmetric matrix with entries
+#' between 0 and 1.
+#' @param colors module labels. A vector of length \code{ncol(adjMat)} giving a
+#' module label for each gene (node) of the network.
+#' @param scaleByMax logical: should intramodular connectivities be scaled by
+#' the maximum IM connectivity in each module?
+#' @param datExpr data frame containing expression data. Columns correspond to
+#' genes and rows to samples.
+#' @param corFnc character string specifying the function to be used to
+#' calculate co-expression similarity for correlation networks. Defaults to
+#' Pearson correlation. Any function returning values between -1 and 1 can be
+#' used.
+#' @param corOptions character string specifying additional arguments to be
+#' passed to the function given by \code{corFnc}. Use \code{"use = 'p', method
+#' = 'spearman'"} to obtain Spearman correlation.
+#' @param distFnc character string specifying the function to be used to
+#' calculate co-expression similarity for distance networks. Defaults to the
+#' function \code{\link{dist}}. Any function returning non-negative values can
+#' be used.
+#' @param distOptions character string specifying additional arguments to be
+#' passed to the function given by \code{distFnc}. For example, when the
+#' function \code{\link{dist}} is used, the argument \code{method} can be used
+#' to specify various ways of computing the distance.
+#' @param networkType network type. Allowed values are (unique abbreviations
+#' of) \code{"unsigned"}, \code{"signed"}, \code{"signed hybrid"},
+#' \code{"distance"}.
+#' @param power soft thresholding power.
+#' @param ignoreColors level(s) of \code{colors} that identifies unassigned
+#' genes. The intramodular connectivity in this "module" will not be
+#' calculated.
+#' @param getWholeNetworkConnectivity logical: should whole-network
+#' connectivity be computed as well? For large networks, this can be quite
+#' time-consuming.
+#' @return If input \code{getWholeNetworkConnectivity} is \code{TRUE}, a data
+#' frame with 4 columns giving the total connectivity, intramodular
+#' connectivity, extra-modular connectivity, and the difference of the intra-
+#' and extra-modular connectivities for all genes; otherwise a vector of
+#' intramodular connectivities,
+#' @author Steve Horvath and Peter Langfelder
+#' @seealso \code{\link{adjacency}}
+#' @references Dong J, Horvath S (2007) Understanding Network Concepts in
+#' Modules, BMC Systems Biology 2007, 1:24
+#' @keywords misc
 intramodularConnectivity <- function(adjMat, colors, scaleByMax = FALSE) {
     if (nrow(adjMat) != ncol(adjMat))
         stop("'adjMat' is not a square matrix.")
@@ -2724,29 +4132,41 @@ intramodularConnectivity.fromExpr <- function(datExpr, colors,
 
 
 
+
+
+#' Number of present data entries.
+#' 
+#' A simple sum of present entries in the argument.
+#' 
+#' 
+#' @param x data in which to count number of present entries.
+#' @return A single number giving the number of present entries in \code{x}.
+#' @author Steve Horvath
+#' @keywords misc
 nPresent <- function(x) {
     sum(!is.na(x))
 }
 
-#' @rdname checkAdjMat
-#' @name checkAdjMat
-#' @title Check adjacency matrix
-#' @description
+
+
+#' Check adjacency matrix
+#' 
 #' Checks a given matrix for properties that an adjacency matrix must satisfy.
-#' @param adjMat Adjacency matrix to be checked.
-#' @param similarity Similarity matrix to be checked.
-#' @param min minimum allowed values for entries of the input.
-#' @param max maximum allowed values for entries of the input.
-#' @details  The function checks whether the given matrix really is a
-#' 2-dimensional numeric matrix, whether it is square, symmetric, and all
-#' finite entries are between min and max. If any of the conditions is not met,
-#' the function issues an error.
-#' @return
-#' None. The functions returns normally if all conditions are met.
-#' @author
-#' Peter Langfelder
-#' @seealso
-#' \code{\link{adjacency}}
+#' 
+#' The function checks whether the given matrix really is a 2-dimensional
+#' numeric matrix, whether it is square, symmetric, and all finite entries are
+#' between \code{min} and \code{max}.  If any of the conditions is not met, the
+#' function issues an error.
+#' 
+#' @aliases checkAdjMat checkSimilarity
+#' @param adjMat matrix to be checked
+#' @param similarity matrix to be checked
+#' @param min minimum allowed value for entries of the input
+#' @param max maximum allowed value for entries of the input
+#' @return None. The function returns normally if all conditions are met.
+#' @author Peter Langfelder
+#' @seealso \code{\link{adjacency}}
+#' @keywords misc
 checkAdjMat <- function(adjMat, min = 0, max = 1) {
     dim = dim(adjMat)
     if (is.null(dim) || length(dim) != 2)
@@ -2781,6 +4201,42 @@ checkAdjMat <- function(adjMat, min = 0, max = 1) {
 # with tens of thousands of gene expression data.
 # If there are many eigengenes (say hundreds) consider decreasing the block size
 
+
+
+#' Signed eigengene-based connectivity
+#' 
+#' Calculation of (signed) eigengene-based connectivity, also known as module
+#' membership.
+#' 
+#' Signed eigengene-based connectivity of a gene in a module is defined as the
+#' correlation of the gene with the corresponding module eigengene.  The
+#' samples in \code{datExpr} and \code{datME} must be the same.
+#' 
+#' @param datExpr a data frame containing the gene expression data. Rows
+#' correspond to samples and columns to genes. Missing values are allowed and
+#' will be ignored.
+#' @param datME a data frame containing module eigengenes. Rows correspond to
+#' samples and columns to module eigengenes.
+#' @param outputColumnName a character string specifying the prefix of column
+#' names of the output.
+#' @param corFnc character string specifying the function to be used to
+#' calculate co-expression similarity. Defaults to Pearson correlation. Any
+#' function returning values between -1 and 1 can be used.
+#' @param corOptions character string specifying additional arguments to be
+#' passed to the function given by \code{corFnc}. Use \code{"use = 'p', method
+#' = 'spearman'"} to obtain Spearman correlation.
+#' @return A data frame in which rows correspond to input genes and columns to
+#' module eigengenes, giving the signed eigengene-based connectivity of each
+#' gene with respect to each eigengene.
+#' @author Steve Horvath
+#' @references
+#' 
+#' Dong J, Horvath S (2007) Understanding Network Concepts in Modules, BMC
+#' Systems Biology 2007, 1:24
+#' 
+#' Horvath S, Dong J (2008) Geometric Interpretation of Gene Coexpression
+#' Network Analysis. PLoS Comput Biol 4(8): e1000117
+#' @keywords misc
 signedKME <- function(datExpr, datME, outputColumnName = "kME",
                       corFnc = "cor", corOptions = "use = 'p'") {
     datExpr = data.frame(datExpr)
@@ -2823,6 +4279,18 @@ signedKME <- function(datExpr, datME, outputColumnName = "kME",
 # The function clusterCoef computes the cluster coefficients.
 # Input is an adjacency matrix
 
+
+
+#' Clustering coefficient calculation
+#' 
+#' This function calculates the clustering coefficients for all nodes in the
+#' network given by the input adjacency matrix.
+#' 
+#' 
+#' @param adjMat adjacency matrix
+#' @return A vector of clustering coefficients for each node.
+#' @author Steve Horvath
+#' @keywords misc
 clusterCoef <- function(adjMat) {
     checkAdjMat(adjMat)
     diag(adjMat) = 0
@@ -2850,6 +4318,20 @@ clusterCoef <- function(adjMat) {
 #===============================================================================
 # The function addErrorBars  is used to create error bars in a barplot
 # usage: addErrorBars(as.vector(means), as.vector(stderrs), two.side = FALSE)
+
+
+#' Add error bars to a barplot.
+#' 
+#' This function adds error bars to an existing barplot.
+#' 
+#' 
+#' @param means vector of means plotted in the barplot
+#' @param errors vector of standard errors (signle positive values) to be
+#' plotted.
+#' @param two.side should the error bars be two-sided?
+#' @return None.
+#' @author Steve Horvath and Peter Langfelder
+#' @keywords hplot
 addErrorBars <- function(means, errors, two.side = FALSE) {
     if (!is.numeric(means)) {
         stop("All arguments must be numeric")}
@@ -2878,6 +4360,18 @@ addErrorBars <- function(means, errors, two.side = FALSE) {
 
 #===============================================================================
 # this function computes the standard error
+
+
+#' Standard error of the mean of a given vector.
+#' 
+#' Returns the standard error of the mean of a given vector. Missing values are
+#' ignored.
+#' 
+#' 
+#' @param x a numeric vector
+#' @return Standard error of the mean of x.
+#' @author Steve Horvath
+#' @keywords misc
 stdErr <- function(x){ sqrt(var(x, na.rm = TRUE)/sum(!is.na(x))  ) }
 
 #===============================================================================
@@ -2938,6 +4432,25 @@ stdErr <- function(x){ sqrt(var(x, na.rm = TRUE)/sum(!is.na(x))  ) }
 # GlobalStandardColors are
 # used, i.e. if you want to see the GlobalStandardColors, just call this
 # function without parameters.
+
+
+#' Show colors used to label modules
+#' 
+#' The function plots a barplot using colors that label modules.
+#' 
+#' To see the first \code{n} colors, use argument \code{colors =
+#' standardColors(n)}.
+#' 
+#' @param colors colors to be displayed. Defaults to all colors available for
+#' module labeling.
+#' @return None.
+#' @author Peter Langfelder
+#' @seealso \code{\link{standardColors}}
+#' @keywords misc
+#' @examples
+#' 
+#'   displayColors(standardColors(10))
+#' 
 displayColors <- function(colors = NULL) {
     if (is.null(colors)) colors = standardColors()
     barplot(rep(1, length(colors)), col = colors, border = colors)
@@ -2955,6 +4468,31 @@ displayColors <- function(colors = NULL) {
 #
 #-------------------------------------------------------------------------------
 
+
+
+#' Threshold for module merging
+#' 
+#' Calculate a suitable threshold for module merging based on the number of
+#' samples and a desired Z quantile.
+#' 
+#' This function calculates the threshold for module merging. The threshold is
+#' calculated as the lower boundary of the interval around the theoretical
+#' correlation \code{mergeCor} whose width is given by the Z value
+#' \code{Zquantile}.
+#' 
+#' @param n number of samples
+#' @param mergeCor theoretical correlation threshold for module merging
+#' @param Zquantile Z quantile for module merging
+#' @return The correlation threshold for module merging; a single number.
+#' @author Steve Horvath
+#' @seealso \code{\link{moduleEigengenes}}, \code{\link{mergeCloseModules}}
+#' @keywords misc
+#' @examples
+#' 
+#'   dynamicMergeCut(20)
+#'   dynamicMergeCut(50)
+#'   dynamicMergeCut(100)
+#' 
 dynamicMergeCut <- function(n, mergeCor = .9, Zquantile = 2.35) {
     if (mergeCor > 1 | mergeCor<0) stop("'mergeCor' must be between 0 and 1.")
     if (mergeCor == 1) {
@@ -2997,6 +4535,21 @@ dynamicMergeCut <- function(n, mergeCor = .9, Zquantile = 2.35) {
 #
 #===============================================================================
 
+
+
+#' Fisher's asymptotic p-value for correlation
+#' 
+#' Calculates Fisher's asymptotic p-value for given correlations.
+#' 
+#' 
+#' @param cor A vector of correlation values whose corresponding p-values are
+#' to be calculated
+#' @param nSamples Number of samples from which the correlations were
+#' calculated
+#' @param twoSided logical: should the calculated p-values be two sided?
+#' @return A vector of p-values of the same length as the input correlations.
+#' @author Steve Horvath and Peter Langfelder
+#' @keywords misc
 corPvalueFisher <- function(cor, nSamples, twoSided = TRUE) {
     if (sum(abs(cor) > 1, na.rm = TRUE) > 0)
         stop("Some entries in 'cor' are out of normal range  - 1 to 1.")
@@ -3013,6 +4566,20 @@ corPvalueFisher <- function(cor, nSamples, twoSided = TRUE) {
 # this function compute an asymptotic p-value for a given correlation (r) and
 # sample size (n). Needs a new name before we commit it to the package.
 
+
+
+#' Student asymptotic p-value for correlation
+#' 
+#' Calculates Student asymptotic p-value for given correlations.
+#' 
+#' 
+#' @param cor A vector of correlation values whose corresponding p-values are
+#' to be calculated
+#' @param nSamples Number of samples from which the correlations were
+#' calculated
+#' @return A vector of p-values of the same length as the input correlations.
+#' @author Steve Horvath and Peter Langfelder
+#' @keywords misc
 corPvalueStudent <- function(cor, nSamples) {
     T = sqrt(nSamples - 2) * cor/sqrt(1 - cor^2)
     2 * pt(abs(T), nSamples - 2, lower.tail = FALSE)
@@ -3021,6 +4588,35 @@ corPvalueStudent <- function(cor, nSamples) {
 
 ################################################################################
 
+
+
+#' Proportion of variance explained by eigengenes.
+#' 
+#' This function calculates the proportion of variance of genes in each module
+#' explained by the respective module eigengene.
+#' 
+#' For compatibility with other functions, entries in \code{color} are matched
+#' to a substring of \code{names(MEs)} starting at position 3. For example, the
+#' entry \code{"turquoise"} in \code{colors} will be matched to the eigengene
+#' named \code{"MEturquoise"}. The first two characters of the eigengene name
+#' are ignored and can be arbitrary.
+#' 
+#' @param datExpr expression data. A data frame in which columns are genes and
+#' rows ar samples. NAs are allowed and will be ignored.
+#' @param colors a vector giving module assignment for genes given in
+#' \code{datExpr}. Unique values should correspond to the names of the
+#' eigengenes in \code{MEs}.
+#' @param MEs a data frame of module eigengenes in which each column is an
+#' eigengene and each row corresponds to a sample.
+#' @param corFnc character string containing the name of the function to
+#' calculate correlation. Suggested functions include \code{"cor"} and
+#' \code{"bicor"}.
+#' @param corOptions further argument to the correlation function.
+#' @return A vector with one entry per eigengene containing the proportion of
+#' variance of the module explained by the eigengene.
+#' @author Peter Langfelder
+#' @seealso \code{\link{moduleEigengenes}}
+#' @keywords misc
 propVarExplained <- function(datExpr, colors, MEs, corFnc = "cor",
                              corOptions = "use = 'p'") {
     fc = as.factor(colors)
@@ -3068,6 +4664,30 @@ propVarExplained <- function(datExpr, colors, MEs, corFnc = "cor",
 #===============================================================================
 # This function adds a horizontal grid to a plot
 
+
+
+#' Add grid lines to an existing plot.
+#' 
+#' This function adds horizontal and/or vertical grid lines to an existing
+#' plot. The grid lines are aligned with tick marks.
+#' 
+#' If \code{linesPerTick} is not specified, it is set to 5 if number of tick s
+#' is 5 or less, and it is set to 2 if number of ticks is greater than 5.
+#' 
+#' @param linesPerTick Number of lines between successive tick marks (including
+#' the line on the tickmarks themselves)
+#' @param horiz Draw horizontal grid lines?
+#' @param vert Draw vertical tick lines?
+#' @param col Specifies color of the grid lines
+#' @param lty Specifies line type of grid lines. See \code{\link{par}}.
+#' @note The function does not work whenever logarithmic scales are in use.
+#' @author Peter Langfelder
+#' @keywords hplot
+#' @examples
+#' 
+#'   plot(c(1:10), c(1:10))
+#'   addGrid();
+#' 
 addGrid <- function(linesPerTick = NULL, horiz = TRUE, vert = FALSE,
                     col = "grey30", lty = 3) {
     box = par("usr")
@@ -3116,6 +4736,27 @@ addGrid <- function(linesPerTick = NULL, horiz = TRUE, vert = FALSE,
 #
 #-------------------------------------------------------------------------------
 
+
+
+#' Add vertical ``guide lines'' to a dendrogram plot
+#' 
+#' Adds vertical ``guide lines'' to a dendrogram plot.
+#' 
+#' 
+#' @param dendro The dendrogram (see \code{\link{hclust}}) to which the guide
+#' lines are to be added.
+#' @param all Add a guide line to every object on the dendrogram? Useful if the
+#' number of objects is relatively low.
+#' @param count Number of guide lines to be plotted. The lines will be
+#' equidistantly spaced.
+#' @param positions Horizontal positions of the added guide lines. If given,
+#' overrides \code{count}.
+#' @param col Color of the guide lines
+#' @param lty Line type of the guide lines. See \code{\link{par}}.
+#' @param hang Fraction of the figure height that will separate top ends of
+#' guide lines and the merge heights of the corresponding objects.
+#' @author Peter Langfelder
+#' @keywords hplot
 addGuideLines <- function(dendro, all = FALSE, count = 50, positions = NULL,
                           col = "grey30", lty = 3,
                           hang = 0) {
@@ -3156,6 +4797,51 @@ addGuideLines <- function(dendro, all = FALSE, count = 50, positions = NULL,
 # dimensions nGenes * nSets containing the connectivities of each gene in each
 # subset.
 
+
+
+#' Connectivity to a constant number of nearest neighbors
+#' 
+#' Given expression data and basic network parameters, the function calculates
+#' connectivity of each gene to a given number of nearest neighbors.
+#' 
+#' Connectivity of gene \code{i} is the sum of adjacency strengths between gene
+#' \code{i} and other genes; in this case we take the \code{nNeighbors} nodes
+#' with the highest connection strength to gene \code{i}. The adjacency
+#' strengths are calculated by correlating the given expression data using the
+#' function supplied in \code{corFNC} and transforming them into adjacency
+#' according to the given network \code{type} and \code{power}.
+#' 
+#' @param datExpr a data frame containing expression data, with rows
+#' corresponding to samples and columns to genes. Missing values are allowed
+#' and will be ignored.
+#' @param nNeighbors number of nearest neighbors to use.
+#' @param power soft thresholding power for network construction. Should be a
+#' number greater than 1.
+#' @param type a character string encoding network type. Recognized values are
+#' (unique abbreviations of) \code{"unsigned"}, \code{"signed"}, and
+#' \code{"signed hybrid"}.
+#' @param corFnc character string containing the name of the function to
+#' calculate correlation. Suggested functions include \code{"cor"} and
+#' \code{"bicor"}.
+#' @param corOptions further argument to the correlation function.
+#' @param blockSize correlation calculations will be split into square blocks
+#' of this size, to prevent running out of memory for large gene sets.
+#' @param sampleLinks logical: should network connections be sampled
+#' (\code{TRUE}) or should all connections be used systematically
+#' (\code{FALSE})?
+#' @param nLinks number of links to be sampled. Should be set such that
+#' \code{nLinks * nNeighbors} be several times larger than the number of genes.
+#' @param setSeed seed to be used for sampling, for repeatability. If a seed
+#' already exists, it is saved before the sampling starts and restored upon
+#' exit.
+#' @param verbose integer controlling the level of verbosity. 0 means silent.
+#' @param indent integer controlling indentation of output. Each unit above 0
+#' adds two spaces.
+#' @return A vector with one component for each gene containing the nearest
+#' neighbor connectivity.
+#' @author Peter Langfelder
+#' @seealso \code{\link{adjacency}}, \code{\link{softConnectivity}}
+#' @keywords misc
 nearestNeighborConnectivity <- function(datExpr, nNeighbors = 50, power = 6,
                                         type = "unsigned", corFnc = "cor",
                                         corOptions = "use = 'p'",
@@ -3277,6 +4963,54 @@ nearestNeighborConnectivity <- function(datExpr, nNeighbors = 50, power = 6,
 # dimensions nGenes * nSets containing the connectivities of each gene in each
 # subset.
 
+
+
+#' Connectivity to a constant number of nearest neighbors across multiple data
+#' sets
+#' 
+#' Given expression data from several sets and basic network parameters, the
+#' function calculates connectivity of each gene to a given number of nearest
+#' neighbors in each set.
+#' 
+#' Connectivity of gene \code{i} is the sum of adjacency strengths between gene
+#' \code{i} and other genes; in this case we take the \code{nNeighbors} nodes
+#' with the highest connection strength to gene \code{i}. The adjacency
+#' strengths are calculated by correlating the given expression data using the
+#' function supplied in \code{corFNC} and transforming them into adjacency
+#' according to the given network \code{type} and \code{power}.
+#' 
+#' @param multiExpr expression data in multi-set format. A vector of lists, one
+#' list per set. In each list there must be a component named \code{data} whose
+#' content is a matrix or dataframe or array of dimension 2 containing the
+#' expression data. Rows correspond to samples and columns to genes (probes).
+#' @param nNeighbors number of nearest neighbors to use.
+#' @param power soft thresholding power for network construction. Should be a
+#' number greater than 1.
+#' @param type a character string encoding network type. Recognized values are
+#' (unique abbreviations of) \code{"unsigned"}, \code{"signed"}, and
+#' \code{"signed hybrid"}.
+#' @param corFnc character string containing the name of the function to
+#' calculate correlation. Suggested functions include \code{"cor"} and
+#' \code{"bicor"}.
+#' @param corOptions further argument to the correlation function.
+#' @param blockSize correlation calculations will be split into square blocks
+#' of this size, to prevent running out of memory for large gene sets.
+#' @param sampleLinks logical: should network connections be sampled
+#' (\code{TRUE}) or should all connections be used systematically
+#' (\code{FALSE})?
+#' @param nLinks number of links to be sampled. Should be set such that
+#' \code{nLinks * nNeighbors} be several times larger than the number of genes.
+#' @param setSeed seed to be used for sampling, for repeatability. If a seed
+#' already exists, it is saved before the sampling starts and restored after.
+#' @param verbose integer controlling the level of verbosity. 0 means silent.
+#' @param indent integer controlling indentation of output. Each unit above 0
+#' adds two spaces.
+#' @return A matrix in which columns correspond to sets and rows to genes; each
+#' entry contains the nearest neighbor connectivity of the corresponding gene.
+#' @author Peter Langfelder
+#' @seealso \code{\link{adjacency}}, \code{\link{softConnectivity}},
+#' \code{\link{nearestNeighborConnectivity}}
+#' @keywords misc
 nearestNeighborConnectivityMS <- function(multiExpr, nNeighbors = 50,
                                           power = 6,
                                           type = "unsigned", corFnc = "cor",
@@ -3449,6 +5183,87 @@ updateProgInd <- function(newFrac, progInd, quiet = !interactive())
 #===============================================================================
 #
 
+
+
+#' Dendrogram plot with color annotation of objects
+#' 
+#' This function plots a hierarchical clustering dendrogram and color
+#' annotation(s) of objects in the dendrogram underneath.
+#' 
+#' The function slits the plotting device into two regions, plots the given
+#' dendrogram in the upper region, then plots color rows in the region below
+#' the dendrogram.
+#' 
+#' @param dendro a hierarchical clustering dendrogram such as one produced by
+#' \code{\link[stats]{hclust}}.
+#' @param colors Coloring of objects on the dendrogram. Either a vector (one
+#' color per object) or a matrix (can also be an array or a data frame) with
+#' each column giving one color per object. Each column will be plotted as a
+#' horizontal row of colors under the dendrogram.
+#' @param groupLabels Labels for the colorings given in \code{colors}. The
+#' labels will be printed to the left of the color rows in the plot. If the
+#' argument is given, it must be a vector of length equal to the number of
+#' columns in \code{colors}. If not given, \code{names(colors)} will be used if
+#' available. If not, sequential numbers starting from 1 will be used.
+#' @param rowText Optional labels to identify colors in the color rows.  If
+#' given, must be either the same dimensions as \code{colors} or must have the
+#' same number of rows and \code{textPositions} must be used to specify which
+#' columns of \code{colors} each column of \code{rowText} corresponds to. Each
+#' label that occurs will be displayed once, under the largest continuous block
+#' of the corresponding \code{colors}.
+#' @param rowTextAlignment Character string specifying whether the labels
+#' should be left-justified to the start of the largest block of each label,
+#' centered in the middle, or right-justified to the end of the largest block.
+#' @param rowTextIgnore Optional specifications of labels that should be
+#' ignored when displaying them using \code{rowText} above.
+#' @param textPositions optional numeric vector of the same length as the
+#' number of columns in \code{rowText} giving the color rows under which the
+#' text rows should appear.
+#' @param setLayout logical: should the plotting device be partitioned into a
+#' standard layout? If \code{FALSE}, the user is responsible for partitioning.
+#' The function expects two regions of the same width, the first one
+#' immediately above the second one.
+#' @param autoColorHeight logical: should the height of the color area below
+#' the dendrogram be automatically adjusted for the number of traits? Only
+#' effective if \code{setLayout} is \code{TRUE}.
+#' @param colorHeight specifies the height of the color area under dendrogram
+#' as a fraction of the height of the dendrogram area. Only effective when
+#' \code{autoColorHeight} above is \code{FALSE}.
+#' @param rowWidths optional specification of relative row widths for the color
+#' and text (if given) rows. Need not sum to 1.
+#' @param dendroLabels dendrogram labels. Set to \code{FALSE} to disable
+#' dendrogram labels altogether; set to \code{NULL} to use row labels of
+#' \code{datExpr}.
+#' @param addGuide logical: should vertical "guide lines" be added to the
+#' dendrogram plot? The lines make it easier to identify color codes with
+#' individual samples.
+#' @param guideAll logical: add a guide line for every sample? Only effective
+#' for \code{addGuide} set \code{TRUE}.
+#' @param guideCount number of guide lines to be plotted. Only effective when
+#' \code{addGuide} is \code{TRUE} and \code{guideAll} is \code{FALSE}.
+#' @param guideHang fraction of the dendrogram height to leave between the top
+#' end of the guide line and the dendrogram merge height. If the guide lines
+#' overlap with dendrogram labels, increase \code{guideHang} to leave more
+#' space for the labels.
+#' @param addTextGuide logical: should guide lines be added for the text rows
+#' (if given)?
+#' @param cex.colorLabels character expansion factor for trait labels.
+#' @param cex.dendroLabels character expansion factor for dendrogram (sample)
+#' labels.
+#' @param cex.rowText character expansion factor for text rows (if given).
+#' @param marAll a vector of length 4 giving the bottom, left, top and right
+#' margins of the combined plot. There is no margin between the dendrogram and
+#' the color plot underneath.
+#' @param saveMar logical: save margins setting before starting the plot and
+#' restore on exit?
+#' @param abHeight optional specification of the height for a horizontal line
+#' in the dendrogram, see \code{\link{abline}}.
+#' @param abCol color for plotting the horizontal line.
+#' @param \dots other graphical parameters to \code{\link{plot.hclust}}.
+#' @return None.
+#' @author Peter Langfelder
+#' @seealso \code{\link{plotColorUnderTree}}
+#' @keywords hplot
 plotDendroAndColors <- function(dendro, colors, groupLabels = NULL,
                                 rowText = NULL,
                                 rowTextAlignment = c("left", "center", "right"),
@@ -3510,6 +5325,34 @@ plotDendroAndColors <- function(dendro, colors, groupLabels = NULL,
 # correlation coefficients.
 # The diagonal contains histograms of the module eigengene expressions.
 
+
+
+#' Pairwise scatterplots of eigengenes
+#' 
+#' The function produces a matrix of plots containing pairwise scatterplots of
+#' given eigengenes, the distribution of their values and their pairwise
+#' correlations.
+#' 
+#' The function produces an NxN matrix of plots, where N is the number of
+#' eigengenes. In the upper traingle it plots pairwise scatterplots of module
+#' eigengenes (plus the trait \code{y}, if given). On the diagonal it plots
+#' histograms of sample values for each eigengene. Below the diagonal, it
+#' displays the pairwise correlations of the eigengenes.
+#' 
+#' @param datME a data frame containing expression data, with rows
+#' corresponding to samples and columns to genes. Missing values are allowed
+#' and will be ignored.
+#' @param y optional microarray sample trait vector. Will be treated as an
+#' additional eigengene.
+#' @param main main title for the plot.
+#' @param clusterMEs logical: should the module eigengenes be ordered by their
+#' dendrogram?
+#' @param \dots additional graphical parameters to the function
+#' \code{\link{pairs}}
+#' @return None.
+#' @author Steve Horvath
+#' @seealso \code{\link{pairs}}
+#' @keywords hplot
 plotMEpairs <- function(datME, y = NULL,
                         main = "Relationship between module eigengenes",
                         clusterMEs = TRUE, ...) {
@@ -3561,6 +5404,29 @@ plotMEpairs <- function(datME, y = NULL,
 # genes which are predicted to have negative correlations.
 # meancorTestSetOverall = (meancorTestSetPositive - meancorTestSetNegative)/2
 
+
+
+#' Qunatification of success of gene screening
+#' 
+#' This function calculates the success of gene screening.
+#' 
+#' For each column in \code{corPrediction}, the function evaluates the mean
+#' \code{corTestSet} for the number of top genes (ranked by the column in
+#' \code{corPrediction}) given in \code{topNumber}. The higher the mean
+#' \code{corTestSet} (for positive \code{corPrediction}) or negative (for
+#' negative \code{corPrediction}), the more successful the prediction.
+#' 
+#' @param corPrediction a vector or a matrix of prediction statistics
+#' @param corTestSet correlation or other statistics on test set
+#' @param topNumber a vector of the number of top genes to consider
+#' @return \item{meancorTestSetOverall }{ difference of
+#' \code{meancorTestSetPositive} and \code{meancorTestSetNegative} below }
+#' \item{meancorTestSetPositive}{ mean \code{corTestSet} on top genes with
+#' positive \code{corPrediction} } \item{meancorTestSetNegative}{ mean
+#' \code{corTestSet} on top genes with negative \code{corPrediction} } ...
+#' @author Steve Horvath
+#' @seealso \code{\link{relativeCorPredictionSuccess}}
+#' @keywords misc
 corPredictionSuccess <- function(corPrediction, corTestSet, topNumber = 100)
 {
     nPredictors = dim(as.matrix(corPrediction))[[2]]
@@ -3623,6 +5489,22 @@ corPredictionSuccess <- function(corPrediction, corTestSet, topNumber = 100)
 # The function outputs a p-value for the Kruskal test that the new correlation
 # prediction methods outperform the standard correlation prediction method.
 
+
+
+#' Compare prediction success
+#' 
+#' Compare prediction success of several gene screening methods.
+#' 
+#' 
+#' @param corPredictionNew Matrix of predictor statistics
+#' @param corPredictionStandard Reference presdictor statistics
+#' @param corTestSet Correlations of predictor variables with trait in test set
+#' @param topNumber A vector giving the numbers of top genes to consider
+#' @return Data frame with components \item{topNumber}{copy of the input
+#' \code{topNumber}} \item{kruskalp}{Kruskal-Wallis p-values}
+#' @author Steve Horvath
+#' @seealso \code{\link{corPredictionSuccess}}
+#' @keywords misc
 relativeCorPredictionSuccess <- function(corPredictionNew,
                                          corPredictionStandard,
                                          corTestSet, topNumber = 100) {
@@ -3680,6 +5562,25 @@ relativeCorPredictionSuccess <- function(corPredictionNew,
 # If y is not supplied, the first column of datExpr is used as the reference
 # direction.
 
+
+
+#' Align expression data with given vector
+#' 
+#' Multiplies genes (columns) in given expression data such that their
+#' correlation with given reference vector is non-negative.
+#' 
+#' The function basically multiplies each column in \code{datExpr} by the sign
+#' of its correlation with \code{y}. If \code{y} is not given, the first column
+#' in \code{datExpr} will be used as the reference vector.
+#' 
+#' @param datExpr expression data to be aligned. A data frame with columns
+#' corresponding to genes and rows to samples.
+#' @param y reference vector of length equal the number of samples (rows) in
+#' \code{datExpr}
+#' @return A data frame containing the aligned expression data, of the same
+#' dimensions as the input data frame.
+#' @author Steve Horvath and Peter Langfelder
+#' @keywords misc
 alignExpr <- function(datExpr, y = NULL) {
     if (!is.null(y) & dim(as.matrix(datExpr))[[1]]  != length(y))
         stop("Incompatible number of samples in 'datExpr' and 'y'.")
@@ -3741,6 +5642,33 @@ alignExpr <- function(datExpr, y = NULL) {
 # it runs the standard causal network signal propagation and returns the
 # resulting vectors.
 
+
+
+#' Simulate eigengene network from a causal model
+#' 
+#' Simulates a set of eigengenes (vectors) from a given set of causal anchors
+#' and a causal matrix.
+#' 
+#' The algorithm starts with the anchor vectors and iteratively generates the
+#' rest from the path coefficients given in the matrix \code{causeMat}.
+#' 
+#' @param causeMat causal matrix. The entry \code{[i,j]} is the influence (path
+#' coefficient) of vector \code{j} on vector \code{i}.
+#' @param anchorIndex specifies the indices of the anchor vectors.
+#' @param anchorVectors a matrix giving the actual anchor vectors as columns.
+#' Their number must equal the length of \code{anchorIndex}.
+#' @param noise standard deviation of the noise added to each simulated vector.
+#' @param verbose level of verbosity. 0 means silent.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation; each unit adds two spaces.
+#' @return A list with the following components: \item{eigengenes }{ generated
+#' eigengenes. } \item{causeMat }{ a copy of the input causal matrix}
+#' \item{levels}{ useful for debugging. A vector with one entry for each
+#' eigengene giving the number of generations of parents of the eigengene.
+#' Anchors have level 0, their direct causal children have level 1 etc.}
+#' \item{anchorIndex}{a copy of the input \code{anchorIndex}. }
+#' @author Peter Langfelder
+#' @keywords misc
 simulateEigengeneNetwork <- function(causeMat, anchorIndex, anchorVectors,
                                      noise = 1, verbose = 0, indent = 0) {
     spaces = indentSpaces(indent)
@@ -3828,6 +5756,80 @@ simulateEigengeneNetwork <- function(causeMat, anchorIndex, anchorVectors,
 # the curve is roughly x^{1/corPower} with x<1 and x~0 near the "center", so the
 #  higher the power, the faster the curve rises.
 
+
+
+#' Simulate a gene co-expression module
+#' 
+#' Simulation of a single gene co-expression module.
+#' 
+#' Module genes are simulated around the eigengene by choosing them such that
+#' their (expected) correlations with the seed eigengene decrease progressively
+#' from (just below) \code{maxCor} to \code{minCor}. The genes are otherwise
+#' independent from one another. The variable \code{corPower} determines how
+#' fast the correlation drops towards \code{minCor}. Higher powers lead to a
+#' faster frop-off; \code{corPower} must be above zero but need not be integer.
+#' 
+#' If \code{signed} is \code{FALSE}, the genes are simulated so as to be part
+#' of an unsigned network module, that is some genes will be simulated with a
+#' negative correlation with the seed eigengene (but of the same absolute value
+#' that a positively correlated gene would be simulated with). The proportion
+#' of genes with negative correlation is controlled by \code{propNegativeCor}.
+#' 
+#' Optionally, the function can also simulate genes that are "near" the module,
+#' meaning they are simulated with a low but non-zero correlation with the seed
+#' eigengene. The correlations run between \code{minCor} and zero.
+#' 
+#' @param ME seed module eigengene.
+#' @param nGenes number of genes in the module to be simulated. Must be
+#' non-zero.
+#' @param nNearGenes number of genes to be simulated with low correlation with
+#' the seed eigengene.
+#' @param minCor minimum correlation of module genes with the eigengene. See
+#' details.
+#' @param maxCor maximum correlation of module genes with the eigengene. See
+#' details.
+#' @param corPower controls the dropoff of gene-eigengene correlation. See
+#' details.
+#' @param signed logical: should the genes be simulated as belonging to a
+#' signed network? If \code{TRUE}, all genes will be simulated to have positive
+#' correlation with the eigengene. If \code{FALSE}, a proportion given by
+#' \code{propNegativeCor} will be simulated with negative correlations of the
+#' same absolute values.
+#' @param propNegativeCor proportion of genes to be simulated with negative
+#' gene-eigengene correlations. Only effective if \code{signed} is
+#' \code{FALSE}.
+#' @param geneMeans optional vector of length \code{nGenes} giving desired mean
+#' expression for each gene. If not given, the returned expression profiles
+#' will have mean zero.
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @return A matrix containing the expression data with rows corresponding to
+#' samples and columns to genes.
+#' @author Peter Langfelder
+#' @seealso
+#' 
+#' \code{\link{simulateEigengeneNetwork}} for a simulation of eigengenes with a
+#' given causal structure;
+#' 
+#' \code{\link{simulateDatExpr}} for simulations of whole datasets consisting
+#' of multiple modules;
+#' 
+#' \code{\link{simulateDatExpr5Modules}} for a simplified interface to
+#' expression simulations;
+#' 
+#' \code{\link{simulateMultiExpr}} for a simulation of several related data
+#' sets.
+#' @references A short description of the simulation method can also be found
+#' in the Supplementary Material to the article
+#' 
+#' Langfelder P, Horvath S (2007) Eigengene networks for studying the
+#' relationships between co-expression modules. BMC Systems Biology 2007, 1:54.
+#' 
+#' The material is posted at
+#' http://www.genetics.ucla.edu/labs/horvath/CoexpressionNetwork/EigengeneNetwork/SupplementSimulations.pdf.
+#' @keywords misc
 simulateModule <- function(ME, nGenes, nNearGenes = 0, minCor = 0.3, maxCor = 1,
                            corPower = 1, signed = FALSE, propNegativeCor = 0.3,
                            geneMeans = NULL, verbose = 0, indent = 0) {
@@ -3914,6 +5916,59 @@ simulateModule <- function(ME, nGenes, nNearGenes = 0, minCor = 0.3, maxCor = 1,
 #-------------------------------------------------------------------------------
 # Simulates a bunch of small and weakly expressed modules.
 
+
+
+#' Simulate small modules
+#' 
+#' This function simulates a set of small modules. The primary purpose is to
+#' add a submodule structure to the main module structure simulated by
+#' \code{\link{simulateDatExpr}}.
+#' 
+#' Module eigenvectors are chosen randomly and independently. Module sizes are
+#' chosen randomly from an exponential distribution with mean equal
+#' \code{averageModuleSize}. Two thirds of genes in each module are simulated
+#' as proper module genes and one third as near-module genes (see
+#' \code{\link{simulateModule}} for details).  Between each successive pairs of
+#' modules a number of genes given by \code{moduleSpacing} will be left
+#' unsimulated (zero expression). Module expression, that is the expected
+#' standard deviation of the module expression vectors, is chosen randomly from
+#' an exponential distribution with mean equal \code{averageExpr}. The
+#' expression profiles are chosen such that their correlations with the
+#' eigengene run from just below \code{maxCor} to \code{minCor * maxCor} (hence
+#' minCor must be between 0 and 1, not including the bounds). The parameter
+#' \code{corPower} can be chosen to control the behaviour of the simulated
+#' correlation with the gene index; values higher than 1 will result in the
+#' correlation approaching \code{minCor * maxCor} faster and lower than 1
+#' slower.
+#' 
+#' The simulated genes will be returned in the order given in \code{order}.
+#' 
+#' @param order a vector giving the simulation order for vectors. See details.
+#' @param nSamples integer giving the number of samples to be simulated.
+#' @param minCor a multiple of \code{maxCor} (see below) giving the minimum
+#' correlation of module genes with the corresponding eigengene. See details.
+#' @param maxCor maximum correlation of module genes with the corresponding
+#' eigengene. See details.
+#' @param corPower controls the dropoff of gene-eigengene correlation. See
+#' details.
+#' @param averageModuleSize average number of genes in a module. See details.
+#' @param averageExpr average strength of module expression vectors.
+#' @param moduleSpacing a number giving module spacing: this multiple of the
+#' module size will lie between the module and the next one.
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @return A matrix of simulated gene expressions, with dimension
+#' \code{(nSamples, length(order))}.
+#' @author Peter Langfelder
+#' @seealso
+#' 
+#' \code{\link{simulateModule}} for simulation of individual modules;
+#' 
+#' \code{\link{simulateDatExpr}} for the main gene expression simulation
+#' function.
+#' @keywords misc
 simulateSmallLayer <- function(order, nSamples,
                                minCor = 0.3, maxCor = 0.5, corPower = 1,
                                averageModuleSize, averageExpr, moduleSpacing,
@@ -3975,6 +6030,138 @@ simulateSmallLayer <- function(order, nSamples,
 
 # ScatteredModuleLayers: Layers of small modules whose order is random.
 
+
+
+#' Simulation of expression data
+#' 
+#' Simulation of expression data with a customizable modular structure and
+#' several different types of noise.
+#' 
+#' 
+#' Given \code{eigengenes} can be unrelated or they can exhibit non-trivial
+#' correlations. Each module is simulated separately from others. The
+#' expression profiles are chosen such that their correlations with the
+#' eigengene run from just below \code{maxCor} to \code{minCor} (hence minCor
+#' must be between 0 and 1, not including the bounds). The parameter
+#' \code{corPower} can be chosen to control the behaviour of the simulated
+#' correlation with the gene index; values higher than 1 will result in the
+#' correlation approaching \code{minCor} faster and lower than 1 slower.
+#' 
+#' Numbers of genes in each module are specified (as fractions of the total
+#' number of genes \code{nGenes}) by \code{modProportions}. The last entry in
+#' \code{modProportions} corresponds to the genes that will be simulated as
+#' unrelated to anything else ("grey" genes). The proportion must add up to 1
+#' or less. If the sum is less than one, the remaining genes will be
+#' partitioned into groups and simulated to be "close" to the proper modules,
+#' that is with small but non-zero correlations (between \code{minCor} and 0)
+#' with the module eigengene.
+#' 
+#' If \code{signed} is set \code{FALSE}, the correlation for some of the module
+#' genes is chosen negative (but the absolute values remain the same as they
+#' would be for positively correlated genes). To ensure consistency for
+#' simulations of multiple sets, the indices of the negatively correlated genes
+#' are fixed and distributed evenly.
+#' 
+#' In addition to the primary module structure, a secondary structure can be
+#' optionally simulated. Modules in the secondary structure have sizes chosen
+#' from an exponential distribution with mean equal
+#' \code{averageNGenesInSubmodule}. Expression vectors simulated in the
+#' secondary structure are simulated with expected standard deviation chosen
+#' from an exponential distribution with mean equal
+#' \code{averageExprInSubmodule}; the higher this coefficient, the more
+#' pronounced will the submodules be in the main modules. The secondary
+#' structure can be simulated in several layers; their number is given by
+#' \code{SubmoduleLayers}. Genes in these submodules are ordered in the same
+#' order as in the main modules.
+#' 
+#' In addition to the ordered submodule structure, a scattered submodule
+#' structure can be simulated as well. This structure can be viewed as noise
+#' that tends to correlate random groups of genes. The size and effect
+#' parameters are the same as for the ordered submodules, and the number of
+#' layers added is controlled by \code{nScatteredModuleLayers}.
+#' 
+#' @param eigengenes a data frame containing the seed eigengenes for the
+#' simulated modules. Rows correspond to samples and columns to modules.
+#' @param nGenes total number of genes to be simulated.
+#' @param modProportions a numeric vector with length equal the number of
+#' eigengenes in \code{eigengenes} plus one, containing fractions of the total
+#' number of genes to be put into each of the modules and into the "grey
+#' module", which means genes not related to any of the modules. See details.
+#' @param minCor minimum correlation of module genes with the corresponding
+#' eigengene. See details.
+#' @param maxCor maximum correlation of module genes with the corresponding
+#' eigengene. See details.
+#' @param corPower controls the dropoff of gene-eigengene correlation. See
+#' details.
+#' @param signed logical: should the genes be simulated as belonging to a
+#' signed network? If \code{TRUE}, all genes will be simulated to have positive
+#' correlation with the eigengene. If \code{FALSE}, a proportion given by
+#' \code{propNegativeCor} will be simulated with negative correlations of the
+#' same absolute values.
+#' @param propNegativeCor proportion of genes to be simulated with negative
+#' gene-eigengene correlations. Only effective if \code{signed} is
+#' \code{FALSE}.
+#' @param geneMeans optional vector of length \code{nGenes} giving desired mean
+#' expression for each gene. If not given, the returned expression profiles
+#' will have mean zero.
+#' @param backgroundNoise amount of background noise to be added to the
+#' simulated expression data.
+#' @param leaveOut optional specification of modules that should be left out of
+#' the simulation, that is their genes will be simulated as unrelated ("grey").
+#' This can be useful when simulating several sets, in some which a module is
+#' present while in others it is absent.
+#' @param nSubmoduleLayers number of layers of ordered submodules to be added.
+#' See details.
+#' @param nScatteredModuleLayers number of layers of scattered submodules to be
+#' added. See details.
+#' @param averageNGenesInSubmodule average number of genes in a submodule. See
+#' details.
+#' @param averageExprInSubmodule average strength of submodule expression
+#' vectors.
+#' @param submoduleSpacing a number giving submodule spacing: this multiple of
+#' the submodule size will lie between the submodule and the next one.
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @return A list with the following components: \item{datExpr}{ simulated
+#' expression data in a data frame whose columns correspond genes and rows to
+#' samples. }
+#' 
+#' \item{setLabels}{ simulated module assignment. Module labels are numeric,
+#' starting from 1. Genes simulated to be outside of proper modules have label
+#' 0.  Modules that are left out (specified in \code{leaveOut}) are indicated
+#' as 0 here. }
+#' 
+#' \item{allLabels}{ simulated module assignment. Genes that belong to leftout
+#' modules (specified in \code{leaveOut}) are indicated by their would-be
+#' assignment here. }
+#' 
+#' \item{labelOrder}{ a vector specifying the order in which labels correspond
+#' to the given eigengenes, that is \code{labelOrder[1]} is the label assigned
+#' to module whose seed is \code{eigengenes[, 1]} etc.  }
+#' @author Peter Langfelder
+#' @seealso
+#' 
+#' \code{\link{simulateEigengeneNetwork}} for a simulation of eigengenes with a
+#' given causal structure;
+#' 
+#' \code{\link{simulateModule}} for simulations of individual modules;
+#' 
+#' \code{\link{simulateDatExpr5Modules}} for a simplified interface to
+#' expression simulations;
+#' 
+#' \code{\link{simulateMultiExpr}} for a simulation of several related data
+#' sets.
+#' @references A short description of the simulation method can also be found
+#' in the Supplementary Material to the article
+#' 
+#' Langfelder P, Horvath S (2007) Eigengene networks for studying the
+#' relationships between co-expression modules. BMC Systems Biology 2007, 1:54.
+#' 
+#' The material is posted at
+#' http://www.genetics.ucla.edu/labs/horvath/CoexpressionNetwork/EigengeneNetwork/SupplementSimulations.pdf.
+#' @keywords misc
 simulateDatExpr <- function(eigengenes, nGenes, modProportions,
                             minCor = 0.3, maxCor = 1,
                             corPower = 1,
@@ -4165,6 +6352,114 @@ simulateDatExpr <- function(eigengenes, nGenes, modProportions,
 # nSamples is a vector specifying the number of samples in each set this must
 # be compatible with the dimensions of the eigengenes.
 
+
+
+#' Simulate multi-set expression data
+#' 
+#' Simulation of expression data in several sets with relate module structure.
+#' 
+#' For details of simulation of individual data sets and the meaning of
+#' individual set simulation arguments, see \code{\link{simulateDatExpr}}. This
+#' function simulates several data sets at a time and puts the result in a
+#' multi-set format. The number of genes is the same for all data sets. Module
+#' memberships are also the same, but modules can optionally be ``dissolved'',
+#' that is their genes will be simulated as unassigned. Such ``dissolved'', or
+#' left out, modules can be specified in the matrix \code{leaveOut}.
+#' 
+#' @param eigengenes the seed eigengenes for the simulated modules in a
+#' multi-set format. A list with one component per set. Each component is again
+#' a list that must contain a component \code{data}. This is a data frame of
+#' seed eigengenes for the corresponding data set. Columns correspond to
+#' modules, rows to samples. Number of samples in the simulated data is
+#' determined from the number of samples of the eigengenes.
+#' @param nGenes integer specifyin the number of simulated genes.
+#' @param modProportions a numeric vector with length equal the number of
+#' eigengenes in \code{eigengenes} plus one, containing fractions of the total
+#' number of genes to be put into each of the modules and into the "grey
+#' module", which means genes not related to any of the modules. See details.
+#' @param minCor minimum correlation of module genes with the corresponding
+#' eigengene. See details.
+#' @param maxCor maximum correlation of module genes with the corresponding
+#' eigengene. See details.
+#' @param corPower controls the dropoff of gene-eigengene correlation. See
+#' details.
+#' @param backgroundNoise amount of background noise to be added to the
+#' simulated expression data.
+#' @param leaveOut optional specification of modules that should be left out of
+#' the simulation, that is their genes will be simulated as unrelated ("grey").
+#' A logical matrix in which columns correspond to sets and rows to modules.
+#' Wherever \code{TRUE}, the corresponding module in the corresponding data set
+#' will not be simulated, that is its genes will be simulated independently of
+#' the eigengene.
+#' @param signed logical: should the genes be simulated as belonging to a
+#' signed network? If \code{TRUE}, all genes will be simulated to have positive
+#' correlation with the eigengene. If \code{FALSE}, a proportion given by
+#' \code{propNegativeCor} will be simulated with negative correlations of the
+#' same absolute values.
+#' @param propNegativeCor proportion of genes to be simulated with negative
+#' gene-eigengene correlations. Only effective if \code{signed} is
+#' \code{FALSE}.
+#' @param geneMeans optional vector of length \code{nGenes} giving desired mean
+#' expression for each gene. If not given, the returned expression profiles
+#' will have mean zero.
+#' @param nSubmoduleLayers number of layers of ordered submodules to be added.
+#' See details.
+#' @param nScatteredModuleLayers number of layers of scattered submodules to be
+#' added. See details.
+#' @param averageNGenesInSubmodule average number of genes in a submodule. See
+#' details.
+#' @param averageExprInSubmodule average strength of submodule expression
+#' vectors.
+#' @param submoduleSpacing a number giving submodule spacing: this multiple of
+#' the submodule size will lie between the submodule and the next one.
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @return A list with the following components:
+#' 
+#' \item{multiExpr }{simulated expression data in multi-set format analogous to
+#' that of the input \code{eigengenes}.  A list with one component per set.
+#' Each component is again a list that must contains a component \code{data}.
+#' This is a data frame of expression data for the corresponding data set.
+#' Columns correspond to genes, rows to samples.}
+#' 
+#' \item{setLabels}{a matrix of dimensions (number of genes) times (number of
+#' sets) that contains module labels for each genes in each simulated data set.
+#' }
+#' 
+#' \item{allLabels}{a matrix of dimensions (number of genes) times (number of
+#' sets) that contains the module labels that would be simulated if no module
+#' were left out using \code{leaveOut}. This means that all columns of the
+#' matrix are equal; the columns are repeated for convenience so
+#' \code{allLabels} has the same dimensions as \code{setLabels}. }
+#' 
+#' \item{labelOrder}{a matrix of dimensions (number of modules) times (number
+#' of sets) that contains the order in which module labels were assigned to
+#' genes in each set. The first label is assigned to genes 1...(module size of
+#' module labeled by first label), the second label to the following batch of
+#' genes etc.}
+#' @author Peter Langfelder
+#' @seealso
+#' 
+#' \code{\link{simulateEigengeneNetwork}} for a simulation of eigengenes with a
+#' given causal structure;
+#' 
+#' \code{\link{simulateDatExpr}} for simulation of individual data sets;
+#' 
+#' \code{\link{simulateDatExpr5Modules}} for a simple simulation of a data set
+#' consisting of 5 modules;
+#' 
+#' \code{\link{simulateModule}} for simulations of individual modules;
+#' @references A short description of the simulation method can also be found
+#' in the Supplementary Material to the article
+#' 
+#' Langfelder P, Horvath S (2007) Eigengene networks for studying the
+#' relationships between co-expression modules. BMC Systems Biology 2007, 1:54.
+#' 
+#' The material is posted at
+#' http://www.genetics.ucla.edu/labs/horvath/CoexpressionNetwork/EigengeneNetwork/SupplementSimulations.pdf.
+#' @keywords misc
 simulateMultiExpr <- function(eigengenes, nGenes, modProportions,
                               minCor = 0.5, maxCor = 1,
                               corPower = 1, backgroundNoise = 0.1,
@@ -4254,6 +6549,51 @@ simulateMultiExpr <- function(eigengenes, nGenes, modProportions,
 #
 #-------------------------------------------------------------------------------
 
+
+
+#' Simplified simulation of expression data
+#' 
+#' This function provides a simplified interface to the expression data
+#' simulation, at the cost of considerably less flexibility.
+#' 
+#' Roughly one-third of the genes are simulated with a negative correlation to
+#' their seed eigengene. See the functions \code{\link{simulateModule}} and
+#' \code{\link{simulateDatExpr}} for more details.
+#' 
+#' @param nGenes total number of genes to be simulated.
+#' @param colorLabels labels for simulated modules.
+#' @param simulateProportions a vector of length 5 giving proportions of the
+#' total number of genes to be placed in each individual module. The entries
+#' must be positive and sum to at most 1. If the sum is less than 1, the
+#' leftover genes will be simulated outside of modules.
+#' @param MEturquoise seed module eigengene for the first module.
+#' @param MEblue seed module eigengene for the second module.
+#' @param MEbrown seed module eigengene for the third module.
+#' @param MEyellow seed module eigengene for the fourth module.
+#' @param MEgreen seed module eigengene for the fifth module.
+#' @param SDnoise level of noise to be added to the simulated expressions.
+#' @param backgroundCor backgrond correlation. If non-zero, a component will be
+#' added to all genes such that the average correlation of otherwise unrelated
+#' genes will be \code{backgroundCor}.
+#' @return
+#' 
+#' A list with the following components: \item{datExpr}{ the simulated
+#' expression data in a data frame, with rows corresponding to samples and
+#' columns to genes. }
+#' 
+#' \item{truemodule}{ a vector with one entry per gene containing the simulated
+#' module membership. }
+#' 
+#' \item{datME}{a data frame containing a copy of the input module eigengenes.
+#' }
+#' @author Steve Horvath and Peter Langfelder
+#' @seealso
+#' 
+#' \code{\link{simulateModule}} for simulation of individual modules;
+#' 
+#' \code{\link{simulateDatExpr}} for a more comprehensive data simulation
+#' interface.
+#' @keywords misc
 simulateDatExpr5Modules <- function(
     nGenes = 2000,
     colorLabels = c("turquoise", "blue", "brown", "yellow", "green"),
@@ -4314,6 +6654,46 @@ simulateDatExpr5Modules <- function(
 #-------------------------------------------------------------------------------
 
 
+
+
+#' One-step automatic network gene screening
+#' 
+#' This function performs gene screening based on a given trait and gene
+#' network properties
+#' 
+#' Network screening is a method for identifying genes that have a high gene
+#' significance and are members of important modules at the same time.  If
+#' \code{datME} is given, the function calls \code{\link{networkScreening}}
+#' with the default parameters. If \code{datME} is not given, module eigengenes
+#' are first calculated using network analysis based on supplied parameters.
+#' 
+#' @param datExpr data frame containing the expression data, columns
+#' corresponding to genes and rows to samples
+#' @param y vector containing trait values for all samples in \code{datExpr}
+#' @param power soft thresholding power used in network construction
+#' @param networkType character string specifying network type. Allowed values
+#' are (unique abbreviations of) \code{"unsigned"}, \code{"signed"},
+#' \code{"hybrid"}.
+#' @param detectCutHeight cut height of the gene hierarchical clustering
+#' dendrogram. See \code{cutreeDynamic} for details.
+#' @param minModuleSize minimum module size to be used in module detection
+#' procedure.
+#' @param datME optional specification of module eigengenes. A data frame whose
+#' columns are the module eigengenes. If given, module analysis will not be
+#' performed.
+#' @param getQValues logical: should q-values (local FDR) be calculated?
+#' @param ... other arguments to the module identification function
+#' \code{\link{blockwiseModules}}
+#' @return A list with the following components: \item{networkScreening}{a data
+#' frame containing results of the network screening procedure. See
+#' \code{\link{networkScreening}} for more details.} \item{datME}{ calculated
+#' module eigengenes (or a copy of the input \code{datME}, if given).}
+#' \item{hubGeneSignificance}{ hub gene significance for all calculated
+#' modules. See \code{\link{hubGeneSignificance}}. }
+#' @author Steve Horvath
+#' @seealso \code{\link{networkScreening}}, \code{\link{hubGeneSignificance}},
+#' \code{\link{networkScreening}}, \code{\link[dynamicTreeCut]{cutreeDynamic}}
+#' @keywords misc
 automaticNetworkScreening <- function(
     datExpr, y,
     power = 6,
@@ -4422,6 +6802,44 @@ automaticNetworkScreening <- function(
 #
 #-------------------------------------------------------------------------------
 
+
+
+#' One-step automatic network gene screening with external gene significance
+#' 
+#' This function performs gene screening based on external gene significance
+#' and their network properties.
+#' 
+#' Network screening is a method for identifying genes that have a high gene
+#' significance and are members of important modules at the same time.  If
+#' \code{datME} is given, the function calls \code{\link{networkScreeningGS}}
+#' with the default parameters. If \code{datME} is not given, module eigengenes
+#' are first calculated using network analysis based on supplied parameters.
+#' 
+#' @param datExpr data frame containing the expression data, columns
+#' corresponding to genes and rows to samples
+#' @param GS vector containing gene significance for all genes given in
+#' \code{datExpr}
+#' @param power soft thresholding power used in network construction
+#' @param networkType character string specifying network type. Allowed values
+#' are (unique abbreviations of) \code{"unsigned"}, \code{"signed"},
+#' \code{"hybrid"}.
+#' @param detectCutHeight cut height of the gene hierarchical clustering
+#' dendrogram. See \code{cutreeDynamic} for details.
+#' @param minModuleSize minimum module size to be used in module detection
+#' procedure.
+#' @param datME optional specification of module eigengenes. A data frame whose
+#' columns are the module eigengenes. If given, module analysis will not be
+#' performed.
+#' @return A list with the following components: \item{networkScreening}{a data
+#' frame containing results of the network screening procedure. See
+#' \code{\link{networkScreeningGS}} for more details.} \item{datME}{ calculated
+#' module eigengenes (or a copy of the input \code{datME}, if given).}
+#' \item{hubGeneSignificance}{ hub gene significance for all calculated
+#' modules. See \code{\link{hubGeneSignificance}}. }
+#' @author Steve Horvath
+#' @seealso \code{\link{networkScreening}}, \code{\link{hubGeneSignificance}},
+#' \code{\link{networkScreening}}, \code{\link[dynamicTreeCut]{cutreeDynamic}}
+#' @keywords misc
 automaticNetworkScreeningGS <- function(
     datExpr, GS,
     power = 6, networkType = "unsigned", detectCutHeight = 0.995,
@@ -4476,6 +6894,24 @@ automaticNetworkScreeningGS <- function(
     print(signif (HGS1, 2))
     output = list(networkScreening = data.frame(NS1, MMdata, MMdataPvalue),
                   datME = data.frame(datME),
+
+
+#' Hubgene significance
+#' 
+#' Calculate approximate hub gene significance for all modules in network.
+#' 
+#' In \code{datKME} rows correspond to genes and columns to modules.
+#' 
+#' @param datKME a data frame (or a matrix-like object) containing
+#' eigengene-based connectivities of all genes in the network.
+#' @param GS a vector with one entry for every gene containing its gene
+#' significance.
+#' @return A vector whose entries are the hub gene significances for each
+#' module.
+#' @author Steve Horvath
+#' @references Dong J, Horvath S (2007) Understanding Network Concepts in
+#' Modules, BMC Systems Biology 2007, 1:24
+#' @keywords misc
                   hubGeneSignificance = data.frame(HGS1))
     output
 } # end of function automaticNetworkScreeningGS
@@ -4515,6 +6951,33 @@ hubGeneSignificance <- function(datKME, GS){
 #
 #-------------------------------------------------------------------------------
 
+
+
+#' Network gene screening with an external gene significance measure
+#' 
+#' This function blends standard and network approaches to selecting genes (or
+#' variables in general) with high gene significance
+#' 
+#' This function should be considered experimental. It takes into account both
+#' the "standard" and the network measures of gene importance for the trait.
+#' 
+#' @param datExpr data frame of expression data
+#' @param datME data frame of module eigengenes
+#' @param GS numeric vector of gene significances
+#' @param oddPower odd integer used as a power to raise module memberships and
+#' significances
+#' @param blockSize block size to use for calculations with large data sets
+#' @param minimumSampleSize minimum acceptable number of samples. Defaults to
+#' the default minimum number of samples used throughout the WGCNA package,
+#' currently 4.
+#' @param addGS logical: should gene significances be added to the screening
+#' statistics?
+#' @return \item{GS.Weighted }{weighted gene significance } \item{GS }{copy of
+#' the input gene significances (only if \code{addGS=TRUE})}
+#' @author Steve Horvath
+#' @seealso \code{\link{networkScreening}},
+#' \code{\link{automaticNetworkScreeningGS}}
+#' @keywords misc
 networkScreeningGS <- function(datExpr, datME, GS ,
                                oddPower = 3,
                                blockSize = 1000,
@@ -4619,6 +7082,60 @@ networkScreeningGS <- function(datExpr, datME, GS ,
 #
 #-------------------------------------------------------------------------------
 
+
+
+#' Identification of genes related to a trait
+#' 
+#' This function blends standard and network approaches to selecting genes (or
+#' variables in general) highly related to a given trait.
+#' 
+#' This function should be considered experimental. It takes into account both
+#' the "standard" and the network measures of gene importance for the trait.
+#' 
+#' @param y clinical trait given as a numeric vector (one value per sample)
+#' @param datME data frame of module eigengenes
+#' @param datExpr data frame of expression data
+#' @param corFnc character string specifying the function to be used to
+#' calculate co-expression similarity. Defaults to Pearson correlation. Any
+#' function returning values between -1 and 1 can be used.
+#' @param corOptions character string specifying additional arguments to be
+#' passed to the function given by \code{corFnc}. Use \code{"use = 'p', method
+#' = 'spearman'"} to obtain Spearman correlation.
+#' @param oddPower odd integer used as a power to raise module memberships and
+#' significances
+#' @param blockSize block size to use for calculations with large data sets
+#' @param minimumSampleSize minimum acceptable number of samples. Defaults to
+#' the default minimum number of samples used throughout the WGCNA package,
+#' currently 4.
+#' @param addMEy logical: should the trait be used as an additional "module
+#' eigengene"?
+#' @param removeDiag logical: remove the diagonal?
+#' @param weightESy weight to use for the trait as an additional eigengene;
+#' should be between 0 and 1
+#' @param getQValues logical: should q-values be calculated?
+#' @return datout = data.frame(p.Weighted, q.Weighted, Cor.Weighted,
+#' Z.Weighted, p.Standard, q.Standard, Cor.Standard, Z.Standard) Data frame
+#' reporting the following quantities for each given gene:
+#' 
+#' \item{p.Weighted }{weighted p-value of association with the trait}
+#' 
+#' \item{q.Weighted }{q-value (local FDR) calculated from \code{p.Weighted}}
+#' 
+#' \item{cor.Weighted}{correlation of trait with gene expression weighted by a
+#' network term}
+#' 
+#' \item{Z.Weighted}{ Fisher Z score of the weighted correlation}
+#' 
+#' \item{p.Standard}{ standard Student p-value of association of the gene with
+#' the trait}
+#' 
+#' \item{q.Standard}{ q-value (local FDR) calculated from \code{p.Standard}}
+#' 
+#' \item{cor.Standard}{ correlation of gene with the trait}
+#' 
+#' \item{Z.Standard}{ Fisher Z score of the standard correlation}
+#' @author Steve Horvath
+#' @keywords misc
 networkScreening <- function(
     y, datME, datExpr,
     corFnc = "cor", corOptions = "use = 'p'",
@@ -4805,6 +7322,196 @@ networkScreening <- function(
 # "PCturquoise". xSymbol, ySymbols are additional markers that can be placed
 # next to color labels
 
+
+
+#' Produce a labeled heatmap plot
+#' 
+#' Plots a heatmap plot with color legend, row and column annotation, and
+#' optional text within th heatmap.
+#' 
+#' The function basically plots a standard heatmap plot of the given
+#' \code{Matrix} and embellishes it with row and column labels and/or with text
+#' within the heatmap entries. Row and column labels can be either character
+#' strings or color squares, or both.
+#' 
+#' To get simple text labels, use \code{colorLabels=FALSE} and pass the desired
+#' row and column labels in \code{yLabels} and \code{xLabels}, respectively.
+#' 
+#' To label rows and columns by color squares, use \code{colorLabels=TRUE};
+#' \code{yLabels} and \code{xLabels} are then expected to represent valid
+#' colors. For reasons of compatibility with other functions, each entry in
+#' \code{yLabels} and \code{xLabels} is expected to consist of a color
+#' designation preceded by 2 characters: an example would be
+#' \code{MEturquoise}. The first two characters can be arbitrary, they are
+#' stripped.  Any labels that do not represent valid colors will be considered
+#' text labels and printed in full, allowing the user to mix text and color
+#' labels.
+#' 
+#' It is also possible to label rows and columns by both color squares and
+#' additional text annotation. To achieve this, use the above technique to get
+#' color labels and, additionally, pass the desired text annotation in the
+#' \code{xSymbols} and \code{ySymbols} arguments.
+#' 
+#' @param Matrix numerical matrix to be plotted in the heatmap.
+#' @param xLabels labels for the columns. See Details.
+#' @param yLabels labels for the rows. See Details.
+#' @param xSymbols additional labels used when \code{xLabels} are interpreted
+#' as colors. See Details.
+#' @param ySymbols additional labels used when \code{yLabels} are interpreted
+#' as colors. See Details.
+#' @param colorLabels logical: should \code{xLabels} and \code{yLabels} be
+#' interpreted as colors? If given, overrides \code{xColorLabels} and
+#' \code{yColorLabels} below.
+#' @param xColorLabels logical: should \code{xLabels} be interpreted as colors?
+#' @param yColorLabels logical: should \code{yLabels} be interpreted as colors?
+#' @param checkColorsValid logical: should given colors be checked for validity
+#' against the output of \code{colors()} ? If this argument is \code{FALSE},
+#' invalid color specification will trigger an error.
+#' @param invertColors logical: should the color order be inverted?
+#' @param setStdMargins logical: should standard margins be set before calling
+#' the plot function? Standard margins depend on \code{colorLabels}: they are
+#' wider for text labels and narrower for color labels. The defaults are
+#' static, that is the function does not attempt to guess the optimal margins.
+#' @param xLabelsPosition a character string specifying the position of labels
+#' for the columns. Recognized values are (unique abbreviations of)
+#' \code{"top", "bottom"}.
+#' @param xLabelsAngle angle by which the column labels should be rotated.
+#' @param xLabelsAdj justification parameter for column labels. See
+#' \code{\link{par}} and the description of parameter \code{"adj"}.
+#' @param xColorWidth width of the color labels for the x axis expressed as a
+#' fraction of the smaller of the range of the x and y axis.
+#' @param yColorWidth width of the color labels for the y axis expressed as a
+#' fraction of the smaller of the range of the x and y axis.
+#' @param xColorOffset gap between the y axis and color labels as a fraction of
+#' the range of x axis.
+#' @param yColorOffset gap between the x axis and color labels as a fraction of
+#' the range of y axis.
+#' @param colors color pallette to be used in the heatmap. Defaults to
+#' \code{\link{heat.colors}}.
+#' @param naColor color to be used for encoding missing data.
+#' @param textMatrix optional text entries for each cell. Either a matrix of
+#' the same dimensions as \code{Matrix} or a vector of the same length as the
+#' number of entries in \code{Matrix}.
+#' @param cex.text character expansion factor for \code{textMatrix}.
+#' @param textAdj Adjustment for the entries in the text matrix. See the
+#' \code{adj} argument to \code{\link{text}}.
+#' @param cex.lab character expansion factor for text labels labeling the axes.
+#' @param cex.lab.x character expansion factor for text labels labeling the x
+#' axis. Overrides \code{cex.lab} above.
+#' @param cex.lab.y character expansion factor for text labels labeling the y
+#' axis. Overrides \code{cex.lab} above.
+#' @param colors.lab.x colors for character labels or symbols along x axis.
+#' @param colors.lab.y colors for character labels or symbols along y axis.
+#' @param bg.lab.x background color for the margin along the x axis.
+#' @param bg.lab.y background color for the margin along the y axs.
+#' @param plotLegend logical: should a color legend be plotted?
+#' @param keepLegendSpace logical: if the color legend is not drawn, should the
+#' space be left empty (\code{TRUE}), or should the heatmap fill the space
+#' (\code{FALSE})?
+#' @param verticalSeparator.x indices of columns after which separator lines
+#' (vertical lines between columns) should be drawn. \code{NULL} means no lines
+#' will be drawn.
+#' @param verticalSeparator.col color(s) of the vertical separator lines.
+#' Recycled if need be.
+#' @param verticalSeparator.lty line type of the vertical separator lines.
+#' Recycled if need be.
+#' @param verticalSeparator.lwd line width of the vertical separator lines.
+#' Recycled if need be.
+#' @param verticalSeparator.ext number giving the extension of the separator
+#' line into the margin as a fraction of the margin width. 0 means no
+#' extension, 1 means extend all the way through the margin.
+#' @param horizontalSeparator.y indices of columns after which separator lines
+#' (horizontal lines between columns) should be drawn. \code{NULL} means no
+#' lines will be drawn.
+#' @param horizontalSeparator.col color(s) of the horizontal separator lines.
+#' Recycled if need be.
+#' @param horizontalSeparator.lty line type of the horizontal separator lines.
+#' Recycled if need be.
+#' @param horizontalSeparator.lwd line width of the horizontal separator lines.
+#' Recycled if need be.
+#' @param horizontalSeparator.ext number giving the extension of the separator
+#' line into the margin as a fraction of the margin width. 0 means no
+#' extension, 1 means extend all the way through the margin.
+#' @param \dots other arguments to function \code{\link{heatmap}}.
+#' @return None.
+#' @author Peter Langfelder
+#' @seealso \code{\link{heatmap}}, \code{\link{colors}}
+#' @keywords hplot
+#' @examples
+#' 
+#' 
+#' # This example illustrates 4 main ways of annotating columns and rows of a heatmap.
+#' # Copy and paste the whole example into an R session with an interactive plot window;
+#' # alternatively, you may replace the command sizeGrWindow below by opening 
+#' # another graphical device such as pdf.
+#' 
+#' # Generate a matrix to be plotted
+#' 
+#' nCol = 8; nRow = 7;
+#' mat = matrix(runif(nCol*nRow, min = -1, max = 1), nRow, nCol);
+#' 
+#' rowColors = standardColors(nRow);
+#' colColors = standardColors(nRow + nCol)[(nRow+1):(nRow + nCol)];
+#' 
+#' rowColors;
+#' colColors;
+#' 
+#' sizeGrWindow(9,7)
+#' par(mfrow = c(2,2))
+#' par(mar = c(4, 5, 4, 6));
+#' 
+#' # Label rows and columns by text:
+#' 
+#' labeledHeatmap(mat, xLabels = colColors, yLabels = rowColors, 
+#'                colors = greenWhiteRed(50),
+#'                setStdMargins = FALSE, 
+#'                textMatrix = signif(mat, 2),
+#'                main = "Text-labeled heatmap");
+#' 
+#' # Label rows and columns by colors:
+#' 
+#' rowLabels = paste("ME", rowColors, sep="");
+#' colLabels = paste("ME", colColors, sep="");
+#' 
+#' labeledHeatmap(mat, xLabels = colLabels, yLabels = rowLabels,
+#'                colorLabels = TRUE,
+#'                colors = greenWhiteRed(50),
+#'                setStdMargins = FALSE,
+#'                textMatrix = signif(mat, 2),
+#'                main = "Color-labeled heatmap");
+#' 
+#' # Mix text and color labels:
+#' 
+#' rowLabels[3] = "Row 3";
+#' colLabels[1] = "Column 1";
+#' 
+#' labeledHeatmap(mat, xLabels = colLabels, yLabels = rowLabels,
+#'                colorLabels = TRUE,
+#'                colors = greenWhiteRed(50),
+#'                setStdMargins = FALSE,
+#'                textMatrix = signif(mat, 2), 
+#'                main = "Mix-labeled heatmap");
+#' 
+#' # Color labels and additional text labels
+#' 
+#' rowLabels = paste("ME", rowColors, sep="");
+#' colLabels = paste("ME", colColors, sep="");
+#' 
+#' extraRowLabels = paste("Row", c(1:nRow));
+#' extraColLabels = paste("Column", c(1:nCol));
+#' 
+#' # Extend margins to fit all labels
+#' par(mar = c(6, 6, 4, 6));
+#' labeledHeatmap(mat, xLabels = colLabels, yLabels = rowLabels,
+#'                xSymbols = extraColLabels,
+#'                ySymbols = extraRowLabels,
+#'                colorLabels = TRUE,
+#'                colors = greenWhiteRed(50),
+#'                setStdMargins = FALSE,
+#'                textMatrix = signif(mat, 2),
+#'                main = "Text- + color-labeled heatmap");
+#' 
+#' 
 labeledHeatmap <- function(
     Matrix,
     xLabels, yLabels = NULL,
@@ -5137,6 +7844,109 @@ labeledHeatmap <- function(
 #
 #===============================================================================
 
+
+
+#' Labeled heatmap divided into several separate plots.
+#' 
+#' This function produces labaled heatmaps divided into several plots. This is
+#' useful for large heatmaps where labels on individual columns and rows may
+#' become unreadably small (or overlap).
+#' 
+#' The function \code{\link{labeledHeatmap}} is used to produce each plot/page;
+#' most arguments are described in more detail in the help file for that
+#' function.
+#' 
+#' In each plot/page \code{\link{labeledHeatmap}} plots a standard heatmap plot
+#' of an appropriate sub-rectangle of \code{Matrix} and embellishes it with row
+#' and column labels and/or with text within the heatmap entries. Row and
+#' column labels can be either character strings or color squares, or both.
+#' 
+#' To get simple text labels, use \code{colorLabels=FALSE} and pass the desired
+#' row and column labels in \code{yLabels} and \code{xLabels}, respectively.
+#' 
+#' To label rows and columns by color squares, use \code{colorLabels=TRUE};
+#' \code{yLabels} and \code{xLabels} are then expected to represent valid
+#' colors. For reasons of compatibility with other functions, each entry in
+#' \code{yLabels} and \code{xLabels} is expected to consist of a color
+#' designation preceded by 2 characters: an example would be
+#' \code{MEturquoise}. The first two characters can be arbitrary, they are
+#' stripped. Any labels that do not represent valid colors will be considered
+#' text labels and printed in full, allowing the user to mix text and color
+#' labels.
+#' 
+#' It is also possible to label rows and columns by both color squares and
+#' additional text annotation. To achieve this, use the above technique to get
+#' color labels and, additionally, pass the desired text annotation in the
+#' \code{xSymbols} and \code{ySymbols} arguments.
+#' 
+#' If \code{rowsPerPage} (\code{colsPerPage}) is not given, rows (columns) are
+#' allocated automatically as uniformly as possible, in contiguous blocks of
+#' size at most \code{maxRowsPerPage} (\code{maxColsPerPage}).  The allocation
+#' is performed by the function \code{\link{allocateJobs}}.
+#' 
+#' @param Matrix numerical matrix to be plotted in the heatmap.
+#' @param xLabels labels for the columns. See Details.
+#' @param yLabels labels for the rows. See Details.
+#' @param xSymbols additional labels used when \code{xLabels} are interpreted
+#' as colors. See Details.
+#' @param ySymbols additional labels used when \code{yLabels} are interpreted
+#' as colors. See Details.
+#' @param textMatrix optional text entries for each cell. Either a matrix of
+#' the same dimensions as \code{Matrix} or a vector of the same length as the
+#' number of entries in \code{Matrix}.
+#' @param rowsPerPage optional list in which each component is a vector
+#' specifying which rows should appear together in each plot. If not given,
+#' will be generated automatically based on \code{maxRowsPerPage} below and the
+#' number of rows in \code{Matrix}.
+#' @param maxRowsPerPage integer giving maximum number of rows appearing on
+#' each plot (page).
+#' @param colsPerPage optional list in which each component is a vector
+#' specifying which columns should appear together in each plot. If not given,
+#' will be generated automatically based on \code{maxColsPerPage} below and the
+#' number of rows in \code{Matrix}.
+#' @param maxColsPerPage integer giving maximum number of columns appearing on
+#' each plot (page).
+#' @param addPageNumberToMain logical: should plot/page number be added to the
+#' \code{main} title of each plot?
+#' @param zlim Optional specification of the extreme values for the color
+#' scale. If not given, will be determined from the input \code{Matrix}.
+#' @param main Main title for each plot/page, optionally with the plot/page
+#' number added.
+#' @param signed logical: should the input \code{Matrix} be converted to colors
+#' using a scale centered at zero?
+#' @param verticalSeparator.x indices of columns after which separator lines
+#' (vertical lines between columns) should be drawn. \code{NULL} means no lines
+#' will be drawn.
+#' @param verticalSeparator.col color(s) of the vertical separator lines.
+#' Recycled if need be.
+#' @param verticalSeparator.lty line type of the vertical separator lines.
+#' Recycled if need be.
+#' @param verticalSeparator.lwd line width of the vertical separator lines.
+#' Recycled if need be.
+#' @param verticalSeparator.ext number giving the extension of the separator
+#' line into the margin as a fraction of the margin width. 0 means no
+#' extension, 1 means extend all the way through the margin.
+#' @param horizontalSeparator.y indices of columns after which separator lines
+#' (horizontal lines between columns) should be drawn. \code{NULL} means no
+#' lines will be drawn.
+#' @param horizontalSeparator.col color(s) of the horizontal separator lines.
+#' Recycled if need be.
+#' @param horizontalSeparator.lty line type of the horizontal separator lines.
+#' Recycled if need be.
+#' @param horizontalSeparator.lwd line width of the horizontal separator lines.
+#' Recycled if need be.
+#' @param horizontalSeparator.ext number giving the extension of the separator
+#' line into the margin as a fraction of the margin width. 0 means no
+#' extension, 1 means extend all the way through the margin.
+#' @param \dots other arguments to function \code{\link{labeledHeatmap}}.
+#' @return None.
+#' @author Peter Langfelder
+#' @seealso The workhorse function \code{\link{labeledHeatmap}} for the actual
+#' heatmap plot;
+#' 
+#' function \code{\link{allocateJobs}} for the allocation of rows/columns to
+#' each plot.
+#' @keywords misc
 labeledHeatmap.multiPage <- function(
     # Input data and ornaments
     Matrix,
@@ -5260,6 +8070,52 @@ labeledHeatmap.multiPage <- function(
 # Plots a barplot of the Matrix and writes the labels underneath such that they
 # are readable.
 
+
+
+#' Barplot with text or color labels.
+#' 
+#' Produce a barplot with extra annotation.
+#' 
+#' 
+#' Individual bars in the barplot can be identified either by printing the text
+#' of the corresponding entry in \code{labels} underneath the bar at the angle
+#' specified by \code{xLabelsAngle}, or by interpreting the \code{labels} entry
+#' as a color (see below) and drawing a correspondingly colored square
+#' underneath the bar.
+#' 
+#' For reasons of compatibility with other functions, \code{labels} are
+#' interpreted as colors after stripping the first two characters from each
+#' label. For example, the label \code{"MEturquoise"} is interpreted as the
+#' color turquoise.
+#' 
+#' If \code{colored} is set, the code assumes that \code{labels} can be
+#' interpreted as colors, and the input \code{Matrix} is square and the rows
+#' have the same labels as the columns. Each bar in the barplot is then
+#' sectioned into contributions from each row entry in \code{Matrix} and is
+#' colored by the color given by the entry in \code{labels} that corresponds to
+#' the row.
+#' 
+#' @param Matrix vector or a matrix to be plotted.
+#' @param labels labels to annotate the bars underneath the barplot.
+#' @param colorLabels logical: should the labels be interpreted as colors? If
+#' \code{TRUE}, the bars will be labeled by colored squares instead of text.
+#' See details.
+#' @param colored logical: should the bars be divided into segments and
+#' colored? If \code{TRUE}, assumes the \code{labels} can be interpreted as
+#' colors, and the input \code{Matrix} is square and the rows have the same
+#' labels as the columns. See details.
+#' @param setStdMargins if \code{TRUE}, the function wil set margins \code{c(3,
+#' 3, 2, 2)+0.2}.
+#' @param stdErrors if given, error bars corresponding to \code{1.96*stdErrors}
+#' will be plotted on top of the bars.
+#' @param cex.lab character expansion factor for axis labels, including the
+#' text labels underneath the barplot.
+#' @param xLabelsAngle angle at which text labels under the barplot will be
+#' printed.
+#' @param \dots other parameters for the function \code{\link{barplot}}.
+#' @return None.
+#' @author Peter Langfelder
+#' @keywords hplot
 labeledBarplot <- function(Matrix, labels, colorLabels = FALSE, colored = TRUE,
                             setStdMargins = TRUE, stdErrors = NULL,
                            cex.lab = NULL,
@@ -5347,6 +8203,19 @@ labeledBarplot <- function(Matrix, labels, colorLabels = FALSE, colored = TRUE,
 # if the current device isn't of the required dimensions, close it and open a
 # new one.
 
+
+
+#' Opens a graphics window with specified dimensions
+#' 
+#' If a graphic device window is already open, it is closed and re-opened with
+#' specified dimensions (in inches); otherwise a new window is opened.
+#' 
+#' 
+#' @param width desired width of the window, in inches.
+#' @param height desired heigh of the window, in inches.
+#' @return None.
+#' @author Peter Langfelder
+#' @keywords misc
 sizeGrWindow <- function(width, height) {
     din = par("din")
     if ((din[1] != width) | (din[2] != height)) {
@@ -5359,6 +8228,30 @@ sizeGrWindow <- function(width, height) {
 # GreenToRed.R
 #===============================================================================
 
+
+
+#' Green-black-red color sequence
+#' 
+#' Generate a green-black-red color sequence of a given length.
+#' 
+#' The function returns a color vector that starts with pure green, gradually
+#' turns into black and then to red. The power \code{gamma} can be used to
+#' control the behaviour of the quarter- and three quarter-values (between
+#' green and black, and black and red, respectively). Higher powers will make
+#' the mid-colors more green and red, respectively.
+#' 
+#' @param n number of colors to be returned
+#' @param gamma color correction power
+#' @return A vector of colors of length \code{n}.
+#' @author Peter Langfelder
+#' @keywords color
+#' @examples
+#' 
+#'   par(mfrow = c(3, 1))
+#'   displayColors(greenBlackRed(50));
+#'   displayColors(greenBlackRed(50, 2));
+#'   displayColors(greenBlackRed(50, 0.5));
+#' 
 greenBlackRed <- function(n, gamma = 1) {
     half = as.integer(n/2)
     red = c(rep(0, times = half), 0,
@@ -5370,6 +8263,48 @@ greenBlackRed <- function(n, gamma = 1) {
     col
 }
 
+
+
+#' Green-white-red color sequence
+#' 
+#' Generate a green-white-red color sequence of a given length.
+#' 
+#' The function returns a color vector that starts with green, gradually turns
+#' into white and then to red. The power \code{gamma} can be used to control
+#' the behaviour of the quarter- and three quarter-values (between green and
+#' white, and white and red, respectively). Higher powers will make the
+#' mid-colors more white, while lower powers will make the colors more
+#' saturated, respectively.
+#' 
+#' Typical use of this function is to produce (via function
+#' \code{\link{numbers2colors}}) a color representation of numbers within a
+#' symmetric interval around 0, for example, the interval [-1, 1]. Note though
+#' that since green and red are not distinguishable by people with the most
+#' common type of color blindness, we recommend using the analogous palette
+#' returned by the function \code{\link{blueWhiteRed}}.
+#' 
+#' @param n number of colors to be returned
+#' @param gamma color change power
+#' @param warn logical: should the user be warned that this function produces a
+#' palette unsuitable for people with most common color blindness?
+#' @return A vector of colors of length \code{n}.
+#' @author Peter Langfelder
+#' @seealso \code{\link{blueWhiteRed}} for a color sequence more friendly to
+#' people with the most common type of color blindness;
+#' 
+#' \code{\link{numbers2colors}} for a function that produces a color
+#' representation for continuous numbers.
+#' @keywords color
+#' @examples
+#' 
+#'   par(mfrow = c(3, 1))
+#'   displayColors(greenWhiteRed(50));
+#'   title("gamma = 1")
+#'   displayColors(greenWhiteRed(50, 3));
+#'   title("gamma = 3")
+#'   displayColors(greenWhiteRed(50, 0.5));
+#'   title("gamma = 0.5")
+#' 
 greenWhiteRed <- function(n, gamma = 1, warn = TRUE) {
     if (warn)
         warning(paste0(
@@ -5388,6 +8323,31 @@ greenWhiteRed <- function(n, gamma = 1, warn = TRUE) {
     col
 }
 
+
+
+#' Red-white-green color sequence
+#' 
+#' Generate a red-white-green color sequence of a given length.
+#' 
+#' The function returns a color vector that starts with pure green, gradually
+#' turns into white and then to red. The power \code{gamma} can be used to
+#' control the behaviour of the quarter- and three quarter-values (between red
+#' and white, and white and green, respectively). Higher powers will make the
+#' mid-colors more white, while lower powers will make the colors more
+#' saturated, respectively.
+#' 
+#' @param n number of colors to be returned
+#' @param gamma color correction power
+#' @return A vector of colors of length \code{n}.
+#' @author Peter Langfelder
+#' @keywords color
+#' @examples
+#' 
+#'   par(mfrow = c(3, 1))
+#'   displayColors(redWhiteGreen(50));
+#'   displayColors(redWhiteGreen(50, 3));
+#'   displayColors(redWhiteGreen(50, 0.5));
+#' 
 redWhiteGreen <- function(n, gamma = 1) {
     half = as.integer(n/2)
     green = c(seq(from = 0, to = 1, length.out = half)^(1/gamma),
@@ -5406,6 +8366,39 @@ redWhiteGreen <- function(n, gamma = 1) {
 #
 #===============================================================================
 
+
+
+#' Blue-white-red color sequence
+#' 
+#' Generate a blue-white-red color sequence of a given length.
+#' 
+#' The function returns a color vector that starts with blue, gradually turns
+#' into white and then to red. The power \code{gamma} can be used to control
+#' the behaviour of the quarter- and three quarter-values (between blue and
+#' white, and white and red, respectively). Higher powers will make the
+#' mid-colors more white, while lower powers will make the colors more
+#' saturated, respectively.
+#' 
+#' @param n number of colors to be returned.
+#' @param gamma color change power.
+#' @param endSaturation a number between 0 and 1 giving the saturation of the
+#' colors that will represent the ends of the scale. Lower numbers mean less
+#' saturation (lighter colors).
+#' @return A vector of colors of length \code{n}.
+#' @author Peter Langfelder
+#' @seealso \code{\link{numbers2colors}} for a function that produces a color
+#' representation for continuous numbers.
+#' @keywords color
+#' @examples
+#' 
+#'   par(mfrow = c(3, 1))
+#'   displayColors(blueWhiteRed(50));
+#'   title("gamma = 1")
+#'   displayColors(blueWhiteRed(50, 3));
+#'   title("gamma = 3")
+#'   displayColors(blueWhiteRed(50, 0.5));
+#'   title("gamma = 0.5")
+#' 
 blueWhiteRed <- function(n, gamma = 1, endSaturation = 1) {
     if (endSaturation  > 1  | endSaturation < 0)
         stop("'endSaturation' must be between 0 and 1.")
@@ -5443,6 +8436,24 @@ blueWhiteRed <- function(n, gamma = 1, endSaturation = 1) {
 # Filters out probes that are not common to all datasets, and puts probes into the same order in each
 # set. Works by creating dataframes of probe names and their indices and merging them all.
 
+
+
+#' Keep probes that are shared among given data sets
+#' 
+#' This function strips out probes that are not shared by all given data sets,
+#' and orders the remaining common probes using the same order in all sets.
+#' 
+#' 
+#' @param multiExpr expression data in the multi-set format (see
+#' \code{\link{checkSets}}). A vector of lists, one per set. Each set must
+#' contain a component \code{data} that contains the expression data, with rows
+#' corresponding to samples and columns to genes or probes.
+#' @param orderBy index of the set by which probes are to be ordered.
+#' @return Expression data in the same format as the input data, containing
+#' only common probes.
+#' @author Peter Langfelder
+#' @seealso \code{\link{checkSets}}
+#' @keywords misc
 keepCommonProbes <- function(multiExpr, orderBy = 1) {
     size = checkSets(multiExpr)
     nSets = size$nSets
@@ -5474,6 +8485,29 @@ keepCommonProbes <- function(multiExpr, orderBy = 1) {
 # an entry data which is a nSamples x nTraits data frame with an appropriate
 # column name, not a vector.
 
+
+
+#' Add trait information to multi-set module eigengene structure
+#' 
+#' Adds trait information to multi-set module eigengene structure.
+#' 
+#' The function simply \code{cbind}'s the module eigengenes and traits for each
+#' set. The number of sets and numbers of samples in each set must be
+#' consistent between \code{multiMEs} and \code{multiTraits}.
+#' 
+#' @param multiME Module eigengenes in multi-set format. A vector of lists, one
+#' list per set. Each list must contain an element named \code{data} that is a
+#' data frame with module eigengenes.
+#' @param multiTraits Microarray sample trait(s) in multi-set format. A vector
+#' of lists, one list per set. Each list must contain an element named
+#' \code{data} that is a data frame in which each column corresponds to a
+#' trait, and each row to an individual sample.
+#' @return A multi-set structure analogous to the input: a vector of lists, one
+#' list per set. Each list will contain a component \code{data} with the merged
+#' eigengenes and traits for the corresponding set.
+#' @author Peter Langfelder
+#' @seealso \code{\link{checkSets}}, \code{\link{moduleEigengenes}}
+#' @keywords misc
 addTraitToMEs <- function(multiME, multiTraits) {
     nSets = length(multiTraits)
     setsize = checkSets(multiTraits)
@@ -5511,6 +8545,39 @@ addTraitToMEs <- function(multiME, multiTraits) {
 # each module in each pair
 # of datasets and return them as a matrix
 
+
+
+#' Preservation of eigengene correlations
+#' 
+#' Calculates a summary measure of preservation of eigengene correlations
+#' across data sets
+#' 
+#' The function calculates the preservation of correlation of each eigengene
+#' with all other eigengenes (optionally except the 'grey' eigengene) in all
+#' pairs of sets.
+#' 
+#' @param multiME consensus module eigengenes in a multi-set format. A vector
+#' of lists with one list corresponding to each set. Each list must contain a
+#' component \code{data} that is a data frame whose columns are consensus
+#' module eigengenes.
+#' @param setLabels names to be used for the sets represented in
+#' \code{multiME}.
+#' @param excludeGrey logical: exclude the 'grey' eigengene from preservation
+#' measure?
+#' @param greyLabel module label corresponding to the 'grey' module. Usually
+#' this will be the character string \code{"grey"} if the labels are colors,
+#' and the number 0 if the labels are numeric.
+#' @return A data frame whose rows correspond to consensus module eigengenes
+#' given in the input \code{multiME}, and columns correspond to all possible
+#' set comparisons. The two sets compared in each column are indicated in the
+#' column name.
+#' @author Peter Langfelder
+#' @seealso \code{\link{multiSetMEs}} and module\code{\link{checkSets}} in
+#' package moduleColor for more on eigengenes and the multi-set format
+#' @references Langfelder P, Horvath S (2007) Eigengene networks for studying
+#' the relationships between co-expression modules. BMC Systems Biology 2007,
+#' 1:54
+#' @keywords misc
 correlationPreservation <- function(multiME, setLabels, excludeGrey = TRUE,
                                     greyLabel = "grey") {
     nSets = length(multiME)
@@ -5554,6 +8621,46 @@ correlationPreservation <- function(multiME, setLabels, excludeGrey = TRUE,
 # Given a set of multiME (or OrderedMEs), calculate the preservation values for
 # each each pair of datasets and return them as a matrix.
 
+
+
+#' Summary correlation preservation measure
+#' 
+#' Given consensus eigengenes, the function calculates the average correlation
+#' preservation pair-wise for all pairs of sets.
+#' 
+#' For each pair of sets, the function calculates the average preservation of
+#' correlation among the eigengenes. Two preservation measures are available,
+#' the abosolute preservation (high if the two correlations are similar and low
+#' if they are different), and the hyperbolically scaled preservation, which
+#' de-emphasizes preservation of low correlation values.
+#' 
+#' @param multiME consensus module eigengenes in a multi-set format. A vector
+#' of lists with one list corresponding to each set. Each list must contain a
+#' component \code{data} that is a data frame whose columns are consensus
+#' module eigengenes.
+#' @param setLabels names to be used for the sets represented in
+#' \code{multiME}.
+#' @param excludeGrey logical: exclude the 'grey' eigengene from preservation
+#' measure?
+#' @param greyLabel module label corresponding to the 'grey' module. Usually
+#' this will be the character string \code{"grey"} if the labels are colors,
+#' and the number 0 if the labels are numeric.
+#' @param method character string giving the correlation preservation measure
+#' to use. Recognized values are (unique abbreviations of) \code{"absolute"},
+#' \code{"hyperbolic"}.
+#' @return A data frame with each row and column corresponding to a set given
+#' in \code{multiME}, containing the pairwise average correlation preservation
+#' values. Names and rownames are set to entries of \code{setLabels}.
+#' @author Peter Langfelder
+#' @seealso
+#' 
+#' \code{\link{multiSetMEs}} for module eigengene calculation;
+#' 
+#' \code{\link{plotEigengeneNetworks}} for eigengene network visualization.
+#' @references Langfelder P, Horvath S (2007) Eigengene networks for studying
+#' the relationships between co-expression modules. BMC Systems Biology 2007,
+#' 1:54
+#' @keywords misc
 setCorrelationPreservation <- function(multiME, setLabels, excludeGrey = TRUE,
                                        greyLabel = "grey",
                                        method = "absolute") {
@@ -5609,6 +8716,102 @@ setCorrelationPreservation <- function(multiME, setLabels, excludeGrey = TRUE,
 
 # This function returns connectivities of nodes in preservation networks
 
+
+
+#' Network preservation calculations
+#' 
+#' This function calculates several measures of gene network preservation.
+#' Given gene expression data in several individual data sets, it calculates
+#' the individual adjacency matrices, forms the preservation network and
+#' finally forms several summary measures of adjacency preservation for each
+#' node (gene) in the network.
+#' 
+#' The preservation network is formed from adjacencies of compared sets. For
+#' 'complete' preservations, all given sets are compared at once; for
+#' 'pairwise' preservations, the sets are compared in pairs. Unweighted
+#' preservations are simple mean preservations for each node; their weighted
+#' counterparts are weighted averages in which a preservation of adjacencies
+#' \eqn{A^{(1)}_{ij}}{A[i,j; 1]} and \eqn{A^{(2)}_{ij}}{A[i,j; 2]} of nodes
+#' \eqn{i,j} between sets 1 and 2 is weighted by \eqn{[ (A^{(1)}_{ij} +
+#' A^{(2)}_{ij} )/2]^weightPower}{ ( (A[i,j; 1]+A[i,j; 2])/2)^weightPower}. The
+#' hyperbolic preservation is based on \eqn{tanh[( max -
+#' min)/(max+min)^2]}{tanh[( max - min)/(max+min)^2]}, where \eqn{max}{max} and
+#' \eqn{min}{min} are the componentwise maximum and minimum of the compared
+#' adjacencies, respectively.
+#' 
+#' @param multiExpr expression data in the multi-set format (see
+#' \code{\link{checkSets}}). A vector of lists, one per set. Each set must
+#' contain a component \code{data} that contains the expression data, with rows
+#' corresponding to samples and columns to genes or probes.
+#' @param useSets optional specification of sets to be used for the
+#' preservation calculation. Defaults to using all sets.
+#' @param useGenes optional specification of genes to be used for the
+#' preservation calculation. Defaults to all genes.
+#' @param corFnc character string containing the name of the function to
+#' calculate correlation. Suggested functions include \code{"cor"} and
+#' \code{"bicor"}.
+#' @param corOptions further argument to the correlation function.
+#' @param networkType a character string encoding network type. Recognized
+#' values are (unique abbreviations of) \code{"unsigned"}, \code{"signed"}, and
+#' \code{"signed hybrid"}.
+#' @param power soft thresholding power for network construction. Should be a
+#' number greater than 1.
+#' @param sampleLinks logical: should network connections be sampled
+#' (\code{TRUE}) or should all connections be used systematically
+#' (\code{FALSE})?
+#' @param nLinks number of links to be sampled. Should be set such that
+#' \code{nLinks * nNeighbors} be several times larger than the number of genes.
+#' @param blockSize correlation calculations will be split into square blocks
+#' of this size, to prevent running out of memory for large gene sets.
+#' @param setSeed seed to be used for sampling, for repeatability. If a seed
+#' already exists, it is saved before the sampling starts and restored upon
+#' exit.
+#' @param weightPower power with which higher adjacencies will be weighted in
+#' weighted means
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @return A list with the following components:
+#' 
+#' \item{pairwise}{ a matrix with rows corresponding to genes and columns to
+#' unique pairs of given sets, giving the pairwise preservation of the
+#' adjacencies connecting the gene to all other genes.}
+#' 
+#' \item{complete}{ a vector with one entry for each input gene containing the
+#' complete mean preservation of the adjacencies connecting the gene to all
+#' other genes.}
+#' 
+#' \item{pairwiseWeighted}{ a matrix with rows corresponding to genes and
+#' columns to unique pairs of given sets, giving the pairwise weighted
+#' preservation of the adjacencies connecting the gene to all other genes.}
+#' 
+#' \item{completeWeighted}{ a vector with one entry for each input gene
+#' containing the complete weighted mean preservation of the adjacencies
+#' connecting the gene to all other genes.}
+#' 
+#' \item{pairwiseHyperbolic}{ a matrix with rows corresponding to genes and
+#' columns to unique pairs of given sets, giving the pairwise hyperbolic
+#' preservation of the adjacencies connecting the gene to all other genes.}
+#' 
+#' \item{completeHyperbolic}{ a vector with one entry for each input gene
+#' containing the complete mean hyperbolic preservation of the adjacencies
+#' connecting the gene to all other genes.}
+#' 
+#' \item{pairwiseWeightedHyperbolic}{ a matrix with rows corresponding to genes
+#' and columns to unique pairs of given sets, giving the pairwise weighted
+#' hyperbolic preservation of the adjacencies connecting the gene to all other
+#' genes.}
+#' 
+#' \item{completeWeightedHyperbolic}{ a vector with one entry for each input
+#' gene containing the complete weighted hyperbolic mean preservation of the
+#' adjacencies connecting the gene to all other genes.}
+#' @author Peter Langfelder
+#' @seealso \code{\link{adjacency}} for calculation of adjacency;
+#' @references Langfelder P, Horvath S (2007) Eigengene networks for studying
+#' the relationships between co-expression modules. BMC Systems Biology 2007,
+#' 1:54
+#' @keywords misc
 preservationNetworkConnectivity <- function(
     multiExpr,
     useSets = NULL, useGenes = NULL,
@@ -5820,6 +9023,126 @@ preservationNetworkConnectivity <- function(
 # setLabels is a vector of titles for the diagonal diagrams; the off - diagonal
 # will have no title for now.
 
+
+
+#' Eigengene network plot
+#' 
+#' This function plots dendrogram and eigengene representations of (consensus)
+#' eigengenes networks.  In the case of conensus eigengene networks the
+#' function also plots pairwise preservation measures between consensus
+#' networks in different sets.
+#' 
+#' 
+#' Consensus eigengene networks consist of a fixed set of eigengenes
+#' "expressed" in several different sets. Network connection strengths are
+#' given by eigengene correlations. This function aims to visualize the
+#' networks as well as their similarities and differences across sets.
+#' 
+#' The function partitions the screen appropriately and plots eigengene
+#' dendrograms in the top row, then a square matrix of plots: heatmap plots of
+#' eigengene networks in each set on the diagonal, heatmap plots of pairwise
+#' preservation networks below the diagonal, and barplots of aggregate network
+#' preservation of individual eigengenes above the diagonal. A preservation
+#' plot or barplot in the row i and column j of the square matrix represents
+#' the preservation between sets i and j.
+#' 
+#' Individual eigengenes are labeled by their name in the dendrograms; in the
+#' heatmaps and barplots they can optionally be labeled by color squares. For
+#' compatibility with other functions, the color labels are encoded in the
+#' eigengene names by prefixing the color with two letters, such as
+#' \code{"MEturquoise"}.
+#' 
+#' Two types of network preservation can be plotted: the \code{"standard"} is
+#' simply the difference between adjacencies in the two compared sets. The
+#' \code{"hyperbolic"} difference de-emphasizes the preservation of low
+#' adjacencies. When \code{"both"} is specified, standard preservation is
+#' plotted in the lower triangle and hyperbolic in the upper triangle of each
+#' preservation heatmap.
+#' 
+#' If the eigengenes are labeled by color, the bars in the barplot can be split
+#' into segments representing the contribution of each eigengene and labeled by
+#' the contribution. For example, a yellow segment in a bar labeled by a
+#' turquoise square represents the preservation of the adjacency between the
+#' yellow and turquoise eigengenes in the two networks compared by the barplot.
+#' 
+#' For large numbers of eigengenes and/or sets, it may be difficult to get a
+#' meaningful plot fit a standard computer screen. In such cases we recommend
+#' using a device such as \code{\link{postscript}} or \code{\link{pdf}} where
+#' the user can specify large dimensions; such plots can be conveniently viewed
+#' in standard pdf or postscript viewers.
+#' 
+#' @param multiME either a single data frame containing the module eigengenes,
+#' or module eigengenes in the multi-set format (see \code{\link{checkSets}}).
+#' The multi-set format is a vector of lists, one per set. Each set must
+#' contain a component \code{data} whose rows correspond to samples and columns
+#' to eigengenes.
+#' @param setLabels A vector of character strings that label sets in
+#' \code{multiME}.
+#' @param letterSubPlots logical: should subplots be lettered?
+#' @param Letters optional specification of a sequence of letters for
+#' lettering. Defaults to "ABCD"...
+#' @param excludeGrey logical: should the grey module eigengene be excluded
+#' from the plots?
+#' @param greyLabel label for the grey module. Usually either "grey" or the
+#' number 0.
+#' @param plotDendrograms logical: should eigengene dendrograms be plotted?
+#' @param plotHeatmaps logical: should eigengene network heatmaps be plotted?
+#' @param setMargins logical: should margins be set? See
+#' \code{\link[graphics]{par}}.
+#' @param marDendro a vector of length 4 giving the margin setting for
+#' dendrogram plots. See \code{\link[graphics]{par}}. If \code{setMargins} is
+#' \code{TRUE} and \code{marDendro} is not given, the function will provide
+#' reasonable default values.
+#' @param marHeatmap a vector of length 4 giving the margin setting for heatmap
+#' plots. See \code{\link[graphics]{par}}. If \code{setMargins} is \code{TRUE}
+#' and \code{marDendro} is not given, the function will provide reasonable
+#' default values.
+#' @param colorLabels logical: should module eigengene names be interpreted as
+#' color names and the colors used to label heatmap plots and barplots?
+#' @param signed logical: should eigengene networks be constructed as signed?
+#' @param heatmapColors color palette for heatmaps. Defaults to
+#' \code{\link{heat.colors}} when \code{signed} is \code{FALSE}, and to
+#' \code{\link{redWhiteGreen}} when \code{signed} is \code{TRUE}.
+#' @param plotAdjacency logical: should module eigengene heatmaps plot
+#' adjacency (ranging from 0 to 1), or correlation (ranging from -1 to 1)?
+#' @param printAdjacency logical: should the numerical values be printed into
+#' the adjacency or correlation heatmap?
+#' @param cex.adjacency character expansion factor for printing of numerical
+#' values into the adjacency or correlation heatmap
+#' @param coloredBarplot logical: should the barplot of eigengene adjacency
+#' preservation distinguish individual contributions by color? This is possible
+#' only if \code{colorLabels} is \code{TRUE} and module eigengene names encode
+#' valid colors.
+#' @param barplotMeans logical: plot mean preservation in the barplot? This
+#' option effectively rescales the preservation by the number of eigengenes in
+#' the network. If means are plotted, the barplot is not colored.
+#' @param barplotErrors logical: should standard errors of the mean
+#' preservation be plotted?
+#' @param plotPreservation a character string specifying which type of
+#' preservation measure to plot. Allowed values are (unique abbreviations of)
+#' \code{"standard"}, \code{"hyperbolic"}, \code{"both"}.
+#' @param zlimPreservation a vector of length 2 giving the value limits for the
+#' preservation heatmaps.
+#' @param printPreservation logical: should preservation values be printed
+#' within the heatmap?
+#' @param cex.preservation character expansion factor for preservation display.
+#' @param \dots other graphical arguments to function
+#' \code{\link{labeledHeatmap}}.
+#' @return None.
+#' @author Peter Langfelder
+#' @seealso
+#' 
+#' \code{\link{labeledHeatmap}}, \code{\link{labeledBarplot}} for annotated
+#' heatmaps and barplots;
+#' 
+#' \code{\link[stats]{hclust}} for hierarchical clustering and dendrogram plots
+#' @references
+#' 
+#' For theory and applications of consensus eigengene networks, see
+#' 
+#' Langfelder P, Horvath S (2007) Eigengene networks for studying the
+#' relationships between co-expression modules. BMC Systems Biology 2007, 1:54
+#' @keywords hplot
 plotEigengeneNetworks <- function(
     multiME, setLabels,
     letterSubPlots = FALSE, Letters = NULL,
@@ -6076,6 +9399,44 @@ plotEigengeneNetworks <- function(
 # Turn a numerical variable into a color indicator. x can be a matrix or a vector.
 # For discrete variables, consider also labels2colors.
 
+
+
+#' Color representation for a numeric variable
+#' 
+#' The function creates a color represenation for the given numeric input.
+#' 
+#' Each column of \code{x} is processed individually, meaning that the color
+#' palette is adjusted individually for each column of \code{x}.
+#' 
+#' @param x a vector or matrix of numbers. Missing values are allowed and will
+#' be assigned the color given in \code{naColor}. If a matrix, each column of
+#' the matrix is processed separately and the return value will be a matrix of
+#' colors.
+#' @param signed logical: should \code{x} be considered signed? If \code{TRUE},
+#' the default setting is to use to use a palette that starts with green for
+#' the most negative values, continues with white for values around zero and
+#' turns red for positive values. If \code{FALSE}, the default palette ranges
+#' from white for minimum values to red for maximum values. If not given, the
+#' behaviour is controlled by values in \code{x}: if there are both positive
+#' and negative values, \code{signed} will be considered \code{TRUE}, otherwise
+#' \code{FALSE}.
+#' @param centered logical. If \code{TRUE} and \code{signed==TRUE}, numeric
+#' value zero will correspond to the middle of the color palette. If
+#' \code{FALSE} or \code{signed==FALSE}, the middle of the color palette will
+#' correspond to the average of the minimum and maximum value. If neither
+#' \code{signed} nor \code{centered} are given, \code{centered} will follow
+#' \code{signed} (see above).
+#' @param lim optional specification of limits, that is numeric values that
+#' should correspond to the first and last entry of \code{colors}.
+#' @param commonLim logical: should limits be calculated separately for each
+#' column of x, or should the limits be the same for all columns? Only applies
+#' if \code{lim} is \code{NULL}.
+#' @param colors color palette to represent the given numbers.
+#' @param naColor color to represent missing values in \code{x}.
+#' @return A vector or matrix (of the same dimensions as \code{x}) of colors.
+#' @author Peter Langfelder
+#' @seealso \code{\link{labels2colors}} for color coding of ordinal labels.
+#' @keywords misc
 numbers2colors <- function(
     x,
     signed = NULL,
@@ -6185,6 +9546,22 @@ numbers2colors <- function(
 
 # the following function computes the Rand index between 2 clusterings
 # assesses how similar two clusterings are
+
+
+#' Rand index of two partitions
+#' 
+#' Computes the Rand index, a measure of the similarity between two
+#' clusterings.
+#' 
+#' 
+#' @param tab a matrix giving the cross-tabulation table of two clusterings.
+#' @param adjust logical: should the "adjusted" version be computed?
+#' @return the Rand index of the input table.
+#' @author Steve Horvath
+#' @references W. M. Rand (1971). "Objective criteria for the evaluation of
+#' clustering methods". Journal of the American Statistical Association 66:
+#' 846-850
+#' @keywords misc
 randIndex <- function(tab, adjust = TRUE)
 {
     a <- 0
@@ -6300,6 +9677,60 @@ goodSamples <- function(datExpr, useSamples = NULL, useGenes = NULL,
     goodSamples
 }
 
+
+
+#' Filter genes with too many missing entries across multiple sets
+#' 
+#' This function checks data for missing entries and returns a list of genes
+#' that have non-zero variance in all sets and pass two criteria on maximum
+#' number of missing values in each given set: the fraction of missing values
+#' must be below a given threshold and the total number of missing samples must
+#' be below a given threshold
+#' 
+#' The constants \code{..minNSamples} and \code{..minNGenes} are both set to
+#' the value 4.  For most data sets, the fraction of missing samples criterion
+#' will be much more stringent than the absolute number of missing samples
+#' criterion.
+#' 
+#' @param multiExpr expression data in the multi-set format (see
+#' \code{\link{checkSets}}). A vector of lists, one per set. Each set must
+#' contain a component \code{data} that contains the expression data, with rows
+#' corresponding to samples and columns to genes or probes.
+#' @param useSamples optional specifications of which samples to use for the
+#' check. Should be a logical vector; samples whose entries are \code{FALSE}
+#' will be ignored for the missing value counts. Defaults to using all samples.
+#' @param useGenes optional specifications of genes for which to perform the
+#' check. Should be a logical vector; genes whose entries are \code{FALSE} will
+#' be ignored. Defaults to using all genes.
+#' @param minFraction minimum fraction of non-missing samples for a gene to be
+#' considered good.
+#' @param minNSamples minimum number of non-missing samples for a gene to be
+#' considered good.
+#' @param minNGenes minimum number of good genes for the data set to be
+#' considered fit for analysis. If the actual number of good genes falls below
+#' this threshold, an error will be issued.
+#' @param tol an optional 'small' number to compare the variance against. For
+#' each set in \code{multiExpr}, the default value is \code{1e-10 *
+#' max(abs(multiExpr[[set]]$data), na.rm = TRUE)}.  The reason of comparing the
+#' variance to this number, rather than zero, is that the fast way of computing
+#' variance used by this function sometimes causes small numerical overflow
+#' errors which make variance of constant vectors slightly non-zero; comparing
+#' the variance to \code{tol} rather than zero prevents the retaining of such
+#' genes as 'good genes'.
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @return A logical vector with one entry per gene that is \code{TRUE} if the
+#' gene is considered good and \code{FALSE} otherwise. Note that all genes
+#' excluded by \code{useGenes} are automatically assigned \code{FALSE}.
+#' @author Peter Langfelder
+#' @seealso \code{\link{goodGenes}}, \code{\link{goodSamples}},
+#' \code{\link{goodSamplesGenes}} for cleaning individual sets separately;
+#' 
+#' \code{\link{goodSamplesMS}}, \code{\link{goodSamplesGenesMS}} for additional
+#' cleaning of multiple data sets together.
+#' @keywords misc
 goodGenesMS <- function(multiExpr, useSamples = NULL, useGenes = NULL,
                         minFraction = 1/2, minNSamples = ..minNSamples, minNGenes = ..minNGenes,
                         tol = NULL,
@@ -6364,6 +9795,51 @@ goodGenesMS <- function(multiExpr, useSamples = NULL, useGenes = NULL,
     goodGenes
 }
 
+
+
+#' Filter samples with too many missing entries across multiple data sets
+#' 
+#' This function checks data for missing entries and returns a list of samples
+#' that pass two criteria on maximum number of missing values: the fraction of
+#' missing values must be below a given threshold and the total number of
+#' missing genes must be below a given threshold.
+#' 
+#' The constants \code{..minNSamples} and \code{..minNGenes} are both set to
+#' the value 4.  For most data sets, the fraction of missing samples criterion
+#' will be much more stringent than the absolute number of missing samples
+#' criterion.
+#' 
+#' @param multiExpr expression data in the multi-set format (see
+#' \code{\link{checkSets}}). A vector of lists, one per set. Each set must
+#' contain a component \code{data} that contains the expression data, with rows
+#' corresponding to samples and columns to genes or probes.
+#' @param useSamples optional specifications of which samples to use for the
+#' check. Should be a logical vector; samples whose entries are \code{FALSE}
+#' will be ignored for the missing value counts. Defaults to using all samples.
+#' @param useGenes optional specifications of genes for which to perform the
+#' check. Should be a logical vector; genes whose entries are \code{FALSE} will
+#' be ignored. Defaults to using all genes.
+#' @param minFraction minimum fraction of non-missing samples for a gene to be
+#' considered good.
+#' @param minNSamples minimum number of good samples for the data set to be
+#' considered fit for analysis. If the actual number of good samples falls
+#' below this threshold, an error will be issued.
+#' @param minNGenes minimum number of non-missing samples for a sample to be
+#' considered good.
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @return A list with one component per input set. Each component is a logical
+#' vector with one entry per sample in the corresponding set, indicating
+#' whether the sample passed the missing value criteria.
+#' @author Peter Langfelder and Steve Horvath
+#' @seealso \code{\link{goodGenes}}, \code{\link{goodSamples}},
+#' \code{\link{goodSamplesGenes}} for cleaning individual sets separately;
+#' 
+#' \code{\link{goodGenesMS}}, \code{\link{goodSamplesGenesMS}} for additional
+#' cleaning of multiple data sets together.
+#' @keywords misc
 goodSamplesMS <- function(multiExpr, useSamples = NULL, useGenes = NULL,
                           minFraction = 1/2, minNSamples = ..minNSamples,
                           minNGenes = ..minNGenes,
@@ -6417,6 +9893,52 @@ goodSamplesMS <- function(multiExpr, useSamples = NULL, useGenes = NULL,
     goodSamples
 }
 
+
+
+#' Iterative filtering of samples and genes with too many missing entries
+#' 
+#' This function checks data for missing entries and zero-variance genes, and
+#' returns a list of samples and genes that pass criteria maximum number of
+#' missing values. If necessary, the filtering is iterated.
+#' 
+#' This function iteratively identifies samples and genes with too many missing
+#' entries and genes with zero variance. Iterations may be required since
+#' excluding samples effectively changes criteria on genes and vice versa. The
+#' process is repeated until the lists of good samples and genes are stable.
+#' The constants \code{..minNSamples} and \code{..minNGenes} are both set to
+#' the value 4.
+#' 
+#' @param datExpr expression data. A data frame in which columns are genes and
+#' rows ar samples.
+#' @param minFraction minimum fraction of non-missing samples for a gene to be
+#' considered good.
+#' @param minNSamples minimum number of non-missing samples for a gene to be
+#' considered good.
+#' @param minNGenes minimum number of good genes for the data set to be
+#' considered fit for analysis. If the actual number of good genes falls below
+#' this threshold, an error will be issued.
+#' @param tol an optional 'small' number to compare the variance against.
+#' Defaults to the square of \code{1e-10 * max(abs(datExpr), na.rm = TRUE)}.
+#' The reason of comparing the variance to this number, rather than zero, is
+#' that the fast way of computing variance used by this function sometimes
+#' causes small numerical overflow errors which make variance of constant
+#' vectors slightly non-zero; comparing the variance to \code{tol} rather than
+#' zero prevents the retaining of such genes as 'good genes'.
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @return
+#' 
+#' A list with the foolowing components: \item{goodSamples}{ A logical vector
+#' with one entry per sample that is \code{TRUE} if the sample is considered
+#' good and \code{FALSE} otherwise.  }
+#' 
+#' \item{goodGenes}{ A logical vector with one entry per gene that is
+#' \code{TRUE} if the gene is considered good and \code{FALSE} otherwise.  }
+#' @author Peter Langfelder
+#' @seealso \code{\link{goodSamples}}, \code{\link{goodGenes}}
+#' @keywords misc
 goodSamplesGenes <- function(datExpr,
                              minFraction = 1/2,
                              minNSamples = ..minNSamples,
@@ -6457,6 +9979,60 @@ goodSamplesGenes <- function(datExpr,
     list(goodGenes = goodGenes, goodSamples = goodSamples, allOK = allOK)
 }
 
+
+
+#' Iterative filtering of samples and genes with too many missing entries
+#' across multiple data sets
+#' 
+#' This function checks data for missing entries and zero variance across
+#' multiple data sets and returns a list of samples and genes that pass
+#' criteria maximum number of missing values. If necessary, the filtering is
+#' iterated.
+#' 
+#' This function iteratively identifies samples and genes with too many missing
+#' entries, and genes with zero variance. Iterations may be required since
+#' excluding samples effectively changes criteria on genes and vice versa. The
+#' process is repeated until the lists of good samples and genes are stable.
+#' The constants \code{..minNSamples} and \code{..minNGenes} are both set to
+#' the value 4.
+#' 
+#' @param multiExpr expression data in the multi-set format (see
+#' \code{\link{checkSets}}). A vector of lists, one per set. Each set must
+#' contain a component \code{data} that contains the expression data, with rows
+#' corresponding to samples and columns to genes or probes.
+#' @param minFraction minimum fraction of non-missing samples for a gene to be
+#' considered good.
+#' @param minNSamples minimum number of non-missing samples for a gene to be
+#' considered good.
+#' @param minNGenes minimum number of good genes for the data set to be
+#' considered fit for analysis. If the actual number of good genes falls below
+#' this threshold, an error will be issued.
+#' @param tol an optional 'small' number to compare the variance against. For
+#' each set in \code{multiExpr}, the default value is \code{1e-10 *
+#' max(abs(multiExpr[[set]]$data), na.rm = TRUE)}.  The reason of comparing the
+#' variance to this number, rather than zero, is that the fast way of computing
+#' variance used by this function sometimes causes small numerical overflow
+#' errors which make variance of constant vectors slightly non-zero; comparing
+#' the variance to \code{tol} rather than zero prevents the retaining of such
+#' genes as 'good genes'.
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @return A list with the foolowing components: \item{goodSamples}{ A list
+#' with one component per given set. Each component is a logical vector with
+#' one entry per sample in the corresponding set that is \code{TRUE} if the
+#' sample is considered good and \code{FALSE} otherwise.  }
+#' 
+#' \item{goodGenes}{ A logical vector with one entry per gene that is
+#' \code{TRUE} if the gene is considered good and \code{FALSE} otherwise.  }
+#' @author Peter Langfelder
+#' @seealso \code{\link{goodGenes}}, \code{\link{goodSamples}},
+#' \code{\link{goodSamplesGenes}} for cleaning individual sets separately;
+#' 
+#' \code{\link{goodSamplesMS}}, \code{\link{goodGenesMS}} for additional
+#' cleaning of multiple data sets together.
+#' @keywords misc
 goodSamplesGenesMS <- function(multiExpr, minFraction = 1/2,
                                minNSamples = ..minNSamples,
                                minNGenes = ..minNGenes, tol = NULL,
@@ -6686,6 +10262,21 @@ goodSamplesGenesMS <- function(multiExpr, minFraction = 1/2,
 # symmetric matrix. By default it  excludes the diagonal elements of a symmetric
 #  matrix.
 
+
+
+#' Turn a matrix into a vector of non-redundant components
+#' 
+#' A convenient function to turn a matrix into a vector of non-redundant
+#' components. If the matrix is non-symmetric, returns a vector containing all
+#' entries of the matrix. If the matrix is symmetric, only returns the upper
+#' triangle and optionally the diagonal.
+#' 
+#' 
+#' @param M the matrix or data frame to be vectorized.
+#' @param diag logical: should the diagonal be included in the output?
+#' @return A vector containing the non-redundant entries of the input matrix.
+#' @author Steve Horvath
+#' @keywords misc
 vectorizeMatrix <- function(M, diag = FALSE)
 {
     if (is.null(dim(M)))  stop(
@@ -6709,6 +10300,28 @@ vectorizeMatrix <- function(M, diag = FALSE)
 
 #===============================================================================
 
+
+
+#' Calculation of fitting statistics for evaluating scale free topology fit.
+#' 
+#' The function scaleFreeFitIndex calculates several indices (fitting
+#' statistics) for evaluating scale free topology fit.  The input is a vector
+#' (of connectivities) k. Next k is discretized into nBreaks number of
+#' equal-width bins.  Let's denote the resulting vector dk.  The relative
+#' frequency for each bin is denoted p.dk.
+#' 
+#' 
+#' @param k numeric vector whose components contain non-negative values
+#' @param nBreaks positive integer. This determines the number of equal width
+#' bins.
+#' @param removeFirst logical. If TRUE then the first bin will be removed.
+#' @return Data frame with columns \item{Rsquared.SFT}{the model fitting index
+#' (R.squared) from the following model lm(log.p.dk ~ log.dk)}
+#' \item{slope.SFT}{the slope estimate from model lm(log(p(k))~log(k))}
+#' \item{truncatedExponentialAdjRsquared}{the adjusted R.squared measure from
+#' the truncated exponential model given by lm2 = lm(log.p.dk ~ log.dk + dk).}
+#' @author Steve Horvath
+#' @keywords misc
 scaleFreeFitIndex <- function(k, nBreaks = 10, removeFirst = FALSE) {
     # TODO: What does this do?
     discretized.k <- cut(k, nBreaks)
@@ -6738,6 +10351,97 @@ scaleFreeFitIndex <- function(k, nBreaks = 10, removeFirst = FALSE) {
 
 #===============================================================================
 
+
+
+#' Standard Screening with regard to a Censored Time Variable
+#' 
+#' The function standardScreeningCensoredTime computes association measures
+#' between the columns of the input data datE and a censored time variable
+#' (e.g. survival time). The censored time is specified using two input
+#' variables "time" and "event". The event variable is binary where 1 indicates
+#' that the event took place (e.g. the person died) and 0 indicates censored
+#' (i.e. lost to follow up).  The function fits univariate Cox regression
+#' models (one for each column of datE) and outputs a Wald test p-value, a
+#' logrank p-value, corresponding local false discovery rates (known as
+#' q-values, Storey et al 2004), hazard ratios. Further it reports the
+#' concordance index (also know as area under the ROC curve) and optionally
+#' results from dichotomizing the columns of datE.
+#' 
+#' 
+#' If input option fastCalculation=TRUE, then the function outputs correlation
+#' test p-values (and q-values) for correlating the columns of datE with the
+#' expected hazard (if no covariate is fit). Specifically, the expected hazard
+#' is defined as the deviance residual of an intercept only Cox regression
+#' model. The results are very similar to those resulting from a univariate Cox
+#' model where the censored time is regressed on the columns of dat.
+#' Specifically, this computational speed up is facilitated by the insight that
+#' the p-values resulting from a univariate Cox regression
+#' coxph(Surv(time,event)~datE[,i]) are very similar to those from
+#' corPvalueFisher(cor(devianceResidual,datE[,i]), nSamples)
+#' 
+#' @param time numeric variable showing time to event or time to last follow
+#' up.
+#' @param event Input variable \code{time} specifies the time to event or time
+#' to last follow up. Input variable \code{event} indicates whether the event
+#' happend (=1) or whether there was censoring (=0).
+#' @param datExpr a data frame or matrix whose columns will be related to the
+#' censored time.
+#' @param percentiles numeric vector which is only used when
+#' dichotomizationResults=T. Each value should lie between 0 and 1. For each
+#' value specified in the vector percentiles, a binary vector will be defined
+#' by dichotomizing the column value according to the corresponding quantile.
+#' Next a corresponding p-value will be calculated.
+#' @param dichotomizationResults logical. If this option is set to TRUE then
+#' the values of the columns of datE will be dichotomized and corresponding Cox
+#' regression p-values will be calculated.
+#' @param qValues logical. If this option is set to TRUE (default) then
+#' q-values will be calculated for the Cox regression p-values.
+#' @param fastCalculation logical. If set to TRUE, the function outputs
+#' correlation test p-values (and q-values) for correlating the columns of datE
+#' with the expected hazard (if no covariate is fit). Specifically, the
+#' expected hazard is defined as the deviance residual of an intercept only Cox
+#' regression model. The results are very similar to those resulting from a
+#' univariate Cox model where the censored time is regressed on the columns of
+#' dat. Specifically, this computational speed up is facilitated by the insight
+#' that the p-values resulting from a univariate Cox regression
+#' coxph(Surv(time,event)~datE[,i]) are very similar to those from
+#' corPvalueFisher(cor(devianceResidual,datE[,i]), nSamples).
+#' @return If \code{fastCalculation} is \code{FALSE}, the function outputs a
+#' data frame whose rows correspond to the columns of datE and whose columns
+#' report \item{ID}{column names of the input data datExpr.}
+#' \item{pvalueWald}{Wald test p-value from fitting a univariate Cox regression
+#' model where the censored time is regressed on each column of datExpr.}
+#' \item{qValueWald}{local false discovery rate (q-value) corresponding to the
+#' Wald test p-value. } \item{pvalueLogrank}{Logrank p-value resulting from the
+#' Cox regression model. Also known as score test p-value. For large sample
+#' sizes this sould be similar to the Wald test p-value. }
+#' \item{qValueLogrank}{local false discovery rate (q-value) corresponding to
+#' the Logrank test p-value. } \item{HazardRatio}{hazard ratio resulting from
+#' the Cox model. If the value is larger than 1, then high values of the column
+#' are associated with shorter time, e.g. increased hazard of death. A hazard
+#' ratio equal to 1 means no relationship between the column and time. HR<1
+#' means that high values are associated with longer time, i.e. lower hazard.}
+#' \item{CI.LowerLimitHR}{Lower bound of the 95 percent confidence interval of
+#' the hazard ratio. } \item{CI.UpperLimitHR}{Upper bound of the 95 percent
+#' confidence interval of the hazard ratio. } \item{C.index}{concordance index,
+#' also known as C-index or area under the ROC curve. Calculated with the
+#' rcorr.cens option outx=TRUE (ties are ignored).}
+#' \item{MinimumDichotPvalue}{This is the smallest p-value from the
+#' dichotomization results. To see which dichotomized variable (and percentile)
+#' corresponds to the minimum, study the following columns. }
+#' \item{pValueDichot0.1}{This columns report the p-value when the column is
+#' dichotomized according to the specified percentile (here 0.1). The
+#' percentiles are specified in the input option percentiles. }
+#' \item{pvalueDeviance}{The p-value resulting from using a correlation test to
+#' relate the expected hazard (deviance residual) with each (undichotomized)
+#' column of datE. Specifically, the Fisher transformation is used to calculate
+#' the p-value for the Pearson correlation. The resulting p-value should be
+#' very similar to that of a univariate Cox regression model.}
+#' \item{qvalueDeviance}{Local false discovery rate (q-value) corresponding to
+#' pvalueDeviance.} \item{corDeviance}{Pearson correlation between the expected
+#' hazard (deviance residual) with each (undichotomized) column of datExpr.}
+#' @author Steve Horvath
+#' @keywords misc
 standardScreeningCensoredTime <- function(
     time,
     event,
@@ -6894,6 +10598,44 @@ standardScreeningCensoredTime <- function(
 #
 #===============================================================================
 
+
+
+#' Standard screening for numeric traits
+#' 
+#' Standard screening for numeric traits based on Pearson correlation.
+#' 
+#' The function calculates the correlations, associated p-values, area under
+#' the ROC, and q-values
+#' 
+#' @param datExpr data frame containing expression data (or more generally
+#' variables to be screened), with rows corresponding to samples and columns to
+#' genes (variables)
+#' @param yNumeric a numeric vector giving the trait measurements for each
+#' sample
+#' @param corFnc correlation function.  Defaults to Pearson correlation but can
+#' also be \code{\link{bicor}}.
+#' @param corOptions list specifying additional arguments to be passed to the
+#' correlation function given by \code{corFnc}.
+#' @param alternative alternative hypothesis for the correlation test
+#' @param qValues logical: should q-values be calculated?
+#' @param areaUnderROC logical: should are under the receiver-operating curve
+#' be calculated?
+#' @return
+#' 
+#' Data frame with the following components:
+#' 
+#' \item{ID }{Gene (or variable) identifiers copied from
+#' \code{colnames(datExpr)}} \item{cor}{correlations of all genes with the
+#' trait} \item{Z}{Fisher Z statistics corresponding to the correlations}
+#' \item{pvalueStudent }{Student p-values of the correlations}
+#' \item{qvalueStudent }{(if input \code{qValues==TRUE}) q-values of the
+#' correlations calculated from the p-values} \item{AreaUnderROC }{(if input
+#' \code{areaUnderROC==TRUE}) area under the ROC} \item{nPresentSamples}{number
+#' of samples present for the calculation of each association. }
+#' @author Steve Horvath
+#' @seealso \code{\link{standardScreeningBinaryTrait}},
+#' \code{\link{standardScreeningCensoredTime}}
+#' @keywords misc
 standardScreeningNumericTrait <- function(
     datExpr, yNumeric, corFnc = cor,
     corOptions = list(use = 'p'),
@@ -6979,6 +10721,28 @@ standardScreeningNumericTrait <- function(
 #
 #===============================================================================
 
+
+
+#' Meta-analysis Z statistic
+#' 
+#' The function calculates a meta analysis Z statistic based on an input data
+#' frame of Z statistics.
+#' 
+#' For example, if datZ has 3 columns whose columns are labelled Z1,Z2,Z3 then
+#' ZMeta= (Z1+Z2+Z3)/sqrt(3). Under the null hypothesis (where all Z statistics
+#' follow a standard normal distribution and the Z statistics are independent),
+#' ZMeta also follows a standard normal distribution.  To calculate a 2 sided
+#' p-value, one an use the following code pvalue=2*pnorm(-abs(ZMeta) )
+#' 
+#' @param datZ Matrix or data frame of Z statistics (assuming standard normal
+#' distribution under the null hypothesis). Rows correspond to genes, columns
+#' to independent data sets.
+#' @param columnweights optional vector of non-negative numbers for weighing
+#' the columns of datZ.
+#' @return Vector of meta analysis Z statistic. Under the null hypothesis this
+#' should follow a standard normal distribution.
+#' @author Steve Horvath
+#' @keywords misc
 metaZfunction <- function(datZ, columnweights = NULL ) {
     if (! is.null(columnweights))  {datZ = t(t(datZ) *  columnweights)   }
     datZpresent = !is.na(datZ) + 0.0
@@ -6996,6 +10760,143 @@ metaZfunction <- function(datZ, columnweights = NULL ) {
 #
 #===============================================================================
 
+
+
+#' Estimate the p-value for ranking consistently high (or low) on multiple
+#' lists
+#' 
+#' The function rankPvalue calculates the p-value for observing that an object
+#' (corresponding to a row of the input data frame \code{datS}) has a
+#' consistently high ranking (or low ranking) according to multiple ordinal
+#' scores (corresponding to the columns of the input data frame \code{datS}).
+#' 
+#' The function calculates asymptotic p-values (and optionally q-values) for
+#' testing the null hypothesis that the values in the columns of datS are
+#' independent. This allows us to find objects (rows) with consistently high
+#' (or low) values across the columns.
+#' 
+#' Example: Imagine you have 5 vectors of Z statistics corresponding to the
+#' columns of datS. Further assume that a gene has ranks 1,1,1,1,20 in the 5
+#' lists. It seems very significant that the gene ranks number 1 in 4 out of
+#' the 5 lists. The function rankPvalue can be used to calculate a p-value for
+#' this occurrence.
+#' 
+#' The function uses the central limit theorem to calculate asymptotic p-values
+#' for two types of test statistics that measure consistently high or low
+#' ordinal values. The first method (referred to as percentile rank method)
+#' leads to accurate estimates of p-values if datS has at least 4 columns but
+#' it can be overly conservative.  The percentile rank method replaces each
+#' column datS by the ranked version rank(datS[,i]) (referred to ask low
+#' ranking) and by rank(-datS[,i]) (referred to as high ranking). Low ranking
+#' and high ranking allow one to find consistently small values or consistently
+#' large values of datS, respectively.  All ranks are divided by the maximum
+#' rank so that the result lies in the unit interval [0,1]. In the following,
+#' we refer to rank/max(rank) as percentile rank. For a given object
+#' (corresponding to a row of datS) the observed percentile rank follows
+#' approximately a uniform distribution under the null hypothesis. The test
+#' statistic is defined as the sum of the percentile ranks (across the columns
+#' of datS). Under the null hypothesis that there is no relationship between
+#' the rankings of the columns of datS, this (row sum) test statistic follows a
+#' distribution that is given by the convolution of random uniform
+#' distributions. Under the null hypothesis, the individual percentile ranks
+#' are independent and one can invoke the central limit theorem to argue that
+#' the row sum test statistic follows asymptotically a normal distribution.  It
+#' is well-known that the speed of convergence to the normal distribution is
+#' extremely fast in case of identically distributed uniform distributions.
+#' Even when datS has only 4 columns, the difference between the normal
+#' approximation and the exact distribution is negligible in practice (Killmann
+#' et al 2001). In summary, we use the central limit theorem to argue that the
+#' sum of the percentile ranks follows a normal distribution whose mean and
+#' variance can be calculated using the fact that the mean value of a uniform
+#' random variable (on the unit interval) equals 0.5 and its variance equals
+#' 1/12.
+#' 
+#' The second method for calculating p-values is referred to as scale method.
+#' It is often more powerful but its asymptotic p-value can only be trusted if
+#' either datS has a lot of columns or if the ordinal scores (columns of datS)
+#' follow an approximate normal distribution.  The scale method scales (or
+#' standardizes) each ordinal variable (column of datS) so that it has mean 0
+#' and variance 1. Under the null hypothesis of independence, the row sum
+#' follows approximately a normal distribution if the assumptions of the
+#' central limit theorem are met. In practice, we find that the second approach
+#' is often more powerful but it makes more distributional assumptions (if datS
+#' has few columns).
+#' 
+#' @param datS a data frame whose rows represent objects that will be ranked.
+#' Each column of \code{datS} represents an ordinal variable (which can take on
+#' negative values). The columns correspond to (possibly signed) object
+#' significance measures, e.g., statistics (such as Z statistics), ranks, or
+#' correlations.
+#' @param columnweights allows the user to input a vector of non-negative
+#' numbers reflecting weights for the different columns of \code{datZ}. If it
+#' is set to \code{NULL} then all weights are equal.
+#' @param na.last controls the treatment of missing values (NAs) in the rank
+#' function. If \code{TRUE}, missing values in the data are put last (i.e. they
+#' get the highest rank values). If \code{FALSE}, they are put first; if
+#' \code{NA}, they are removed; if \code{"keep"} they are kept with rank NA.
+#' See \code{\link{rank}} for more details.
+#' @param ties.method represents the ties method used in the rank function for
+#' the percentile rank method. See \code{\link{rank}} for more details.
+#' @param calculateQvalue logical: should q-values be calculated? If set to
+#' TRUE then the function calculates corresponding q-values (local false
+#' discovery rates) using the qvalue package, see Storey JD and Tibshirani R.
+#' (2003). This option assumes that qvalue package has been installed.
+#' @param pValueMethod determines which method is used for calculating
+#' p-values. By default it is set to "all", i.e. both methods are used. If it
+#' is set to "rank" then only the percentile rank method is used. If it set to
+#' "scale" then only the scale method will be used.
+#' @return
+#' 
+#' A list whose actual content depends on which p-value methods is selected,
+#' and whether q0values are calculated. The following inner components are
+#' calculated, organized in outer components \code{datoutrank} and
+#' \code{datoutscale},:
+#' 
+#' \item{pValueExtremeRank}{This is the minimum between pValueLowRank and
+#' pValueHighRank, i.e. min(pValueLow, pValueHigh)}
+#' 
+#' \item{pValueLowRank}{Asymptotic p-value for observing a consistently low
+#' value across the columns of datS based on the rank method.}
+#' 
+#' \item{pValueHighRank}{Asymptotic p-value for observing a consistently low
+#' value across the columns of datS based on the rank method.}
+#' 
+#' \item{pValueExtremeScale}{This is the minimum between pValueLowScale and
+#' pValueHighScale, i.e. min(pValueLow, pValueHigh)}
+#' 
+#' \item{pValueLowScale}{Asymptotic p-value for observing a consistently low
+#' value across the columns of datS based on the Scale method.}
+#' 
+#' \item{pValueHighScale}{Asymptotic p-value for observing a consistently low
+#' value across the columns of datS based on the Scale method.}
+#' 
+#' \item{qValueExtremeRank}{local false discovery rate (q-value) corresponding
+#' to the p-value pValueExtremeRank}
+#' 
+#' \item{qValueLowRank}{local false discovery rate (q-value) corresponding to
+#' the p-value pValueLowRank}
+#' 
+#' \item{qValueHighRank}{local false discovery rate (q-value) corresponding to
+#' the p-value pValueHighRank}
+#' 
+#' \item{qValueExtremeScale}{local false discovery rate (q-value) corresponding
+#' to the p-value pValueExtremeScale}
+#' 
+#' \item{qValueLowScale}{local false discovery rate (q-value) corresponding to
+#' the p-value pValueLowScale}
+#' 
+#' \item{qValueHighScale}{local false discovery rate (q-value) corresponding to
+#' the p-value pValueHighScale}
+#' @author Steve Horvath
+#' @seealso \code{\link{rank}}, \code{\link{qvalue}}
+#' @references Killmann F, VonCollani E (2001) A Note on the Convolution of the
+#' Uniform and Related Distributions and Their Use in Quality Control. Economic
+#' Quality Control Vol 16 (2001), No. 1, 17-41.ISSN 0940-5151
+#' 
+#' Storey JD and Tibshirani R. (2003) Statistical significance for genome-wide
+#' experiments. Proceedings of the National Academy of Sciences, 100:
+#' 9440-9445.
+#' @keywords misc
 rankPvalue <- function(datS, columnweights = NULL, na.last = "keep",
                        ties.method = "average",
                        calculateQvalue = TRUE, pValueMethod = "all")
@@ -7125,6 +11026,24 @@ rankPvalue <- function(datS, columnweights = NULL, na.last = "keep",
 #
 #===============================================================================
 
+
+
+#' Prepend a comma to a non-empty string
+#' 
+#' Utility function that prepends a comma before the input string if the string
+#' is non-empty.
+#' 
+#' 
+#' @param s Character string.
+#' @return If \code{s} is non-empty, returns \code{paste(",", s)}, otherwise
+#' returns s.
+#' @author Peter Langfelder
+#' @keywords misc
+#' @examples
+#' 
+#' prepComma("abc");
+#' prepComma("");
+#' 
 prepComma <- function(s)
 {
     if (s == "") return (s)
@@ -7138,6 +11057,25 @@ prepComma <- function(s)
 #
 #===============================================================================
 
+
+
+#' qvalue convenience wrapper
+#' 
+#' This function calls \code{\link{qvalue}} on finite input p-values,
+#' optionally traps errors from the q-value calculation, and returns just the q
+#' values.
+#' 
+#' 
+#' @param p a vector of p-values. Missing data are allowed and will be removed.
+#' @param trapErrors logical: should errors generated by function
+#' \code{\link{qvalue}} trapped? If \code{TRUE}, the errors will be silently
+#' ignored and the returned q-values will all be \code{NA}.
+#' @param \dots other arguments to function \code{\link{qvalue}}.
+#' @return A vector of q-values. Entries whose corresponding p-values were not
+#' finite will be \code{NA}.
+#' @author Peter Langfelder
+#' @seealso \code{\link{qvalue}}
+#' @keywords misc
 qvalue.restricted <- function(p, trapErrors = TRUE, ...) {
     fin = is.finite(p)
     qx = try(qvalue(p[fin], ...)$qvalues, silent = TRUE)
@@ -7195,6 +11133,257 @@ qvalue.restricted <- function(p, trapErrors = TRUE, ...) {
 }
 
 
+
+
+#' Calculate consensus kME (eigengene-based connectivities) across multiple
+#' data sets.
+#' 
+#' Calculate consensus kME (eigengene-based connectivities) across multiple
+#' data sets, typically following a consensus module analysis.
+#' 
+#' The function \code{corAndPvalueFnc} is currently is expected to accept
+#' arguments \code{x} (gene expression profiles), \code{y} (eigengene
+#' expression profiles), and \code{alternative} with possibilities at least
+#' \code{"greater", "two.sided"}.  Any additional arguments can be passed via
+#' \code{corOptions}.
+#' 
+#' The function \code{corAndPvalueFnc} should return a list which at the least
+#' contains (1) a matrix of associations of genes and eigengenes (this
+#' component should have the name given by \code{corComponent}), and (2) a
+#' matrix of the corresponding p-values, named "p" or "p.value". Other
+#' components are optional but for full functionality should include (3)
+#' \code{nObs} giving the number of observations for each association (which is
+#' the number of samples less number of missing data - this can in principle
+#' vary from association to association), and (4) \code{Z} giving a Z static
+#' for each observation. If these are missing, \code{nObs} is calculated in the
+#' main function, and calculations using the Z statistic are skipped.
+#' 
+#' @param multiExpr Expression (or other numeric) data in a multi-set format. A
+#' vector of lists; in each list there must be a component named `data' whose
+#' content is a matrix or dataframe or array of dimension 2.
+#' @param moduleLabels Module labels: one label for each gene in
+#' \code{multiExpr}.
+#' @param multiEigengenes Optional eigengenes of modules specified in
+#' \code{moduleLabels}. If not given, will be calculated from \code{multiExpr}.
+#' @param signed logical: should the network be considered signed? In signed
+#' networks (\code{TRUE}), negative kME values are not considered significant
+#' and the corresponding p-values will be one-sided. In unsigned networks
+#' (\code{FALSE}), negative kME values are considered significant and the
+#' corresponding p-values will be two-sided.
+#' @param useModules Optional specification of module labels to which the
+#' analysis should be restricted. This could be useful if there are many
+#' modules, most of which are not interesting. Note that the "grey" module
+#' cannot be used with \code{useModules}.
+#' @param consensusQuantile Quantile for the consensus calculation. Should be a
+#' number between 0 (minimum) and 1.
+#' @param metaAnalysisWeights Optional specification of meta-analysis weights
+#' for each input set. If given, must be a numeric vector of length equal the
+#' number of input data sets (i.e., \code{length(multiExpr)}). These weights
+#' will be used in addition to constant weights and weights proportional to
+#' number of samples (observations) in each set.
+#' @param corAndPvalueFnc Function that calculates associations between
+#' expression profiles and eigengenes. See details.
+#' @param corOptions List giving additional arguments to function
+#' \code{corAndPvalueFnc}. See details.
+#' @param corComponent Name of the component of output of
+#' \code{corAndPvalueFnc} that contains the actual correlation.
+#' @param getQvalues logical: should q-values (estimates of FDR) be calculated?
+#' @param useRankPvalue Logical: should the \code{\link{rankPvalue}} function
+#' be used to obtain alternative meta-analysis statistics?
+#' @param rankPvalueOptions Additional options for function
+#' \code{\link{rankPvalue}}. These include \code{na.last} (default
+#' \code{"keep"}), \code{ties.method} (default \code{"average"}),
+#' \code{calculateQvalue} (default copied from input \code{getQvalues}), and
+#' \code{pValueMethod} (default \code{"scale"}). See the help file for
+#' \code{\link{rankPvalue}} for full details.
+#' @param setNames names for the input sets. If not given, will be taken from
+#' \code{names(multiExpr)}. If those are \code{NULL} as well, the names will be
+#' \code{"Set_1", "Set_2", ...}.
+#' @param excludeGrey logical: should the grey module be excluded from the kME
+#' tables? Since the grey module is typically not a real module, it makes
+#' little sense to report kME values for it.
+#' @param greyLabel label that labels the grey module.
+#' @return Data frame with the following components (for easier readability the
+#' order here is not the same as in the actual output): \item{ID}{Gene ID,
+#' taken from the column names of the first input data set}
+#' 
+#' \item{consensus.kME.1, consensus.kME.2, ...}{Consensus kME (that is, the
+#' requested quantile of the kMEs in the individual data sets)in each module
+#' for each gene across the input data sets. The module labels (here 1, 2,
+#' etc.) correspond to those in \code{moduleLabels}.}
+#' 
+#' \item{weightedAverage.equalWeights.kME1, weightedAverage.equalWeights.kME2,
+#' ...}{ Average kME in each module for each gene across the input data sets. }
+#' 
+#' \item{weightedAverage.RootDoFWeights.kME1,
+#' weightedAverage.RootDoFWeights.kME2, ...}{ Weighted average kME in each
+#' module for each gene across the input data sets. The weight of each data set
+#' is proportional to the square root of the number of samples in the set. }
+#' 
+#' \item{weightedAverage.DoFWeights.kME1, weightedAverage.DoFWeights.kME2,
+#' ...}{ Weighted average kME in each module for each gene across the input
+#' data sets. The weight of each data set is proportional to number of samples
+#' in the set. }
+#' 
+#' \item{weightedAverage.userWeights.kME1, weightedAverage.userWeights.kME2,
+#' ...}{ (Only present if input \code{metaAnalysisWeights} is non-NULL.)
+#' Weighted average kME in each module for each gene across the input data
+#' sets. The weight of each data set is given in \code{metaAnalysisWeights}.}
+#' 
+#' \item{meta.Z.equalWeights.kME1, meta.Z.equalWeights.kME2, ...}{Meta-analysis
+#' Z statistic for kME in each module, obtained by weighing the Z scores in
+#' each set equally. Only returned if the function \code{corAndPvalueFnc}
+#' returns the Z statistics corresponding to the correlations.}
+#' 
+#' \item{meta.Z.RootDoFWeights.kME1, meta.Z.RootDoFWeights.kME2, ...}{
+#' Meta-analysis Z statistic for kME in each module, obtained by weighing the Z
+#' scores in each set by the square root of the number of samples. Only
+#' returned if the function \code{corAndPvalueFnc} returns the Z statistics
+#' corresponding to the correlations.}
+#' 
+#' \item{meta.Z.DoFWeights.kME1, meta.Z.DoFWeights.kME2, ...}{Meta-analysis Z
+#' statistic for kME in each module, obtained by weighing the Z scores in each
+#' set by the number of samples. Only returned if the function
+#' \code{corAndPvalueFnc} returns the Z statistics corresponding to the
+#' correlations.}
+#' 
+#' \item{meta.Z.userWeights.kME1, meta.Z.userWeights.kME2, ...}{Meta-analysis Z
+#' statistic for kME in each module, obtained by weighing the Z scores in each
+#' set by \code{metaAnalysisWeights}.  Only returned if
+#' \code{metaAnalysisWeights} is non-NULL and the function
+#' \code{corAndPvalueFnc} returns the Z statistics corresponding to the
+#' correlations.}
+#' 
+#' \item{meta.p.equalWeights.kME1, meta.p.equalWeights.kME2, ...}{ p-values
+#' obtained from the equal-weight meta-analysis Z statistics. Only returned if
+#' the function \code{corAndPvalueFnc} returns the Z statistics corresponding
+#' to the correlations. }
+#' 
+#' \item{meta.p.RootDoFWeights.kME1, meta.p.RootDoFWeights.kME2, ...}{ p-values
+#' obtained from the meta-analysis Z statistics with weights proportional to
+#' the square root of the number of samples. Only returned if the function
+#' \code{corAndPvalueFnc} returns the Z statistics corresponding to the
+#' correlations. }
+#' 
+#' \item{meta.p.DoFWeights.kME1, meta.p.DoFWeights.kME2, ...}{ p-values
+#' obtained from the degree-of-freedom weight meta-analysis Z statistics. Only
+#' returned if the function \code{corAndPvalueFnc} returns the Z statistics
+#' corresponding to the correlations. }
+#' 
+#' \item{meta.p.userWeights.kME1, meta.p.userWeights.kME2, ...}{ p-values
+#' obtained from the user-supplied weight meta-analysis Z statistics. Only
+#' returned if \code{metaAnalysisWeights} is non-NULL and the function
+#' \code{corAndPvalueFnc} returns the Z statistics corresponding to the
+#' correlations. }
+#' 
+#' \item{meta.q.equalWeights.kME1, meta.q.equalWeights.kME2, ...}{ q-values
+#' obtained from the equal-weight meta-analysis p-values. Only present if
+#' \code{getQvalues} is \code{TRUE} and the function \code{corAndPvalueFnc}
+#' returns the Z statistics corresponding to the kME values.}
+#' 
+#' \item{meta.q.RootDoFWeights.kME1, meta.q.RootDoFWeights.kME2, ...}{ q-values
+#' obtained from the meta-analysis p-values with weights proportional to the
+#' square root of the number of samples. Only present if \code{getQvalues} is
+#' \code{TRUE} and the function \code{corAndPvalueFnc} returns the Z statistics
+#' corresponding to the kME values.}
+#' 
+#' \item{meta.q.DoFWeights.kME1, meta.q.DoFWeights.kME2, ...}{ q-values
+#' obtained from the degree-of-freedom weight meta-analysis p-values. Only
+#' present if \code{getQvalues} is \code{TRUE} and the function
+#' \code{corAndPvalueFnc} returns the Z statistics corresponding to the kME
+#' values.}
+#' 
+#' \item{meta.q.userWeights.kME1, meta.q.userWeights.kME2, ...}{ q-values
+#' obtained from the user-specified weight meta-analysis p-values. Only present
+#' if \code{metaAnalysisWeights} is non-NULL, \code{getQvalues} is \code{TRUE}
+#' and the function \code{corAndPvalueFnc} returns the Z statistics
+#' corresponding to the kME values.}
+#' 
+#' The next set of columns contain the results of function
+#' \code{\link{rankPvalue}} and are only present if input \code{useRankPvalue}
+#' is \code{TRUE}. Some columns may be missing depending on the options
+#' specified in \code{rankPvalueOptions}. We explicitly list columns that are
+#' based on weighing each set equally; names of these columns carry the suffix
+#' \code{.equalWeights}
+#' 
+#' \item{pValueExtremeRank.ME1.equalWeights,
+#' pValueExtremeRank.ME2.equalWeights, ...}{ This is the minimum between
+#' pValueLowRank and pValueHighRank, i.e. min(pValueLow, pValueHigh)}
+#' 
+#' \item{pValueLowRank.ME1.equalWeights, pValueLowRank.ME2.equalWeights, ...}{
+#' Asymptotic p-value for observing a consistently low value across the columns
+#' of datS based on the rank method.}
+#' 
+#' \item{pValueHighRank.ME1.equalWeights, pValueHighRank.ME2.equalWeights,
+#' ...}{ Asymptotic p-value for observing a consistently low value across the
+#' columns of datS based on the rank method.}
+#' 
+#' \item{pValueExtremeScale.ME1.equalWeights,
+#' pValueExtremeScale.ME2.equalWeights, ...}{ This is the minimum between
+#' pValueLowScale and pValueHighScale, i.e. min(pValueLow, pValueHigh)}
+#' 
+#' \item{pValueLowScale.ME1.equalWeights, pValueLowScale.ME2.equalWeights,
+#' ...}{ Asymptotic p-value for observing a consistently low value across the
+#' columns of datS based on the Scale method.}
+#' 
+#' \item{pValueHighScale.ME1.equalWeights, pValueHighScale.ME2.equalWeights,
+#' ...}{ Asymptotic p-value for observing a consistently low value across the
+#' columns of datS based on the Scale method.}
+#' 
+#' \item{qValueExtremeRank.ME1.equalWeights,
+#' qValueExtremeRank.ME2.equalWeights, ...}{ local false discovery rate
+#' (q-value) corresponding to the p-value pValueExtremeRank}
+#' 
+#' \item{qValueLowRank.ME1.equalWeights, qValueLowRank.ME2.equalWeights, ...}{
+#' local false discovery rate (q-value) corresponding to the p-value
+#' pValueLowRank}
+#' 
+#' \item{qValueHighRank.ME1.equalWeights, lueHighRank.ME2.equalWeights, ...}{
+#' local false discovery rate (q-value) corresponding to the p-value
+#' pValueHighRank}
+#' 
+#' \item{qValueExtremeScale.ME1.equalWeights,
+#' qValueExtremeScale.ME2.equalWeights, ...}{ local false discovery rate
+#' (q-value) corresponding to the p-value pValueExtremeScale}
+#' 
+#' \item{qValueLowScale.ME1.equalWeights, qValueLowScale.ME2.equalWeights,
+#' ...}{ local false discovery rate (q-value) corresponding to the p-value
+#' pValueLowScale}
+#' 
+#' \item{qValueHighScale.ME1.equalWeights,qValueHighScale.ME2.equalWeights,
+#' ...}{ local false discovery rate (q-value) corresponding to the p-value
+#' pValueHighScale}
+#' 
+#' \item{...}{Analogous columns corresponding to weighing individual sets by
+#' the square root of the number of samples, by number of samples, and by user
+#' weights (if given). The corresponding column name suffixes are
+#' \code{.RootDoFWeights}, \code{.DoFWeights}, and \code{.userWeights}.}
+#' 
+#' The following set of columns summarize kME in individual input data sets.
+#' 
+#' \item{kME1.Set_1, kME1.Set_2, ..., kME2.Set_1, kME2.Set_2, ...}{ kME values
+#' for each gene in each module in each given data set. }
+#' 
+#' \item{p.kME1.Set_1, p.kME1.Set_2, ..., p.kME2.Set_1, p.kME2.Set_2, ...}{
+#' p-values corresponding to kME values for each gene in each module in each
+#' given data set. }
+#' 
+#' \item{q.kME1.Set_1, q.kME1.Set_2, ..., q.kME2.Set_1, q.kME2.Set_2, ...}{
+#' q-values corresponding to kME values for each gene in each module in each
+#' given data set. Only returned if \code{getQvalues} is \code{TRUE}. }
+#' 
+#' \item{Z.kME1.Set_1, Z.kME1.Set_2, ..., Z.kME2.Set_1, Z.kME2.Set_2, ...}{ Z
+#' statistics corresponding to kME values for each gene in each module in each
+#' given data set. Only present if the function \code{corAndPvalueFnc} returns
+#' the Z statistics corresponding to the kME values. }
+#' @author Peter Langfelder
+#' @seealso \link{signedKME} for eigengene based connectivity in a single data
+#' set. \link{corAndPvalue}, \link{bicorAndPvalue} for two alternatives for
+#' calculating correlations and the corresponding p-values and Z scores. Both
+#' can be used with this function.
+#' @references Langfelder P, Horvath S., WGCNA: an R package for weighted
+#' correlation network analysis. BMC Bioinformatics. 2008 Dec 29; 9:559.
+#' @keywords misc
 consensusKME <- function(multiExpr, moduleLabels, multiEigengenes = NULL,
                          consensusQuantile = 0,
                          signed = TRUE,
@@ -7490,6 +11679,259 @@ consensusKME <- function(multiExpr, moduleLabels, multiEigengenes = NULL,
     bin
 }
 
+
+
+#' Meta-analysis of binary and continuous variables
+#' 
+#' This is a meta-analysis complement to functions
+#' \code{\link{standardScreeningBinaryTrait}} and
+#' \code{\link{standardScreeningNumericTrait}}. Given expression (or other)
+#' data from multiple independent data sets, and the corresponding clinical
+#' traits or outcomes, the function calculates multiple screening statistics in
+#' each data set, then calculates meta-analysis Z scores, p-values, and
+#' optionally q-values (False Discovery Rates). Three different ways of
+#' calculating the meta-analysis Z scores are provided: the Stouffer method,
+#' weighted Stouffer method, and using user-specified weights.
+#' 
+#' The Stouffer method of combines Z statistics by simply taking a mean of
+#' input Z statistics and multiplying it by \code{sqrt(n)}, where \code{n} is
+#' the number of input data sets. We refer to this method as
+#' \code{Stouffer.equalWeights}. In general, a better (i.e., more powerful)
+#' method of combining Z statistics is to weigh them by the number of degrees
+#' of freedom (which approximately equals \code{n}). We refer to this method as
+#' \code{weightedStouffer}. Finally, the user can also specify custom weights,
+#' for example if a data set needs to be downweighted due to technical
+#' concerns; however, specifying own weights by hand should be done carefully
+#' to avoid possible selection biases.
+#' 
+#' @param multiExpr Expression data (or other data) in multi-set format (see
+#' \code{\link{checkSets}}). A vector of lists; in each list there must be a
+#' component named \code{data} whose content is a matrix or dataframe or array
+#' of dimension 2.
+#' @param multiTrait Trait or ourcome data in multi-set format. Only one trait
+#' is allowed; consequesntly, the \code{data} component of each component list
+#' can be either a vector or a data frame (matrix, array of dimension 2).
+#' @param binary Logical: is the trait binary (\code{TRUE}) or continuous
+#' (\code{FALSE})? If not given, the decision will be made based on the content
+#' of \code{multiTrait}.
+#' @param metaAnalysisWeights Optional specification of set weights for
+#' meta-analysis. If given, must be a vector of non-negative weights, one entry
+#' for each set contained in \code{multiExpr}.
+#' @param corFnc Correlation function to be used for screening. Should be
+#' either the default \code{\link{cor}} or its robust alternative,
+#' \code{\link{bicor}}.
+#' @param corOptions A named list giving extra arguments to be passed to the
+#' correlation function.
+#' @param getQvalues Logical: should q-values (FDRs) be calculated?
+#' @param getAreaUnderROC Logical: should area under the ROC be calculated?
+#' Caution, enabling the calculation will slow the function down considerably
+#' for large data sets.
+#' @param useRankPvalue Logical: should the \code{\link{rankPvalue}} function
+#' be used to obtain alternative meta-analysis statistics?
+#' @param rankPvalueOptions Additional options for function
+#' \code{\link{rankPvalue}}. These include \code{na.last} (default
+#' \code{"keep"}), \code{ties.method} (default \code{"average"}),
+#' \code{calculateQvalue} (default copied from input \code{getQvalues}), and
+#' \code{pValueMethod} (default \code{"all"}).  See the help file for
+#' \code{\link{rankPvalue}} for full details.
+#' @param setNames Optional specification of set names (labels). These are used
+#' to label the corresponding components of the output. If not given, will be
+#' taken from the \code{names} attribute of \code{multiExpr}. If
+#' \code{names(multiExpr)} is \code{NULL}, generic names of the form
+#' \code{Set_1, Set2, ...} will be used.
+#' @param kruskalTest Logical: should the Kruskal test be performed in addition
+#' to t-test? Only applies to binary traits.
+#' @param var.equal Logical: should the t-test assume equal variance in both
+#' groups? If \code{TRUE}, the function will warn the user that the returned
+#' test statistics will be different from the results of the standard
+#' \code{\link[stats]{t.test}} function.
+#' @param metaKruskal Logical: should the meta-analysis be based on the results
+#' of Kruskal test (\code{TRUE}) or Student t-test (\code{FALSE})?
+#' @param na.action Specification of what should happen to missing values in
+#' \code{\link[stats]{t.test}}.
+#' @return Data frame with the following components: \item{ID}{ Identifier of
+#' the input genes (or other variables) }
+#' 
+#' \item{Z.equalWeights}{ Meta-analysis Z statistics obtained using Stouffer's
+#' method with equal weights} \item{p.equalWeights}{ p-values corresponding to
+#' \code{Z.Stouffer.equalWeights} } \item{q.equalWeights}{ q-values
+#' corresponding to \code{p.Stouffer.equalWeights}, only present if
+#' \code{getQvalues} is \code{TRUE}.}
+#' 
+#' \item{Z.RootDoFWeights}{ Meta-analysis Z statistics obtained using
+#' Stouffer's method with weights given by the square root of the number of
+#' (non-missing) samples in each data set} \item{p.RootDoFWeights}{ p-values
+#' corresponding to \code{Z.DoFWeights} } \item{q.RootDoFWeights}{ q-values
+#' corresponding to \code{p.DoFWeights}, only present if \code{getQvalues} is
+#' \code{TRUE}. }
+#' 
+#' \item{Z.DoFWeights}{ Meta-analysis Z statistics obtained using Stouffer's
+#' method with weights given by the number of (non-missing) samples in each
+#' data set} \item{p.DoFWeights}{ p-values corresponding to \code{Z.DoFWeights}
+#' } \item{q.DoFWeights}{ q-values corresponding to \code{p.DoFWeights}, only
+#' present if \code{getQvalues} is \code{TRUE}. }
+#' 
+#' \item{Z.userWeights}{ Meta-analysis Z statistics obtained using Stouffer's
+#' method with user-defined weights. Only present if input
+#' \code{metaAnalysisWeights} are present.} \item{p.userWeights}{ p-values
+#' corresponding to \code{Z.userWeights} } \item{q.userWeights}{ q-values
+#' corresponding to \code{p.userWeights}, only present if \code{getQvalues} is
+#' \code{TRUE}. }
+#' 
+#' The next set of columns is present only if input \code{useRankPvalue} is
+#' \code{TRUE} and contain the output of the function \code{\link{rankPvalue}}
+#' with the same column weights as the above meta-analysis. Depending on the
+#' input options \code{calculateQvalue} and \code{pValueMethod} in
+#' \code{rankPvalueOptions}, some columns may be missing. The following columns
+#' are calculated using equal weights for each data set.
+#' 
+#' \item{pValueExtremeRank.equalWeights}{This is the minimum between
+#' pValueLowRank and pValueHighRank, i.e. min(pValueLow, pValueHigh)}
+#' 
+#' \item{pValueLowRank.equalWeights}{Asymptotic p-value for observing a
+#' consistently low value across the columns of datS based on the rank method.}
+#' 
+#' \item{pValueHighRank.equalWeights}{Asymptotic p-value for observing a
+#' consistently low value across the columns of datS based on the rank method.}
+#' 
+#' \item{pValueExtremeScale.equalWeights}{This is the minimum between
+#' pValueLowScale and pValueHighScale, i.e. min(pValueLow, pValueHigh)}
+#' 
+#' \item{pValueLowScale.equalWeights}{Asymptotic p-value for observing a
+#' consistently low value across the columns of datS based on the Scale
+#' method.}
+#' 
+#' \item{pValueHighScale.equalWeights}{Asymptotic p-value for observing a
+#' consistently low value across the columns of datS based on the Scale
+#' method.}
+#' 
+#' \item{qValueExtremeRank.equalWeights}{local false discovery rate (q-value)
+#' corresponding to the p-value pValueExtremeRank}
+#' 
+#' \item{qValueLowRank.equalWeights}{local false discovery rate (q-value)
+#' corresponding to the p-value pValueLowRank}
+#' 
+#' \item{qValueHighRank.equalWeights}{local false discovery rate (q-value)
+#' corresponding to the p-value pValueHighRank}
+#' 
+#' \item{qValueExtremeScale.equalWeights}{local false discovery rate (q-value)
+#' corresponding to the p-value pValueExtremeScale}
+#' 
+#' \item{qValueLowScale.equalWeights}{local false discovery rate (q-value)
+#' corresponding to the p-value pValueLowScale}
+#' 
+#' \item{qValueHighScale.equalWeights}{local false discovery rate (q-value)
+#' corresponding to the p-value pValueHighScale}
+#' 
+#' \item{...}{Analogous columns calculated by weighting each input set using
+#' the square root of the number of samples, number of samples, and user
+#' weights (if given). The corresponding column names carry the suffixes
+#' \code{RootDofWeights}, \code{DoFWeights}, \code{userWeights}.}
+#' 
+#' The following columns contain results returned by
+#' \code{\link{standardScreeningBinaryTrait}} or
+#' \code{\link{standardScreeningNumericTrait}} (depending on whether the input
+#' trait is binary or continuous).
+#' 
+#' For binary traits, the following information is returned for each set:
+#' 
+#' \item{corPearson.Set_1, corPearson.Set_2,...}{Pearson correlation with a
+#' binary numeric version of the input variable. The numeric variable equals 1
+#' for level 1 and 2 for level 2. The levels are given by levels(factor(y)).}
+#' 
+#' \item{t.Student.Set_1, t.Student.Set_2, ...}{Student t-test statistic}
+#' 
+#' \item{pvalueStudent.Set_1, pvalueStudent.Set_2, ...}{two-sided Student
+#' t-test p-value.}
+#' 
+#' \item{qvalueStudent.Set_1, qvalueStudent.Set_2, ...}{(if input
+#' \code{qValues==TRUE}) q-value (local false discovery rate) based on the
+#' Student T-test p-value (Storey et al 2004).}
+#' 
+#' \item{foldChange.Set_1, foldChange.Set_2, ...}{a (signed) ratio of mean
+#' values. If the mean in the first group (corresponding to level 1) is larger
+#' than that of the second group, it equals meanFirstGroup/meanSecondGroup.
+#' But if the mean of the second group is larger than that of the first group
+#' it equals -meanSecondGroup/meanFirstGroup (notice the minus sign).}
+#' 
+#' \item{meanFirstGroup.Set_1, meanSecondGroup.Set_2, ...}{means of columns in
+#' input \code{datExpr} across samples in the second group.}
+#' 
+#' \item{SE.FirstGroup.Set_1, SE.FirstGroup.Set_2, ...}{standard errors of
+#' columns in input \code{datExpr} across samples in the first group.  Recall
+#' that SE(x)=sqrt(var(x)/n) where n is the number of non-missing values of x.
+#' }
+#' 
+#' \item{SE.SecondGroup.Set_1, SE.SecondGroup.Set_2, ...}{standard errors of
+#' columns in input \code{datExpr} across samples in the second group.}
+#' 
+#' \item{areaUnderROC.Set_1, areaUnderROC.Set_2, ...}{the area under the ROC,
+#' also known as the concordance index or C.index.  This is a measure of
+#' discriminatory power. The measure lies between 0 and 1 where 0.5 indicates
+#' no discriminatory power. 0 indicates that the "opposite" predictor has
+#' perfect discriminatory power. To compute it we use the function
+#' \link[Hmisc]{rcorr.cens} with \code{outx=TRUE} (from Frank Harrel's package
+#' Hmisc).}
+#' 
+#' \item{nPresentSamples.Set_1, nPresentSamples.Set_2, ...}{number of samples
+#' with finite measurements for each gene.}
+#' 
+#' If input \code{kruskalTest} is \code{TRUE}, the following columns further
+#' summarize results of Kruskal-Wallis test:
+#' 
+#' \item{stat.Kruskal.Set_1, stat.Kruskal.Set_2, ...}{Kruskal-Wallis test
+#' statistic.}
+#' 
+#' \item{stat.Kruskal.signed.Set_1, stat.Kruskal.signed.Set_2,...}{(Warning:
+#' experimental) Kruskal-Wallis test statistic including a sign that indicates
+#' whether the average rank is higher in second group (positive) or first group
+#' (negative).  }
+#' 
+#' \item{pvaluekruskal.Set_1, pvaluekruskal.Set_2, ...}{Kruskal-Wallis test
+#' p-value.}
+#' 
+#' \item{qkruskal.Set_1, qkruskal.Set_2, ...}{q-values corresponding to the
+#' Kruskal-Wallis test p-value (if input \code{qValues==TRUE}).}
+#' 
+#' \item{Z.Set1, Z.Set2, ...}{Z statistics obtained from
+#' \code{pvalueStudent.Set1, pvalueStudent.Set2, ...} or from
+#' \code{pvaluekruskal.Set1, pvaluekruskal.Set2, ...}, depending on input
+#' \code{metaKruskal}.}
+#' 
+#' For numeric traits, the following columns are returned:
+#' 
+#' \item{cor.Set_1, cor.Set_2, ...}{correlations of all genes with the trait}
+#' 
+#' \item{Z.Set1, Z.Set2, ...}{Fisher Z statistics corresponding to the
+#' correlations}
+#' 
+#' \item{pvalueStudent.Set_1, pvalueStudent.Set_2, ...}{Student p-values of the
+#' correlations}
+#' 
+#' \item{qvalueStudent.Set_1, qvalueStudent.Set_1, ...}{(if input
+#' \code{qValues==TRUE}) q-values of the correlations calculated from the
+#' p-values}
+#' 
+#' \item{AreaUnderROC.Set_1, AreaUnderROC.Set_2, ...}{area under the ROC}
+#' 
+#' \item{nPresentSamples.Set_1, nPresentSamples.Set_2, ...}{number of samples
+#' present for the calculation of each association. }
+#' @author Peter Langfelder
+#' @seealso \code{\link{standardScreeningBinaryTrait}},
+#' \code{\link{standardScreeningNumericTrait}} for screening functions for
+#' individual data sets
+#' @references For Stouffer's method, see
+#' 
+#' Stouffer, S.A., Suchman, E.A., DeVinney, L.C., Star, S.A. & Williams, R.M.
+#' Jr. 1949. The American Soldier, Vol. 1: Adjustment during Army Life.
+#' Princeton University Press, Princeton.
+#' 
+#' A discussion of weighted Stouffer's method can be found in
+#' 
+#' Whitlock, M. C., Combining probability from independent tests: the weighted
+#' Z-method is superior to Fisher's approach, Journal of Evolutionary Biology
+#' 18:5 1368 (2005)
+#' @keywords misc
 metaAnalysis <- function(multiExpr, multiTrait,
                          binary = NULL,
                          #consensusQuantile = 0,
@@ -7709,6 +12151,21 @@ metaAnalysis <- function(multiExpr, multiTrait,
 #
 #===============================================================================
 
+
+
+#' Union and intersection of multiple sets
+#' 
+#' Union and intersection of multiple sets. These function generalize the
+#' standard functions \code{\link{union}} and \code{\link{intersect}}.
+#' 
+#' 
+#' @aliases multiUnion multiIntersect
+#' @param setList A list containing the sets to be performed upon.
+#' @return The union or intersection of the given sets.
+#' @author Peter Langfelder
+#' @seealso The "standard" functions \code{\link{union}} and
+#' \code{\link{intersect}}.
+#' @keywords misc
 multiUnion <- function(setList) {
     len = length(setList)
     if (len == 0) return(NULL)
@@ -7739,6 +12196,24 @@ multiIntersect <- function(setList) {
 # prepend as many zeros as necessary to fill number to a certain width.
 # Assumes an integer input.
 
+
+
+#' Pad numbers with leading zeros to specified total width
+#' 
+#' This function pads the specified numbers with zeros to a specified total
+#' width.
+#' 
+#' 
+#' @param x Vector of numbers to be padded.
+#' @param width Width to pad the numbers to.
+#' @return Character vector with the 0-padded numbers.
+#' @author Peter Langfelder
+#' @keywords misc
+#' @examples
+#' 
+#' prependZeros(1:10)
+#' prependZeros(1:10, 4)
+#' 
 prependZeros <- function(x, width = max(nchar(x))){
     lengths = nchar(x)
     if (width < max(lengths)) stop("Some entries of 'x' are too long.")
@@ -7757,6 +12232,45 @@ prependZeros <- function(x, width = max(nchar(x))){
 #
 #===============================================================================
 
+
+
+#' Break long character strings into multiple lines
+#' 
+#' This function attempts to break lomg character strings into multiple lines
+#' by replacing a given pattern by a newline character.
+#' 
+#' Each given element of \code{labels} is processed independently. The
+#' character string is split using \code{strsplit}, with \code{split} as the
+#' splitting pattern. The resulting shorter character strings are then
+#' concatenated together with \code{newsplit} as the separator. Whenever the
+#' length of the combined result from the start or the previous newline
+#' character exceeds \code{maxCharPerLine}, a newline character is inserted (at
+#' the previous split).
+#' 
+#' Note that individual segements (i.e., sections of the input between
+#' occurrences of \code{split}) whose number of characters exceeds
+#' \code{maxCharPerLine} will not be split.
+#' 
+#' @param labels Character strings to be formatted.
+#' @param maxCharPerLine Integer giving the maximum number of characters per
+#' line.
+#' @param split Pattern to be replaced by newline ('\n') characters.
+#' @param fixed Logical: Should the pattern be interpreted literally
+#' (\code{TRUE}) or as a regular expression (\code{FALSE})? See
+#' \code{\link{strsplit}} and its argument \code{fixed}.
+#' @param newsplit Character string to replace the occurrences of \code{split}
+#' above with.
+#' @param keepSplitAtEOL When replacing an occurrence of \code{split} with a
+#' newline character, should the \code{newsplit} be added before the newline as
+#' well?
+#' @return A character vector of the same length as input \code{labels}.
+#' @author Peter Langfelder
+#' @keywords misc
+#' @examples
+#' 
+#' s = "A quick hare jumps over the brown fox";
+#' formatLabels(s);
+#' 
 formatLabels <- function(labels, maxCharPerLine = 14, split = " ", fixed = TRUE,
                          newsplit = split,
                          keepSplitAtEOL = TRUE) {
@@ -7798,6 +12312,41 @@ formatLabels <- function(labels, maxCharPerLine = 14, split = " ", fixed = TRUE,
 # Truncate labels at the last 'split' before given maximum length, add ...
 # if the label is shortened.
 
+
+
+#' Shorten given character strings by truncating at a suitable separator.
+#' 
+#' This function shortens given character strings so they are not longer than a
+#' given maximum length.
+#' 
+#' Strings whose length (number of characters) is at most \code{maxLength} are
+#' returned unchanged. For those that are longer, the function uses
+#' \code{\link{gregexpr}} to search for the occurrences of \code{split} in each
+#' given character string. If such occurrences are found at positions between
+#' \code{minLength} and \code{maxLength}, the string will be truncated at the
+#' last such \code{split}; otherwise, the string will be truncated at
+#' \code{maxLength}. The \code{ellipsis} is appended to each truncated string.
+#' 
+#' @param strings Character strings to be shortened.
+#' @param maxLength Maximum length (number of characters) in the strings to be
+#' retained. See details for when the returned strings can exceed this length.
+#' @param minLength Minimum length of the returned strings. See details.
+#' @param split Character string giving the split at which the strings can be
+#' truncated. This can be a literal string or a regular expression (if the
+#' latter, \code{fixed} below must be set to \code{FALSE}).
+#' @param fixed Logical: should \code{split} be interpreted as a literal
+#' specification (\code{TRUE}) or as a regular expression (\code{FALSE})?
+#' @param ellipsis Character string that will be appended to every shorten
+#' string, to indicate that the string has been shortened.
+#' @param countEllipsisInLength Logical: should the length of the ellipsis
+#' count toward the minimum and maximum length?
+#' @return A character vector of strings, shortened as necessary. If the input
+#' \code{strings} had non-NULL dimensions and dimnames, these are copied to the
+#' output.
+#' @author Peter Langfelder
+#' @seealso \code{\link{gregexpr}}, the workhorse pattern matching function
+#' \code{\link{formatLabels}} for splitting strings into multiple lines
+#' @keywords misc
 shortenStrings <- function(strings, maxLength = 25, minLength = 10, split = " ",
                            fixed = TRUE,
                            ellipsis = "...",

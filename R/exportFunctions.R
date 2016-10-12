@@ -1,44 +1,43 @@
 # Functions for exporting networks to various network visualization software
-#' @name exportNetworkToVisANT
-#' @rdname exportNetworkToVisANT
-#' @title Export network data in format readable by VisANT
-#' @description
-#' Export network data in a format readable and displayable by the VisANT
+
+
+#' Export network data in format readable by VisANT
+#' 
+#' Exports network data in a format readable and displayable by the VisANT
 #' software.
+#' 
+#' The adjacency matrix is checked for validity. The entries can be negative,
+#' however. The adjacency matrix is expected to also have valid \code{names} or
+#' \code{dimnames[[2]]} that represent the probe names of the corresponding
+#' edges.
+#' 
+#' Whether the output is a weighted network or not, only edges whose (absolute
+#' value of) adjacency are above \code{threshold} will be included in the
+#' output. If \code{maxNConnections} is given, at most \code{maxNConnections}
+#' will be included in the output.
+#' 
+#' If \code{probeToGene} is given, it is expected to have two columns, the
+#' first one corresponding to the probe names, the second to their
+#' corresponding gene names that will be used in the output.
+#' 
 #' @param adjMat adjacency matrix of the network to be exported.
 #' @param file character string specifying the file name of the file in which
 #' the data should be written. If not given, no file will be created. The file
 #' is in a plain text format.
-#' @param weighted logical: should the exported network be weighted?
+#' @param weighted logical: should the exported network by weighted?
 #' @param threshold adjacency threshold for including edges in the output.
 #' @param maxNConnections maximum number of exported adjacency edges. This can
 #' be used as another filter on the exported edges.
-#' @param probeToGene optional specification of a conversion between probe names
-#' (that label columns and rows of adjacency) and gene names (that should label
-#' nodes in the output).
-#' @details
-#' The adjacency matrix is checked for validity. The entries can be negative,
-#' however. The adjacency matrix is expected to also have valid names or
-#' dimnames[[2]] that represent the probe names of the corresponding edges.
-#'
-#' Whether the output is a weighted network or not, only edges whose (absolute
-#' value of) adjacency are above threshold will be included in the output. If
-#' maxNConnections is given, at most maxNConnections will be included in the
-#' output.
-#'
-#' If probeToGene is given, it is expected to have two columns, the first one
-#' corresponding to the probe names, the second to their corresponding gene
-#' names that will be used in the output.
-#' @return
-#' A data frame containing the network information suitable as input to VisANT.
-#' The same data frame is also written into a file specified by file, if given.
-#' @author
-#' Peter Langfelder
-#' @references
-#' VisANT software is available from \url{http://visant.bu.edu/}
-#' @seealso
-#' \code{\link{exportNetworkToCytoscape}}
-#' @export
+#' @param probeToGene optional specification of a conversion between probe
+#' names (that label columns and rows of \code{adjacency}) and gene names (that
+#' should label nodes in the output).
+#' @return A data frame containing the network information suitable as input to
+#' VisANT. The same data frame is also written into a file specified by
+#' \code{file}, if given.
+#' @author Peter Langfelder
+#' @references VisANT software is available from http://visant.bu.edu/.
+#' @keywords misc
+#' @export exportNetworkToVisANT
 exportNetworkToVisANT = function(
   adjMat,
   file = NULL,
@@ -87,28 +86,39 @@ exportNetworkToVisANT = function(
   invisible(visAntData)
 }
 
-#' @name exportNetworkToCytoscape
-#' @rdname exportNetworkToCytoscape
-#' @title Export network to Cytoscape
-#' @description
+
+
+#' Export network to Cytoscape
+#' 
 #' This function exports a network in edge and node list files in a format
 #' suitable for importing to Cytoscape.
-#' @inheritParams  exportNetworkToVisANT
-#' @details
+#' 
 #' If the corresponding file names are supplied, the edge and node data is
 #' written to the appropriate files. The edge and node data is also returned as
 #' return value (see below).
-#' @return
-#' A list with the following componens:
-#' \describe{
-#' \item{egdeData}{a data frame containing the edge data, with one row per edge}
-#' \item{nodeData}{a data frame containing the node data, with one row per node}
-#' }
-#' @author
-#' Peter Langfelder
-#' @seealso
-#' \code{\link{exportNetworkToVisANT}}
-#' @export
+#' 
+#' @param adjMat adjacency matrix giving connection strengths among the nodes
+#' in the network.
+#' @param edgeFile file name of the file to contain the edge information.
+#' @param nodeFile file name of the file to contain the node information.
+#' @param weighted logical: should the exported network be weighted?
+#' @param threshold adjacency threshold for including edges in the output.
+#' @param nodeNames names of the nodes. If not given, \code{dimnames} of
+#' \code{adjMat} will be used.
+#' @param altNodeNames optional alternate names for the nodes, for example gene
+#' names if nodes are labeled by probe IDs.
+#' @param nodeAttr optional node attribute, for example module color. Can be a
+#' vector or a data frame.
+#' @param includeColNames logical: should column names be included in the
+#' output files? Note that Cytoscape can read files both with and without
+#' column names.
+#' @return A list with the following componens: \item{egdeData}{a data frame
+#' containing the edge data, with one row per edge} \item{nodeData}{a data
+#' frame containing the node data, with one row per node}
+#' @author Peter Langfelder
+#' @seealso \code{\link{exportNetworkToVisANT}}
+#' @keywords misc
+#' @export exportNetworkToCytoscape
 exportNetworkToCytoscape = function(
   adjMat,
   edgeFile = NULL,

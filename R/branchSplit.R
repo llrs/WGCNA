@@ -46,6 +46,33 @@
 # Assumes correct input: multiExpr is scaled to mean 0 and variance 1, branch1 and branch2 are numeric
 # indices that have no overlap.
 
+
+
+#' Branch dissimilarity based on eigennodes (eigengenes).
+#' 
+#' Calculation of branch dissimilarity based on eigennodes (eigengenes) in
+#' single set and multi-data situations. This function is used as a plugin for
+#' the dynamicTreeCut package and the user should not call this function
+#' directly. This function is experimental and subject to change.
+#' 
+#' 
+#' @aliases branchEigengeneDissim mtd.branchEigengeneDissim
+#' @param expr Expression data.
+#' @param multiExpr Expression data in multi-set format.
+#' @param branch1 Branch 1.
+#' @param branch2 Branch 2.
+#' @param corFnc Correlation function.
+#' @param corOptions Other arguments to the correlation function.
+#' @param consensusQuantile Consensus quantile.
+#' @param signed Should the network be considered signed?
+#' @param reproduceQuantileError Logical: should an error in the calculation
+#' from previous versions, which caused the true consensus quantile to be
+#' \code{1-consensusQuantile} rather than \code{consensusQuantile}, be
+#' reproduced? Use this only to reproduce old calculations.
+#' @param \dots Other arguments for compatibility; currently unused.
+#' @return A single number or a list containing details of the calculation.
+#' @author Peter Langfelder
+#' @keywords misc
 branchEigengeneDissim = function(expr, branch1, branch2,
                             corFnc = cor, corOptions = list(use = 'p'),
                             signed = TRUE, ...)
@@ -157,6 +184,27 @@ mtd.branchEigengeneDissim = function(multiExpr, branch1, branch2,
 
   
 
+
+
+#' Branch split.
+#' 
+#' Calculation of branch split based on expression data. This function is used
+#' as a plugin for the dynamicTreeCut package and the user should not call this
+#' function directly.
+#' 
+#' 
+#' @param expr Expression data.
+#' @param branch1 Branch 1,
+#' @param branch2 Branch 2.
+#' @param discardProp Proportion of data to be discarded as outliers.
+#' @param minCentralProp Minimum central proportion
+#' @param nConsideredPCs Number of principal components to consider.
+#' @param signed Should the network be considered signed?
+#' @param getDetails Should details of the calculation be returned?
+#' @param \dots Other arguments. Present for compatibility; currently unusued.
+#' @return A single number or a list containing detils of the calculation.
+#' @author Peter Langfelder
+#' @keywords misc
 branchSplit = function(expr, branch1, branch2, discardProp = 0.05, minCentralProp = 0.75, 
                        nConsideredPCs = 3, signed = FALSE, getDetails = TRUE, ...)
 {
@@ -276,6 +324,26 @@ branchSplit = function(expr, branch1, branch2, discardProp = 0.05, minCentralPro
 }
 
 
+
+
+#' Branch split based on dissimilarity.
+#' 
+#' Calculation of branch split based on a dissimilarity matrix. This function
+#' is used as a plugin for the dynamicTreeCut package and the user should not
+#' call this function directly. This function is experimental and subject to
+#' change.
+#' 
+#' 
+#' @param dissimMat Dissimilarity matrix.
+#' @param branch1 Branch 1.
+#' @param branch2 Branch 2.
+#' @param upperP Percentile of (closest) objects to be considered.
+#' @param minNumberInSplit Minimum number of objects to be considered.
+#' @param getDetails Should details of the calculation be returned?
+#' @param \dots Other arguments for compatibility; currently unused.
+#' @return A single number or a list containing details of the calculation.
+#' @author Peter Langfelder
+#' @keywords misc
 branchSplit.dissim = function(dissimMat, branch1, branch2, upperP, 
                               minNumberInSplit = 5, getDetails = FALSE, ...)
 {
@@ -400,6 +468,51 @@ branchSplit.dissim = function(dissimMat, branch1, branch2, upperP,
 
 # stabilityLabels: a matrix of dimensions (nGenes) x (number of alternate labels)
 
+
+
+#' Branch split (dissimilarity) statistic derived from labels determined from a
+#' stability study
+#' 
+#' This function evaluates how different two branches are based on a series of
+#' cluster labels that are usually obtained in a stability study but can in
+#' principle be arbitrary. The idea is to quantify how well membership on the
+#' two tested branches can be predicted from clusters in the given stability
+#' labels.
+#' 
+#' The idea is to measure how well clusters in \code{stabilityLabels} can
+#' distinguish the two given branches. For example, if a cluster C intersects
+#' with branch1 but not branch2, it can distinguish branches 1 and 2 perfectly.
+#' On the other hand, if there is a cluster C that contains both branch 1 and
+#' branch 2, the two branches are indistinguishable (based on the test
+#' clustering).
+#' 
+#' Formally, for each cluster C in each clustering in \code{stabilityLabels},
+#' its contribution to the branch similarity is min(r1, r2), where r1 =
+#' |intersect(C, branch1)|/|branch1| and r2 = |intersect(C,
+#' branch2)|/|branch2|. The statistics for clusters in each clustering are
+#' added; the sums are then averaged across the clusterings. Since the result
+#' is a similarity statistic, the final dissimilarity is defined as
+#' 1-similarity. The dissimilarity ranges between 0 (branch1 and branch2 are
+#' indistinguishable) and 1 (branch1 and branch2 are perfectly
+#' distinguishable).
+#' 
+#' This is a very simple statistic that does not attempt to correct for the
+#' similarity that would be expected by chance.
+#' 
+#' @param branch1 A vector of indices giving members of branch 1.
+#' @param branch2 A vector of indices giving members of branch 1.
+#' @param stabilityLabels A matrix of cluster labels. Each column corresponds
+#' to one clustering and each row to one object (whose indices \code{branch1}
+#' and \code{branch2} refer to).
+#' @param ignoreLabels Label or labels that do not constitute proper clusters
+#' in \code{stabilityLabels}, for example because they label unassigned
+#' objects.
+#' @param \dots Ignored.
+#' @return Branch dissimilarity (a single number between 0 and 1).
+#' @author Peter Langfelder
+#' @seealso This function is utilized in \code{\link{blockwiseModules}} and
+#' \code{\link{blockwiseConsensusModules}}.
+#' @keywords misc
 branchSplitFromStabilityLabels = function(
             branch1, branch2, 
             stabilityLabels, ignoreLabels = 0, ...)

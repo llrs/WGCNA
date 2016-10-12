@@ -2,6 +2,38 @@
 # same labels
 
 
+
+
+#' Calculate overlap of modules
+#' 
+#' The function calculates overlap counts and Fisher exact test p-values for
+#' the given two sets of module assignments.
+#' 
+#' 
+#' @param labels1 a vector containing module labels.
+#' @param labels2 a vector containing module labels to be compared to
+#' \code{labels1}.
+#' @param na.rm logical: should entries missing in either \code{labels1} or
+#' \code{labels2} be removed?
+#' @param ignore an optional vector giving label levels that are to be ignored.
+#' @param levels1 optional vector giving levels for \code{labels1}. Defaults to
+#' sorted unique non-missing values in \code{labels1} that are not present in
+#' \code{ignore}.
+#' @param levels2 optional vector giving levels for \code{labels2}. Defaults to
+#' sorted unique non-missing values in \code{labels2} that are not present in
+#' \code{ignore}.
+#' @return A list with the following components: \item{countTable}{a matrix
+#' whose rows correspond to modules (unique labels) in \code{labels1} and whose
+#' columns correspond to modules (unique labels) in \code{labels2}, giving the
+#' number of objects in the intersection of the two respective modules. }
+#' 
+#' \item{pTable}{a matrix whose rows correspond to modules (unique labels) in
+#' \code{labels1} and whose columns correspond to modules (unique labels) in
+#' \code{labels2}, giving Fisher's exact test significance p-values for the
+#' overlap of the two respective modules. }
+#' @author Peter Langfelder
+#' @seealso \code{\link{fisher.test}}, \code{\link{matchLabels}}
+#' @keywords misc
 overlapTable = function(labels1, labels2, na.rm = TRUE, ignore = NULL,
                         levels1 = NULL, levels2 = NULL)
 {
@@ -49,6 +81,57 @@ overlapTable = function(labels1, labels2, na.rm = TRUE, ignore = NULL,
 }
  
 
+
+
+#' Relabel module labels to best match the given reference labels
+#' 
+#' Given a \code{source} and \code{reference} vectors of module labels, the
+#' function produces a module labeling that is equivalent to \code{source}, but
+#' individual modules are re-labeled so that modules with significant overlap
+#' in \code{source} and \code{reference} have the same labels.
+#' 
+#' Each column of \code{source} is treated separately. Unlike in previous
+#' version of this function, source and reference labels can be any labels, not
+#' necessarily of the same type.
+#' 
+#' The function calculates the overlap of the \code{source} and
+#' \code{reference} modules using Fisher's exact test. It then attempts to
+#' relabel \code{source} modules such that each \code{source} module gets the
+#' label of the \code{reference} module that it overlaps most with, subject to
+#' not renaming two \code{source} modules to the same \code{reference} module.
+#' (If two \code{source} modules point to the same \code{reference} module, the
+#' one with the more significant overlap is chosen.)
+#' 
+#' Those \code{source} modules that cannot be matched to a \code{reference}
+#' module are labeled using those labels from \code{extraLabels} that do not
+#' occur in either of \code{source}, \code{reference} or \code{ignoreLabels}.
+#' 
+#' @param source a vector or a matrix of reference labels. The labels may be
+#' numeric or character.
+#' @param reference a vector of reference labels.
+#' @param pThreshold threshold of Fisher's exact test for considering modules
+#' to have a significant overlap.
+#' @param na.rm logical: should missing values in either \code{source} or
+#' \code{reference} be removed? If not, missing values may be treated as a
+#' standard label or the function may throw an error (exact behaviour depends
+#' on whether the input labels are numeric or not).
+#' @param ignoreLabels labels in \code{source} and \code{reference} to be
+#' considered unmatchable. These labels are excluded from the re-labeling
+#' procedure.
+#' @param extraLabels a vector of labels for modules in \code{source} that
+#' cannot be matched to any modules in \code{reference}. The user should ensure
+#' that this vector contains enough labels since the function automatically
+#' removes a values that occur in either \code{source}, \code{reference} or
+#' \code{ignoreLabels}, to avoid possible confusion.
+#' @return A vector (if the input \code{source} labels are a vector) or a
+#' matrix (if the input \code{source} labels are a matrix) of the new labels.
+#' @author Peter Langfelder
+#' @seealso
+#' 
+#' \code{\link{overlapTable}} for calculation of overlap counts and p-values;
+#' 
+#' \code{\link{standardColors}} for standard non-numeric WGCNA labels.
+#' @keywords misc
 matchLabels = function(source, reference, pThreshold = 5e-2, na.rm = TRUE,
                        ignoreLabels = if (is.numeric(reference)) 0 else "grey", 
                        extraLabels = if (is.numeric(reference)) c(1:1000) else standardColors())

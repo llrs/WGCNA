@@ -1,45 +1,53 @@
 #  TOM similarity via a call to a compiled code.
-#' @rdname TOMsimilarityFromExpr
-#' @name TOMsimilarityFromExpr
-#' @title Topological overlap matrix
-#' @description
+
+
+#' Topological overlap matrix
+#' 
 #' Calculation of the topological overlap matrix from given expression data.
-#' @inheritParams adjacency
+#' 
+#' 
+#' @param datExpr expression data. A data frame in which columns are genes and
+#' rows ar samples. NAs are allowed, but not too many.
 #' @param corType character string specifying the correlation to be used.
-#' Allowed values are (unique abbreviations of) "pearson" and "bicor",
-#' corresponding to Pearson and bidweight midcorrelation, respectively.
-#' Missing values are handled using the pairwise.complete.obs option.
-#' @param networkType network type. Allowed values are (unique abbreviations of)
-#' "unsigned", "signed", "signed hybrid". See \code{\link{adjacency}}.
-#' @param TOMType one of "none", "unsigned", "signed". If "none", adjacency will
-#' be used for clustering. If "unsigned", the standard TOM will be used (more
-#' generally, TOM function will receive the adjacency as input). If "signed",
-#' TOM will keep track of the sign of correlations between neighbors.
+#' Allowed values are (unique abbreviations of) \code{"pearson"} and
+#' \code{"bicor"}, corresponding to Pearson and bidweight midcorrelation,
+#' respectively. Missing values are handled using the
+#' \code{pairwise.complete.obs} option.
+#' @param networkType network type. Allowed values are (unique abbreviations
+#' of) \code{"unsigned"}, \code{"signed"}, \code{"signed hybrid"}. See
+#' \code{\link{adjacency}}.
+#' @param power soft-thresholding power for netwoek construction.
+#' @param TOMType one of \code{"none"}, \code{"unsigned"}, \code{"signed"}. If
+#' \code{"none"}, adjacency will be used for clustering. If \code{"unsigned"},
+#' the standard TOM will be used (more generally, TOM function will receive the
+#' adjacency as input). If \code{"signed"}, TOM will keep track of the sign of
+#' correlations between neighbors.
 #' @param TOMDenom a character string specifying the TOM variant to be used.
-#' Recognized values are "min" giving the standard TOM described in Zhang and
-#' Horvath (2005), and "mean" in which the min function in the denominator is
-#' replaced by mean. The "mean" may produce better results but at this time
-#' should be considered experimental.
-#' @param maxPOutliers only used for corType=="bicor". Specifies the maximum
-#' percentile of data that can be considered outliers on either side of the
-#' median separately. For each side of the median, if higher percentile than
-#' maxPOutliers is considered an outlier by the weight function based on
-#' 9*mad(x), the width of the weight function is increased such that the
-#' percentile of outliers on that side of the median equals maxPOutliers.
-#' Using maxPOutliers=1 will effectively disable all weight function broadening;
-#' using maxPOutliers=0 will give results that are quite similar (but not equal
-#' to) Pearson correlation.
+#' Recognized values are \code{"min"} giving the standard TOM described in
+#' Zhang and Horvath (2005), and \code{"mean"} in which the \code{min} function
+#' in the denominator is replaced by \code{mean}. The \code{"mean"} may produce
+#' better results but at this time should be considered experimental.
+#' @param maxPOutliers only used for \code{corType=="bicor"}. Specifies the
+#' maximum percentile of data that can be considered outliers on either side of
+#' the median separately. For each side of the median, if higher percentile
+#' than \code{maxPOutliers} is considered an outlier by the weight function
+#' based on \code{9*mad(x)}, the width of the weight function is increased such
+#' that the percentile of outliers on that side of the median equals
+#' \code{maxPOutliers}. Using \code{maxPOutliers=1} will effectively disable
+#' all weight function broadening; using \code{maxPOutliers=0} will give
+#' results that are quite similar (but not equal to) Pearson correlation.
 #' @param quickCor real number between 0 and 1 that controls the handling of
 #' missing data in the calculation of correlations. See details.
 #' @param pearsonFallback Specifies whether the bicor calculation, if used,
 #' should revert to Pearson when median absolute deviation (mad) is zero.
-#' Recongnized values are (abbreviations of) "none", "individual", "all". If set
-#' to "none", zero mad will result in NA for the corresponding correlation. If
-#' set to "individual", Pearson calculation will be used only for columns that
-#' have zero mad. If set to "all", the presence of a single zero mad will cause
-#' the whole variable to be treated in Pearson correlation manner (as if the
-#' corresponding robust option was set to FALSE). Has no effect for Pearson
-#' correlation. See \code{\link{bicor}}.
+#' Recongnized values are (abbreviations of) \code{"none", "individual",
+#' "all"}. If set to \code{"none"}, zero mad will result in \code{NA} for the
+#' corresponding correlation.  If set to \code{"individual"}, Pearson
+#' calculation will be used only for columns that have zero mad.  If set to
+#' \code{"all"}, the presence of a single zero mad will cause the whole
+#' variable to be treated in Pearson correlation manner (as if the
+#' corresponding \code{robust} option was set to \code{FALSE}). Has no effect
+#' for Pearson correlation. See \code{\link{bicor}}.
 #' @param cosineCorrelation logical: should the cosine version of the
 #' correlation calculation be used? The cosine calculation differs from the
 #' standard one in that it does not subtract the mean.
@@ -53,19 +61,16 @@
 #' dynamically, otherwise correlation calculations will use 2 threads.
 #' @param verbose integer level of verbosity. Zero means silent, higher values
 #' make the output progressively more and more verbose.
-#' @param indent indentation for diagnostic messages. Zero means no indentation,
-#' each unit adds two spaces.
-#' @return
-#' A matrix holding the topological overlap.
-#' @author
-#' Peter Langelder
-#' @references
-#' Bin Zhang and Steve Horvath (2005) "A General Framework for Weighted Gene
-#' Co-Expression Network Analysis", Statistical Applications in Genetics and
-#' Molecular Biology: Vol. 4: No. 1, Article 17
-#' @seealso
-#' \code{\link{TOMsimilarity}}
-#' @export
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @return A matrix holding the topological overlap.
+#' @author Peter Langfelder
+#' @seealso \code{\link{TOMsimilarity}}
+#' @references Bin Zhang and Steve Horvath (2005) "A General Framework for
+#' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
+#' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
+#' @keywords misc
+#' @export TOMsimilarityFromExpr
 TOMsimilarityFromExpr = function(datExpr, corType = "pearson",
                                  networkType = "unsigned",
                                  power = 6, TOMType = "signed", TOMDenom = "min",
@@ -132,39 +137,52 @@ TOMsimilarityFromExpr = function(datExpr, corType = "pearson",
 
 #
 # TOMsimilarity (from adjacency)
-#' @rdname TOMsimilarity
-#' @name TOMsimilarity
-#' @aliases TOMdist
-#' @title Topological overlap matrix similarity and dissimilarity
-#' @description
+
+
+#' Topological overlap matrix similarity and dissimilarity
+#' 
 #' Calculation of the topological overlap matrix from a given adjacency matrix.
-#' @inheritParams TOMsimilarityFromExpr
-#' @param adjMat adjacency matrix, that is a square, symmetric matrix with
-#' entries between 0 and 1 (negative values are allowed if TOMType=="signed").
-#' @details
-#' The functions perform basically the same calculations of topological overlap.
-#' TOMdist turns the overlap (which is a measure of similarity) into a measure
-#' of dissimilarity by subtracting it from 1.
-#'
+#' 
+#' 
+#' The functions perform basically the same calculations of topological
+#' overlap. \code{TOMdist} turns the overlap (which is a measure of similarity)
+#' into a measure of dissimilarity by subtracting it from 1.
+#' 
 #' Basic checks on the adjacency matrix are performed and missing entries are
-#' replaced by zeros. If TOMType = "unsigned", entries of the adjacency matrix
-#' are required to lie between 0 and 1; for TOMType = "signed" they can be
-#' between -1 and 1. In both cases the resulting TOM entries, as well as the
-#' corresponding dissimilarities, lie between 0 and 1.
-#'
+#' replaced by zeros.  If \code{TOMType = "unsigned"}, entries of the adjacency
+#' matrix are required to lie between 0 and 1; for \code{TOMType = "signed"}
+#' they can be between -1 and 1. In both cases the resulting TOM entries, as
+#' well as the corresponding dissimilarities, lie between 0 and 1.
+#' 
 #' The underlying C code assumes that the diagonal of the adjacency matrix
 #' equals 1. If this is not the case, the diagonal of the input is set to 1
 #' before the calculation begins.
-#' @return
-#' A matrix holding the topological overlap.
-#' @author
-#' Peter Langfelder
-#' @references
-#' Bin Zhang and Steve Horvath (2005) "A General Framework for Weighted Gene
-#' Co-Expression Network Analysis", Statistical Applications in Genetics and
-#' Molecular Biology: Vol. 4: No. 1, Article 17
-#' @seealso
-#' \code{\link{TOMsimilarityFromExpr}}
+#' 
+#' @aliases TOMsimilarity TOMdist
+#' @param adjMat adjacency matrix, that is a square, symmetric matrix with
+#' entries between 0 and 1 (negative values are allowed if
+#' \code{TOMType=="signed"}).
+#' @param TOMType a character string specifying TOM type to be calculated. One
+#' of \code{"unsigned"}, \code{"signed"}. If \code{"unsigned"}, the standard
+#' TOM will be used (more generally, TOM function will receive the adjacency as
+#' input). If \code{"signed"}, TOM will keep track of the sign of the adjacency
+#' between neighbors.
+#' @param TOMDenom a character string specifying the TOM variant to be used.
+#' Recognized values are \code{"min"} giving the standard TOM described in
+#' Zhang and Horvath (2005), and \code{"mean"} in which the \code{min} function
+#' in the denominator is replaced by \code{mean}. The \code{"mean"} may produce
+#' better results but at this time should be considered experimental.
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @return A matrix holding the topological overlap.
+#' @author Peter Langfelder
+#' @seealso \code{\link{TOMsimilarityFromExpr}}
+#' @references Bin Zhang and Steve Horvath (2005) "A General Framework for
+#' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
+#' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
+#' @keywords misc
 TOMsimilarity = function(adjMat, TOMType = "unsigned", TOMDenom = "min",
                          verbose = 1, indent = 0) {
   TOMTypeC = pmatch(TOMType, .TOMTypes)-1;
@@ -216,6 +234,295 @@ TOMdist = function(adjMat, TOMType = "unsigned", TOMDenom = "min", verbose = 1, 
 #==========================================================================================================
 # Function to calculate modules and eigengenes from all genes.
 
+
+
+#' Automatic network construction and module detection
+#' 
+#' This function performs automatic network construction and module detection
+#' on large expression datasets in a block-wise manner.
+#' 
+#' Before module detection starts, genes and samples are optionally checked for
+#' the presence of \code{NA}s. Genes and/or samples that have too many
+#' \code{NA}s are flagged as bad and removed from the analysis; bad genes will
+#' be automatically labeled as unassigned, while the returned eigengenes will
+#' have \code{NA} entries for all bad samples.
+#' 
+#' If \code{blocks} is not given and the number of genes exceeds
+#' \code{maxBlockSize}, genes are pre-clustered into blocks using the function
+#' \code{\link{projectiveKMeans}}; otherwise all genes are treated in a single
+#' block.
+#' 
+#' For each block of genes, the network is constructed and (if requested)
+#' topological overlap is calculated. If requested, the topological overlaps
+#' are returned as part of the return value list. Genes are then clustered
+#' using average linkage hierarchical clustering and modules are identified in
+#' the resulting dendrogram by the Dynamic Hybrid tree cut. Found modules are
+#' trimmed of genes whose correlation with module eigengene (KME) is less than
+#' \code{minKMEtoStay}. Modules in which fewer than \code{minCoreKMESize} genes
+#' have KME higher than \code{minCoreKME} are disbanded, i.e., their
+#' constituent genes are pronounced unassigned.
+#' 
+#' After all blocks have been processed, the function checks whether there are
+#' genes whose KME in the module they assigned is lower than KME to another
+#' module. If p-values of the higher correlations are smaller than those of the
+#' native module by the factor \code{reassignThresholdPS}, the gene is
+#' re-assigned to the closer module.
+#' 
+#' In the last step, modules whose eigengenes are highly correlated are merged.
+#' This is achieved by clustering module eigengenes using the dissimilarity
+#' given by one minus their correlation, cutting the dendrogram at the height
+#' \code{mergeCutHeight} and merging all modules on each branch. The process is
+#' iterated until no modules are merged. See \code{\link{mergeCloseModules}}
+#' for more details on module merging.
+#' 
+#' The argument \code{quick} specifies the precision of handling of missing
+#' data in the correlation calculations. Zero will cause all calculations to be
+#' executed precisely, which may be significantly slower than calculations
+#' without missing data. Progressively higher values will speed up the
+#' calculations but introduce progressively larger errors. Without missing
+#' data, all column means and variances can be pre-calculated before the
+#' covariances are calculated. When missing data are present, exact
+#' calculations require the column means and variances to be calculated for
+#' each covariance. The approximate calculation uses the pre-calculated mean
+#' and variance and simply ignores missing data in the covariance calculation.
+#' If the number of missing data is high, the pre-calculated means and
+#' variances may be very different from the actual ones, thus potentially
+#' introducing large errors.  The \code{quick} value times the number of rows
+#' specifies the maximum difference in the number of missing entries for mean
+#' and variance calculations on the one hand and covariance on the other hand
+#' that will be tolerated before a recalculation is triggered. The hope is that
+#' if only a few missing data are treated approximately, the error introduced
+#' will be small but the potential speedup can be significant.
+#' 
+#' @param datExpr expression data. A data frame in which columns are genes and
+#' rows ar samples. NAs are allowed, but not too many.
+#' @param checkMissingData logical: should data be checked for excessive
+#' numbers of missing entries in genes and samples, and for genes with zero
+#' variance? See details.
+#' @param blocks optional specification of blocks in which hierarchical
+#' clustering and module detection should be performed. If given, must be a
+#' numeric vector with one entry per column (gene) of \code{exprData} giving
+#' the number of the block to which the corresponding gene belongs.
+#' @param maxBlockSize integer giving maximum block size for module detection.
+#' Ignored if \code{blocks} above is non-NULL. Otherwise, if the number of
+#' genes in \code{datExpr} exceeds \code{maxBlockSize}, genes will be
+#' pre-clustered into blocks whose size should not exceed \code{maxBlockSize}.
+#' @param blockSizePenaltyPower number specifying how strongly blocks should be
+#' penalized for exceeding the maximum size. Set to a lrge number or \code{Inf}
+#' if not exceeding maximum block size is very important.
+#' @param nPreclusteringCenters number of centers for pre-clustering. Larger
+#' numbers typically results in better but slower pre-clustering.
+#' @param randomSeed integer to be used as seed for the random number generator
+#' before the function starts. If a current seed exists, it is saved and
+#' restored upon exit. If \code{NULL} is given, the function will not save and
+#' restore the seed.
+#' @param loadTOM logical: should Topological Overlap Matrices be loaded from
+#' previously saved files (\code{TRUE}) or calculated (\code{FALSE})? It may be
+#' useful to load previously saved TOM matrices if these have been calculated
+#' previously, since TOM calculation is often the most computationally
+#' expensive part of network construction and module identification. See
+#' \code{saveTOMs} and \code{saveTOMFileBase} below for when and how TOM files
+#' are saved, and what the file names are. If \code{loadTOM} is \code{TRUE} but
+#' the files cannot be found, or do not contain the correct TOM data, TOM will
+#' be recalculated.
+#' @param corType character string specifying the correlation to be used.
+#' Allowed values are (unique abbreviations of) \code{"pearson"} and
+#' \code{"bicor"}, corresponding to Pearson and bidweight midcorrelation,
+#' respectively. Missing values are handled using the
+#' \code{pairwise.complete.obs} option.
+#' @param maxPOutliers only used for \code{corType=="bicor"}. Specifies the
+#' maximum percentile of data that can be considered outliers on either side of
+#' the median separately. For each side of the median, if higher percentile
+#' than \code{maxPOutliers} is considered an outlier by the weight function
+#' based on \code{9*mad(x)}, the width of the weight function is increased such
+#' that the percentile of outliers on that side of the median equals
+#' \code{maxPOutliers}. Using \code{maxPOutliers=1} will effectively disable
+#' all weight function broadening; using \code{maxPOutliers=0} will give
+#' results that are quite similar (but not equal to) Pearson correlation.
+#' @param quickCor real number between 0 and 1 that controls the handling of
+#' missing data in the calculation of correlations. See details.
+#' @param pearsonFallback Specifies whether the bicor calculation, if used,
+#' should revert to Pearson when median absolute deviation (mad) is zero.
+#' Recongnized values are (abbreviations of) \code{"none", "individual",
+#' "all"}. If set to \code{"none"}, zero mad will result in \code{NA} for the
+#' corresponding correlation.  If set to \code{"individual"}, Pearson
+#' calculation will be used only for columns that have zero mad.  If set to
+#' \code{"all"}, the presence of a single zero mad will cause the whole
+#' variable to be treated in Pearson correlation manner (as if the
+#' corresponding \code{robust} option was set to \code{FALSE}). Has no effect
+#' for Pearson correlation.  See \code{\link{bicor}}.
+#' @param cosineCorrelation logical: should the cosine version of the
+#' correlation calculation be used? The cosine calculation differs from the
+#' standard one in that it does not subtract the mean.
+#' @param power soft-thresholding power for network construction.
+#' @param networkType network type. Allowed values are (unique abbreviations
+#' of) \code{"unsigned"}, \code{"signed"}, \code{"signed hybrid"}. See
+#' \code{\link{adjacency}}.
+#' @param replaceMissingAdjacencies logical: should missing values in the
+#' calculation of adjacency be replaced by 0?
+#' @param TOMType one of \code{"none"}, \code{"unsigned"}, \code{"signed"}. If
+#' \code{"none"}, adjacency will be used for clustering. If \code{"unsigned"},
+#' the standard TOM will be used (more generally, TOM function will receive the
+#' adjacency as input). If \code{"signed"}, TOM will keep track of the sign of
+#' correlations between neighbors.
+#' @param TOMDenom a character string specifying the TOM variant to be used.
+#' Recognized values are \code{"min"} giving the standard TOM described in
+#' Zhang and Horvath (2005), and \code{"mean"} in which the \code{min} function
+#' in the denominator is replaced by \code{mean}. The \code{"mean"} may produce
+#' better results but at this time should be considered experimental.
+#' @param getTOMs deprecated, please use saveTOMs below.
+#' @param saveTOMs logical: should the consensus topological overlap matrices
+#' for each block be saved and returned?
+#' @param saveTOMFileBase character string containing the file name base for
+#' files containing the consensus topological overlaps. The full file names
+#' have \code{"block.1.RData"}, \code{"block.2.RData"} etc. appended. These
+#' files are standard R data files and can be loaded using the
+#' \code{\link{load}} function.
+#' @param deepSplit integer value between 0 and 4. Provides a simplified
+#' control over how sensitive module detection should be to module splitting,
+#' with 0 least and 4 most sensitive. See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param detectCutHeight dendrogram cut height for module detection. See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param minModuleSize minimum module size for module detection. See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param maxCoreScatter maximum scatter of the core for a branch to be a
+#' cluster, given as the fraction of \code{cutHeight} relative to the 5th
+#' percentile of joining heights. See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param minGap minimum cluster gap given as the fraction of the difference
+#' between \code{cutHeight} and the 5th percentile of joining heights. See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param maxAbsCoreScatter maximum scatter of the core for a branch to be a
+#' cluster given as absolute heights. If given, overrides
+#' \code{maxCoreScatter}. See \code{\link[dynamicTreeCut]{cutreeDynamic}} for
+#' more details.
+#' @param minAbsGap minimum cluster gap given as absolute height difference. If
+#' given, overrides \code{minGap}. See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param minSplitHeight Minimum split height given as the fraction of the
+#' difference between \code{cutHeight} and the 5th percentile of joining
+#' heights. Branches merging below this height will automatically be merged.
+#' Defaults to zero but is used only if \code{minAbsSplitHeight} below is
+#' \code{NULL}.
+#' @param minAbsSplitHeight Minimum split height given as an absolute height.
+#' Branches merging below this height will automatically be merged. If not
+#' given (default), will be determined from \code{minSplitHeight} above.
+#' @param useBranchEigennodeDissim Logical: should branch eigennode (eigengene)
+#' dissimilarity be considered when merging branches in Dynamic Tree Cut?
+#' @param minBranchEigennodeDissim Minimum consensus branch eigennode
+#' (eigengene) dissimilarity for branches to be considerd separate. The branch
+#' eigennode dissimilarity in individual sets is simly 1-correlation of the
+#' eigennodes; the consensus is defined as quantile with probability
+#' \code{consensusQuantile}.
+#' @param stabilityLabels Optional matrix of cluster labels that are to be used
+#' for calculating branch dissimilarity based on split stability. The number of
+#' rows must equal the number of genes in \code{multiExpr}; the number of
+#' columns (clusterings) is arbitrary. See
+#' \code{\link{branchSplitFromStabilityLabels}} for details.
+#' @param minStabilityDissim Minimum stability dissimilarity criterion for two
+#' branches to be considered separate. Should be a number between 0
+#' (essentially no dissimilarity required) and 1 (perfect dissimilarity or
+#' distinguishability based on \code{stabilityLabels}). See
+#' \code{\link{branchSplitFromStabilityLabels}} for details.
+#' @param pamStage logical.  If TRUE, the second (PAM-like) stage of module
+#' detection will be performed.  See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param pamRespectsDendro Logical, only used when \code{pamStage} is
+#' \code{TRUE}.  If \code{TRUE}, the PAM stage will respect the dendrogram in
+#' the sense an object can be PAM-assigned only to clusters that lie below it
+#' on the branch that the object is merged into.  See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param minCoreKME a number between 0 and 1. If a detected module does not
+#' have at least \code{minModuleKMESize} genes with eigengene connectivity at
+#' least \code{minCoreKME}, the module is disbanded (its genes are unlabeled
+#' and returned to the pool of genes waiting for mofule detection).
+#' @param minCoreKMESize see \code{minCoreKME} above.
+#' @param minKMEtoStay genes whose eigengene connectivity to their module
+#' eigengene is lower than \code{minKMEtoStay} are removed from the module.
+#' @param reassignThreshold p-value ratio threshold for reassigning genes
+#' between modules. See Details.
+#' @param mergeCutHeight dendrogram cut height for module merging.
+#' @param impute logical: should imputation be used for module eigengene
+#' calculation? See \code{\link{moduleEigengenes}} for more details.
+#' @param trapErrors logical: should errors in calculations be trapped?
+#' @param numericLabels logical: should the returned modules be labeled by
+#' colors (\code{FALSE}), or by numbers (\code{TRUE})?
+#' @param nThreads non-negative integer specifying the number of parallel
+#' threads to be used by certain parts of correlation calculations. This option
+#' only has an effect on systems on which a POSIX thread library is available
+#' (which currently includes Linux and Mac OSX, but excludes Windows).  If
+#' zero, the number of online processors will be used if it can be determined
+#' dynamically, otherwise correlation calculations will use 2 threads.
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @param ... Other arguments.
+#' @return A list with the following components:
+#' 
+#' \item{colors }{ a vector of color or numeric module labels for all genes.}
+#' 
+#' \item{unmergedColors }{ a vector of color or numeric module labels for all
+#' genes before module merging.}
+#' 
+#' \item{MEs }{ a data frame containing module eigengenes of the found modules
+#' (given by \code{colors}).}
+#' 
+#' \item{goodSamples}{numeric vector giving indices of good samples, that is
+#' samples that do not have too many missing entries. }
+#' 
+#' \item{goodGenes}{ numeric vector giving indices of good genes, that is genes
+#' that do not have too many missing entries.}
+#' 
+#' \item{dendrograms}{ a list whose components conatain hierarchical clustering
+#' dendrograms of genes in each block. }
+#' 
+#' \item{TOMFiles}{ if \code{saveTOMs==TRUE}, a vector of character strings,
+#' one string per block, giving the file names of files (relative to current
+#' directory) in which blockwise topological overlaps were saved. }
+#' 
+#' \item{blockGenes}{ a list whose components give the indices of genes in each
+#' block. }
+#' 
+#' \item{blocks}{if input \code{blocks} was given, its copy; otherwise a vector
+#' of length equal number of genes giving the block label for each gene. Note
+#' that block labels are not necessarilly sorted in the order in which the
+#' blocks were processed (since we do not require this for the input
+#' \code{blocks}). See \code{blockOrder} below. }
+#' 
+#' \item{blockOrder}{ a vector giving the order in which blocks were processed
+#' and in which \code{blockGenes} above is returned. For example,
+#' \code{blockOrder[1]} contains the label of the first-processed block. }
+#' 
+#' \item{MEsOK}{logical indicating whether the module eigengenes were
+#' calculated without errors. }
+#' @note If the input dataset has a large number of genes, consider carefully
+#' the \code{maxBlockSize} as it significantly affects the memory footprint
+#' (and whether the function will fail with a memory allocation error). From a
+#' theoretical point of view it is advantageous to use blocks as large as
+#' possible; on the other hand, using smaller blocks is substantially faster
+#' and often the only way to work with large numbers of genes. As a rough
+#' guide, it is unlikely a standard desktop computer with 4GB memory or less
+#' will be able to work with blocks larger than 8000 genes.
+#' @author Peter Langfelder
+#' @seealso
+#' 
+#' \code{\link{goodSamplesGenes}} for basic quality control and filtering;
+#' 
+#' \code{\link{adjacency}}, \code{\link{TOMsimilarity}} for network
+#' construction;
+#' 
+#' \code{\link[stats]{hclust}} for hierarchical clustering;
+#' 
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for adaptive branch cutting in
+#' hierarchical clustering dendrograms;
+#' 
+#' \code{\link{mergeCloseModules}} for merging of close modules.
+#' @references Bin Zhang and Steve Horvath (2005) "A General Framework for
+#' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
+#' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
+#' @keywords misc
 blockwiseModules = function(
   # Input data
 
@@ -884,7 +1191,94 @@ blockwiseModules = function(
   list(colors = mergedAllColors,
        unmergedColors = colors,
        MEs = allSampleMEs,
+
+
+#' Filter samples with too many missing entries
+#' 
+#' This function checks data for missing entries and returns a list of samples
+#' that pass two criteria on maximum number of missing values: the fraction of
+#' missing values must be below a given threshold and the total number of
+#' missing genes must be below a given threshold.
+#' 
+#' The constants \code{..minNSamples} and \code{..minNGenes} are both set to
+#' the value 4.  For most data sets, the fraction of missing samples criterion
+#' will be much more stringent than the absolute number of missing samples
+#' criterion.
+#' 
+#' @param datExpr expression data. A data frame in which columns are genes and
+#' rows ar samples.
+#' @param useSamples optional specifications of which samples to use for the
+#' check. Should be a logical vector; samples whose entries are \code{FALSE}
+#' will be ignored for the missing value counts. Defaults to using all samples.
+#' @param useGenes optional specifications of genes for which to perform the
+#' check. Should be a logical vector; genes whose entries are \code{FALSE} will
+#' be ignored. Defaults to using all genes.
+#' @param minFraction minimum fraction of non-missing samples for a gene to be
+#' considered good.
+#' @param minNSamples minimum number of good samples for the data set to be
+#' considered fit for analysis. If the actual number of good samples falls
+#' below this threshold, an error will be issued.
+#' @param minNGenes minimum number of non-missing samples for a sample to be
+#' considered good.
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @return A logical vector with one entry per sample that is \code{TRUE} if
+#' the sample is considered good and \code{FALSE} otherwise. Note that all
+#' samples excluded by \code{useSamples} are automatically assigned
+#' \code{FALSE}.
+#' @author Peter Langfelder and Steve Horvath
+#' @seealso \code{\link{goodSamples}}, \code{\link{goodSamplesGenes}}
+#' @keywords misc
        goodSamples = gsg$goodSamples,
+
+
+#' Filter genes with too many missing entries
+#' 
+#' This function checks data for missing entries and returns a list of genes
+#' that have non-zero variance and pass two criteria on maximum number of
+#' missing values: the fraction of missing values must be below a given
+#' threshold and the total number of missing samples must be below a given
+#' threshold.
+#' 
+#' The constants \code{..minNSamples} and \code{..minNGenes} are both set to
+#' the value 4.  For most data sets, the fraction of missing samples criterion
+#' will be much more stringent than the absolute number of missing samples
+#' criterion.
+#' 
+#' @param datExpr expression data. A data frame in which columns are genes and
+#' rows ar samples.
+#' @param useSamples optional specifications of which samples to use for the
+#' check. Should be a logical vector; samples whose entries are \code{FALSE}
+#' will be ignored for the missing value counts. Defaults to using all samples.
+#' @param useGenes optional specifications of genes for which to perform the
+#' check. Should be a logical vector; genes whose entries are \code{FALSE} will
+#' be ignored. Defaults to using all genes.
+#' @param minFraction minimum fraction of non-missing samples for a gene to be
+#' considered good.
+#' @param minNSamples minimum number of non-missing samples for a gene to be
+#' considered good.
+#' @param minNGenes minimum number of good genes for the data set to be
+#' considered fit for analysis. If the actual number of good genes falls below
+#' this threshold, an error will be issued.
+#' @param tol an optional 'small' number to compare the variance against.
+#' Defaults to the square of \code{1e-10 * max(abs(datExpr), na.rm = TRUE)}.
+#' The reason of comparing the variance to this number, rather than zero, is
+#' that the fast way of computing variance used by this function sometimes
+#' causes small numerical overflow errors which make variance of constant
+#' vectors slightly non-zero; comparing the variance to \code{tol} rather than
+#' zero prevents the retaining of such genes as 'good genes'.
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @return A logical vector with one entry per gene that is \code{TRUE} if the
+#' gene is considered good and \code{FALSE} otherwise. Note that all genes
+#' excluded by \code{useGenes} are automatically assigned \code{FALSE}.
+#' @author Peter Langfelder and Steve Horvath
+#' @seealso \code{\link{goodSamples}}, \code{\link{goodSamplesGenes}}
+#' @keywords misc
        goodGenes = gsg$goodGenes,
        dendrograms = dendros,
        TOMFiles = TOMFiles,
@@ -923,6 +1317,160 @@ blockwiseModules = function(
 #
 #======================================================================================================
 
+
+
+#' Repeat blockwise module detection from pre-calculated data
+#' 
+#' Given consensus networks constructed for example using
+#' \code{\link{blockwiseModules}}, this function (re-)detects modules in them
+#' by branch cutting of the corresponding dendrograms. If repeated branch cuts
+#' of the same gene network dendrograms are desired, this function can save
+#' substantial time by re-using already calculated networks and dendrograms.
+#' 
+#' 
+#' For details on blockwise module detection, see
+#' \code{\link{blockwiseModules}}. This function implements the module
+#' detection subset of the functionality of \code{\link{blockwiseModules}};
+#' network construction and clustering must be performed in advance. The
+#' primary use of this function is to experiment with module detection settings
+#' without having to re-execute long network and clustering calculations whose
+#' results are not affected by the cutting parameters.
+#' 
+#' This function takes as input the networks and dendrograms that are produced
+#' by \code{\link{blockwiseModules}}.  Working block by block, modules are
+#' identified in the dendrogram by the Dynamic Hybrid Tree Cut algorithm. Found
+#' modules are trimmed of genes whose correlation with module eigengene (KME)
+#' is less than \code{minKMEtoStay}. Modules in which fewer than
+#' \code{minCoreKMESize} genes have KME higher than \code{minCoreKME} are
+#' disbanded, i.e., their constituent genes are pronounced unassigned.
+#' 
+#' After all blocks have been processed, the function checks whether there are
+#' genes whose KME in the module they assigned is lower than KME to another
+#' module. If p-values of the higher correlations are smaller than those of the
+#' native module by the factor \code{reassignThresholdPS}, the gene is
+#' re-assigned to the closer module.
+#' 
+#' In the last step, modules whose eigengenes are highly correlated are merged.
+#' This is achieved by clustering module eigengenes using the dissimilarity
+#' given by one minus their correlation, cutting the dendrogram at the height
+#' \code{mergeCutHeight} and merging all modules on each branch. The process is
+#' iterated until no modules are merged. See \code{\link{mergeCloseModules}}
+#' for more details on module merging.
+#' 
+#' @param datExpr expression data. A data frame in which columns are genes and
+#' rows ar samples. NAs are allowed, but not too many.
+#' @param goodSamples a logical vector specifying which samples are considered
+#' "good" for the analysis. See \code{\link{goodSamplesGenes}}.
+#' @param goodGenes a logical vector with length equal number of genes in
+#' \code{multiExpr} that specifies which genes are considered "good" for the
+#' analysis. See \code{\link{goodSamplesGenes}}.
+#' @param blocks specification of blocks in which hierarchical clustering and
+#' module detection should be performed. A numeric vector with one entry per
+#' gene of \code{multiExpr} giving the number of the block to which the
+#' corresponding gene belongs.
+#' @param TOMFiles a vector of character strings specifying file names in which
+#' the block-wise topological overlaps are saved.
+#' @param dendrograms a list of length equal the number of blocks, in which
+#' each component is a hierarchical clustering dendrograms of the genes that
+#' belong to the block.
+#' @param corType character string specifying the correlation to be used.
+#' Allowed values are (unique abbreviations of) \code{"pearson"} and
+#' \code{"bicor"}, corresponding to Pearson and bidweight midcorrelation,
+#' respectively. Missing values are handled using the
+#' \code{pariwise.complete.obs} option.
+#' @param networkType network type. Allowed values are (unique abbreviations
+#' of) \code{"unsigned"}, \code{"signed"}, \code{"signed hybrid"}. See
+#' \code{\link{adjacency}}.
+#' @param deepSplit integer value between 0 and 4. Provides a simplified
+#' control over how sensitive module detection should be to module splitting,
+#' with 0 least and 4 most sensitive. See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param detectCutHeight dendrogram cut height for module detection. See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param minModuleSize minimum module size for module detection. See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param maxCoreScatter maximum scatter of the core for a branch to be a
+#' cluster, given as the fraction of \code{cutHeight} relative to the 5th
+#' percentile of joining heights. See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param minGap minimum cluster gap given as the fraction of the difference
+#' between \code{cutHeight} and the 5th percentile of joining heights. See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param maxAbsCoreScatter maximum scatter of the core for a branch to be a
+#' cluster given as absolute heights. If given, overrides
+#' \code{maxCoreScatter}. See \code{\link[dynamicTreeCut]{cutreeDynamic}} for
+#' more details.
+#' @param minAbsGap minimum cluster gap given as absolute height difference. If
+#' given, overrides \code{minGap}. See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param minSplitHeight Minimum split height given as the fraction of the
+#' difference between \code{cutHeight} and the 5th percentile of joining
+#' heights. Branches merging below this height will automatically be merged.
+#' Defaults to zero but is used only if \code{minAbsSplitHeight} below is
+#' \code{NULL}.
+#' @param minAbsSplitHeight Minimum split height given as an absolute height.
+#' Branches merging below this height will automatically be merged. If not
+#' given (default), will be determined from \code{minSplitHeight} above.
+#' @param useBranchEigennodeDissim Logical: should branch eigennode (eigengene)
+#' dissimilarity be considered when merging branches in Dynamic Tree Cut?
+#' @param minBranchEigennodeDissim Minimum consensus branch eigennode
+#' (eigengene) dissimilarity for branches to be considerd separate. The branch
+#' eigennode dissimilarity in individual sets is simly 1-correlation of the
+#' eigennodes; the consensus is defined as quantile with probability
+#' \code{consensusQuantile}.
+#' @param pamStage logical.  If TRUE, the second (PAM-like) stage of module
+#' detection will be performed.  See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param pamRespectsDendro Logical, only used when \code{pamStage} is
+#' \code{TRUE}. If \code{TRUE}, the PAM stage will respect the dendrogram in
+#' the sense an object can be PAM-assigned only to clusters that lie below it
+#' on the branch that the object is merged into.  See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param minCoreKME a number between 0 and 1. If a detected module does not
+#' have at least \code{minModuleKMESize} genes with eigengene connectivity at
+#' least \code{minCoreKME}, the module is disbanded (its genes are unlabeled
+#' and returned to the pool of genes waiting for mofule detection).
+#' @param minCoreKMESize see \code{minCoreKME} above.
+#' @param minKMEtoStay genes whose eigengene connectivity to their module
+#' eigengene is lower than \code{minKMEtoStay} are removed from the module.
+#' @param reassignThreshold p-value ratio threshold for reassigning genes
+#' between modules. See Details.
+#' @param mergeCutHeight dendrogram cut height for module merging.
+#' @param impute logical: should imputation be used for module eigengene
+#' calculation? See \code{\link{moduleEigengenes}} for more details.
+#' @param trapErrors logical: should errors in calculations be trapped?
+#' @param numericLabels logical: should the returned modules be labeled by
+#' colors (\code{FALSE}), or by numbers (\code{TRUE})?
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @param ... Other arguments.
+#' @return A list with the following components:
+#' 
+#' \item{colors }{ a vector of color or numeric module labels for all genes.}
+#' 
+#' \item{unmergedColors }{ a vector of color or numeric module labels for all
+#' genes before module merging.}
+#' 
+#' \item{MEs }{ a data frame containing module eigengenes of the found modules
+#' (given by \code{colors}).}
+#' 
+#' \item{MEsOK}{logical indicating whether the module eigengenes were
+#' calculated without errors. }
+#' @author Peter Langfelder
+#' @seealso
+#' 
+#' \code{\link{blockwiseModules}} for full module calculation;
+#' 
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for adaptive branch cutting in
+#' hierarchical clustering dendrograms;
+#' 
+#' \code{\link{mergeCloseModules}} for merging of close modules.
+#' @references Bin Zhang and Steve Horvath (2005) "A General Framework for
+#' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
+#' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
+#' @keywords misc
 recutBlockwiseTrees = function(datExpr,
                       goodSamples, goodGenes,
                       blocks,
@@ -1371,6 +1919,208 @@ recutBlockwiseTrees = function(datExpr,
 
 
 
+
+
+#' Calculation of block-wise topological overlaps
+#' 
+#' Calculates topological overlaps in the given (expression) data. If the
+#' number of variables (columns) in the input data is too large, the data is
+#' first split using pre-clustering, then topological overlaps are calculated
+#' in each block.
+#' 
+#' The function starts by optionally filtering out samples that have too many
+#' missing entries and genes that have either too many missing entries or zero
+#' variance in at least one set. Genes that are filtered out are excluded from
+#' the TOM calculations.
+#' 
+#' If \code{blocks} is not given and the number of genes exceeds
+#' \code{maxBlockSize}, genes are pre-clustered into blocks using the function
+#' \code{\link{consensusProjectiveKMeans}}; otherwise all genes are treated in
+#' a single block.
+#' 
+#' For each block of genes, the network is constructed and (if requested)
+#' topological overlap is calculated in each set. The topological overlaps can
+#' be saved to disk as RData files, or returned directly within the return
+#' value (see below). Note that the matrices can be big and returning them
+#' within the return value can quickly exhaust the system's memory. In
+#' particular, if the block-wise calculation is necessary, it is nearly certain
+#' that returning all matrices via the return value will be impossible.
+#' 
+#' @param multiExpr expression data in the multi-set format (see
+#' \code{\link{checkSets}}). A vector of lists, one per set. Each set must
+#' contain a component \code{data} that contains the expression data, with rows
+#' corresponding to samples and columns to genes or probes.
+#' @param checkMissingData logical: should data be checked for excessive
+#' numbers of missing entries in genes and samples, and for genes with zero
+#' variance? See details.
+#' @param blocks optional specification of blocks in which hierarchical
+#' clustering and module detection should be performed. If given, must be a
+#' numeric vector with one entry per gene of \code{multiExpr} giving the number
+#' of the block to which the corresponding gene belongs.
+#' @param maxBlockSize integer giving maximum block size for module detection.
+#' Ignored if \code{blocks} above is non-NULL. Otherwise, if the number of
+#' genes in \code{datExpr} exceeds \code{maxBlockSize}, genes will be
+#' pre-clustered into blocks whose size should not exceed \code{maxBlockSize}.
+#' @param blockSizePenaltyPower number specifying how strongly blocks should be
+#' penalized for exceeding the maximum size. Set to a lrge number or \code{Inf}
+#' if not exceeding maximum block size is very important.
+#' @param nPreclusteringCenters number of centers for pre-clustering. Larger
+#' numbers typically results in better but slower pre-clustering. The default
+#' is \code{as.integer(min(nGenes/20, 100*nGenes/preferredSize))} and is an
+#' attempt to arrive at a reasonable number given the resources available.
+#' @param randomSeed integer to be used as seed for the random number generator
+#' before the function starts. If a current seed exists, it is saved and
+#' restored upon exit. If \code{NULL} is given, the function will not save and
+#' restore the seed.
+#' @param corType character string specifying the correlation to be used.
+#' Allowed values are (unique abbreviations of) \code{"pearson"} and
+#' \code{"bicor"}, corresponding to Pearson and bidweight midcorrelation,
+#' respectively. Missing values are handled using the
+#' \code{pariwise.complete.obs} option.
+#' @param maxPOutliers only used for \code{corType=="bicor"}. Specifies the
+#' maximum percentile of data that can be considered outliers on either side of
+#' the median separately. For each side of the median, if higher percentile
+#' than \code{maxPOutliers} is considered an outlier by the weight function
+#' based on \code{9*mad(x)}, the width of the weight function is increased such
+#' that the percentile of outliers on that side of the median equals
+#' \code{maxPOutliers}. Using \code{maxPOutliers=1} will effectively disable
+#' all weight function broadening; using \code{maxPOutliers=0} will give
+#' results that are quite similar (but not equal to) Pearson correlation.
+#' @param quickCor real number between 0 and 1 that controls the handling of
+#' missing data in the calculation of correlations. See details.
+#' @param pearsonFallback Specifies whether the bicor calculation, if used,
+#' should revert to Pearson when median absolute deviation (mad) is zero.
+#' Recongnized values are (abbreviations of) \code{"none", "individual",
+#' "all"}. If set to \code{"none"}, zero mad will result in \code{NA} for the
+#' corresponding correlation. If set to \code{"individual"}, Pearson
+#' calculation will be used only for columns that have zero mad. If set to
+#' \code{"all"}, the presence of a single zero mad will cause the whole
+#' variable to be treated in Pearson correlation manner (as if the
+#' corresponding \code{robust} option was set to \code{FALSE}). Has no effect
+#' for Pearson correlation. See \code{\link{bicor}}.
+#' @param cosineCorrelation logical: should the cosine version of the
+#' correlation calculation be used? The cosine calculation differs from the
+#' standard one in that it does not subtract the mean.
+#' @param power soft-thresholding power for netwoek construction.
+#' @param networkType network type. Allowed values are (unique abbreviations
+#' of) \code{"unsigned"}, \code{"signed"}, \code{"signed hybrid"}. See
+#' \code{\link{adjacency}}.
+#' @param checkPower logical: should basic sanity check be performed on the
+#' supplied \code{power}? If you would like to experiment with unusual powers,
+#' set the argument to \code{FALSE} and proceed with caution.
+#' @param replaceMissingAdjacencies logical: should missing values in
+#' calculated adjacency be replaced by 0?
+#' @param TOMType one of \code{"none"}, \code{"unsigned"}, \code{"signed"}. If
+#' \code{"none"}, adjacency will be used for clustering. If \code{"unsigned"},
+#' the standard TOM will be used (more generally, TOM function will receive the
+#' adjacency as input). If \code{"signed"}, TOM will keep track of the sign of
+#' correlations between neighbors. Note that the \code{"unsigned"} vs.
+#' \code{"signed"} distinction is only relevant when \code{networkType} is
+#' \code{"unsigned"}. When \code{networkType} is \code{"signed"} or
+#' \code{"signed hybrid"}, there is no difference between
+#' \code{TOMType="signed"} and \code{TOMType="unsigned". }
+#' @param TOMDenom a character string specifying the TOM variant to be used.
+#' Recognized values are \code{"min"} giving the standard TOM described in
+#' Zhang and Horvath (2005), and \code{"mean"} in which the \code{min} function
+#' in the denominator is replaced by \code{mean}. The \code{"mean"} may produce
+#' better results in certain special situations but at this time should be
+#' considered experimental.
+#' @param saveTOMs logical: should calculated TOMs be saved to disk
+#' (\code{TRUE}) or returned in the return value (\code{FALSE})? Returning
+#' calculated TOMs via the return value ay be more convenient bt not always
+#' feasible if the matrices are too big to fit all in memory at the same time.
+#' @param individualTOMFileNames character string giving the file names to save
+#' individual TOMs into. The following tags should be used to make the file
+#' names unique for each set and block: \code{%s} will be replaced by the set
+#' number; \code{%N} will be replaced by the set name (taken from
+#' \code{names(multiExpr)}) if it exists, otherwise by set number; \code{%b}
+#' will be replaced by the block number. If the file names turn out to be
+#' non-unique, an error will be generated.
+#' @param nThreads non-negative integer specifying the number of parallel
+#' threads to be used by certain parts of correlation calculations. This option
+#' only has an effect on systems on which a POSIX thread library is available
+#' (which currently includes Linux and Mac OSX, but excludes Windows). If zero,
+#' the number of online processors will be used if it can be determined
+#' dynamically, otherwise correlation calculations will use 2 threads.
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @return A list with the following components:
+#' 
+#' \item{actualTOMFileNames}{Only returned if input \code{saveTOMs} is
+#' \code{TRUE}. A matrix of character strings giving the file names in which
+#' each block TOM is saved. Rows correspond to data sets and columns to
+#' blocks.}
+#' 
+#' \item{TOMSimilarities}{Only returned if input \code{saveTOMs} is
+#' \code{FALSE}. A list in which each component corresponds to one block. Each
+#' component is a matrix of dimensions (N times (number of sets)), where N is
+#' the length of a distance structure corresponding to the block. That is, if
+#' the block contains n genes, N=n*(n-1)/2. Each column of the matrix contains
+#' the topological overlap of variables in the corresponding set ( and the
+#' corresponding block), arranged as a distance structure. Do note however that
+#' the topological overlap is a similarity (not a distance). }
+#' 
+#' \item{blocks}{if input \code{blocks} was given, its copy; otherwise a vector
+#' of length equal number of genes giving the block label for each gene. Note
+#' that block labels are not necessarilly sorted in the order in which the
+#' blocks were processed (since we do not require this for the input
+#' \code{blocks}). See \code{blockOrder} below. }
+#' 
+#' \item{blockGenes}{a list with one component for each block of genes. Each
+#' component is a vector giving the indices (relative to the input
+#' \code{multiExpr}) of genes in the corresponding block. }
+#' 
+#' \item{goodSamplesAndGenes}{if input \code{checkMissingData} is \code{TRUE},
+#' the output of the function \code{\link{goodSamplesGenesMS}}.  A list with
+#' components \code{goodGenes} (logical vector indicating which genes passed
+#' the missing data filters), \code{goodSamples} (a list of logical vectors
+#' indicating which samples passed the missing data filters in each set), and
+#' \code{allOK} (a logical indicating whether all genes and all samples passed
+#' the filters). See \code{\link{goodSamplesGenesMS}} for more details. If
+#' \code{checkMissingData} is \code{FALSE}, \code{goodSamplesAndGenes} contains
+#' a list of the same type but indicating that all genes and all samples passed
+#' the missing data filters.}
+#' 
+#' The following components are present mostly to streamline the interaction of
+#' this function with \code{\link{blockwiseConsensusModules}}.
+#' 
+#' \item{nGGenes}{ Number of genes that passed missing data filters (if input
+#' \code{checkMissingData} is \code{TRUE}), or the number of all genes (if
+#' \code{checkMissingData} is \code{FALSE}).}
+#' 
+#' \item{gBlocks}{ the vector \code{blocks} (above), restricted to good genes
+#' only. }
+#' 
+#' \item{nThreads}{ number of threads used to calculate correlation and TOM
+#' matrices. }
+#' 
+#' \item{saveTOMs}{ logical: were calculated matrices saved in files
+#' (\code{TRUE}) or returned in the return value (\code{FALSE})?}
+#' 
+#' \item{intNetworkType, intCorType}{integer codes for network and correlation
+#' type. }
+#' 
+#' \item{nSets}{number of sets in input data.}
+#' 
+#' \item{setNames}{the \code{names} attribute of input \code{multiExpr}.}
+#' @author Peter Langfelder
+#' @seealso
+#' 
+#' \code{\link{blockwiseConsensusModules}}
+#' @references For a general discussion of the weighted network formalism, see
+#' 
+#' Bin Zhang and Steve Horvath (2005) "A General Framework for Weighted Gene
+#' Co-Expression Network Analysis", Statistical Applications in Genetics and
+#' Molecular Biology: Vol. 4: No. 1, Article 17
+#' 
+#' The blockwise approach is briefly described in the article describing this
+#' package,
+#' 
+#' Langfelder P, Horvath S (2008) "WGCNA: an R package for weighted correlation
+#' network analysis".  BMC Bioinformatics 2008, 9:559
+#' @keywords misc
 blockwiseIndividualTOMs = function(multiExpr,
 
                             # Data checking options
@@ -1420,6 +2170,23 @@ blockwiseIndividualTOMs = function(multiExpr,
   dataSize = checkSets(multiExpr, checkStructure = TRUE);
   if (dataSize$structureOK)
   {
+
+
+#' Number of sets in a multi-set variable
+#' 
+#' A convenience function that returns the number of sets in a multi-set
+#' variable.
+#' 
+#' 
+#' @param multiData vector of lists; in each list there must be a component
+#' named \code{data} whose content is a matrix or dataframe or array of
+#' dimension 2.
+#' @param \dots Other arguments to function \code{\link{checkSets}}.
+#' @return A single integer that equals the number of sets given in the input
+#' \code{multiData}.
+#' @author Peter Langfelder
+#' @seealso \code{\link{checkSets}}
+#' @keywords misc
     nSets = dataSize$nSets;
     nGenes = dataSize$nGenes;
     multiFormat = TRUE;
@@ -1648,6 +2415,50 @@ blockwiseIndividualTOMs = function(multiExpr,
 #
 #==========================================================================================================
 
+
+
+#' Reconstruct a symmetric matrix from a distance (lower-triangular)
+#' representation
+#' 
+#' Assuming the input vector contains a vectorized form of the distance
+#' representation of a symmetric matrix, this function creates the
+#' corresponding matrix. This is useful when re-forming symmetric matrices that
+#' have been vectorized to save storage space.
+#' 
+#' The function assumes that \code{x} contains the vectorized form of the
+#' distance representation of a symmetric matrix. In particular, \code{x} must
+#' have a length that can be expressed as n*(n-1)/2, with n an integer. The
+#' result of the function is then an n times n matrix.
+#' 
+#' @param x a numeric vector
+#' @param diag value to be put on the diagonal. Recycled if necessary.
+#' @return A symmetric matrix whose lower triangle is given by \code{x}.
+#' @author Peter Langfelder
+#' @keywords misc
+#' @examples
+#' 
+#'   # Create a symmetric matrix
+#'   m = matrix(c(1:16), 4,4)
+#'   mat = (m + t(m));
+#'   diag(mat) = 0;
+#' 
+#'   # Print the matrix
+#'   mat
+#' 
+#'   # Take the lower triangle and vectorize it (in two ways)
+#'   x1 = mat[lower.tri(mat)]
+#'   x2 = as.vector(as.dist(mat))
+#' 
+#'   all.equal(x1, x2) # The vectors are equal
+#' 
+#'   # Turn the vectors back into matrices
+#'   new.mat = lowerTri2matrix(x1, diag = 0);
+#' 
+#'   # Did we get back the same matrix?
+#' 
+#'   all.equal(mat, new.mat)
+#' 
+#' 
 lowerTri2matrix = function(x, diag = 1)
 {
   if (class(x)=="dist")
@@ -1683,6 +2494,433 @@ lowerTri2matrix = function(x, diag = 1)
 
 # Function to calculate consensus modules and eigengenes from all genes.
 
+
+
+#' Find consensus modules across several datasets.
+#' 
+#' Perform network construction and consensus module detection across several
+#' datasets.
+#' 
+#' The function starts by optionally filtering out samples that have too many
+#' missing entries and genes that have either too many missing entries or zero
+#' variance in at least one set. Genes that are filtered out are left
+#' unassigned by the module detection. Returned eigengenes will contain
+#' \code{NA} in entries corresponding to filtered-out samples.
+#' 
+#' If \code{blocks} is not given and the number of genes exceeds
+#' \code{maxBlockSize}, genes are pre-clustered into blocks using the function
+#' \code{\link{consensusProjectiveKMeans}}; otherwise all genes are treated in
+#' a single block.
+#' 
+#' For each block of genes, the network is constructed and (if requested)
+#' topological overlap is calculated in each set. To minimize memory usage,
+#' calculated topological overlaps are optionally saved to disk in chunks until
+#' they are needed again for the calculation of the consensus network
+#' topological overlap.
+#' 
+#' Before calculation of the consensus Topological Overlap, individual TOMs are
+#' optionally calibrated. Calibration methods include single quantile scaling
+#' and full quantile normalization.
+#' 
+#' Single quantile scaling raises individual TOM in sets 2,3,... to a power
+#' such that the quantiles given by \code{calibrationQuantile} agree with the
+#' quantile in set 1. Since the high TOMs are usually the most important for
+#' module identification, the value of \code{calibrationQuantile} is close to
+#' (but not equal) 1. To speed up quantile calculation, the quantiles can be
+#' determined on a randomly-chosen component subset of the TOM matrices.
+#' 
+#' Full quantile normalization, implemented in
+#' \code{\link[preprocessCore]{normalize.quantiles}}, adjusts the TOM matrices
+#' such that all quantiles equal each other (and equal to the quantiles of the
+#' component-wise average of the individual TOM matrices).
+#' 
+#' Note that network calibration is performed separately in each block, i.e.,
+#' the normalizing transformation may differ between blocks. This is necessary
+#' to avoid manipulating a full TOM in memory.
+#' 
+#' The consensus TOM is calculated as the component-wise
+#' \code{consensusQuantile} quantile of the individual (set) TOMs; that is, for
+#' each gene pair (TOM entry), the \code{consensusQuantile} quantile across all
+#' input sets. Alternatively, one can also use (weighted) component-wise mean
+#' across all imput data sets. If requested, the consensus topological overlaps
+#' are saved to disk for later use.
+#' 
+#' Genes are then clustered using average linkage hierarchical clustering and
+#' modules are identified in the resulting dendrogram by the Dynamic Hybrid
+#' tree cut. Found modules are trimmed of genes whose consensus module
+#' membership kME (that is, correlation with module eigengene) is less than
+#' \code{minKMEtoStay}. Modules in which fewer than \code{minCoreKMESize} genes
+#' have consensus KME higher than \code{minCoreKME} are disbanded, i.e., their
+#' constituent genes are pronounced unassigned.
+#' 
+#' After all blocks have been processed, the function checks whether there are
+#' genes whose KME in the module they assigned is lower than KME to another
+#' module. If p-values of the higher correlations are smaller than those of the
+#' native module by the factor \code{reassignThresholdPS} (in every set), the
+#' gene is re-assigned to the closer module.
+#' 
+#' In the last step, modules whose eigengenes are highly correlated are merged.
+#' This is achieved by clustering module eigengenes using the dissimilarity
+#' given by one minus their correlation, cutting the dendrogram at the height
+#' \code{mergeCutHeight} and merging all modules on each branch. The process is
+#' iterated until no modules are merged. See \code{\link{mergeCloseModules}}
+#' for more details on module merging.
+#' 
+#' The argument \code{quick} specifies the precision of handling of missing
+#' data in the correlation calculations. Zero will cause all calculations to be
+#' executed precisely, which may be significantly slower than calculations
+#' without missing data. Progressively higher values will speed up the
+#' calculations but introduce progressively larger errors. Without missing
+#' data, all column means and variances can be pre-calculated before the
+#' covariances are calculated. When missing data are present, exact
+#' calculations require the column means and variances to be calculated for
+#' each covariance. The approximate calculation uses the pre-calculated mean
+#' and variance and simply ignores missing data in the covariance calculation.
+#' If the number of missing data is high, the pre-calculated means and
+#' variances may be very different from the actual ones, thus potentially
+#' introducing large errors.  The \code{quick} value times the number of rows
+#' specifies the maximum difference in the number of missing entries for mean
+#' and variance calculations on the one hand and covariance on the other hand
+#' that will be tolerated before a recalculation is triggered. The hope is that
+#' if only a few missing data are treated approximately, the error introduced
+#' will be small but the potential speedup can be significant.
+#' 
+#' @param multiExpr expression data in the multi-set format (see
+#' \code{\link{checkSets}}). A vector of lists, one per set. Each set must
+#' contain a component \code{data} that contains the expression data, with rows
+#' corresponding to samples and columns to genes or probes.
+#' @param checkMissingData logical: should data be checked for excessive
+#' numbers of missing entries in genes and samples, and for genes with zero
+#' variance? See details.
+#' @param blocks optional specification of blocks in which hierarchical
+#' clustering and module detection should be performed. If given, must be a
+#' numeric vector with one entry per gene of \code{multiExpr} giving the number
+#' of the block to which the corresponding gene belongs.
+#' @param maxBlockSize integer giving maximum block size for module detection.
+#' Ignored if \code{blocks} above is non-NULL. Otherwise, if the number of
+#' genes in \code{datExpr} exceeds \code{maxBlockSize}, genes will be
+#' pre-clustered into blocks whose size should not exceed \code{maxBlockSize}.
+#' @param blockSizePenaltyPower number specifying how strongly blocks should be
+#' penalized for exceeding the maximum size. Set to a lrge number or \code{Inf}
+#' if not exceeding maximum block size is very important.
+#' @param nPreclusteringCenters number of centers to be used in the
+#' preclustering. Defaults to smaller of \code{nGenes/20} and
+#' \code{100*nGenes/maxBlockSize}, where \code{nGenes} is the nunber of genes
+#' (variables) in \code{multiExpr}.
+#' @param randomSeed integer to be used as seed for the random number generator
+#' before the function starts. If a current seed exists, it is saved and
+#' restored upon exit. If \code{NULL} is given, the function will not save and
+#' restore the seed.
+#' @param individualTOMInfo Optional data for TOM matrices in individual data
+#' sets. This object is returned by the function
+#' \code{\link{blockwiseIndividualTOMs}}. If not given, appropriate topological
+#' overlaps will be calculated using the network contruction options below.
+#' @param useIndivTOMSubset If \code{individualTOMInfo} is given, this argument
+#' allows to only select a subset of the individual set networks contained in
+#' \code{individualTOMInfo}. It should be a numeric vector giving the indices
+#' of the individual sets to be used. Note that this argument is NOT applied to
+#' \code{multiExpr}.
+#' @param corType character string specifying the correlation to be used.
+#' Allowed values are (unique abbreviations of) \code{"pearson"} and
+#' \code{"bicor"}, corresponding to Pearson and bidweight midcorrelation,
+#' respectively. Missing values are handled using the
+#' \code{pariwise.complete.obs} option.
+#' @param maxPOutliers only used for \code{corType=="bicor"}. Specifies the
+#' maximum percentile of data that can be considered outliers on either side of
+#' the median separately. For each side of the median, if higher percentile
+#' than \code{maxPOutliers} is considered an outlier by the weight function
+#' based on \code{9*mad(x)}, the width of the weight function is increased such
+#' that the percentile of outliers on that side of the median equals
+#' \code{maxPOutliers}. Using \code{maxPOutliers=1} will effectively disable
+#' all weight function broadening; using \code{maxPOutliers=0} will give
+#' results that are quite similar (but not equal to) Pearson correlation.
+#' @param quickCor real number between 0 and 1 that controls the handling of
+#' missing data in the calculation of correlations. See details.
+#' @param pearsonFallback Specifies whether the bicor calculation, if used,
+#' should revert to Pearson when median absolute deviation (mad) is zero.
+#' Recongnized values are (abbreviations of) \code{"none", "individual",
+#' "all"}. If set to \code{"none"}, zero mad will result in \code{NA} for the
+#' corresponding correlation. If set to \code{"individual"}, Pearson
+#' calculation will be used only for columns that have zero mad. If set to
+#' \code{"all"}, the presence of a single zero mad will cause the whole
+#' variable to be treated in Pearson correlation manner (as if the
+#' corresponding \code{robust} option was set to \code{FALSE}). Has no effect
+#' for Pearson correlation. See \code{\link{bicor}}.
+#' @param cosineCorrelation logical: should the cosine version of the
+#' correlation calculation be used? The cosine calculation differs from the
+#' standard one in that it does not subtract the mean.
+#' @param power soft-thresholding power for network construction.
+#' @param networkType network type. Allowed values are (unique abbreviations
+#' of) \code{"unsigned"}, \code{"signed"}, \code{"signed hybrid"}. See
+#' \code{\link{adjacency}}.
+#' @param checkPower logical: should basic sanity check be performed on the
+#' supplied \code{power}? If you would like to experiment with unusual powers,
+#' set the argument to \code{FALSE} and proceed with caution.
+#' @param replaceMissingAdjacencies logical: should missing values in the
+#' calculation of adjacency be replaced by 0?
+#' @param TOMType one of \code{"none"}, \code{"unsigned"}, \code{"signed"}. If
+#' \code{"none"}, adjacency will be used for clustering. If \code{"unsigned"},
+#' the standard TOM will be used (more generally, TOM function will receive the
+#' adjacency as input). If \code{"signed"}, TOM will keep track of the sign of
+#' correlations between neighbors.
+#' @param TOMDenom a character string specifying the TOM variant to be used.
+#' Recognized values are \code{"min"} giving the standard TOM described in
+#' Zhang and Horvath (2005), and \code{"mean"} in which the \code{min} function
+#' in the denominator is replaced by \code{mean}. The \code{"mean"} may produce
+#' better results but at this time should be considered experimental.
+#' @param saveIndividualTOMs logical: should individual TOMs be saved to disk
+#' for later use?
+#' @param individualTOMFileNames character string giving the file names to save
+#' individual TOMs into. The following tags should be used to make the file
+#' names unique for each set and block: \code{%s} will be replaced by the set
+#' number; \code{%N} will be replaced by the set name (taken from
+#' \code{names(multiExpr)}) if it exists, otherwise by set number; \code{%b}
+#' will be replaced by the block number. If the file names turn out to be
+#' non-unique, an error will be generated.
+#' @param networkCalibration network calibration method. One of "single
+#' quantile", "full quantile", "none" (or a unique abbreviation of one of
+#' them).
+#' @param calibrationQuantile if \code{networkCalibration} is \code{"single
+#' quantile"}, topological overlaps (or adjacencies if TOMs are not computed)
+#' will be scaled such that their \code{calibrationQuantile} quantiles will
+#' agree.
+#' @param sampleForCalibration if \code{TRUE}, calibration quantiles will be
+#' determined from a sample of network similarities. Note that using all data
+#' can double the memory footprint of the function and the function may fail.
+#' @param sampleForCalibrationFactor determines the number of samples for
+#' calibration: the number is \code{1/calibrationQuantile *
+#' sampleForCalibrationFactor}. Should be set well above 1 to ensure accuracy
+#' of the sampled quantile.
+#' @param getNetworkCalibrationSamples logical: should samples used for TOM
+#' calibration be saved for future analysis? This option is only available when
+#' \code{sampleForCalibration} is \code{TRUE}.
+#' @param consensusQuantile quantile at which consensus is to be defined. See
+#' details.
+#' @param useMean logical: should the consensus be determined from a (possibly
+#' weighted) mean across the data sets rather than a quantile?
+#' @param setWeights Optional vector (one component per input set) of weights
+#' to be used for weighted mean consensus. Only used when \code{useMean} above
+#' is \code{TRUE}.
+#' @param saveConsensusTOMs logical: should the consensus topological overlap
+#' matrices for each block be saved and returned?
+#' @param consensusTOMFileNames character string containing the file namefiles
+#' containing the consensus topological overlaps. The tag \code{%b} will be
+#' replaced by the block number. If the resulting file names are non-unique
+#' (for example, because the user gives a file name without a \code{%b} tag),
+#' an error will be generated. These files are standard R data files and can be
+#' loaded using the \code{\link{load}} function.
+#' @param useDiskCache should calculated network similarities in individual
+#' sets be temporarilly saved to disk? Saving to disk is somewhat slower than
+#' keeping all data in memory, but for large blocks and/or many sets the memory
+#' footprint may be too big.
+#' @param chunkSize network similarities are saved in smaller chunks of size
+#' \code{chunkSize}.
+#' @param cacheBase character string containing the desired name for the cache
+#' files. The actual file names will consists of \code{cacheBase} and a suffix
+#' to make the file names unique.
+#' @param cacheDir character string containing the desired path for the cache
+#' files.
+#' @param consensusTOMInfo optional list summarizing consensus TOM, output of
+#' \code{\link{consensusTOM}}. It contains information about pre-calculated
+#' consensus TOM. Supplying this argument replaces TOM calculation, so none of
+#' the individual or consensus TOM calculation arguments are taken into
+#' account.
+#' @param deepSplit integer value between 0 and 4. Provides a simplified
+#' control over how sensitive module detection should be to module splitting,
+#' with 0 least and 4 most sensitive. See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param detectCutHeight dendrogram cut height for module detection. See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param minModuleSize minimum module size for module detection. See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param checkMinModuleSize logical: should sanity checks be performed on
+#' \code{minModuleSize}?
+#' @param maxCoreScatter maximum scatter of the core for a branch to be a
+#' cluster, given as the fraction of \code{cutHeight} relative to the 5th
+#' percentile of joining heights. See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param minGap minimum cluster gap given as the fraction of the difference
+#' between \code{cutHeight} and the 5th percentile of joining heights. See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param maxAbsCoreScatter maximum scatter of the core for a branch to be a
+#' cluster given as absolute heights. If given, overrides
+#' \code{maxCoreScatter}. See \code{\link[dynamicTreeCut]{cutreeDynamic}} for
+#' more details.
+#' @param minAbsGap minimum cluster gap given as absolute height difference. If
+#' given, overrides \code{minGap}. See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param minSplitHeight Minimum split height given as the fraction of the
+#' difference between \code{cutHeight} and the 5th percentile of joining
+#' heights. Branches merging below this height will automatically be merged.
+#' Defaults to zero but is used only if \code{minAbsSplitHeight} below is
+#' \code{NULL}.
+#' @param minAbsSplitHeight Minimum split height given as an absolute height.
+#' Branches merging below this height will automatically be merged. If not
+#' given (default), will be determined from \code{minSplitHeight} above.
+#' @param useBranchEigennodeDissim Logical: should branch eigennode (eigengene)
+#' dissimilarity be considered when merging branches in Dynamic Tree Cut?
+#' @param minBranchEigennodeDissim Minimum consensus branch eigennode
+#' (eigengene) dissimilarity for branches to be considerd separate. The branch
+#' eigennode dissimilarity in individual sets is simly 1-correlation of the
+#' eigennodes; the consensus is defined as quantile with probability
+#' \code{consensusQuantile}.
+#' @param stabilityLabels Optional matrix of cluster labels that are to be used
+#' for calculating branch dissimilarity based on split stability. The number of
+#' rows must equal the number of genes in \code{multiExpr}; the number of
+#' columns (clusterings) is arbitrary. See
+#' \code{\link{branchSplitFromStabilityLabels}} for details.
+#' @param minStabilityDissim Minimum stability dissimilarity criterion for two
+#' branches to be considered separate. Should be a number between 0
+#' (essentially no dissimilarity required) and 1 (perfect dissimilarity or
+#' distinguishability based on \code{stabilityLabels}). See
+#' \code{\link{branchSplitFromStabilityLabels}} for details.
+#' @param pamStage logical.  If TRUE, the second (PAM-like) stage of module
+#' detection will be performed.  See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param pamRespectsDendro Logical, only used when \code{pamStage} is
+#' \code{TRUE}. If \code{TRUE}, the PAM stage will respect the dendrogram in
+#' the sense an object can be PAM-assigned only to clusters that lie below it
+#' on the branch that the object is merged into.  See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param reassignThresholdPS per-set p-value ratio threshold for reassigning
+#' genes between modules.  See Details.
+#' @param trimmingConsensusQuantile a number between 0 and 1 specifying the
+#' consensus quantile used for kME calculation that determines module trimming
+#' according to the arguments below.
+#' @param minCoreKME a number between 0 and 1. If a detected module does not
+#' have at least \code{minModuleKMESize} genes with eigengene connectivity at
+#' least \code{minCoreKME}, the module is disbanded (its genes are unlabeled
+#' and returned to the pool of genes waiting for mofule detection).
+#' @param minCoreKMESize see \code{minCoreKME} above.
+#' @param minKMEtoStay genes whose eigengene connectivity to their module
+#' eigengene is lower than \code{minKMEtoStay} are removed from the module.
+#' @param impute logical: should imputation be used for module eigengene
+#' calculation? See \code{\link{moduleEigengenes}} for more details.
+#' @param trapErrors logical: should errors in calculations be trapped?
+#' @param equalizeQuantilesForModuleMerging Logical: equalize quantiles of the
+#' module eigengene networks before module merging? If \code{TRUE}, the
+#' quantiles of the eigengene correlation matrices (interpreted as a single
+#' vectors of non-redundant components) will be equalized across the input data
+#' sets. Note that although this seems like a reasonable option, it should be
+#' considered experimental and not necessarily recommended.
+#' @param quantileSummaryForModuleMerging One of \code{"mean"} or
+#' \code{"median"}.  If quantile equalization of the module eigengene networks
+#' is performed, the resulting "normal" quantiles will be given by this
+#' function of the corresponding quantiles across the input data sets.
+#' @param mergeCutHeight dendrogram cut height for module merging.
+#' @param mergeConsensusQuantile consensus quantile for module merging. See
+#' \code{mergeCloseModules} for details.
+#' @param numericLabels logical: should the returned modules be labeled by
+#' colors (\code{FALSE}), or by numbers (\code{TRUE})?
+#' @param nThreads non-negative integer specifying the number of parallel
+#' threads to be used by certain parts of correlation calculations. This option
+#' only has an effect on systems on which a POSIX thread library is available
+#' (which currently includes Linux and Mac OSX, but excludes Windows). If zero,
+#' the number of online processors will be used if it can be determined
+#' dynamically, otherwise correlation calculations will use 2 threads.
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @param ... Other arguments. At present these can include
+#' \code{reproduceBranchEigennodeQuantileError} that instructs the function to
+#' reproduce a bug in branch eigennode dissimilarity calculations for purposes
+#' if reproducing old reults.
+#' @return A list with the following components:
+#' 
+#' \item{colors}{ module assignment of all input genes. A vector containing
+#' either character strings with module colors (if input \code{numericLabels}
+#' was unset) or numeric module labels (if \code{numericLabels} was set to
+#' \code{TRUE}). The color "grey" and the numeric label 0 are reserved for
+#' unassigned genes.  }
+#' 
+#' \item{unmergedColors }{ module colors or numeric labels before the module
+#' merging step. }
+#' 
+#' \item{multiMEs}{ module eigengenes corresponding to the modules returned in
+#' \code{colors}, in multi-set format. A vector of lists, one per set,
+#' containing eigengenes, proportion of variance explained and other
+#' information. See \code{\link{multiSetMEs}} for a detailed description. }
+#' 
+#' \item{goodSamples}{ a list, with one component per input set. Each component
+#' is a logical vector with one entry per sample from the corresponding set.
+#' The entry indicates whether the sample in the set passed basic quality
+#' control criteria. }
+#' 
+#' \item{goodGenes}{a logical vector with one entry per input gene indicating
+#' whether the gene passed basic quality control criteria in all sets.}
+#' 
+#' \item{dendrograms}{a list with one component for each block of genes. Each
+#' component is the hierarchical clustering dendrogram obtained by clustering
+#' the consensus gene dissimilarity in the corresponding block. }
+#' 
+#' \item{TOMFiles}{ if \code{saveConsensusTOMs==TRUE}, a vector of character
+#' strings, one string per block, giving the file names of files (relative to
+#' current directory) in which blockwise topological overlaps were saved. }
+#' 
+#' \item{blockGenes}{a list with one component for each block of genes. Each
+#' component is a vector giving the indices (relative to the input
+#' \code{multiExpr}) of genes in the corresponding block. }
+#' 
+#' \item{blocks}{if input \code{blocks} was given, its copy; otherwise a vector
+#' of length equal number of genes giving the block label for each gene. Note
+#' that block labels are not necessarilly sorted in the order in which the
+#' blocks were processed (since we do not require this for the input
+#' \code{blocks}). See \code{blockOrder} below. }
+#' 
+#' \item{blockOrder}{ a vector giving the order in which blocks were processed
+#' and in which \code{blockGenes} above is returned. For example,
+#' \code{blockOrder[1]} contains the label of the first-processed block. }
+#' 
+#' \item{originCount}{if the input \code{consensusQuantile==0}, this vector
+#' will contain counts of how many times each set contributed the consensus
+#' gene similarity value. If the counts are highly unbalanced, the consensus
+#' may be biased. }
+#' 
+#' \item{networkCalibrationSamples}{if the input
+#' \code{getNetworkCalibrationSamples} is \code{TRUE}, this component is a list
+#' with one component per block. Each component is again a list with two
+#' components: \code{sampleIndex} contains indices of the distance structure in
+#' which TOM is stored that were sampled, and \code{TOMSamples} is a matrix
+#' whose rows correspond to TOM samples and columns to individual set. Hence,
+#' \code{networkCalibrationSamples[[blockNo]]$TOMSamples[index, setNo]}
+#' contains the TOM entry that corresponds to element
+#' \code{networkCalibrationSamples[[blockNo]]$sampleIndex[index]} of the TOM
+#' distance structure in block \code{blockNo} and set \code{setNo}. (For
+#' details on the distance structure, see \code{\link{dist}}.)}
+#' @note If the input datasets have large numbers of genes, consider carefully
+#' the \code{maxBlockSize} as it significantly affects the memory footprint
+#' (and whether the function will fail with a memory allocation error). From a
+#' theoretical point of view it is advantageous to use blocks as large as
+#' possible; on the other hand, using smaller blocks is substantially faster
+#' and often the only way to work with large numbers of genes. As a rough
+#' guide, it is unlikely a standard desktop computer with 4GB memory or less
+#' will be able to work with blocks larger than 7000 genes.
+#' 
+#' %Topological overlap calculations can be speeded up substantially (several
+#' 10-fold times on multi-core %systems) if R is compiled with a dedicated BLAS
+#' (Basic Linear Algebra Subroutines) %library such as ATLAS or GotoBLAS and
+#' the package is compiled on your target system (which is always the %case for
+#' Unix, Unix-like and Mac systems, but is normally not the case on Windows
+#' systems).
+#' @author Peter Langfelder
+#' @seealso
+#' 
+#' \code{\link{goodSamplesGenesMS}} for basic quality control and filtering;
+#' 
+#' \code{\link{adjacency}}, \code{\link{TOMsimilarity}} for network
+#' construction;
+#' 
+#' \code{\link{hclust}} for hierarchical clustering;
+#' 
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for adaptive branch cutting in
+#' hierarchical clustering dendrograms;
+#' 
+#' \code{\link{mergeCloseModules}} for merging of close modules.
+#' @references Langfelder P, Horvath S (2007) Eigengene networks for studying
+#' the relationships between co-expression modules. BMC Systems Biology 2007,
+#' 1:54
+#' @keywords misc
 blockwiseConsensusModules = function(multiExpr,
 
          # Data checking options
@@ -2485,6 +3723,180 @@ blockwiseConsensusModules = function(multiExpr,
 #
 #==========================================================================================================
 
+
+
+#' Repeat blockwise consensus module detection from pre-calculated data
+#' 
+#' Given consensus networks constructed for example using
+#' \code{\link{blockwiseConsensusModules}}, this function (re-)detects modules
+#' in them by branch cutting of the corresponding dendrograms. If repeated
+#' branch cuts of the same gene network dendrograms are desired, this function
+#' can save substantial time by re-using already calculated networks and
+#' dendrograms.
+#' 
+#' 
+#' For details on blockwise consensus module detection, see
+#' \code{\link{blockwiseConsensusModules}}. This function implements the module
+#' detection subset of the functionality of
+#' \code{\link{blockwiseConsensusModules}}; network construction and clustering
+#' must be performed in advance. The primary use of this function is to
+#' experiment with module detection settings without having to re-execute long
+#' network and clustering calculations whose results are not affected by the
+#' cutting parameters.
+#' 
+#' This function takes as input the networks and dendrograms that are produced
+#' by \code{\link{blockwiseConsensusModules}}.  Working block by block, modules
+#' are identified in the dendrograms by the Dynamic Hybrid tree cut.  Found
+#' modules are trimmed of genes whose consensus module membership kME (that is,
+#' correlation with module eigengene) is less than \code{minKMEtoStay}. Modules
+#' in which fewer than \code{minCoreKMESize} genes have consensus KME higher
+#' than \code{minCoreKME} are disbanded, i.e., their constituent genes are
+#' pronounced unassigned.
+#' 
+#' After all blocks have been processed, the function checks whether there are
+#' genes whose KME in the module they assigned is lower than KME to another
+#' module. If p-values of the higher correlations are smaller than those of the
+#' native module by the factor \code{reassignThresholdPS} (in every set), the
+#' gene is re-assigned to the closer module.
+#' 
+#' In the last step, modules whose eigengenes are highly correlated are merged.
+#' This is achieved by clustering module eigengenes using the dissimilarity
+#' given by one minus their correlation, cutting the dendrogram at the height
+#' \code{mergeCutHeight} and merging all modules on each branch. The process is
+#' iterated until no modules are merged. See \code{\link{mergeCloseModules}}
+#' for more details on module merging.
+#' 
+#' @param multiExpr expression data in the multi-set format (see
+#' \code{\link{checkSets}}). A vector of lists, one per set. Each set must
+#' contain a component \code{data} that contains the expression data, with rows
+#' corresponding to samples and columns to genes or probes.
+#' @param goodSamples a list with one component per set. Each component is a
+#' logical vector specifying which samples are considered "good" for the
+#' analysis. See \code{\link{goodSamplesGenesMS}}.
+#' @param goodGenes a logical vector with length equal number of genes in
+#' \code{multiExpr} that specifies which genes are considered "good" for the
+#' analysis. See \code{\link{goodSamplesGenesMS}}.
+#' @param blocks specification of blocks in which hierarchical clustering and
+#' module detection should be performed. A numeric vector with one entry per
+#' gene of \code{multiExpr} giving the number of the block to which the
+#' corresponding gene belongs.
+#' @param TOMFiles a vector of character strings specifying file names in which
+#' the block-wise topological overlaps are saved.
+#' @param dendrograms a list of length equal the number of blocks, in which
+#' each component is a hierarchical clustering dendrograms of the genes that
+#' belong to the block.
+#' @param corType character string specifying the correlation to be used.
+#' Allowed values are (unique abbreviations of) \code{"pearson"} and
+#' \code{"bicor"}, corresponding to Pearson and bidweight midcorrelation,
+#' respectively. Missing values are handled using the
+#' \code{pariwise.complete.obs} option.
+#' @param networkType network type. Allowed values are (unique abbreviations
+#' of) \code{"unsigned"}, \code{"signed"}, \code{"signed hybrid"}. See
+#' \code{\link{adjacency}}. Note that while no new networks are computed in
+#' this function, this parameter affects the interpretation of correlations in
+#' this function.
+#' @param deepSplit integer value between 0 and 4. Provides a simplified
+#' control over how sensitive module detection should be to module splitting,
+#' with 0 least and 4 most sensitive. See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param detectCutHeight dendrogram cut height for module detection. See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param minModuleSize minimum module size for module detection. See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param checkMinModuleSize logical: should sanity checks be performed on
+#' \code{minModuleSize}?
+#' @param maxCoreScatter maximum scatter of the core for a branch to be a
+#' cluster, given as the fraction of \code{cutHeight} relative to the 5th
+#' percentile of joining heights. See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param minGap minimum cluster gap given as the fraction of the difference
+#' between \code{cutHeight} and the 5th percentile of joining heights. See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param maxAbsCoreScatter maximum scatter of the core for a branch to be a
+#' cluster given as absolute heights. If given, overrides
+#' \code{maxCoreScatter}. See \code{\link[dynamicTreeCut]{cutreeDynamic}} for
+#' more details.
+#' @param minAbsGap minimum cluster gap given as absolute height difference. If
+#' given, overrides \code{minGap}. See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param minSplitHeight Minimum split height given as the fraction of the
+#' difference between \code{cutHeight} and the 5th percentile of joining
+#' heights. Branches merging below this height will automatically be merged.
+#' Defaults to zero but is used only if \code{minAbsSplitHeight} below is
+#' \code{NULL}.
+#' @param minAbsSplitHeight Minimum split height given as an absolute height.
+#' Branches merging below this height will automatically be merged. If not
+#' given (default), will be determined from \code{minSplitHeight} above.
+#' @param useBranchEigennodeDissim Logical: should branch eigennode (eigengene)
+#' dissimilarity be considered when merging branches in Dynamic Tree Cut?
+#' @param minBranchEigennodeDissim Minimum consensus branch eigennode
+#' (eigengene) dissimilarity for branches to be considerd separate. The branch
+#' eigennode dissimilarity in individual sets is simly 1-correlation of the
+#' eigennodes; the consensus is defined as quantile with probability
+#' \code{consensusQuantile}.
+#' @param pamStage logical.  If TRUE, the second (PAM-like) stage of module
+#' detection will be performed.  See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param pamRespectsDendro Logical, only used when \code{pamStage} is
+#' \code{TRUE}. If \code{TRUE}, the PAM stage will respect the dendrogram in
+#' the sense an object can be PAM-assigned only to clusters that lie below it
+#' on the branch that the object is merged into.  See
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param trimmingConsensusQuantile a number between 0 and 1 specifying the
+#' consensus quantile used for kME calculation that determines module trimming
+#' according to the arguments below.
+#' @param minCoreKME a number between 0 and 1. If a detected module does not
+#' have at least \code{minModuleKMESize} genes with eigengene connectivity at
+#' least \code{minCoreKME}, the module is disbanded (its genes are unlabeled
+#' and returned to the pool of genes waiting for mofule detection).
+#' @param minCoreKMESize see \code{minCoreKME} above.
+#' @param minKMEtoStay genes whose eigengene connectivity to their module
+#' eigengene is lower than \code{minKMEtoStay} are removed from the module.
+#' @param reassignThresholdPS per-set p-value ratio threshold for reassigning
+#' genes between modules.  See Details.
+#' @param mergeCutHeight dendrogram cut height for module merging.
+#' @param mergeConsensusQuantile consensus quantile for module merging. See
+#' \code{mergeCloseModules} for details.
+#' @param impute logical: should imputation be used for module eigengene
+#' calculation? See \code{\link{moduleEigengenes}} for more details.
+#' @param trapErrors logical: should errors in calculations be trapped?
+#' @param numericLabels logical: should the returned modules be labeled by
+#' colors (\code{FALSE}), or by numbers (\code{TRUE})?
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @return A list with the following components:
+#' 
+#' \item{colors}{ module assignment of all input genes. A vector containing
+#' either character strings with module colors (if input \code{numericLabels}
+#' was unset) or numeric module labels (if \code{numericLabels} was set to
+#' \code{TRUE}). The color "grey" and the numeric label 0 are reserved for
+#' unassigned genes.  }
+#' 
+#' \item{unmergedColors }{ module colors or numeric labels before the module
+#' merging step. }
+#' 
+#' \item{multiMEs}{ module eigengenes corresponding to the modules returned in
+#' \code{colors}, in multi-set format. A vector of lists, one per set,
+#' containing eigengenes, proportion of variance explained and other
+#' information. See \code{\link{multiSetMEs}} for a detailed description. }
+#' @note Basic sanity checks are performed on given arguments, but it is left
+#' to the user's responsibility to provide valid input.
+#' @author Peter Langfelder
+#' @seealso
+#' 
+#' \code{\link{blockwiseConsensusModules}} for the full blockwise modules
+#' calculation. Parts of its output are natural input for this function.
+#' 
+#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for adaptive branch cutting in
+#' hierarchical clustering dendrograms;
+#' 
+#' \code{\link{mergeCloseModules}} for merging of close modules.
+#' @references Langfelder P, Horvath S (2007) Eigengene networks for studying
+#' the relationships between co-expression modules. BMC Systems Biology 2007,
+#' 1:54
+#' @keywords misc
 recutConsensusTrees = function(multiExpr,
                             goodSamples, goodGenes,
                             blocks,
@@ -2979,6 +4391,71 @@ recutConsensusTrees = function(multiExpr,
 #
 #======================================================================================================
 
+
+
+#' Projective K-means (pre-)clustering of expression data
+#' 
+#' Implementation of a variant of K-means clustering for expression data.
+#' 
+#' 
+#' The principal aim of this function within WGCNA is to pre-cluster a large
+#' number of genes into smaller blocks that can be handled using standard WGCNA
+#' techniques.
+#' 
+#' This function implements a variant of K-means clustering that is suitable
+#' for co-expression analysis. Cluster centers are defined by the first
+#' principal component, and distances by correlation (more precisely,
+#' 1-correlation). The distance between a gene and a cluster is multiplied by a
+#' factor of \eqn{max(clusterSize/preferredSize,
+#' 1)^{sizePenaltyPower}}{\code{max(clusterSize/preferredSize,
+#' 1)^sizePenaltyPower}}, thus penalizing clusters whose size exceeds
+#' \code{preferredSize}. The function starts with randomly generated cluster
+#' assignment (hence the need to set the random seed for repeatability) and
+#' executes interations of calculating new centers and reassigning genes to
+#' nearest center until the clustering becomes stable. Before returning, nearby
+#' clusters are iteratively combined if their combined size is below
+#' \code{preferredSize}.
+#' 
+#' The standard principal component calculation via the function \code{svd}
+#' fails from time to time (likely a convergence problem of the underlying
+#' lapack functions). Such errors are trapped and the principal component is
+#' approximated by a weighted average of expression profiles in the cluster. If
+#' \code{verbose} is set above 2, an informational message is printed whenever
+#' this approximation is used.
+#' 
+#' @param datExpr expression data. A data frame in which columns are genes and
+#' rows ar samples. NAs are allowed, but not too many.
+#' @param preferredSize preferred maximum size of clusters.
+#' @param nCenters number of initial clusters. Empirical evidence suggests that
+#' more centers will give a better preclustering; the default is an attempt to
+#' arrive at a reasonable number.
+#' @param sizePenaltyPower parameter specifying how severe is the penalty for
+#' clusters that exceed \code{preferredSize}.
+#' @param networkType network type. Allowed values are (unique abbreviations
+#' of) \code{"unsigned"}, \code{"signed"}, \code{"signed hybrid"}. See
+#' \code{\link{adjacency}}.
+#' @param randomSeed integer to be used as seed for the random number generator
+#' before the function starts. If a current seed exists, it is saved and
+#' restored upon exit.
+#' @param checkData logical: should data be checked for genes with zero
+#' variance and genes and samples with excessive numbers of missing samples?
+#' Bad samples are ignored; returned cluster assignment for bad genes will be
+#' \code{NA}.
+#' @param imputeMissing logical: should missing values in \code{datExpr} be
+#' imputed before the calculations start? The early imputation makes the code
+#' run faster but may produce slightly different results if re-running older
+#' calculations.
+#' @param maxIterations maximum iterations to be attempted.
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @return A list with the following components: \item{clusters}{ a numerical
+#' vector with one component per input gene, giving the cluster number in which
+#' the gene is assigned. } \item{centers}{ cluster centers, that is their first
+#' principal components. }
+#' @author Peter Langfelder
+#' @keywords cluster
 projectiveKMeans = function (
       datExpr,
       preferredSize = 5000,
@@ -3281,6 +4758,96 @@ projectiveKMeans = function (
 #
 #======================================================================================================
 
+
+
+#' Consensus projective K-means (pre-)clustering of expression data
+#' 
+#' Implementation of a consensus variant of K-means clustering for expression
+#' data across multiple data sets.
+#' 
+#' 
+#' The principal aim of this function within WGCNA is to pre-cluster a large
+#' number of genes into smaller blocks that can be handled using standard WGCNA
+#' techniques.
+#' 
+#' This function implements a variant of K-means clustering that is suitable
+#' for co-expression analysis. Cluster centers are defined by the first
+#' principal component, and distances by correlation. Consensus distance across
+#' several sets is defined as the maximum of the corresponding distances in
+#' individual sets; however, if \code{useMean} is set, the mean distance will
+#' be used instead of the maximum.  The distance between a gene and a center of
+#' a cluster is multiplied by a factor of \eqn{max(clusterSize/preferredSize,
+#' 1)^{sizePenaltyPower}}{\code{max(clusterSize/preferredSize,
+#' 1)^sizePenaltyPower}}, thus penalizing clusters whose size exceeds
+#' \code{preferredSize}. The function starts with randomly generated cluster
+#' assignment (hence the need to set the random seed for repeatability) and
+#' executes interations of calculating new centers and reassigning genes to
+#' nearest (in the consensus sense) center until the clustering becomes stable.
+#' Before returning, nearby clusters are iteratively combined if their combined
+#' size is below \code{preferredSize}.
+#' 
+#' Consensus distance defined as maximum of distances in all sets is consistent
+#' with the approach taken in \code{\link{blockwiseConsensusModules}}, but the
+#' procedure may not converge. Hence it is advisable to use the mean as
+#' consensus in cases where there are multiple data sets (4 or more, say)
+#' and/or if the input data sets are very different.
+#' 
+#' The standard principal component calculation via the function \code{svd}
+#' fails from time to time (likely a convergence problem of the underlying
+#' lapack functions). Such errors are trapped and the principal component is
+#' approximated by a weighted average of expression profiles in the cluster. If
+#' \code{verbose} is set above 2, an informational message is printed whenever
+#' this approximation is used.
+#' 
+#' @param multiExpr expression data in the multi-set format (see
+#' \code{\link{checkSets}}). A vector of lists, one per set. Each set must
+#' contain a component \code{data} that contains the expression data, with rows
+#' corresponding to samples and columns to genes or probes.
+#' @param preferredSize preferred maximum size of clusters.
+#' @param nCenters number of initial clusters. Empirical evidence suggests that
+#' more centers will give a better preclustering; the default is
+#' \code{as.integer(min(nGenes/20, 100*nGenes/preferredSize))} and is an
+#' attempt to arrive at a reasonable number given the resources available.
+#' @param sizePenaltyPower parameter specifying how severe is the penalty for
+#' clusters that exceed \code{preferredSize}.
+#' @param networkType network type. Allowed values are (unique abbreviations
+#' of) \code{"unsigned"}, \code{"signed"}, \code{"signed hybrid"}. See
+#' \code{\link{adjacency}}.
+#' @param randomSeed integer to be used as seed for the random number generator
+#' before the function starts. If a current seed exists, it is saved and
+#' restored upon exit.
+#' @param checkData logical: should data be checked for genes with zero
+#' variance and genes and samples with excessive numbers of missing samples?
+#' Bad samples are ignored; returned cluster assignment for bad genes will be
+#' \code{NA}.
+#' @param imputeMissing logical: should missing values in \code{datExpr} be
+#' imputed before the calculations start? If the missing data are not imputed,
+#' they will be replaced by 0 which can be problematic.
+#' @param useMean logical: should mean distance across sets be used instead of
+#' maximum? See details.
+#' @param maxIterations maximum iterations to be attempted.
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @return A list with the following components: \item{clusters}{ a numerical
+#' vector with one component per input gene, giving the cluster number in which
+#' the gene is assigned. }
+#' 
+#' \item{centers}{ a vector of lists, one list per set. Each list contains a
+#' component \code{data} that contains a matrix whose columns are the cluster
+#' centers in the corresponding set. }
+#' 
+#' \item{unmergedClusters}{ a numerical vector with one component per input
+#' gene, giving the cluster number in which the gene was assigned before the
+#' final merging step. }
+#' 
+#' \item{unmergedCenters}{ a vector of lists, one list per set. Each list
+#' contains a component \code{data} that contains a matrix whose columns are
+#' the cluster centers before merging in the corresponding set. }
+#' @author Peter Langfelder
+#' @seealso \code{\link{projectiveKMeans}}
+#' @keywords cluster
 consensusProjectiveKMeans = function (
       multiExpr,
       preferredSize = 5000,
