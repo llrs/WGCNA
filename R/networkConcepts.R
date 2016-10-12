@@ -1,4 +1,4 @@
-# ===================================================
+
 # This code was written by Jun Dong, modified by Peter Langfelder
 # datExpr: expression profiles with rows=samples and cols=genes/probesets
 # power: for contruction of the weighted network
@@ -267,20 +267,16 @@ MAR=MAR, ConformityE=ConformityE)
 
 
 
-#====================================================================================================
+
 #
 # Network functions for network concepts
 #
-#====================================================================================================
-#=========================================
+
 # Function definitions
-#=========================================
 
-# ================================================================================
+
+
 #   Cohesiveness/Conformity/Factorizability etc
-# ================================================================================
-
-# ===================================================
 # Check if adj is a valid adjacency matrix:  square matrix, non-negative entries, symmetric and no missing entries.
 # Parameters:
 #   adj - the input adjacency matrix
@@ -306,7 +302,7 @@ MAR=MAR, ConformityE=ConformityE)
 }
 
 
-# ===================================================
+
 # .NPC.direct=function(adj)
 # Calculates the square root of Normalized Product Connectivity (.NPC), by way of definition of .NPC. ( \sqrt{t})
 # Parameters:
@@ -350,7 +346,7 @@ MAR=MAR, ConformityE=ConformityE)
 	v1
 }
 
-# ===================================================
+
 # .NPC.iterate=function(adj, loop=10^(10), tol=10^(-10))
 # Calculates the square root of Normalized Product Connectivity, by way of iteration algorithm. ( \sqrt{t})
 # Parameters:
@@ -391,7 +387,7 @@ if( exists(".NPC.iterate") ) rm(.NPC.iterate)
 	list(v1=v1,loop=i,diff=diff)
 }
 
-# ===================================================
+
 # The function .ClusterCoef.fun computes the cluster coefficients.
 # Input is an adjacency matrix
 .ClusterCoef.fun=function(adjmat1)
@@ -420,7 +416,7 @@ if( exists(".NPC.iterate") ) rm(.NPC.iterate)
 } # end of function
 
 
-# ===================================================
+
 # The function err.bp  is used to create error bars in a barplot
 # usage: err.bp(as.vector(means), as.vector(stderrs), two.side=F)
 .err.bp<-function(daten,error,two.side=F)
@@ -451,7 +447,7 @@ if( exists(".NPC.iterate") ) rm(.NPC.iterate)
 
 
 
-#========================================================================================
+
 #' @name conformityBasedNetworkConcepts
 #' @rdname conformityBasedNetworkConcepts
 #' @title calculation of conformity-based network concepts
@@ -634,7 +630,7 @@ conformityBasedNetworkConcepts = function(adj, GS=NULL)
 
 
 
-#===================================================================================================
+
 #' @name fundamentalNetworkConcepts
 #' @rdname fundamentalNetworkConcepts
 #' @title Calculation of fundamental network concepts from an adjacency matrix
@@ -716,13 +712,3 @@ equal the number of rows of the adjcency matrix. length(GS) unequal dim(adj)[[1]
    }
    output
 } # end of function
-
-#==========================================================================================================
-#
-# Density function
-#
-#==========================================================================================================
-
-
-
-
