@@ -300,7 +300,10 @@ moduleEigengenes <- function(expr, colors, impute = TRUE, nPC = 1,
 #
 #-------------------------------------------------------------------------------
 # This function removes the grey eigengene from supplied module eigengenes.
-
+#' @rdname removeGreyME
+#' @name removeGreyME
+#'
+#' @export
 removeGreyME <- function(MEs,
                          greyMEName = paste0(moduleColor.getMEprefix(),
                                              "grey")) {
@@ -506,7 +509,50 @@ orderMEs <- function(MEs, greyLast = TRUE,
 #
 #-------------------------------------------------------------------------------
 # Orders MEs by the dendrogram of their consensus dissimilarity.
-
+#' @rdname consensusOrderMEs
+#' @name consensusOrderMEs
+#' @title Put close eigenvectors next to each other in several sets.
+#' @description
+#' Reorder given (eigen-)vectors such that similar ones (as measured by
+#' correlation) are next to each other. This is a multi-set version of orderMEs;
+#' the dissimilarity used can be of consensus type (for each pair of
+#' eigenvectors the consensus dissimilarity is the maximum of individual set
+#' dissimilarities over all sets) or of majority type (for each pair of
+#' eigenvectors the consensus dissimilarity is the average of individual set
+#' dissimilarities over all sets).
+#' @param MEs Module eigengenes of several sets in a multi-set format (see
+#' \code{\link{checkSets}}). A vector of lists, with each list corresponding to
+#' one dataset and the module eigengenes in the component data, that is
+#' MEs[[set]]$data[sample, module] is the expression of the eigengene of module
+#' module in sample sample in dataset set. The number of samples can be
+#' different between the sets, but the modules must be the same.
+#' @param useAbs Controls whether vector similarity should be given by absolute
+#' value of correlation or plain correlation.
+#' @param useSets Allows to specify for which sets the eigengene ordering is to
+#' be performed.
+#' @param greyLast Normally the color grey is reserved for unassigned genes;
+#' hence the grey module is not a proper module and it is conventional to put it
+#' last. If this is not desired, set the parameter to FALSE.
+#' @param greyNAme Name of the grey module eigengene.
+#' @param method A character string giving the method to be used calculating the
+#' consensus dissimilarity. Allowed values are (abbreviations of) "consensus"
+#' and "majority". The consensus dissimilarity is calculated as the maximum of
+#' given set dissimilarities for "consensus" and as the average for "majority".
+#' @details
+#' Ordering module eigengenes is useful for plotting purposes. This function
+#' calculates the consensus or majority dissimilarity of given eigengenes over
+#' the sets specified by useSets (defaults to all sets). A hierarchical
+#' dendrogram is calculated using the dissimilarity and the order given by the
+#' dendrogram is used for the eigengenes in all other sets.
+#' @return
+#' A vector of lists of the same type as MEs containing the re-ordered
+#' eigengenes.
+#' @author
+#' Peter Langfelder
+#' @seealso
+#' \code{\link{moduleEigengenes}}, \code{\link{multiSetMEs}},
+#' \code{\link{orderMEs}}
+#' @export
 consensusOrderMEs <- function(MEs, useAbs = FALSE, useSets = NULL,
                               greyLast = TRUE,
                               greyName = paste0(moduleColor.getMEprefix(),
@@ -1976,7 +2022,7 @@ subsetTOM <- function(datExpr, subset,
 #' calculate co - expression similarity for distance networks. Defaults to the
 #' function \code{\link{dist}}. Any function returning non - negative values
 #' can be used.
-#' @param distOption Character string specifying additional arguments to be
+#' @param distOptions Character string specifying additional arguments to be
 #' passed to the function given by \code{distFnc}. For example, when the
 #' function  \code{\link{dist}} is used, the argument \code{method} can be used
 #' to specify various ways of computing the distance..
