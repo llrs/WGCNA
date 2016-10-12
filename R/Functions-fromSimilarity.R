@@ -47,7 +47,9 @@ adj = ((mat - min)/(max - min))^power
 
   adj
 }
-
+#' @name checkAdjMat
+#' @rdname checkAdjMat
+#' @export
 checkSimilarity <- function(similarity, min =  - 1, max = 1)
 {
   checkAdjMat(similarity, min, max)

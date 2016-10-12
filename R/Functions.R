@@ -2749,6 +2749,25 @@ nPresent <- function(x) {
     sum(!is.na(x))
 }
 
+#' @rdname checkAdjMat
+#' @name checkAdjMat
+#' @title Check adjacency matrix
+#' @description
+#' Checks a given matrix for properties that an adjacency matrix must satisfy.
+#' @param adjMat Adjacency matrix to be checked.
+#' @param similarity Similarity matrix to be checked.
+#' @param min minimum allowed values for entries of the input.
+#' @param max maximum allowed values for entries of the input.
+#' @details  The function checks whether the given matrix really is a
+#' 2-dimensional numeric matrix, whether it is square, symmetric, and all
+#' finite entries are between min and max. If any of the conditions is not met,
+#' the function issues an error.
+#' @return
+#' None. The functions returns normally if all conditions are met.
+#' @author
+#' Peter Langfelder
+#' @seealso
+#' \code{\link{adjacency}}
 checkAdjMat <- function(adjMat, min = 0, max = 1) {
     dim = dim(adjMat)
     if (is.null(dim) || length(dim) != 2)
