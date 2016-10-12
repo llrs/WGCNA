@@ -82,7 +82,7 @@ will be given arguments \code{(datExpr, datExpr[selectCols], ...)}; hence the
 Correlation and distance are transformed as follows: for
 \code{type = "unsigned"}, adjacency = |cor|^power; for \code{type = "signed"}
 , adjacency = (0.5 * (1 + cor))^power; for \code{type = "signed hybrid"},
-adjacency = cor^power if cor>0 and 0 otherwise; and for
+adjacency = cor^power if cor > 0 and 0 otherwise; and for
 \code{type = "distance"}, adjacency = (1 - (dist/max(dist))^2)^power.
 
 The function \code{adjacency.fromSimilarity} inputs a similarity matrix, that

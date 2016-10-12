@@ -35,7 +35,7 @@
 #' @author
 #' Peter Langfelder
 #' @references
-#' VisANT software is available from \link{http://visant.bu.edu/}
+#' VisANT software is available from \url{http://visant.bu.edu/}
 #' @seealso
 #' \code{\link{exportNetworkToCytoscape}}
 #' @export

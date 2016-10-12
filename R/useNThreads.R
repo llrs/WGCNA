@@ -25,8 +25,7 @@
     return(nThreads)
 }
 
-.nProcessorsOnline = function()
-{
+.nProcessorsOnline = function() {
   n = detectCores()
   if (!is.numeric(n)) n = 2
   if (!is.finite(n)) n = 2
@@ -34,8 +33,12 @@
   n
 }
 
-#' @rdname allowWGNCAThreads
-#' @name allowWGNCAThreads
+#' @rdname allowWGCNAThreads
+#' @name allowWGCNAThreads
+#' @aliases WGCNAnThreads
+#' @aliases disableWGCNAThreads
+#' @aliases enableWGCNAThreads
+#' @aliases WGCNAnThreads
 #' @title Allow and disable multi-threading for certain WGCNA calculations.
 #' @description
 #' These functions allow and disable multi-threading for WGCNA calculations that
@@ -96,10 +99,9 @@ allowWGCNAThreads = function(nThreads = NULL) {
   invisible(nThreads)
 }
 #' @rdname allowWGCNAThreads
-#' @aliases allowWGCNAThreads
+#' @aliases disableWGCNAThreads
 #' @export
-disableWGCNAThreads = function()
-{
+disableWGCNAThreads = function() {
   Sys.unsetenv(.threadAllowVar)
   pars = list(1)
   names(pars) = .threadAllowVar
@@ -111,15 +113,14 @@ disableWGCNAThreads = function()
   registerDoSEQ()
 }
 
-.checkAvailableMemory = function()
-{
+.checkAvailableMemory = function() {
   size = 0
   res = .C("checkAvailableMemoryForR", size = as.double(size), PACKAGE = "WGCNA")
   res$size
 }
 
 #' @rdname allowWGCNAThreads
-#' @aliases allowWGCNAThreads
+#' @aliases enableWGCNAThreads
 #' @export
 enableWGCNAThreads = function(nThreads = NULL) {
   nCores = detectCores()
@@ -151,7 +152,9 @@ enableWGCNAThreads = function(nThreads = NULL) {
   # Return the number of threads invisibly
   invisible(nThreads)
 }
-
+#' @rdname allowWGCNAThreads
+#' @aliases WGCNAnThreads
+#' @export
 WGCNAnThreads = function() {
   n = suppressWarnings(as.numeric(as.character(
       Sys.getenv(.threadAllowVar, unset = 1))))
