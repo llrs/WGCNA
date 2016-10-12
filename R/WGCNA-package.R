@@ -226,27 +226,6 @@ NULL
 #'
 NULL
 
-#' Space-less paste
-#'
-#' A convenient wrapper for the \code{\link{paste}} function with
-#' \code{sep=""}.
-#'
-#'
-#' @param \dots standard arguments to function \code{\link{paste}} except
-#' \code{sep}.
-#' @return The result of the corresponding \code{\link{paste}}.
-#' @note Do not use the \code{sep} argument. Using will lead to an error.
-#' @author Peter Langfelder
-#' @seealso \code{\link{paste}}
-#' @keywords misc
-#' @examples
-#'
-#'   a = 1;
-#'   paste("a=", a);
-#'   spaste("a=", a);
-#'
-NULL
-
 #' Weighted Gene Co-Expression Network Analysis
 #'
 #' Functions necessary to perform Weighted Correlation Network Analysis. WGCNA
