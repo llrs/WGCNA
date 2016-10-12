@@ -1,16 +1,16 @@
 # first and last lib functions
 
-.onAttach = function(libname, pkgname)
-{
-  ourVer = try( gsub("[^0-9_.-]", "", packageVersion("WGCNA"), fixed = FALSE) )
+.onAttach = function(libname, pkgname) {
+  ourVer = try(gsub("[^0-9_.-]", "", packageVersion("WGCNA"), fixed = FALSE))
 
-  if (inherits(ourVer, "try-error")) ourVer = ""
+  if (inherits(ourVer, "try-error")) {
+      ourVer = ""
+  }
 
   printFlush("==========================================================================\n*")
   printFlush(paste("*  Package WGCNA", ourVer, "loaded.\n*"))
 
-  if (.useNThreads()==1 && .nProcessorsOnline() > 1)
-  {
+  if (.useNThreads()==1 && .nProcessorsOnline() > 1) {
    printFlush(paste0(
          "*    Important note: It appears that your system supports multi-threading,\n",
          "*    but it is not enabled within WGCNA in R. \n",
@@ -37,12 +37,10 @@
   printFlush("==========================================================================\n\n")
 
 
-  imputeVer = try( gsub("[^0-9_.-]", "", packageVersion("impute"), fixed = FALSE) )
+  imputeVer = try(gsub("[^0-9_.-]", "", packageVersion("impute"), fixed = FALSE))
 
-  if (!inherits(imputeVer, "try-error"))
-  {
-    if (compareVersion(imputeVer, "1.12")< 0)
-    {
+  if (!inherits(imputeVer, "try-error")) {
+    if (compareVersion(imputeVer, "1.12")< 0) {
       printFlush(paste("*!*!*!*!*!*!* Caution: installed package 'impute' is too old.\n",
             "Old versions of this package can occasionally crash the code or the entire R session.\n",
             "If you already have the newest version available from CRAN, \n",
