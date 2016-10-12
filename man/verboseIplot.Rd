@@ -136,8 +136,8 @@ rrespective of the specified correlation function, the MSE is always
 calculated based on the residuals of a linear model.
 }
 \note{
-This funtion is based on \code{\link{verboseScatterplot}},
-\code{\link{iplot}} and \code{\link{greenWhiteRed}}.
+This funtion is based on \code{\link{verboseScatterplot}} and
+\code{\link{greenWhiteRed}}.
 
 This funtion is based on verboseScatterplot (Steve Horvath and Peter
 Langfelder), iplot (Andreas Ruckstuhl, Rene Locher) and greenWhiteRed(Peter

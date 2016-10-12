@@ -8,8 +8,8 @@ adjacency.splineReg(datExpr, df = 6 - (nrow(datExpr) < 100) - (nrow(datExpr) <
   30), symmetrizationMethod = "mean", ...)
 }
 \arguments{
-\item{datExpr}{data frame containing numeric variables. Example: Columns may
-correspond to genes and rows to observations (samples).}
+\item{datExpr}{data.frame containing expression data. Columns correspond to
+genes and rows to samples.}
 
 \item{df}{degrees of freedom in generating natural cubic spline. The default
 is as follows: if nrow(datExpr)>100 use 6, if nrow(datExpr)>30 use 4,

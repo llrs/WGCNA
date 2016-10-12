@@ -44,7 +44,7 @@ calculate co - expression similarity for distance networks. Defaults to the
 function \code{\link{dist}}. Any function returning non - negative values
 can be used.}
 
-\item{distOption}{Character string specifying additional arguments to be
+\item{distOptions}{Character string specifying additional arguments to be
 passed to the function given by \code{distFnc}. For example, when the
 function \code{\link{dist}} is used, the argument \code{method} can be used
 to specify various ways of computing the distance..}

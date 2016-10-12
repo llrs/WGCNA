@@ -121,6 +121,8 @@ better results but at this time should be considered experimental.}
 \item{saveIndividualTOMs}{logical: should individual TOMs be saved to disk
 for later use?}
 
+\item{individualTOMFileNames}{Load a previously saved TOM?}
+
 \item{individualTOMInfo}{Optional data for TOM matrices in individual data
 sets. This object is returned by the function
 \code{\link{blockwiseIndividualTOMs}}. If not given, appropriate topological
@@ -174,6 +176,8 @@ is \code{TRUE}.}
 
 \item{saveConsensusTOMs}{logical: should the consensus topological overlap
 matrices for each block be saved and returned?}
+
+\item{consensusTOMFileNames}{Load a previously saved TOM?}
 
 \item{returnTOMs}{logical: should calculated consensus TOM(s) be returned?}
 

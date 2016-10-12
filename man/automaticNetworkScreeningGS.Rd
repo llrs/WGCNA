@@ -30,12 +30,6 @@ procedure.}
 \item{datME}{optional specification of module eigengenes. A data frame whose
 columns are the module eigengenes. If given, module analysis will not be
 performed.}
-
-\item{datKME}{a data frame (or a matrix-like object) containing
-eigengene-based connectivities of all genes in the network.}
-
-\item{GS}{a vector with one entry for every gene containing its gene
-significance.}
 }
 \value{
 A list with the following components: \item{networkScreening}{a data
@@ -44,9 +38,6 @@ frame containing results of the network screening procedure. See
 module eigengenes (or a copy of the input \code{datME}, if given).}
 \item{hubGeneSignificance}{ hub gene significance for all calculated
 modules. See \code{\link{hubGeneSignificance}}. }
-
-A vector whose entries are the hub gene significances for each
-module.
 }
 \description{
 This function performs gene screening based on external gene significance
@@ -61,36 +52,10 @@ are first calculated using network analysis based on supplied parameters.
 }
 \author{
 Steve Horvath
-
-Steve Horvath
-}
-\references{
-Dong J, Horvath S (2007) Understanding Network Concepts in
-Modules, BMC Systems Biology 2007, 1:24
 }
 \seealso{
 \code{\link{networkScreening}}, \code{\link{hubGeneSignificance}},
 \code{\link{networkScreening}}, \code{\link[dynamicTreeCut]{cutreeDynamic}}
 }
-\keyword{Calculate}
-\keyword{Hubgene}
-\keyword{In}
-\keyword{\code{datKME}}
-\keyword{all}
-\keyword{and}
-\keyword{approximate}
-\keyword{columns}
-\keyword{correspond}
-\keyword{for}
-\keyword{gene}
-\keyword{genes}
-\keyword{hub}
-\keyword{in}
 \keyword{misc}
-\keyword{modules}
-\keyword{modules.}
-\keyword{network.}
-\keyword{rows}
-\keyword{significance}
-\keyword{to}
 

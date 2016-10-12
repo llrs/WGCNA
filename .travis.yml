@@ -3,6 +3,7 @@ language: R
 cache: packages
 r_packages:
   - covr
+  - roxygen2
 sudo: required
 before_script:
   - Rscript -e 'library(devtools); document()'
