@@ -6,6 +6,9 @@
 \usage{
 nSets(multiData, ...)
 }
+\arguments{
+\item{multiData}{List of Expression data, creating a multiset object.}
+}
 \value{
 The number of sets of a multisets object
 }

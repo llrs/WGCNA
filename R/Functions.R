@@ -296,7 +296,7 @@ moduleEigengenes <- function(datExpr, colors, impute = TRUE, nPC = 1,
         isHub <- validAEs
         validColors <- colors
         names(PrinComps) <-
-            paste0(moduleColor.getMEprefix(), modlevels, )
+            paste0(moduleColor.getMEprefix(), modlevels)
         names(averExpr) <- paste0("AE", modlevels)
         for (i in c(1:lml)) {
             if (verbose > 1) {
@@ -1112,27 +1112,15 @@ consensusMEDissimilarity <-
             as.numeric(as.dist(x))
         })
         dim(distMat) <- c(nUseMEs * (nUseMEs - 1) / 2, nUseSets)
-        normalized <-
-            .equalizeQuantiles(distMat, summaryType = quantileSummary)
-        MEDiss <- apply(
-            normalized,
-            2,
-            .turnDistVectorIntoMatrix,
-            size = nUseMEs,
-            Diag = FALSE,
-            Upper = FALSE,
-            diagValue = 0
+        normalized <- .equalizeQuantiles(distMat, summaryType = quantileSummary)
+        MEDiss <- apply(normalized, 2, .turnDistVectorIntoMatrix,
+                        size = nUseMEs, Diag = FALSE, Upper = FALSE,
+                        diagValue = 0
         )
     }
 
-    ConsDiss <- apply(
-        MEDiss,
-        c(1:2),
-        quantile,
-        probs = 1 - consensusQuantile,
-        names = FALSE,
-        na.rm = TRUE
-    )
+    ConsDiss <- apply(MEDiss, c(1:2), quantile, probs = 1 - consensusQuantile,
+                      names = FALSE, na.rm = TRUE)
     colnames(ConsDiss) <- rownames(ConsDiss) = useNames
     ConsDiss
 }
@@ -1156,43 +1144,13 @@ consensusMEDissimilarity <-
 # by BaseColors and the rest is "randomly" chosen from the rest of R color names
 # that do not contain "grey" nor "gray".
 
-BaseColors <-
-    c(
-        "turquoise",
-        "blue",
-        "brown",
-        "yellow",
-        "green",
-        "red",
-        "black",
-        "pink",
-        "magenta",
-        "purple",
-        "greenyellow",
-        "tan",
-        "salmon",
-        "cyan",
-        "midnightblue",
-        "lightcyan",
-        "grey60",
-        "lightgreen",
-        "lightyellow",
-        "royalblue",
-        "darkred",
-        "darkgreen",
-        "darkturquoise",
-        "darkgrey",
-        "orange",
-        "darkorange",
-        "white",
-        "skyblue",
-        "saddlebrown",
-        "steelblue",
-        "paleturquoise",
-        "violet",
-        "darkolivegreen",
-        "darkmagenta"
-    )
+BaseColors <-c("turquoise", "blue", "brown", "yellow", "green", "red", "black",
+               "pink", "magenta", "purple", "greenyellow", "tan", "salmon",
+               "cyan", "midnightblue", "lightcyan", "grey60", "lightgreen",
+               "lightyellow", "royalblue", "darkred", "darkgreen",
+               "darkturquoise", "darkgrey", "orange", "darkorange", "white",
+               "skyblue", "saddlebrown", "steelblue", "paleturquoise", "violet",
+               "darkolivegreen", "darkmagenta")
 
 RColors <- colors()[-grep("grey", colors())]
 RColors <- RColors[-grep("gray", RColors)]
@@ -1665,7 +1623,7 @@ multiSetMEs <- function(exprData,
                 setColors = universalColors
             }
             setMEs = moduleEigengenes(
-                expr = exprData[[set]]$data,
+                datExpr = exprData[[set]]$data,
                 colors = setColors,
                 impute = impute,
                 nPC = nPC,
@@ -1715,7 +1673,7 @@ multiSetMEs <- function(exprData,
                 setColors = universalColors[useGenes]
             }
             setMEs = moduleEigengenes(
-                expr = exprData[[set]]$data[, useGenes],
+                datExpr = exprData[[set]]$data[, useGenes],
                 colors = setColors,
                 impute = impute,
                 nPC = nPC,
@@ -4880,9 +4838,10 @@ nearestNeighborConnectivityMS <-
 # Nifty display of progress.
 #
 #===============================================================================
-#' @rdname initProgInd
+#' Progress indicators
+#'
+#' Describes how much/how long does it takes
 #' @export
-#' @aliases initProgInd
 initProgInd <-function(leadStr = "..", trailStr = "", quiet = !interactive()) {
         oldStr = " "
         cat(oldStr)
@@ -4891,10 +4850,13 @@ initProgInd <-function(leadStr = "..", trailStr = "", quiet = !interactive()) {
                        trailStr = trailStr)
         class(progInd) = "progressIndicator"
         updateProgInd(0, progInd, quiet)
-    }
+}
+
+#' Update the progress as it goes
+#'
+#' Should work on all OS to indicate the evolution of indicator
 #' @rdname initProgInd
 #' @export
-#' @aliases updateProgInd
 updateProgInd <- function(newFrac, progInd, quiet = !interactive())
 {
     if (class(progInd) != "progressIndicator")
@@ -9982,8 +9944,16 @@ randIndex <- function(tab, adjust = TRUE)
 # Check expression data: mark genes and samples with too many missing entries
 #
 #===============================================================================
-#' @rdname goodGenesMS
-#' @aliases goodGenes
+#' Find the good genes of a multiset object
+#' @param datExpr MultiSet data of expression values.
+#' @param useSamples Select the samples to use.
+#' @param useGenes Select the genes to use.
+#' @param minFraction Minimal fraction to...
+#' @param minNSamples Minimal number of samples.
+#' @param minNGenes Minimal number of genes.
+#' @param tol Strange option.
+#' @param verbose Indicate the loggin output.
+#' @param indent Indicates how much indentation you want.
 #' @export
 goodGenes <- function(datExpr,
                       useSamples = NULL,
@@ -10044,6 +10014,7 @@ goodGenes <- function(datExpr,
 
 #' @aliases goodSamplesMS
 #' @rdname goodSamplesMS
+#' @inheritParams goodGenes
 #' @export
 goodSamples <- function(datExpr,
                         useSamples = NULL,

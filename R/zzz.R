@@ -11,18 +11,23 @@
 #' @import parallel
 #' @import AnnotationDbi
 #' @import parallel
-#' @import Hmisc
+#' @importFrom Hmisc rcorr.cens errbar
 #' @import impute
 #' @import splines
 #' @import preprocessCore
 #' @import grDevices
 #' @import graphics
-#' @import stats
-#' @import utils
+#' @importFrom stats anova as.dendrogram as.dist as.hclust coef cov cutree dist
+#' fisher.test glm heatmap kruskal.test lm median model.matrix na.exclude
+#' order.dendrogram pchisq phyper pnorm predict pt qnorm quantile reorder
+#' residuals rexp rnorm runif sd smooth.spline t.test var weighted.mean
+#' @importFrom utils packageVersion compareVersion data flush.console read.csv
+#' write.csv write.table
 #' @exportPattern "^[^\\.]"
 #'
 .onAttach = function(libname, pkgname) {
-  ourVer = try(gsub("[^0-9_.-]", "", packageVersion("WGCNA"), fixed = FALSE))
+  ourVer = try(gsub("[^0-9_.-] ", packageVersion("WGCNA"),
+                    packageVersion("WGCNA"), fixed = FALSE))
 
   if (inherits(ourVer, "try-error")) {
       ourVer = ""

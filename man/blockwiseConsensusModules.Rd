@@ -141,7 +141,7 @@ in the denominator is replaced by \code{mean}. The \code{"mean"} may produce
 better results but at this time should be considered experimental.}
 
 \item{saveIndividualTOMs}{logical: should individual TOMs be saved to disk
-for later use?}
+for later use?.}
 
 \item{networkCalibration}{network calibration method. One of "single
 quantile", "full quantile", "none" (or a unique abbreviation of one of
@@ -176,7 +176,7 @@ to be used for weighted mean consensus. Only used when \code{useMean} above
 is \code{TRUE}.}
 
 \item{saveConsensusTOMs}{logical: should the consensus topological overlap
-matrices for each block be saved and returned?}
+matrices for each block be saved and returned?.}
 
 \item{useDiskCache}{should calculated network similarities in individual
 sets be temporarilly saved to disk? Saving to disk is somewhat slower than

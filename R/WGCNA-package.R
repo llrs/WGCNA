@@ -382,7 +382,6 @@ NULL
 #' sizeGrWindow Open a graphics window of given width and height
 #' softConnectivity Calculation of soft (weighted) connectevity
 #' softConnectivity.fromSimilarity Calculation of soft (weighted) connectevity
-#' spaste Space-less paste standardColors Colors this library uses for labeling
 #' modules standardScreeningBinaryTrait Standard screening for a binary trait
 #' standardScreeningCensoredTime Standard screening with regard to a Censored
 #' Time Variable stdErr Standard error stratifiedBarplot Bar plots of data

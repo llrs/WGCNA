@@ -114,8 +114,12 @@ unsignedAdjacency <- function(datExpr, datExpr2 = NULL, power = 6,
 #' 1:54
 #' @keywords array
 #' @examples
-#'
+#' similarity <- matrix(seq(-1, 1, length.out = 25), 5)
+#' similarity[lower.tri(similarity)] <- t(similarity)[lower.tri(similarity)]
 #' adj <-  adjacency.fromSimilarity(similarity)
+#'
+#' datExpr <- matrix(seq(-1, 1, length.out = 25), 5)
+#' datExpr[lower.tri(datExpr)] <- t(datExpr)[lower.tri(datExpr)]
 #' adj <- adjacency(datExpr)
 #'
 #' @export adjacency

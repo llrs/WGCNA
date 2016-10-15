@@ -2,25 +2,25 @@
 
 
 #' Construct a network from a matrix
-#' 
+#'
 #' Constructs a network
-#' 
+#'
 #' If \code{signed} is \code{FALSE}, the matrix \code{mat} is first converted
 #' to its absolute value.
-#' 
+#'
 #' This function then symmetrizes the matrix using the \code{symmetrizeMethod}
 #' component-wise on \code{mat} and \code{t(mat)} (i.e., the transpose of
 #' \code{mat}).
-#' 
+#'
 #' In the next step, the symmetrized matrix is linearly scaled to the interval
 #' [0,1] using either \code{min} and \code{max} (each either supplied or
 #' determined from the matrix). Values outside of the [min, max] range are
 #' truncated to \code{min} or \code{max}.
-#' 
+#'
 #' Lastly, the adjacency is calculated by rasing the matrix to \code{power}.
 #' The diagonal of the result is set to \code{diagEntry}. Note that most WGCNA
 #' functions expect the diagonal of an adjacency matrix to be 1.
-#' 
+#'
 #' @param mat matrix to be turned into a network. Must be square.
 #' @param symmetrizeMethod method for symmetrizing the matrix. The method will
 #' be applied to each component of mat and its transpose.
@@ -40,7 +40,7 @@
 #' @author Peter Langfelder
 #' @seealso \code{adjacency} for calculation of a correlation network
 #' (adjacency) from a numeric matrix such as expression data
-#' 
+#'
 #' \code{adjacency.fromSimilarity} for simpler calculation of a network from a
 #' symmetric similarity matrix.
 #' @keywords misc
@@ -95,14 +95,15 @@ adj = ((mat - min)/(max - min))^power
 #' @name checkAdjMat
 #' @rdname checkAdjMat
 #' @export
-checkSimilarity <- function(similarity, min =  - 1, max = 1)
-{
+checkSimilarity <- function(similarity, min =  - 1, max = 1) {
   checkAdjMat(similarity, min, max)
 }
 
 #' @name adjacency
 #' @rdname adjacency
 #' @examples
+#' similarity <- matrix(seq(-1, 1, length.out = 25),5)
+#' similarity[lower.tri(similarity)] <- t(similarity)[lower.tri(similarity)]
 #' adj <-  adjacency.fromSimilarity(similarity)
 #' @export
 adjacency.fromSimilarity <- function(similarity, type = "unsigned",
@@ -110,8 +111,7 @@ adjacency.fromSimilarity <- function(similarity, type = "unsigned",
   checkSimilarity(similarity)
   adjacency(similarity, type = type, power = power, corFnc = "I",
             corOptions = "", distFnc = "I",
-            distOptions = "")
-}
+            distOptions = "") }
 
 pickHardThreshold.fromSimilarity <- function(similarity,
                                              RsquaredCut = 0.85,

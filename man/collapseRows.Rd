@@ -169,7 +169,7 @@ a given gene symbol into one representative.
     # The first column of the data frame will contain row identifiers
     # number of columns (e.g. observations or microarrays)
     m=60
-    # number of rows (e.g. variables or probes on a microarray) 
+    # number of rows (e.g. variables or probes on a microarray)
     n=500
     # seed module eigenvector for the simulateModule function
     MEtrue=rnorm(m)
@@ -182,19 +182,19 @@ a given gene symbol into one representative.
     dat1=data.frame(RowIdentifier, datNumeric)
     #we simulate a vector with n/5 group labels, i.e. each row group corresponds to 5 rows
     rowGroup=rep(  paste("Group",1:(n/5),  sep=""), 5 )
-    
-    # Typical Input Data 
+
+    # Typical Input Data
     # Since the first column of dat1 contains the RowIdentifier, we use the following code
     datET=dat1[,-1]
     rowID=dat1[,1]
-    
-    # assign row names according to the RowIdentifier 
+
+    # assign row names according to the RowIdentifier
     dimnames(datET)[[1]]=rowID
     # run the function and save it in an object
-    
+
     collapse.object=collapseRows(datET=datET, rowGroup=rowGroup, rowID=rowID)
-    
-    # this creates the collapsed data where 
+
+    # this creates the collapsed data where
     # the first column contains the group name
     # the second column reports the corresponding selected row name (the representative)
     # and the remaining columns report the values of the representative row
@@ -205,10 +205,10 @@ a given gene symbol into one representative.
     # EXAMPLE 2:
     # Using the same data frame as above, run collapseRows with a user-inputted function.
     # In this case we will use the mean.  Note that since we are choosing some combination
-    #   of the probe values for each gene, the group2row and selectedRow output 
+    #   of the probe values for each gene, the group2row and selectedRow output
     #   parameters are not meaningful.
 
-    collapse.object.mean=collapseRows(datET=datET, rowGroup=rowGroup, rowID=rowID, 
+    collapse.object.mean=collapseRows(datET=datET, rowGroup=rowGroup, rowID=rowID,
           method="function", methodFunction=colMeans)[[1]]
 
     # Note that in this situation, running the following code produces the identical results:
@@ -226,21 +226,21 @@ a given gene symbol into one representative.
     datNumeric=data.frame(t(simulateModule(MEtrue,n)))
 
     # In this example, rows are genes, and groups are modules.
-    RowIdentifier=paste("Gene", 1:n, sep="")
-    ColumnName=paste("Sample",1:m, sep="")
+    RowIdentifier=paste0("Gene", 1:n)
+    ColumnName=paste0("Sample", 1:m)
     dimnames(datNumeric)[[2]]=ColumnName
     dat1=data.frame(RowIdentifier, datNumeric)
     # We simulate a vector with n/100 modules, i.e. each row group corresponds to 100 rows
-    rowGroup=rep(  paste("Module",1:(n/100),  sep=""), 100 )
+    rowGroup=rep(paste0("Module", 1:(n/100)), 100)
     datET=dat1[,-1]
     rowID=dat1[,1]
     dimnames(datET)[[1]]=rowID
 
     # run the function and save it in an object
     collapse.object.ME=collapseRows(datET=datET, rowGroup=rowGroup, rowID=rowID, method="ME")[[1]]
-    
+
     # Note that in this situation, running the following code produces the identical results:
-    collapse.object.ME.2 = t(moduleEigengenes(expr=t(datET),colors=rowGroup)$eigengene)
+    collapse.object.ME.2 = t(moduleEigengenes(datExpr=t(datET),colors=rowGroup)$eigengene)
     colnames(collapse.object.ME.2) = ColumnName
     rownames(collapse.object.ME.2) = sort(unique(rowGroup))
 

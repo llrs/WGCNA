@@ -14,6 +14,8 @@ goodSamplesMS(multiExpr, useSamples = NULL, useGenes = NULL,
   verbose = 1, indent = 0)
 }
 \arguments{
+\item{datExpr}{MultiSet data of expression values.}
+
 \item{useSamples}{optional specifications of which samples to use for the
 check. Should be a logical vector; samples whose entries are \code{FALSE}
 will be ignored for the missing value counts. Defaults to using all samples.}

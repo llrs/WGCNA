@@ -162,6 +162,7 @@ multiData.eigengeneSignificance = function(multiData, multiTrait, moduleLabels,
 #' Count the number of sets
 #'
 #' From a given multiset object calculates the numbers of sets present
+#' @param multiData List of Expression data, creating a multiset object.
 #' @return The number of sets of a multisets object
 #' @export
 nSets = function(multiData, ...) {

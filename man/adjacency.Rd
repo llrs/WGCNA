@@ -95,9 +95,15 @@ calculated among the columns of \code{datExpr} irrespective of whether a
 correlation or a distance network is requested.
 }
 \examples{
+similarity <- matrix(seq(-1, 1, length.out = 25),5)
+similarity[lower.tri(similarity)] <- t(similarity)[lower.tri(similarity)]
+adj <-  adjacency.fromSimilarity(similarity)
+similarity <- matrix(seq(-1, 1, length.out = 25), 5)
+similarity[lower.tri(similarity)] <- t(similarity)[lower.tri(similarity)]
 adj <-  adjacency.fromSimilarity(similarity)
 
-adj <-  adjacency.fromSimilarity(similarity)
+datExpr <- matrix(seq(-1, 1, length.out = 25), 5)
+datExpr[lower.tri(datExpr)] <- t(datExpr)[lower.tri(datExpr)]
 adj <- adjacency(datExpr)
 
 }

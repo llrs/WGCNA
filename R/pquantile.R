@@ -1,13 +1,11 @@
 # Parallel version of quantile, mean and median
 
-.dimensions = function(x)
-{
+.dimensions = function(x) {
    if (is.null(dim(x))) return(length(x))
    return(dim(x))
 }
 
-.shiftList = function(c0, lst)
-{
+.shiftList = function(c0, lst) {
   if (length(lst)==0) return(list(c0))
   ll = length(lst)
   out = list()
@@ -20,15 +18,15 @@
 
 
 #' Parallel quantile, median, mean
-#' 
+#'
 #' Calculation of ``parallel'' quantiles, medians, and means, across given
 #' arguments.
-#' 
+#'
 #' Given the argumens, say x,y,z, of equal dimensions, the \code{pquantile}
 #' calculates and returns the quantile of the first components of x,y,z, then
 #' the second components, etc. Similarly, \code{pmedian} and \code{pmean}
 #' calculate the median and mean, respectively.
-#' 
+#'
 #' @aliases pquantile pmedian pmean
 #' @param prob A number or vector of probabilities at which to calculate the
 #' quantile. See \code{\link{quantile}}.
@@ -42,31 +40,31 @@
 #' @author Peter Langfelder and Steve Horvath
 #' @seealso \code{\link{pmin}} and \code{\link{pmax}} for analogous functions
 #' for minimum and maximum,
-#' 
+#'
 #' \code{\link{quantile}}, \code{\link{median}}, \code{\link{mean}} for the
 #' underlying statistics.
 #' @keywords misc
 #' @examples
-#' 
-#' 
+#'
+#'
 #' # Generate 2 simple matrices
 #' a = matrix(c(1:12), 3, 4);
 #' b = a+ 1;
 #' c = a + 2;
-#' 
+#'
 #' # Set the colnames on matrix a
-#' 
-#' colnames(a) = spaste("col_", c(1:4));
-#' 
+#'
+#' colnames(a) = paste("col_", c(1:4));
+#'
 #' # Example use
-#' 
+#'
 #' pquantile(prob = 0.5, a, b, c)
 #' pquantile(prob = c(0, 0.5, 1), a,b, c);
-#' 
+#'
 #' pmean(a,b,c)
 #' pmedian(a,b,c)
-#' 
-#' 
+#'
+#'
 pquantile = function(prob, ...)
 {
    pars = list(...)
@@ -74,7 +72,7 @@ pquantile = function(prob, ...)
    dn = NULL
    for (p in 1:nPars)
    {
-       if (mode(pars[[p]])!="numeric") 
+       if (mode(pars[[p]])!="numeric")
           stop(paste("Argument number", p, " is not numeric."))
        if (p==1) {
           dim = .dimensions(pars[[p]])
@@ -87,7 +85,7 @@ pquantile = function(prob, ...)
        pars[[p]] = as.numeric(pars[[p]])
    }
    x = as.matrix(as.data.frame(pars))
-   if (any(is.na(x))) 
+   if (any(is.na(x)))
       warning("The input contains missing data that will be removed.")
    q = apply(x, 1, quantile, prob = prob, na.rm = TRUE)
    rnq = rownames(q)
@@ -98,14 +96,13 @@ pquantile = function(prob, ...)
 
 pmedian = function(...) { pquantile(0.5, ...)}
 
-pmean = function(...)
-{
+pmean = function(...) {
    pars = list(...)
    nPars = length(pars)
    dn = NULL
    for (p in 1:nPars)
    {
-       if (mode(pars[[p]])!="numeric") 
+       if (mode(pars[[p]])!="numeric")
           stop(paste("Argument number", p, " is not numeric."))
        if (p==1) {
           dim = .dimensions(pars[[p]])
@@ -118,7 +115,7 @@ pmean = function(...)
        pars[[p]] = as.numeric(pars[[p]])
    }
    x = as.matrix(as.data.frame(pars))
-   if (any(is.na(x))) 
+   if (any(is.na(x)))
       warning("The input contains missing data that will be removed.")
    q = rowMeans(x, na.rm = TRUE)
    if (length(dim) > 1) dim(q) = dim

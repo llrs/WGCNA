@@ -2676,7 +2676,7 @@ lowerTri2matrix = function(x, diag = 1)
 #' in the denominator is replaced by \code{mean}. The \code{"mean"} may produce
 #' better results but at this time should be considered experimental.
 #' @param saveIndividualTOMs logical: should individual TOMs be saved to disk
-#' for later use?
+#' for later use?.
 #' @param individualTOMFileNames character string giving the file names to save
 #' individual TOMs into. The following tags should be used to make the file
 #' names unique for each set and block: \code{%s} will be replaced by the set
@@ -2709,7 +2709,7 @@ lowerTri2matrix = function(x, diag = 1)
 #' to be used for weighted mean consensus. Only used when \code{useMean} above
 #' is \code{TRUE}.
 #' @param saveConsensusTOMs logical: should the consensus topological overlap
-#' matrices for each block be saved and returned?
+#' matrices for each block be saved and returned?.
 #' @param consensusTOMFileNames character string containing the file namefiles
 #' containing the consensus topological overlaps. The tag \code{%b} will be
 #' replaced by the block number. If the resulting file names are non-unique

@@ -222,7 +222,12 @@ bicor = function(x, y = NULL, robustX = TRUE, robustY = TRUE, use = 'all.obs', m
 # Code to call my implementation of correlation
 # For less than 100 correlations, use stats::cor since that is usually faster, particularly when no missing
 # data are present, likely due to the complicated threading I do in the WGCNA correlations.
-
+#' @rdname cor
+#' @name cor
+#' @title Correlation functions optimized
+#' @description
+#' Calculates teh correlation of the objects
+#' @export
 cor = function(x, y = NULL, use = "all.obs", method = c("pearson", "kendall", "spearman"),
                quick = 0,
                cosine = FALSE,
@@ -324,6 +329,8 @@ cor = function(x, y = NULL, use = "all.obs", method = c("pearson", "kendall", "s
 #' @rdname cor
 #' @name cor
 #' @title Correlation functions optimized
+#' @description
+#' Calculates teh correlation of the objects
 #' @aliases cor1
 #' @export
 cor1 <- function(x, use = "all.obs", verbose = 0, indent = 0) {
@@ -331,6 +338,7 @@ cor1 <- function(x, use = "all.obs", verbose = 0, indent = 0) {
 }
 #' @rdname cor
 #' @aliases corFast
+#' @name corFast
 #' @export
 corFast = function(x, y = NULL, use = "all.obs",
                 quick = 0, nThreads = 0, verbose = 0, indent = 0) {
