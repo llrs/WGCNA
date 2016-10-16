@@ -36,14 +36,14 @@ common type of color blindness, we recommend using the analogous palette
 returned by the function \code{\link{blueWhiteRed}}.
 }
 \examples{
-
+\\donotrun{
   par(mfrow = c(3, 1))
   displayColors(greenWhiteRed(50));
   title("gamma = 1")
   displayColors(greenWhiteRed(50, 3));
   title("gamma = 3")
   displayColors(greenWhiteRed(50, 0.5));
-  title("gamma = 0.5")
+  title("gamma = 0.5")}
 
 }
 \author{

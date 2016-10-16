@@ -15,6 +15,10 @@ updateProgInd(newFrac, progInd, quiet = !interactive())
 \item{trailStr}{Last characters.}
 
 \item{quiet}{Logical: Run it in interactive mode or not?.}
+
+\item{newFrac}{Unkown parameter.}
+
+\item{progInd}{Object of class progressIndicator obtained with initProgInd.}
 }
 \description{
 Describes how much/how long does it takes

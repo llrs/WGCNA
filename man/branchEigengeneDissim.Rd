@@ -21,15 +21,6 @@ branchEigengeneDissim(expr, branch1, branch2, corFnc = cor,
 
 \item{signed}{Should the network be considered signed?}
 
-\item{multiExpr}{Expression data in multi-set format.}
-
-\item{consensusQuantile}{Consensus quantile.}
-
-\item{reproduceQuantileError}{Logical: should an error in the calculation
-from previous versions, which caused the true consensus quantile to be
-\code{1-consensusQuantile} rather than \code{consensusQuantile}, be
-reproduced? Use this only to reproduce old calculations.}
-
 \item{\dots}{Other arguments for compatibility; currently unused.}
 }
 \value{

@@ -16,6 +16,47 @@ cor1(x, use = "all.obs", verbose = 0, indent = 0)
 corFast(x, y = NULL, use = "all.obs", quick = 0, nThreads = 0,
   verbose = 0, indent = 0)
 }
+\arguments{
+\item{x}{a vector or matrix-like numeric object}
+
+\item{y}{a vector or matrix-like numeric object}
+
+\item{use}{specifies handling of \code{NA}s. One of (unique abbreviations
+of) "all.obs", "pairwise.complete.obs".}
+
+\item{method}{One of the following methods: pearson, kenndall, spearman to calculate the
+correlation with}
+
+\item{quick}{real number between 0 and 1 that controls the handling of
+missing data in the calculation of correlations. See details.}
+
+\item{cosine}{logical: calculate cosine biweight midcorrelation?  Cosine
+bicorrelation is similar to standard bicorrelation but the median
+subtraction is not performed.}
+
+\item{cosineX}{logical: use the cosine calculation for \code{x}? This
+setting does not affect \code{y} and can be used to give a hybrid
+cosine-standard bicorrelation.}
+
+\item{cosineY}{logical: use the cosine calculation for \code{y}? This
+setting does not affect \code{x} and can be used to give a hybrid
+cosine-standard bicorrelation.}
+
+\item{drop}{Remove unwanted data}
+
+\item{nThreads}{non-negative integer specifying the number of parallel
+threads to be used by certain parts of correlation calculations. This option
+only has an effect on systems on which a POSIX thread library is available
+(which currently includes Linux and Mac OSX, but excludes Windows). If zero,
+the number of online processors will be used if it can be determined
+dynamically, otherwise correlation calculations will use 2 threads.}
+
+\item{verbose}{if non-zero, the underlying C function will print some
+diagnostics.}
+
+\item{indent}{indentation for diagnostic messages. Zero means no
+indentation, each unit adds two spaces.}
+}
 \description{
 Calculates teh correlation of the objects
 

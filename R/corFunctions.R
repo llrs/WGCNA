@@ -225,6 +225,11 @@ bicor = function(x, y = NULL, robustX = TRUE, robustY = TRUE, use = 'all.obs', m
 #' @rdname cor
 #' @name cor
 #' @title Correlation functions optimized
+#' @inheritParams bicor
+#' @param method
+#' One of the following methods: pearson, kenndall, spearman to calculate the
+#' correlation with
+#' @param drop Remove unwanted data
 #' @description
 #' Calculates teh correlation of the objects
 #' @export
@@ -233,16 +238,14 @@ cor = function(x, y = NULL, use = "all.obs", method = c("pearson", "kendall", "s
                cosine = FALSE,
                cosineX = cosine, cosineY = cosine,
                drop = FALSE,
-               nThreads = 0, verbose = 0, indent = 0)
-{
+               nThreads = 0, verbose = 0, indent = 0) {
     na.method <- pmatch(use, c("all.obs", "complete.obs", "pairwise.complete.obs",
         "everything", "na.or.complete"), nomatch = 0)
     method <- match.arg(method)
 
     x = as.matrix(x)
     nx = ncol(x)
-    if (!is.null(y))
-    {
+    if (!is.null(y)) {
       y = as.matrix(y)
       ny = ncol(y)
     } else ny = nx
@@ -255,12 +258,10 @@ cor = function(x, y = NULL, use = "all.obs", method = c("pearson", "kendall", "s
       if (is.na(na.method))
           stop(paste("Unrecognized parameter 'use'. Recognized values are \n",
               "'all.obs', 'pairwise.complete.obs'"))
-      if (na.method==1)
-      {
+      if (na.method==1) {
          if (sum(is.na(x))> 0)
            stop("Missing values present in input variable 'x'. Consider using use = 'pairwise.complete.obs'.")
-         if (!is.null(y))
-         {
+         if (!is.null(y)) {
            if (sum(is.na(y)) > 0)
              stop("Missing values present in input variable 'y'. Consider using use = 'pairwise.complete.obs'.")
          }
@@ -277,8 +278,7 @@ cor = function(x, y = NULL, use = "all.obs", method = c("pearson", "kendall", "s
       nThreads = as.integer(nThreads)
       verbose = as.integer(verbose)
       indent = as.integer(indent)
-      if (is.null(y))
-      {
+      if (is.null(y)){
          res = .Call("cor1Fast_call", x,
                    quick, cosine,
                    nNA, err, nThreads,
@@ -318,7 +318,11 @@ cor = function(x, y = NULL, use = "all.obs", method = c("pearson", "kendall", "s
         warning(paste("Missing values generated in calculation of cor.",
                       "Likely cause: too many missing entries or zero variance."))
       }
-      if (drop) res[, , drop = TRUE] else res
+      if (drop) {
+          res[, , drop = TRUE]
+      } else {
+          res
+      }
     } else {
       stats::cor(x,y, use, method)
     }

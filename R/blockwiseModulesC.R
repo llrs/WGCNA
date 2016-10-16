@@ -465,7 +465,7 @@ TOMdist = function(adjMat, TOMType = "unsigned", TOMDenom = "min", verbose = 1,
 #' make the output progressively more and more verbose.
 #' @param indent indentation for diagnostic messages. Zero means no
 #' indentation, each unit adds two spaces.
-#' @param ... Other arguments.
+#' @param \dots Other arguments.
 #' @return
 #' A list with the following components:
 #'
@@ -1146,8 +1146,7 @@ blockwiseModules <- function(
       allSampleMEs = NULL;
       MEsOK = FALSE;
     } else {
-      if (sum(!MEs$validMEs)>0)
-      {
+      if (sum(!MEs$validMEs)>0) {
         colors[gsg$goodGenes] = MEs$validColors;
         MEs = MEs$eigengenes[, MEs$validMEs];
       } else MEs = MEs$eigengenes;
@@ -1162,101 +1161,18 @@ blockwiseModules <- function(
     names(allSampleMEs) = names(mergedMods$newMEs);
   }
 
-  if (seedSaved) .Random.seed <<- savedSeed;
+  if (seedSaved) {
+      .Random.seed <<- savedSeed
+  }
 
-  if (!saveTOMs) TOMFiles = NULL;
+  if (!saveTOMs) {
+      TOMFiles = NULL
+  }
 
   list(colors = mergedAllColors,
        unmergedColors = colors,
        MEs = allSampleMEs,
-
-
-#' Filter samples with too many missing entries
-#'
-#' This function checks data for missing entries and returns a list of samples
-#' that pass two criteria on maximum number of missing values: the fraction of
-#' missing values must be below a given threshold and the total number of
-#' missing genes must be below a given threshold.
-#'
-#' The constants \code{..minNSamples} and \code{..minNGenes} are both set to
-#' the value 4.  For most data sets, the fraction of missing samples criterion
-#' will be much more stringent than the absolute number of missing samples
-#' criterion.
-#'
-#' @param datExpr expression data. A data frame in which columns are genes and
-#' rows ar samples.
-#' @param useSamples optional specifications of which samples to use for the
-#' check. Should be a logical vector; samples whose entries are \code{FALSE}
-#' will be ignored for the missing value counts. Defaults to using all samples.
-#' @param useGenes optional specifications of genes for which to perform the
-#' check. Should be a logical vector; genes whose entries are \code{FALSE} will
-#' be ignored. Defaults to using all genes.
-#' @param minFraction minimum fraction of non-missing samples for a gene to be
-#' considered good.
-#' @param minNSamples minimum number of good samples for the data set to be
-#' considered fit for analysis. If the actual number of good samples falls
-#' below this threshold, an error will be issued.
-#' @param minNGenes minimum number of non-missing samples for a sample to be
-#' considered good.
-#' @param verbose integer level of verbosity. Zero means silent, higher values
-#' make the output progressively more and more verbose.
-#' @param indent indentation for diagnostic messages. Zero means no
-#' indentation, each unit adds two spaces.
-#' @return A logical vector with one entry per sample that is \code{TRUE} if
-#' the sample is considered good and \code{FALSE} otherwise. Note that all
-#' samples excluded by \code{useSamples} are automatically assigned
-#' \code{FALSE}.
-#' @author Peter Langfelder and Steve Horvath
-#' @seealso \code{\link{goodSamples}}, \code{\link{goodSamplesGenes}}
-#' @keywords misc
        goodSamples = gsg$goodSamples,
-
-
-#' Filter genes with too many missing entries
-#'
-#' This function checks data for missing entries and returns a list of genes
-#' that have non-zero variance and pass two criteria on maximum number of
-#' missing values: the fraction of missing values must be below a given
-#' threshold and the total number of missing samples must be below a given
-#' threshold.
-#'
-#' The constants \code{..minNSamples} and \code{..minNGenes} are both set to
-#' the value 4.  For most data sets, the fraction of missing samples criterion
-#' will be much more stringent than the absolute number of missing samples
-#' criterion.
-#'
-#' @param datExpr expression data. A data frame in which columns are genes and
-#' rows ar samples.
-#' @param useSamples optional specifications of which samples to use for the
-#' check. Should be a logical vector; samples whose entries are \code{FALSE}
-#' will be ignored for the missing value counts. Defaults to using all samples.
-#' @param useGenes optional specifications of genes for which to perform the
-#' check. Should be a logical vector; genes whose entries are \code{FALSE} will
-#' be ignored. Defaults to using all genes.
-#' @param minFraction minimum fraction of non-missing samples for a gene to be
-#' considered good.
-#' @param minNSamples minimum number of non-missing samples for a gene to be
-#' considered good.
-#' @param minNGenes minimum number of good genes for the data set to be
-#' considered fit for analysis. If the actual number of good genes falls below
-#' this threshold, an error will be issued.
-#' @param tol an optional 'small' number to compare the variance against.
-#' Defaults to the square of \code{1e-10 * max(abs(datExpr), na.rm = TRUE)}.
-#' The reason of comparing the variance to this number, rather than zero, is
-#' that the fast way of computing variance used by this function sometimes
-#' causes small numerical overflow errors which make variance of constant
-#' vectors slightly non-zero; comparing the variance to \code{tol} rather than
-#' zero prevents the retaining of such genes as 'good genes'.
-#' @param verbose integer level of verbosity. Zero means silent, higher values
-#' make the output progressively more and more verbose.
-#' @param indent indentation for diagnostic messages. Zero means no
-#' indentation, each unit adds two spaces.
-#' @return A logical vector with one entry per gene that is \code{TRUE} if the
-#' gene is considered good and \code{FALSE} otherwise. Note that all genes
-#' excluded by \code{useGenes} are automatically assigned \code{FALSE}.
-#' @author Peter Langfelder and Steve Horvath
-#' @seealso \code{\link{goodSamples}}, \code{\link{goodSamplesGenes}}
-#' @keywords misc
        goodGenes = gsg$goodGenes,
        dendrograms = dendros,
        TOMFiles = TOMFiles,
@@ -1919,7 +1835,7 @@ recutBlockwiseTrees = function(datExpr,
 #' contain a component \code{data} that contains the expression data, with rows
 #' corresponding to samples and columns to genes or probes.
 #' @param checkPower logical: should basic sanity check be performed on the
-#' supplied \code{power}? If you would like to experiment with unusual powers,
+#' supplied \code{power} ? If you would like to experiment with unusual powers,
 #' set the argument to \code{FALSE} and proceed with caution.
 #' individual TOMs into. The following tags should be used to make the file
 #' names unique for each set and block: \code{%s} will be replaced by the set
@@ -2320,21 +2236,21 @@ blockwiseIndividualTOMs = function(multiExpr,
 #'   all.equal(mat, new.mat)
 #'
 #'
-lowerTri2matrix = function(x, diag = 1)
-{
-  if (class(x)=="dist")
-  {
+lowerTri2matrix = function(x, diag = 1) {
+  if (class(x)=="dist") {
     mat = as.matrix(x)
   } else {
     n = length(x);
     n1 = (1 + sqrt(1 + 8*n))/2
-    if (floor(n1)!=n1) stop("Input length does not translate into matrix");
+    if (floor(n1)!=n1) {
+        stop("Input length does not translate into matrix")
+    }
     mat = matrix(0, n1, n1);
     mat[lower.tri(mat)] = x;
     mat = mat + t(mat);
   }
-  diag(mat) = diag;
-  mat;
+  diag(mat) = diag
+  mat
 }
 
 #==========================================================================================================
@@ -2344,13 +2260,12 @@ lowerTri2matrix = function(x, diag = 1)
 #==========================================================================================================
 
 
-.checkComponents = function(object, names)
-{
+.checkComponents = function(object, names) {
   objNames = names(object);
   inObj = names %in% objNames;
   if (!all(inObj))
     stop(".checkComponents: object is missing the following components:\n",
-         paste(names[!inObj], collapse = ", "));
+         paste(names[!inObj], collapse = ", "))
 }
 
 # Function to calculate consensus modules and eigengenes from all genes.
@@ -2696,6 +2611,7 @@ lowerTri2matrix = function(x, diag = 1)
 #' make the output progressively more and more verbose.
 #' @param indent indentation for diagnostic messages. Zero means no
 #' indentation, each unit adds two spaces.
+#' @param \dots Other arguments to be passed.
 #' \code{reproduceBranchEigennodeQuantileError} that instructs the function to
 #' reproduce a bug in branch eigennode dissimilarity calculations for purposes
 #' if reproducing old reults.

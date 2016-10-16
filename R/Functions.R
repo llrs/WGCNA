@@ -4838,6 +4838,8 @@ initProgInd <-function(leadStr = "..", trailStr = "", quiet = !interactive()) {
 #'
 #' Should work on all OS to indicate the evolution of indicator
 #' @rdname initProgInd
+#' @param newFrac Unkown parameter.
+#' @param progInd Object of class progressIndicator obtained with initProgInd.
 #' @export
 updateProgInd <- function(newFrac, progInd, quiet = !interactive())
 {
@@ -8447,51 +8449,28 @@ greenBlackRed <- function(n, gamma = 1) {
 #' representation for continuous numbers.
 #' @keywords color
 #' @examples
-#'
+#'\donotrun{
 #'   par(mfrow = c(3, 1))
 #'   displayColors(greenWhiteRed(50));
 #'   title("gamma = 1")
 #'   displayColors(greenWhiteRed(50, 3));
 #'   title("gamma = 3")
 #'   displayColors(greenWhiteRed(50, 0.5));
-#'   title("gamma = 0.5")
+#'   title("gamma = 0.5")}
 #'
 greenWhiteRed <- function(n, gamma = 1, warn = TRUE) {
     if (warn)
-        warning(
-            paste0(
-                "WGCNA::greenWhiteRed: this palette is not suitable for people\n",
+        warning("WGCNA::greenWhiteRed: this palette is not suitable for people\n",
                 "with green - red color blindness (the most common kind of color
                 blindness).\n",
-                "Consider using the function blueWhiteRed instead."
-            )
-        )
+                "Consider using the function blueWhiteRed instead.")
     half = as.integer(n / 2)
-    red = c(seq(
-        from = 0,
-        to = 1,
-        length.out = half
-    ) ^ (1 / gamma),
-    rep(1, times = half + 1))
+    red = c(seq(from = 0, to = 1, length.out = half) ^ (1 / gamma),
+            rep(1, times = half + 1))
     green = c(rep(1, times = half + 1),
-              seq(
-                  from = 1,
-                  to = 0,
-                  length.out = half
-              ) ^ (1 / gamma))
-    blue = c(
-        seq(
-            from = 0,
-            to = 1,
-            length.out = half
-        ) ^ (1 / gamma),
-        1,
-        seq(
-            from = 1,
-            to = 0,
-            length.out = half
-        ) ^ (1 / gamma)
-    )
+              seq(from = 1, to = 0,length.out = half ) ^ (1 / gamma))
+    blue = c(seq(from = 0, to = 1, length.out = half) ^ (1 / gamma), 1,
+             seq(from = 1, to = 0, length.out = half) ^ (1 / gamma))
     col = rgb(red, green, blue, maxColorValue = 1)
     col
 }
@@ -9926,17 +9905,51 @@ randIndex <- function(tab, adjust = TRUE)
 # Check expression data: mark genes and samples with too many missing entries
 #
 #===============================================================================
-#' Find the good genes of a multiset object
-#' @param datExpr MultiSet data of expression values.
-#' @param useSamples Select the samples to use.
-#' @param useGenes Select the genes to use.
-#' @param minFraction Minimal fraction to...
-#' @param minNSamples Minimal number of samples.
-#' @param minNGenes Minimal number of genes.
-#' @param tol Strange option.
-#' @param verbose Indicate the loggin output.
-#' @param indent Indicates how much indentation you want.
-#' @export
+#' Filter genes with too many missing entries
+#'
+#' This function checks data for missing entries and returns a list of genes
+#' that have non-zero variance and pass two criteria on maximum number of
+#' missing values: the fraction of missing values must be below a given
+#' threshold and the total number of missing samples must be below a given
+#' threshold.
+#'
+#' The constants \code{..minNSamples} and \code{..minNGenes} are both set to
+#' the value 4.  For most data sets, the fraction of missing samples criterion
+#' will be much more stringent than the absolute number of missing samples
+#' criterion.
+#'
+#' @param datExpr expression data. A data frame in which columns are genes and
+#' rows ar samples.
+#' @param useSamples optional specifications of which samples to use for the
+#' check. Should be a logical vector; samples whose entries are \code{FALSE}
+#' will be ignored for the missing value counts. Defaults to using all samples.
+#' @param useGenes optional specifications of genes for which to perform the
+#' check. Should be a logical vector; genes whose entries are \code{FALSE} will
+#' be ignored. Defaults to using all genes.
+#' @param minFraction minimum fraction of non-missing samples for a gene to be
+#' considered good.
+#' @param minNSamples minimum number of non-missing samples for a gene to be
+#' considered good.
+#' @param minNGenes minimum number of good genes for the data set to be
+#' considered fit for analysis. If the actual number of good genes falls below
+#' this threshold, an error will be issued.
+#' @param tol an optional 'small' number to compare the variance against.
+#' Defaults to the square of \code{1e-10 * max(abs(datExpr), na.rm = TRUE)}.
+#' The reason of comparing the variance to this number, rather than zero, is
+#' that the fast way of computing variance used by this function sometimes
+#' causes small numerical overflow errors which make variance of constant
+#' vectors slightly non-zero; comparing the variance to \code{tol} rather than
+#' zero prevents the retaining of such genes as 'good genes'.
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @return A logical vector with one entry per gene that is \code{TRUE} if the
+#' gene is considered good and \code{FALSE} otherwise. Note that all genes
+#' excluded by \code{useGenes} are automatically assigned \code{FALSE}.
+#' @author Peter Langfelder and Steve Horvath
+#' @seealso \code{\link{goodSamples}}, \code{\link{goodSamplesGenes}}
+#' @keywords misc
 goodGenes <- function(datExpr,
                       useSamples = NULL,
                       useGenes = NULL,
@@ -9994,10 +10007,44 @@ goodGenes <- function(datExpr,
 }
 
 
-#' @aliases goodSamplesMS
-#' @rdname goodSamplesMS
-#' @inheritParams goodGenes
-#' @export
+#' Filter samples with too many missing entries
+#'
+#' This function checks data for missing entries and returns a list of samples
+#' that pass two criteria on maximum number of missing values: the fraction of
+#' missing values must be below a given threshold and the total number of
+#' missing genes must be below a given threshold.
+#'
+#' The constants \code{..minNSamples} and \code{..minNGenes} are both set to
+#' the value 4.  For most data sets, the fraction of missing samples criterion
+#' will be much more stringent than the absolute number of missing samples
+#' criterion.
+#'
+#' @param datExpr expression data. A data frame in which columns are genes and
+#' rows ar samples.
+#' @param useSamples optional specifications of which samples to use for the
+#' check. Should be a logical vector; samples whose entries are \code{FALSE}
+#' will be ignored for the missing value counts. Defaults to using all samples.
+#' @param useGenes optional specifications of genes for which to perform the
+#' check. Should be a logical vector; genes whose entries are \code{FALSE} will
+#' be ignored. Defaults to using all genes.
+#' @param minFraction minimum fraction of non-missing samples for a gene to be
+#' considered good.
+#' @param minNSamples minimum number of good samples for the data set to be
+#' considered fit for analysis. If the actual number of good samples falls
+#' below this threshold, an error will be issued.
+#' @param minNGenes minimum number of non-missing samples for a sample to be
+#' considered good.
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @return A logical vector with one entry per sample that is \code{TRUE} if
+#' the sample is considered good and \code{FALSE} otherwise. Note that all
+#' samples excluded by \code{useSamples} are automatically assigned
+#' \code{FALSE}.
+#' @author Peter Langfelder and Steve Horvath
+#' @seealso \code{\link{goodSamples}}, \code{\link{goodSamplesGenes}}
+#' @keywords misc
 goodSamples <- function(datExpr,
                         useSamples = NULL,
                         useGenes = NULL,
@@ -10005,8 +10052,7 @@ goodSamples <- function(datExpr,
                         minNSamples = ..minNSamples,
                         minNGenes = ..minNGenes,
                         verbose = 1,
-                        indent = 0)
-{
+                        indent = 0) {
     if (is.null(useGenes))
         useGenes = rep(TRUE, ncol(datExpr))
     if (is.null(useSamples))
