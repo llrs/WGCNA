@@ -102,8 +102,8 @@ checkSimilarity <- function(similarity, min =  - 1, max = 1) {
 #' @name adjacency
 #' @rdname adjacency
 #' @examples
-#' similarity <- matrix(seq(-1, 1, length.out = 25),5)
-#' similarity[lower.tri(similarity)] <- t(similarity)[lower.tri(similarity)]
+#' datExpr <- matrix(rnorm(100), 10, 10)
+#' similarity <- similarity(datExpr)
 #' adj <-  adjacency.fromSimilarity(similarity)
 #' @export
 adjacency.fromSimilarity <- function(similarity, type = "unsigned",

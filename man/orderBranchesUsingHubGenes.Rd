@@ -79,7 +79,7 @@ suggestions to jeremyinla@gmail.com.
 MEturquoise = sample(1:100,50)
 MEblue      = c(MEturquoise[1:25], sample(1:100,25))
 MEbrown     = sample(1:100,50)
-MEyellow    = sample(1:100,50) 
+MEyellow    = sample(1:100,50)
 MEgreen     = c(MEyellow[1:30], sample(1:100,20))
 MEred	    = c(MEbrown [1:20], sample(1:100,30))
 ME     = data.frame(MEturquoise, MEblue, MEbrown, MEyellow, MEgreen, MEred)
@@ -104,7 +104,7 @@ colorh2 [selectBranch(tree1,hubs["red"],hubs["brown"])]      = "red"
 colorh2 [selectBranch(tree1,hubs["brown"],hubs["red"])]      = "brown"
 plotDendroAndColors(tree1,cbind(colorh,colorh2),c("Old","New"),dendroLabels=FALSE)
 
-## Now swap and reflect some branches, then optimize the order of the branches 
+## Now swap and reflect some branches, then optimize the order of the branches
 # and output pdf with resulting images
 
 \dontrun{

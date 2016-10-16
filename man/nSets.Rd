@@ -2,17 +2,30 @@
 % Please edit documentation in R/Functions-multiData.R
 \name{nSets}
 \alias{nSets}
-\title{Count the number of sets}
+\title{Number of sets in a multi-set variable}
 \usage{
 nSets(multiData, ...)
 }
 \arguments{
-\item{multiData}{List of Expression data, creating a multiset object.}
+\item{multiData}{vector of lists; in each list there must be a component
+named \code{data} whose content is a matrix or dataframe or array of
+dimension 2.}
+
+\item{\dots}{Other arguments to function \code{\link{checkSets}}.}
 }
 \value{
-The number of sets of a multisets object
+A single integer that equals the number of sets given in the input
+\code{multiData}.
 }
 \description{
-From a given multiset object calculates the numbers of sets present
+A convenience function that returns the number of sets in a multi-set
+variable.
 }
+\author{
+Peter Langfelder
+}
+\seealso{
+\code{\link{checkSets}}
+}
+\keyword{misc}
 

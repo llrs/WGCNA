@@ -7,15 +7,15 @@
 # Note: many of these function would be simpler to use if I used some sort of class/method technique to keep
 # track of the class of each object internally. For example, I could then write a generic function "subset" that
 # would work consistently on lists and multiData objects. Similarly, multiData2list would simply become a
-# method of as.list, and as.list would be safe to use both on lists and on multiData objects. 
+# method of as.list, and as.list would be safe to use both on lists and on multiData objects.
 
 
 
 #' Subset rows and columns in a multiData structure
-#' 
+#'
 #' The function restricts each \code{data} component to the given columns and
 #' rows.
-#' 
+#'
 #' A multiData structure is intended to store (the same type of) data for
 #' multiple, possibly independent, realizations (for example, expression data
 #' for several independent experiments). It is a list where each component
@@ -25,10 +25,10 @@
 #' required to each be a matrix or a data frame and have the same number of
 #' columns. In a "loose" multiData structure, the \code{data} components can be
 #' anything (but for most purposes should be of comparable type and content).
-#' 
+#'
 #' This function assumes a "strict" multiData structure unless
 #' \code{permissive} is \code{TRUE}.
-#' 
+#'
 #' @param multiData A multiData structure.
 #' @param rowIndex A list in which each component corresponds to a set and is a
 #' vector giving the rows to be retained in that set. All indexing methods
@@ -58,7 +58,7 @@ mtd.subset = function(multiData, rowIndex = NULL, colIndex = NULL, permissive = 
                   " the same number of columns. This is treacherous territory; proceed with caution."))
   if (is.null(colIndex)) colIndex.1 = c(1:size$nGenes) else colIndex.1 = colIndex
   if (is.null(rowIndex)) rowIndex = lapply(size$nSamples, function(n) {c(1:n)})
-  if (length(rowIndex)!=size$nSets) 
+  if (length(rowIndex)!=size$nSets)
     stop("If given, 'rowIndex' must be a list of the same length as 'multiData'.")
   out = list()
   for (set in 1:size$nSets)
@@ -66,7 +66,7 @@ mtd.subset = function(multiData, rowIndex = NULL, colIndex = NULL, permissive = 
     if (permissive)
       if (is.null(colIndex)) colIndex.1 = c(1:ncol(multiData[[set]]$data)) else colIndex.1 = colIndex
     if (is.character(colIndex.1))
-    { 
+    {
       colIndex.1 = match(colIndex.1, colnames(multiData[[set]]$data))
       n1 = length(colIndex.1)
       if (any(is.na(colIndex.1)))
@@ -80,24 +80,26 @@ mtd.subset = function(multiData, rowIndex = NULL, colIndex = NULL, permissive = 
   out
 }
 
-multiData2list = function(multiData)
-{
+#' @rdname list2multiData
+#' @aliases multiData2list
+#' @param multiData A multiData structure to be converted to a list.
+#' @export
+multiData2list = function(multiData) {
   lapply(multiData, getElement, 'data')
 }
 
 
 
 #' Convert a list to a multiData structure and vice-versa.
-#' 
+#'
 #' \code{list2multiData} converts a list to a multiData structure;
 #' \code{multiData2list} does the inverse.
-#' 
+#'
 #' A multiData structure is a vector of lists (one list for each set) where
 #' each list has a component \code{data} containing some useful information.
-#' 
+#'
 #' @aliases list2multiData multiData2list
 #' @param data A list to be converted to a multiData structure.
-#' @param multiData A multiData structure to be converted to a list.
 #' @return For \code{list2multiData}, a multiData structure; for
 #' \code{multiData2list}, the corresponding list.
 #' @author Peter Langfelder
@@ -144,17 +146,17 @@ mtd.colnames = function(multiData)
   calculate
 }
 
-  
+
 
 
 
 #' Apply a function to each set in a multiData structure.
-#' 
+#'
 #' Inspired by \code{\link{lapply}}, these functions apply a given function to
 #' each \code{data} component in the input \code{multiData} structure, and
 #' optionally simplify the result to an array if possible.
-#' 
-#' 
+#'
+#'
 #' A multiData structure is intended to store (the same type of) data for
 #' multiple, possibly independent, realizations (for example, expression data
 #' for several independent experiments). It is a list where each component
@@ -164,21 +166,15 @@ mtd.colnames = function(multiData)
 #' required to each be a matrix or a data frame and have the same number of
 #' columns. In a "loose" multiData structure, the \code{data} components can be
 #' anything (but for most purposes should be of comparable type and content).
-#' 
+#'
 #' \code{mtd.apply} works on any "loose" multiData structure;
 #' \code{mtd.applyToSubset} assumes (and checks for) a "strict" multiData
 #' structure.
-#' 
+#'
 #' @aliases mtd.apply mtd.applyToSubset
 #' @param multiData A multiData structure to apply the function over
 #' @param FUN Function to be applied.
 #' @param \dots Other arguments to the function \code{FUN}.
-#' @param mdaRowIndex If given, must be a list of the same length as
-#' \code{multiData}. Each element must be a logical or numeric vector that
-#' specifies rows in each \code{data} component to select before applying the
-#' function.
-#' @param mdaColIndex A logical or numeric vector that specifies columns in
-#' each \code{data} component to select before applying the function.
 #' @param mdaExistingResults Optional list that contains previously calculated
 #' results. This can be useful if only a few sets in \code{multiData} have
 #' changed and recalculating the unchanged ones is computationally expensive.
@@ -239,7 +235,7 @@ mtd.apply = function(
   if (!isMultiData(multiData, strict = FALSE))
     stop("Supplied 'multiData' is not a valid multiData structure.")
 
-  if (mdaSimplify && mdaCopyNonData) 
+  if (mdaSimplify && mdaCopyNonData)
     stop("Non-data copying is not compatible with simplification.")
 
   nSets = length(multiData)
@@ -248,12 +244,12 @@ mtd.apply = function(
   calculate = .calculateIndicator(nSets, mdaExistingResults, mdaUpdateIndex)
 
   FUN = match.fun(FUN)
-  for (set in 1:nSets) 
+  for (set in 1:nSets)
   {
     if (calculate[set])
     {
       if (mdaVerbose > 0)
-        printFlush(paste0(printSpaces, "mtd.apply: working on set ", set)); 
+        printFlush(paste0(printSpaces, "mtd.apply: working on set ", set));
       out[[set]] = list(data = FUN(multiData[[set]]$data, ...))
     } else
       out[set] = mdaExistingResults[set]
@@ -261,10 +257,10 @@ mtd.apply = function(
 
   names(out) = names(multiData)
 
-  if (mdaSimplify) 
+  if (mdaSimplify)
   {
     if (mdaVerbose > 0)
-      printFlush(paste0(printSpaces, "mtd.apply: attempting to simplify...")); 
+      printFlush(paste0(printSpaces, "mtd.apply: attempting to simplify..."));
     return (mtd.simplify(out))
   } else if (returnList) {
     return (multiData2list(out))
@@ -304,7 +300,7 @@ mtd.applyToSubset = function(
   if (!is.null(mdaColIndex))
   {
     doSelection = TRUE
-    if (any(mdaColIndex < 0 | mdaColIndex > size$nGenes)) 
+    if (any(mdaColIndex < 0 | mdaColIndex > size$nGenes))
       stop("Some of the indices in 'mdaColIndex' are out of range.")
   } else {
     mdaColIndex = c(1:size$nGenes)
@@ -320,17 +316,17 @@ mtd.applyToSubset = function(
   } else {
     mdaRowIndex = lapply(size$nSamples, function(n) { c(1:n) })
   }
-    
+
   calculate = .calculateIndicator(nSets, mdaExistingResults, mdaUpdateIndex)
 
-  fun = match.fun(FUN) 
+  fun = match.fun(FUN)
   for (set in 1:size$nSets)
   {
     if (calculate[set])
     {
        if (mdaVerbose > 0)
          printFlush(paste0(printSpaces, "mtd.applyToSubset: working on set ", set))
-       res[[set]] = list(data = fun( 
+       res[[set]] = list(data = fun(
                 if (doSelection) multiData[[set]] $ data[mdaRowIndex[[set]], mdaColIndex, drop = FALSE] else
                                  multiData[[set]] $ data, ...))
     } else
@@ -339,7 +335,7 @@ mtd.applyToSubset = function(
 
   names(res) = names(multiData)
 
-  if (mdaSimplify) 
+  if (mdaSimplify)
   {
     if (mdaVerbose > 0)
       printFlush(paste0(printSpaces, "mtd.applyToSubset: attempting to simplify..."))
@@ -354,12 +350,12 @@ mtd.applyToSubset = function(
 
 
 #' If possible, simplify a multiData structure to a 3-dimensional array.
-#' 
+#'
 #' This function attempts to put all \code{data} components into a
 #' 3-dimensional array, with the last dimension corresponding to the sets. This
 #' is only possible if all \code{data} components are matrices or data frames
 #' with the same dimensiosn.
-#' 
+#'
 #' A multiData structure is intended to store (the same type of) data for
 #' multiple, possibly independent, realizations (for example, expression data
 #' for several independent experiments). It is a list where each component
@@ -369,15 +365,15 @@ mtd.applyToSubset = function(
 #' required to each be a matrix or a data frame and have the same number of
 #' columns. In a "loose" multiData structure, the \code{data} components can be
 #' anything (but for most purposes should be of comparable type and content).
-#' 
+#'
 #' This function assumes a "strict" multiData structure.
-#' 
+#'
 #' @param multiData A multiData structure in the "strict" sense (see below).
 #' @return A 3-dimensional array collecting all \code{data} components.
 #' @note The function is relatively fragile and may fail. Use at your own risk.
 #' @author Peter Langfelder
 #' @seealso \code{\link{multiData}} to create a multiData structure;
-#' 
+#'
 #' \code{\link{multiData2list}} for converting multiData structures to plain
 #' lists.
 #' @keywords misc
@@ -401,7 +397,7 @@ mtd.simplify = function(multiData)
     } else {
        innerDim = dim
        innerNames = dimnames(multiData[[1]]$data)
-       if (is.null(innerNames)) 
+       if (is.null(innerNames))
          innerNames = lapply(innerDim, function(x) {paste0("X", 1:x)})
        nullIN = sapply(innerNames, is.null)
        if (any(nullIN))
@@ -424,10 +420,10 @@ mtd.simplify = function(multiData)
 
 
 #' Determine whether the supplied object is a valid multiData structure
-#' 
+#'
 #' Attempts to determine whether the supplied object is a valid multiData
 #' structure (see Details).
-#' 
+#'
 #' A multiData structure is intended to store (the same type of) data for
 #' multiple, possibly independent, realizations (for example, expression data
 #' for several independent experiments). It is a list where each component
@@ -437,11 +433,11 @@ mtd.simplify = function(multiData)
 #' required to each be a matrix or a data frame and have the same number of
 #' columns. In a "loose" multiData structure, the \code{data} components can be
 #' anything (but for most purposes should be of comparable type and content).
-#' 
+#'
 #' This function checks whether the supplied \code{x} is a multiData structure
 #' in the "strict" (when \code{strict = TRUE} or "loose" \code{strict = FALSE}
 #' sense.
-#' 
+#'
 #' @param x An object.
 #' @param strict Logical: should the structure of multiData be checked for
 #' "strict" compliance?
@@ -464,11 +460,11 @@ isMultiData = function(x, strict = TRUE)
 
 
 #' Apply a function to elements of given multiData structures.
-#' 
+#'
 #' Inspired by \code{\link{mapply}}, this function applies a given function to
 #' each \code{data} component in the input multiData arguments, and optionally
 #' simplify the result to an array if possible.
-#' 
+#'
 #' A multiData structure is intended to store (the same type of) data for
 #' multiple, possibly independent, realizations (for example, expression data
 #' for several independent experiments). It is a list where each component
@@ -478,12 +474,12 @@ isMultiData = function(x, strict = TRUE)
 #' required to each be a matrix or a data frame and have the same number of
 #' columns. In a "loose" multiData structure, the \code{data} components can be
 #' anything (but for most purposes should be of comparable type and content).
-#' 
+#'
 #' This function applies the function \code{FUN} to each \code{data} component
 #' of those arguments in \code{...} that are multiData structures in the
 #' "loose" sense, and to each component of those arguments in \code{...} that
 #' are not multiData structures.
-#' 
+#'
 #' @param FUN Function to be applied.
 #' @param \dots Arguments to be vectorized over. These can be multiData
 #' structures or simple vectors (e.g., lists).
@@ -527,7 +523,7 @@ isMultiData = function(x, strict = TRUE)
 #' results of \code{FUN}. If simplification is successful, an array instead.
 #' @author Peter Langfelder
 #' @seealso \code{\link{multiData}} to create a multiData structure;
-#' 
+#'
 #' \code{multiData.apply} for application of a function to a single multiData
 #' structure.
 #' @keywords misc
@@ -552,11 +548,11 @@ mtd.mapply = function(
 {
   printSpaces = indentSpaces(mdmaIndent)
   dots = list(...)
-  if (length(dots)==0) 
+  if (length(dots)==0)
     stop("No arguments were specified. Please type ?mtd.mapply to see the help page.")
   dotLengths = sapply(dots, length)
   if (any(dotLengths!=dotLengths[1]))
-    stop(paste0("All arguments to vectorize over must have the same length.\n", 
+    stop(paste0("All arguments to vectorize over must have the same length.\n",
                 "Scalar arguments should be put into the 'MoreArgs' argument.\n",
                 "Note: lengths of '...' arguments are: ", paste(dotLengths, collapse = ", ")))
   nArgs = length(dots)
@@ -603,10 +599,10 @@ mtd.mapply = function(
 
 
 #' Turn a multiData structure into a single matrix or data frame.
-#' 
+#'
 #' This function "rbinds" the \code{data} components of all sets in the input
 #' into a single matrix or data frame.
-#' 
+#'
 #' A multiData structure is intended to store (the same type of) data for
 #' multiple, possibly independent, realizations (for example, expression data
 #' for several independent experiments). It is a list where each component
@@ -616,14 +612,14 @@ mtd.mapply = function(
 #' required to each be a matrix or a data frame and have the same number of
 #' columns. In a "loose" multiData structure, the \code{data} components can be
 #' anything (but for most purposes should be of comparable type and content).
-#' 
+#'
 #' This function requires a "strict" multiData structure.
-#' 
+#'
 #' @param multiData A multiData structure.
 #' @return A single matrix or data frame containing the "rbinded" result.
 #' @author Peter Langfelder
 #' @seealso \code{\link{multiData}} to create a multiData structure;
-#' 
+#'
 #' \code{\link{rbind}} for various subtleties of the row binding operation.
 #' @keywords misc
 mtd.rbindSelf = function(multiData)
@@ -633,7 +629,7 @@ mtd.rbindSelf = function(multiData)
   colnames = mtd.colnames(multiData)
   for (set in 1:size$nSets)
   {
-    if (!is.null(colnames(multiData[[set]]$data)) && 
+    if (!is.null(colnames(multiData[[set]]$data)) &&
         !isTRUE(all.equal(colnames, colnames(multiData[[set]]$data))) )
           colnames(multiData[[set]]$data) = colnames
     out = rbind(out, multiData[[set]]$data)
@@ -644,10 +640,10 @@ mtd.rbindSelf = function(multiData)
 
 
 #' Set attributes on each component of a multiData structure
-#' 
+#'
 #' Set attributes on each \code{data} component of a multiData structure
-#' 
-#' 
+#'
+#'
 #' @param multiData A multiData structure.
 #' @param attribute Name for the attribute to be set
 #' @param valueList List that gives the attribute value for each set in the
@@ -656,7 +652,7 @@ mtd.rbindSelf = function(multiData)
 #' component.
 #' @author Peter Langfelder
 #' @seealso \code{\link{multiData}} to create a multiData structure;
-#' 
+#'
 #' \code{isMultiData} for a description of the multiData structure.
 #' @keywords misc
 mtd.setAttr = function(multiData, attribute, valueList)
@@ -675,10 +671,10 @@ mtd.setAttr = function(multiData, attribute, valueList)
 
 
 #' Get and set column names in a multiData structure.
-#' 
+#'
 #' Get and set column names on each \code{data} component in a multiData
 #' structure.
-#' 
+#'
 #' A multiData structure is intended to store (the same type of) data for
 #' multiple, possibly independent, realizations (for example, expression data
 #' for several independent experiments). It is a list where each component
@@ -688,17 +684,17 @@ mtd.setAttr = function(multiData, attribute, valueList)
 #' required to each be a matrix or a data frame and have the same number of
 #' columns. In a "loose" multiData structure, the \code{data} components can be
 #' anything (but for most purposes should be of comparable type and content).
-#' 
+#'
 #' The \code{mtd.colnames} and \code{mtd.setColnames} assume (and checks for) a
 #' "strict" multiData structure.
-#' 
+#'
 #' @aliases mtd.setColnames mtd.colnames
 #' @param multiData A multiData structure
 #' @param colnames A vector (coercible to character) of column names.
 #' @return \code{mtd.colnames} returns the vector of column names of the
 #' \code{data} component. The function assumes the column names in all sets are
 #' the same.
-#' 
+#'
 #' \code{mtd.setColnames} returns the multiData structure with the column names
 #' set in all \code{data} components.
 #' @author Peter Langfelder
@@ -716,10 +712,10 @@ mtd.setColnames = function(multiData, colnames)
 
 
 #' Create a multiData structure.
-#' 
+#'
 #' This function creates a multiData structure by storing its input arguments
 #' as the 'data' components.
-#' 
+#'
 #' A multiData structure is intended to store (the same type of) data for
 #' multiple, possibly independent, realizations (for example, expression data
 #' for several independent experiments). It is a list where each component
@@ -729,7 +725,7 @@ mtd.setColnames = function(multiData, colnames)
 #' required to each be a matrix or a data frame and have the same number of
 #' columns. In a "loose" multiData structure, the \code{data} components can be
 #' anything (but for most purposes should be of comparable type and content).
-#' 
+#'
 #' @param \dots Arguments to be stored in the multiData structure.
 #' @return The resulting multiData structure.
 #' @author Peter Langfelder
@@ -740,17 +736,16 @@ mtd.setColnames = function(multiData, colnames)
 #' multiData structure.
 #' @keywords misc
 #' @examples
-#' 
+#'
 #' data1 = matrix(rnorm(100), 20, 5);
 #' data2 = matrix(rnorm(50), 10, 5);
-#' 
+#'
 #' md = multiData(Set1 = data1, Set2 = data2);
-#' 
+#'
 #' checkSets(md)
-#' 
-multiData = function(...)
-{
+#'
+multiData = function(...) {
   list2multiData(list(...))
-}  
+}
 
 

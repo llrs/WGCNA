@@ -3,6 +3,7 @@
 \name{adjacency}
 \alias{adjacency}
 \alias{adjacency.fromSimilarity}
+\alias{similarity}
 \title{Calculate network adjacency}
 \usage{
 adjacency.fromSimilarity(similarity, type = "unsigned", power = if (type ==
@@ -11,6 +12,10 @@ adjacency.fromSimilarity(similarity, type = "unsigned", power = if (type ==
 adjacency(datExpr, selectCols = NULL, type = "unsigned", power = if (type
   == "distance") 1 else 6, corFnc = "cor", corOptions = "use = 'p'",
   distFnc = "dist", distOptions = "method = 'euclidean'")
+
+similarity(datExpr, selectCols = NULL, corFnc = "cor",
+  corOptions = "use = 'p'", type = "cor", distFnc = "dist",
+  distOptions = "method = 'euclidean'")
 }
 \arguments{
 \item{similarity}{A (signed) similarity matrix: square, symmetric matrix
@@ -60,6 +65,8 @@ Calculates (correlation or distance) network adjacency from given expression
 data or from a similarity. Computes the adjacency from the expression data:
 takes cor, transforms it as appropriate and possibly adds a sign if
 requested.
+
+similarity calculates the pairwise correlation of the expression data.
 }
 \details{
 The argument \code{type} determines whether a correlation (\code{type} one
@@ -95,8 +102,8 @@ calculated among the columns of \code{datExpr} irrespective of whether a
 correlation or a distance network is requested.
 }
 \examples{
-similarity <- matrix(seq(-1, 1, length.out = 25),5)
-similarity[lower.tri(similarity)] <- t(similarity)[lower.tri(similarity)]
+datExpr <- matrix(rnorm(100), 10, 10)
+similarity <- similarity(datExpr)
 adj <-  adjacency.fromSimilarity(similarity)
 similarity <- matrix(seq(-1, 1, length.out = 25), 5)
 similarity[lower.tri(similarity)] <- t(similarity)[lower.tri(similarity)]

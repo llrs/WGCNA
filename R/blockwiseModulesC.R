@@ -70,7 +70,7 @@
 #' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
 #' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 #' @keywords misc
-#' @export TOMsimilarityFromExpr
+#' @export
 TOMsimilarityFromExpr = function(datExpr, corType = "pearson",
                                  networkType = "unsigned",
                                  power = 6, TOMType = "signed", TOMDenom = "min",
@@ -185,35 +185,42 @@ TOMsimilarityFromExpr = function(datExpr, corType = "pearson",
 #' @keywords misc
 TOMsimilarity = function(adjMat, TOMType = "unsigned", TOMDenom = "min",
                          verbose = 1, indent = 0) {
-  TOMTypeC = pmatch(TOMType, .TOMTypes)-1;
-  if (is.na(TOMTypeC))
-    stop(paste("Invalid 'TOMType'. Recognized values are", paste(.TOMTypes, collapse = ", ")))
-
-  if (TOMTypeC == 0)
-    stop("'TOMType' cannot be 'none' for this function.");
-
+  TOMTypeC = pmatch(TOMType, .TOMTypes)-1
+  if (is.na(TOMTypeC)) {
+    stop(paste("Invalid 'TOMType'. Recognized values are",
+               paste(.TOMTypes, collapse = ", ")))
+  }
+  if (TOMTypeC == 0) {
+    stop("'TOMType' cannot be 'none' for this function.")
+  }
   TOMDenomC = pmatch(TOMDenom, .TOMDenoms)-1;
-  if (is.na(TOMDenomC))
-    stop(paste("Invalid 'TOMDenom'. Recognized values are", paste(.TOMDenoms, collapse = ", ")))
+  if (is.na(TOMDenomC)) {
+    stop(paste("Invalid 'TOMDenom'. Recognized values are",
+               paste(.TOMDenoms, collapse = ", ")))
+  }
+  checkAdjMat(adjMat, min = if (TOMTypeC==2) -1 else 0, max = 1)
 
-  checkAdjMat(adjMat, min = if (TOMTypeC==2) -1 else 0, max = 1);
+  if (sum(is.na(adjMat))>0) {
+      adjMat[is.na(adjMat)] = 0
+  }
+  if (any(diag(adjMat)!=1)) {
+      diag(adjMat) = 1
+  }
 
-  if (sum(is.na(adjMat))>0) adjMat[is.na(adjMat)] = 0;
-  if (any(diag(adjMat)!=1)) diag(adjMat) = 1;
+  nGenes = dim(adjMat)[1]
 
-  nGenes = dim(adjMat)[1];
+  tom = matrix(0, nGenes, nGenes)
 
-  tom = matrix(0, nGenes, nGenes);
+  tomResult = .C("tomSimilarityFromAdj", as.double(as.matrix(adjMat)),
+                 as.integer(nGenes), as.integer(TOMTypeC),
+                 as.integer(TOMDenomC), tom = as.double(tom),
+                 as.integer(verbose), as.integer(indent), PACKAGE = "WGCNA")
 
-  tomResult = .C("tomSimilarityFromAdj", as.double(as.matrix(adjMat)), as.integer(nGenes),
-        as.integer(TOMTypeC),
-        as.integer(TOMDenomC),
-        tom = as.double(tom), as.integer(verbose), as.integer(indent), PACKAGE = "WGCNA")
-
-  tom[,] = tomResult$tom;
-  diag(tom) = 1;
-  rm(tomResult); collectGarbage();
-  tom;
+  tom[,] = tomResult$tom
+  diag(tom) = 1
+  rm(tomResult)
+  collectGarbage()
+  tom
 }
 
 #
@@ -221,8 +228,8 @@ TOMsimilarity = function(adjMat, TOMType = "unsigned", TOMDenom = "min",
 #' @rdname TOMsimilarity
 #' @name TOMsimilarity
 #' @export
-TOMdist = function(adjMat, TOMType = "unsigned", TOMDenom = "min", verbose = 1, indent = 0)
-{
+TOMdist = function(adjMat, TOMType = "unsigned", TOMDenom = "min", verbose = 1,
+                   indent = 0) {
   1-TOMsimilarity(adjMat, TOMType, TOMDenom, verbose, indent)
 }
 
@@ -459,7 +466,8 @@ TOMdist = function(adjMat, TOMType = "unsigned", TOMDenom = "min", verbose = 1, 
 #' @param indent indentation for diagnostic messages. Zero means no
 #' indentation, each unit adds two spaces.
 #' @param ... Other arguments.
-#' @return A list with the following components:
+#' @return
+#' A list with the following components:
 #'
 #' \item{colors }{ a vector of color or numeric module labels for all genes.}
 #'
@@ -519,99 +527,69 @@ TOMdist = function(adjMat, TOMType = "unsigned", TOMDenom = "min", verbose = 1, 
 #' hierarchical clustering dendrograms;
 #'
 #' \code{\link{mergeCloseModules}} for merging of close modules.
-#' @references Bin Zhang and Steve Horvath (2005) "A General Framework for
+#' @references
+#' Bin Zhang and Steve Horvath (2005) "A General Framework for
 #' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
 #' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 #' @keywords misc
 blockwiseModules <- function(
   # Input data
-
   datExpr,
-
   # Data checking options
-
   checkMissingData = TRUE,
-
   # Options for splitting data into blocks
-
   blocks = NULL,
   maxBlockSize = 5000,
   blockSizePenaltyPower = 5,
   nPreclusteringCenters = as.integer(min(ncol(datExpr)/20, 100*ncol(datExpr)/maxBlockSize)),
   randomSeed = 12345,
-
   # load TOM from previously saved file?
-
   loadTOM = FALSE,
-
   # Network construction arguments: correlation options
-
   corType = "pearson",
   maxPOutliers = 1,
   quickCor = 0,
   pearsonFallback = "individual",
   cosineCorrelation = FALSE,
-
   # Adjacency function options
-
   power = 6,
   networkType = "unsigned",
   replaceMissingAdjacencies = FALSE,
-
   # Topological overlap options
-
   TOMType = "signed",
   TOMDenom = "min",
-
   # Saving or returning TOM
-
   getTOMs = NULL,
   saveTOMs = FALSE,
   saveTOMFileBase = "blockwiseTOM",
-
   # Basic tree cut options
-
   deepSplit = 2,
   detectCutHeight = 0.995,
   minModuleSize = min(20, ncol(datExpr)/2 ),
-
   # Advanced tree cut options
-
   maxCoreScatter = NULL, minGap = NULL,
   maxAbsCoreScatter = NULL, minAbsGap = NULL,
   minSplitHeight = NULL, minAbsSplitHeight = NULL,
   useBranchEigennodeDissim = FALSE,
   minBranchEigennodeDissim = mergeCutHeight,
-
   stabilityLabels = NULL,
   minStabilityDissim = NULL,
-
-
   pamStage = TRUE, pamRespectsDendro = TRUE,
-
   # Gene reassignment, module trimming, and module "significance" criteria
-
   reassignThreshold = 1e-6,
   minCoreKME = 0.5,
   minCoreKMESize = minModuleSize/3,
   minKMEtoStay = 0.3,
-
   # Module merging options
-
   mergeCutHeight = 0.15,
   impute = TRUE,
   trapErrors = FALSE,
-
   # Output options
-
   numericLabels = FALSE,
-
   # Options controlling behaviour
-
   nThreads = 0,
   verbose = 0, indent = 0,
-  ...)
-{
+  ...) {
   spaces = indentSpaces(indent);
 
   if (verbose>0)
@@ -1593,9 +1571,8 @@ recutBlockwiseTrees = function(datExpr,
 
     TOM = NULL;	# Will be loaded below; this gets rid of warnings form Rcheck.
 
-    xx = try(load(TOMFiles[blockNo]), silent = TRUE);
-    if (class(xx)=='try-error')
-    {
+    xx = try(load(TOMFiles[blockNo]), silent = TRUE)
+    if (class(xx)=='try-error') {
       printFlush(paste("************\n File name", TOMFiles[blockNo],
                        "appears invalid: the load function returned the following error:\n     ",
                        xx));
@@ -1635,26 +1612,22 @@ recutBlockwiseTrees = function(datExpr,
     collectGarbage();
     cutreeLabels[[blockNo]] = blockLabels;
 
-    if (class(blockLabels)=='try-error')
-    {
-      if (verbose>0)
-      {
+    if (class(blockLabels)=='try-error') {
+      if (verbose>0) {
         printFlush(paste(spaces, "*** cutreeDynamic returned the following error:\n",
                          spaces, blockLabels, spaces,
                          "Stopping the module detection here."));
       } else
         warning(paste("blockwiseModules: cutreeDynamic returned the following error:\n",
                       "      ", blockLabels, "---> Continuing with next block. "));
-      next;
+      next
     }
-    if (sum(blockLabels>0)==0)
-    {
-      if (verbose>1)
-      {
+    if (sum(blockLabels>0)==0) {
+      if (verbose>1) {
           printFlush(paste(spaces, "No modules detected in block", blockNo));
       }
       blockNo = blockNo + 1;
-      next;
+      next
     }
 
     blockLabels[blockLabels>0] = blockLabels[blockLabels>0] + maxUsedLabel;
@@ -1664,10 +1637,8 @@ recutBlockwiseTrees = function(datExpr,
     MEs = try(moduleEigengenes(selExpr[, blockLabels!=0], blockLabels[blockLabels!=0], impute = impute,
                            # subHubs = TRUE, trapErrors = FALSE,
                            verbose = verbose - 3, indent = indent + 2), silent = TRUE);
-    if (class(MEs)=='try-error')
-    {
-      if (trapErrors)
-      {
+    if (class(MEs)=='try-error') {
+      if (trapErrors){
         if (verbose>0) {
           printFlush(paste(spaces, "*** moduleEigengenes failed with the following message:"));
           printFlush(paste(spaces, "       ", MEs));
@@ -1684,129 +1655,125 @@ recutBlockwiseTrees = function(datExpr,
     propMEs = MEs$eigengenes;
     blockLabelIndex = as.numeric(substring(names(propMEs), 3));
 
-    deleteModules = NULL;
-    changedModules = NULL;
+    deleteModules = NULL
+    changedModules = NULL
 
     # Check modules: make sure that of the genes present in the module, at least a minimum number
     # have a correlation with the eigengene higher than a given cutoff.
 
     if (verbose>2) printFlush(paste(spaces, "....checking modules for statistical meaningfulness.."));
-    for (mod in 1:ncol(propMEs))
-    {
+    for (mod in 1:ncol(propMEs)) {
       modGenes = (blockLabels==blockLabelIndex[mod]);
       corEval = parse(text = paste(corFnc, "(selExpr[, modGenes], propMEs[, mod]",
                                    prepComma(.corOptions[intCorType]), ")"));
       KME = as.vector(eval(corEval));
       if (intNetworkType==1) KME = abs(KME);
-      if (sum(KME>minCoreKME) < minCoreKMESize)
-      {
+      if (sum(KME>minCoreKME) < minCoreKMESize) {
         blockLabels[modGenes] = 0;
         deleteModules = c(deleteModules, mod);
         if (verbose>3)
           printFlush(paste(spaces, "    ..deleting module ", mod, ": of ", sum(modGenes),
                      " total genes in the module\n       only ",  sum(KME>minCoreKME),
                      " have the requisite high correlation with the eigengene.", sep=""));
-      } else if (sum(KME<minKMEtoStay)>0)
-      {
+      } else if (sum(KME<minKMEtoStay)>0) {
         # Remove genes whose KME is too low:
         if (verbose > 2)
           printFlush(paste(spaces, "    ..removing", sum(KME<minKMEtoStay),
                            "genes from module", mod, "because their KME is too low."));
         blockLabels[modGenes][KME < minKMEtoStay] = 0;
-        if (sum(blockLabels[modGenes]>0) < minModuleSize)
-        {
-          deleteModules = c(deleteModules, mod);
-          blockLabels[modGenes] = 0;
+        if (sum(blockLabels[modGenes]>0) < minModuleSize) {
+          deleteModules = c(deleteModules, mod)
+          blockLabels[modGenes] = 0
           if (verbose>3)
-            printFlush(paste(spaces, "    ..deleting module ",blockLabelIndex[mod],
+            printFlush(paste(spaces,
+                             "    ..deleting module ",blockLabelIndex[mod],
                      ": not enough genes in the module after removal of low KME genes.", sep=""));
         } else {
-          changedModules = union(changedModules, blockLabelIndex[mod]);
+          changedModules = union(changedModules, blockLabelIndex[mod])
         }
       }
     }
 
     # Remove modules that are to be removed
 
-    if (!is.null(deleteModules))
-    {
-       propMEs = propMEs[, -deleteModules, drop = FALSE];
-       modGenes = is.finite(match(blockLabels, blockLabelIndex[deleteModules]));
-       blockLabels[modGenes] = 0;
-       modAllGenes = is.finite(match(allLabels, blockLabelIndex[deleteModules]));
-       allLabels[modAllGenes] = 0;
-       blockLabelIndex = blockLabelIndex[-deleteModules];
+    if (!is.null(deleteModules)) {
+       propMEs = propMEs[, -deleteModules, drop = FALSE]
+       modGenes = is.finite(match(blockLabels,
+                                  blockLabelIndex[deleteModules]))
+       blockLabels[modGenes] = 0
+       modAllGenes = is.finite(match(allLabels,
+                                     blockLabelIndex[deleteModules]))
+       allLabels[modAllGenes] = 0
+       blockLabelIndex = blockLabelIndex[-deleteModules]
     }
 
     # Check if any modules are left
 
-    if (sum(blockLabels>0)==0)
-    {
-      if (verbose>1)
-      {
-        printFlush(paste(spaces, "No significant modules detected in block", blockNo));
+    if (sum(blockLabels>0)==0) {
+      if (verbose>1) {
+        printFlush(paste(spaces, "No significant modules detected in block",
+                         blockNo))
       }
-      blockNo = blockNo + 1;
+      blockNo = blockNo + 1
       next;
     }
 
     # Update allMEs and allLabels
 
-    if (is.null(AllMEs))
-    {
-      AllMEs = propMEs;
-    } else
-      AllMEs = cbind(AllMEs, propMEs);
+    if (is.null(AllMEs)){
+      AllMEs = propMEs
+    } else {
+      AllMEs = cbind(AllMEs, propMEs)
+    }
+    allLabelIndex = c(allLabelIndex, blockLabelIndex)
 
-    allLabelIndex = c(allLabelIndex, blockLabelIndex);
+    assigned = block[blockLabels!=0]
+    allLabels[assigned] = blockLabels[blockLabels!=0]
 
-    assigned = block[blockLabels!=0];
-    allLabels[assigned] = blockLabels[blockLabels!=0];
+    rm(dissTom)
+    collectGarbage()
 
-    rm(dissTom);
-    collectGarbage();
-
-    blockNo = blockNo + 1;
+    blockNo = blockNo + 1
   }
 
   # Check whether any of the already assigned genes should be re-assigned
 
-  deleteModules = NULL;
-  goodLabels = allLabels[gsg$goodGenes];
-  if (sum(goodLabels!=0) > 0)
-  {
-     propLabels = goodLabels[goodLabels!=0];
-     assGenes = (c(1:nGenes)[gsg$goodGenes])[goodLabels!=0];
+  deleteModules = NULL
+  goodLabels = allLabels[gsg$goodGenes]
+  if (sum(goodLabels!=0) > 0) {
+     propLabels = goodLabels[goodLabels!=0]
+     assGenes = (c(1:nGenes)[gsg$goodGenes])[goodLabels!=0]
      corEval = parse(text = paste(corFnc, "(datExpr[, goodLabels!=0], AllMEs",
-                                  prepComma(.corOptions[intCorType]), ")"));
+                                  prepComma(.corOptions[intCorType]), ")"))
      KME = eval(corEval);
-     if (intNetworkType == 1) KME = abs(KME)
-     nMods = ncol(AllMEs);
-     for (mod in 1:nMods)
-     {
-       modGenes = c(1:length(propLabels))[propLabels==allLabelIndex[mod]];
-       KMEmodule = KME[modGenes, mod];
-       KMEbest = apply(KME[modGenes, , drop = FALSE], 1, max);
-       candidates = (KMEmodule < KMEbest);
-       candidates[!is.finite(candidates)] = FALSE;
-       if (sum(candidates) > 0)
-       {
+     if (intNetworkType == 1) {
+         KME = abs(KME)
+     }
+     nMods = ncol(AllMEs)
+     for (mod in 1:nMods) {
+       modGenes = c(1:length(propLabels))[propLabels==allLabelIndex[mod]]
+       KMEmodule = KME[modGenes, mod]
+       KMEbest = apply(KME[modGenes, , drop = FALSE], 1, max)
+       candidates = (KMEmodule < KMEbest)
+       candidates[!is.finite(candidates)] = FALSE
+       if (sum(candidates) > 0) {
          pModule = corPvalueFisher(KMEmodule[candidates], nSamples);
          whichBest = apply(KME[modGenes[candidates], , drop = FALSE], 1, which.max);
          pBest = corPvalueFisher(KMEbest[candidates], nSamples);
          reassign = ifelse(is.finite(pBest/pModule), (pBest/pModule < reassignThreshold), FALSE);
-         if (sum(reassign)>0)
-         {
-           if (verbose > 2)
+         if (sum(reassign)>0) {
+           if (verbose > 2) {
              printFlush(paste(spaces, " ..reassigning", sum(reassign),
-                                      "genes from module", mod, "to modules with higher KME."));
-           allLabels[assGenes[modGenes[candidates][reassign]]] = whichBest[reassign];
-           changedModules = union(changedModules, whichBest[reassign]);
-           if (sum(modGenes)-sum(reassign) < minModuleSize)
-           {
-             deleteModules = c(deleteModules, mod);
-           } else
-             changedModules = union(changedModules, mod);
+                              "genes from module", mod,
+                              "to modules with higher KME."))
+           }
+           allLabels[assGenes[modGenes[candidates][reassign]]] = whichBest[reassign]
+           changedModules = union(changedModules, whichBest[reassign])
+           if (sum(modGenes)-sum(reassign) < minModuleSize) {
+             deleteModules = c(deleteModules, mod)
+           } else {
+             changedModules = union(changedModules, mod)
+           }
          }
        }
      }
@@ -1814,62 +1781,64 @@ recutBlockwiseTrees = function(datExpr,
 
   # Remove modules that are to be removed
 
-  if (!is.null(deleteModules))
-  {
-     AllMEs = AllMEs[, -deleteModules, drop = FALSE];
-     genes = is.finite(match(allLabels, allLabelIndex[deleteModules]));
-     allLabels[genes] = 0;
-     allLabelIndex = allLabelIndex[-deleteModules];
-     goodLabels = allLabels[gsg$goodGenes];
+  if (!is.null(deleteModules)) {
+     AllMEs = AllMEs[, -deleteModules, drop = FALSE]
+     genes = is.finite(match(allLabels, allLabelIndex[deleteModules]))
+     allLabels[genes] = 0
+     allLabelIndex = allLabelIndex[-deleteModules]
+     goodLabels = allLabels[gsg$goodGenes]
   }
 
-  if (verbose>1) printFlush(paste(spaces, "..merging modules that are too close.."));
+  if (verbose>1) {
+      printFlush(paste(spaces, "..merging modules that are too close.."))
+  }
   if (numericLabels) {
     colors = allLabels
   } else {
     colors = labels2colors(allLabels)
   }
-  mergedAllColors = colors;
-  MEsOK = TRUE;
+  mergedAllColors = colors
+  MEsOK = TRUE
   mergedMods = try(mergeCloseModules(datExpr, colors[gsg$goodGenes], cutHeight = mergeCutHeight,
                                  relabel = TRUE, # trapErrors = FALSE,
                                  impute = impute,
                                  verbose = verbose-2, indent = indent + 2), silent = TRUE);
-  if (class(mergedMods)=='try-error')
-  {
+  if (class(mergedMods)=='try-error') {
     warning(paste("blockwiseModules: mergeCloseModules failed with the following error message:\n    ",
                   mergedMods, "\n--> returning unmerged colors.\n"));
     MEs = try(moduleEigengenes(datExpr, colors[gsg$goodGenes], # subHubs = TRUE, trapErrors = FALSE,
                                impute = impute,
                                verbose = verbose-3, indent = indent+3), silent = TRUE);
-    if (class(MEs) == 'try-error')
-    {
-      if (!trapErrors) stop(MEs);
-      if (verbose>0)
-      {
+    if (class(MEs) == 'try-error') {
+      if (!trapErrors) stop(MEs)
+      if (verbose>0) {
         printFlush(paste(spaces, "*** moduleEigengenes failed with the following error message:"));
-        printFlush(paste(spaces, "     ", MEs));
-        printFlush(paste(spaces, "*** returning no module eigengenes.\n"));
-      } else
-        warning(paste("blockwiseModules: moduleEigengenes failed with the following error message:\n    ",
-                      MEs, "\n--> returning no module eigengenes.\n"));
-      allSampleMEs = NULL;
-      MEsOK = FALSE;
+        printFlush(paste(spaces, "     ", MEs))
+        printFlush(paste(spaces, "*** returning no module eigengenes.\n"))
+      } else {
+        warning("blockwiseModules: moduleEigengenes failed with the following error message:\n    ",
+                      MEs, "\n--> returning no module eigengenes.\n")
+      }
+      allSampleMEs = NULL
+      MEsOK = FALSE
     } else {
-      if (sum(!MEs$validMEs)>0)
-      {
-        colors[gsg$goodGenes] = MEs$validColors;
-        MEs = MEs$eigengenes[, MEs$validMEs];
-      } else MEs = MEs$eigengenes;
-      allSampleMEs = as.data.frame(matrix(NA, nrow = nSamples, ncol = ncol(MEs)));
-      allSampleMEs[gsg$goodSamples, ] = MEs[,];
-      names(allSampleMEs) = names(MEs);
+      if (sum(!MEs$validMEs)>0) {
+        colors[gsg$goodGenes] = MEs$validColors
+        MEs = MEs$eigengenes[, MEs$validMEs]
+      } else {
+          MEs = MEs$eigengenes
+      }
+      allSampleMEs = as.data.frame(matrix(NA, nrow = nSamples,
+                                          ncol = ncol(MEs)))
+      allSampleMEs[gsg$goodSamples, ] = MEs[,]
+      names(allSampleMEs) = names(MEs)
     }
   } else {
-    mergedAllColors[gsg$goodGenes] = mergedMods$colors;
-    allSampleMEs = as.data.frame(matrix(NA, nrow = nSamples, ncol = ncol(mergedMods$newMEs)));
-    allSampleMEs[gsg$goodSamples, ] = mergedMods$newMEs[,];
-    names(allSampleMEs) = names(mergedMods$newMEs);
+    mergedAllColors[gsg$goodGenes] = mergedMods$colors
+    allSampleMEs = as.data.frame(matrix(NA, nrow = nSamples,
+                                        ncol = ncol(mergedMods$newMEs)))
+    allSampleMEs[gsg$goodSamples, ] = mergedMods$newMEs[,]
+    names(allSampleMEs) = names(mergedMods$newMEs)
   }
 
   list(colors = mergedAllColors,
@@ -1881,7 +1850,7 @@ recutBlockwiseTrees = function(datExpr,
        #dendrograms = dendrograms,
        #TOMFiles = TOMFiles,
        #blockGenes = blockGenes,
-       MEsOK = MEsOK);
+       MEsOK = MEsOK)
 }
 
 #==========================================================================================================
@@ -1897,29 +1866,28 @@ recutBlockwiseTrees = function(datExpr,
 # Note on naming of output files: %s will translate into set number, %N into set name (if given in
 # multiExpr), %b into block number.
 
-.substituteTags = function(format, tags, replacements)
-{
-  nTags = length(tags);
-  if (length(replacements)!= nTags) stop("Length of tags and replacements must be the same.");
+.substituteTags = function(format, tags, replacements) {
+  nTags = length(tags)
+  if (length(replacements)!= nTags) {
+      stop("Length of tags and replacements must be the same.")
+  }
 
-  for (t in 1:nTags)
-    format = gsub(as.character(tags[t]), as.character(replacements[t]), format, fixed = TRUE);
+  for (t in 1:nTags) {
+    format = gsub(as.character(tags[t]),
+                  as.character(replacements[t]), format, fixed = TRUE)
+    }
 
-  format;
+  format
 }
 
-.processFileName = function(format, setNumber, setNames, blockNumber)
-{
-  # The following is a workaround around empty (NULL) setNames. Replaces the name with the setNumber.
+.processFileName = function(format, setNumber, setNames, blockNumber) {
+  # The following is a workaround around empty (NULL) setNames.
+  # Replaces the name with the setNumber.
   if (is.null(setNames)) setNames = rep(setNumber, setNumber)
 
-  .substituteTags(format, c("%s", "%N", "%b"), c(setNumber, setNames[setNumber], blockNumber));
+  .substituteTags(format, c("%s", "%N", "%b"),
+                  c(setNumber, setNames[setNumber], blockNumber))
 }
-
-
-
-
-
 
 #' Calculation of block-wise topological overlaps
 #'
@@ -1950,85 +1918,19 @@ recutBlockwiseTrees = function(datExpr,
 #' \code{\link{checkSets}}). A vector of lists, one per set. Each set must
 #' contain a component \code{data} that contains the expression data, with rows
 #' corresponding to samples and columns to genes or probes.
-#' @param checkMissingData logical: should data be checked for excessive
-#' numbers of missing entries in genes and samples, and for genes with zero
-#' variance? See details.
-#' @param blocks optional specification of blocks in which hierarchical
-#' clustering and module detection should be performed. If given, must be a
-#' numeric vector with one entry per gene of \code{multiExpr} giving the number
-#' of the block to which the corresponding gene belongs.
-#' @param maxBlockSize integer giving maximum block size for module detection.
-#' Ignored if \code{blocks} above is non-NULL. Otherwise, if the number of
-#' genes in \code{datExpr} exceeds \code{maxBlockSize}, genes will be
-#' pre-clustered into blocks whose size should not exceed \code{maxBlockSize}.
-#' @param blockSizePenaltyPower number specifying how strongly blocks should be
-#' penalized for exceeding the maximum size. Set to a lrge number or \code{Inf}
-#' if not exceeding maximum block size is very important.
-#' @param nPreclusteringCenters number of centers for pre-clustering. Larger
-#' numbers typically results in better but slower pre-clustering. The default
-#' is \code{as.integer(min(nGenes/20, 100*nGenes/preferredSize))} and is an
-#' attempt to arrive at a reasonable number given the resources available.
-#' @param randomSeed integer to be used as seed for the random number generator
-#' before the function starts. If a current seed exists, it is saved and
-#' restored upon exit. If \code{NULL} is given, the function will not save and
-#' restore the seed.
-#' @param corType character string specifying the correlation to be used.
-#' Allowed values are (unique abbreviations of) \code{"pearson"} and
-#' \code{"bicor"}, corresponding to Pearson and bidweight midcorrelation,
-#' respectively. Missing values are handled using the
-#' \code{pariwise.complete.obs} option.
-#' @param maxPOutliers only used for \code{corType=="bicor"}. Specifies the
-#' maximum percentile of data that can be considered outliers on either side of
-#' the median separately. For each side of the median, if higher percentile
-#' than \code{maxPOutliers} is considered an outlier by the weight function
-#' based on \code{9*mad(x)}, the width of the weight function is increased such
-#' that the percentile of outliers on that side of the median equals
-#' \code{maxPOutliers}. Using \code{maxPOutliers=1} will effectively disable
-#' all weight function broadening; using \code{maxPOutliers=0} will give
-#' results that are quite similar (but not equal to) Pearson correlation.
-#' @param quickCor real number between 0 and 1 that controls the handling of
-#' missing data in the calculation of correlations. See details.
-#' @param pearsonFallback Specifies whether the bicor calculation, if used,
-#' should revert to Pearson when median absolute deviation (mad) is zero.
-#' Recongnized values are (abbreviations of) \code{"none", "individual",
-#' "all"}. If set to \code{"none"}, zero mad will result in \code{NA} for the
-#' corresponding correlation. If set to \code{"individual"}, Pearson
-#' calculation will be used only for columns that have zero mad. If set to
-#' \code{"all"}, the presence of a single zero mad will cause the whole
-#' variable to be treated in Pearson correlation manner (as if the
-#' corresponding \code{robust} option was set to \code{FALSE}). Has no effect
-#' for Pearson correlation. See \code{\link{bicor}}.
-#' @param cosineCorrelation logical: should the cosine version of the
-#' correlation calculation be used? The cosine calculation differs from the
-#' standard one in that it does not subtract the mean.
-#' @param power soft-thresholding power for netwoek construction.
-#' @param networkType network type. Allowed values are (unique abbreviations
-#' of) \code{"unsigned"}, \code{"signed"}, \code{"signed hybrid"}. See
-#' \code{\link{adjacency}}.
 #' @param checkPower logical: should basic sanity check be performed on the
 #' supplied \code{power}? If you would like to experiment with unusual powers,
 #' set the argument to \code{FALSE} and proceed with caution.
-#' @param replaceMissingAdjacencies logical: should missing values in
-#' calculated adjacency be replaced by 0?
-#' @param TOMType one of \code{"none"}, \code{"unsigned"}, \code{"signed"}. If
-#' \code{"none"}, adjacency will be used for clustering. If \code{"unsigned"},
-#' the standard TOM will be used (more generally, TOM function will receive the
-#' adjacency as input). If \code{"signed"}, TOM will keep track of the sign of
-#' correlations between neighbors. Note that the \code{"unsigned"} vs.
-#' \code{"signed"} distinction is only relevant when \code{networkType} is
-#' \code{"unsigned"}. When \code{networkType} is \code{"signed"} or
-#' \code{"signed hybrid"}, there is no difference between
-#' \code{TOMType="signed"} and \code{TOMType="unsigned". }
-#' @param TOMDenom a character string specifying the TOM variant to be used.
-#' Recognized values are \code{"min"} giving the standard TOM described in
-#' Zhang and Horvath (2005), and \code{"mean"} in which the \code{min} function
-#' in the denominator is replaced by \code{mean}. The \code{"mean"} may produce
-#' better results in certain special situations but at this time should be
-#' considered experimental.
-#' @param saveTOMs logical: should calculated TOMs be saved to disk
-#' (\code{TRUE}) or returned in the return value (\code{FALSE})? Returning
-#' calculated TOMs via the return value ay be more convenient bt not always
-#' feasible if the matrices are too big to fit all in memory at the same time.
+#' individual TOMs into. The following tags should be used to make the file
+#' names unique for each set and block: \code{%s} will be replaced by the set
+#' number; \code{%N} will be replaced by the set name (taken from
+#' \code{names(multiExpr)}) if it exists, otherwise by set number; \code{%b}
+#' will be replaced by the block number. If the file names turn out to be
+#' non-unique, an error will be generated.
+#' @param individualTomFileNames character string giving the file names to save
+#' individual TOMs into. The following tags should be used to make the file
+#' names unique for each set and block: \code{%s} will be replaced by the set number;
+#' \code{%N} will be replaced by the set.
 #' @param individualTOMFileNames character string giving the file names to save
 #' individual TOMs into. The following tags should be used to make the file
 #' names unique for each set and block: \code{%s} will be replaced by the set
@@ -2036,23 +1938,8 @@ recutBlockwiseTrees = function(datExpr,
 #' \code{names(multiExpr)}) if it exists, otherwise by set number; \code{%b}
 #' will be replaced by the block number. If the file names turn out to be
 #' non-unique, an error will be generated.
-#' @param individualTOMFileNames character string giving the file names to save
-#' individual TOMs into. The following tags should be used to make the file
-#' names unique for each set and block: \code{%s} will be replaced by the set
-#' number; \code{%N} will be replaced by the set name (taken from
-#' \code{names(multiExpr)}) if it exists, otherwise by set number; \code{%b}
-#' will be replaced by the block number. If the file names turn out to be
-#' non-unique, an error will be generated.
-#' @param nThreads non-negative integer specifying the number of parallel
-#' threads to be used by certain parts of correlation calculations. This option
-#' only has an effect on systems on which a POSIX thread library is available
-#' (which currently includes Linux and Mac OSX, but excludes Windows). If zero,
-#' the number of online processors will be used if it can be determined
-#' dynamically, otherwise correlation calculations will use 2 threads.
-#' @param verbose integer level of verbosity. Zero means silent, higher values
-#' make the output progressively more and more verbose.
-#' @param indent indentation for diagnostic messages. Zero means no
-#' indentation, each unit adds two spaces.
+#' @inheritParams adjacency
+#' @inheritParams blockwiseModules
 #' @return A list with the following components:
 #'
 #' \item{actualTOMFileNames}{Only returned if input \code{saveTOMs} is
@@ -2129,71 +2016,38 @@ recutBlockwiseTrees = function(datExpr,
 #' network analysis".  BMC Bioinformatics 2008, 9:559
 #' @keywords misc
 blockwiseIndividualTOMs = function(multiExpr,
-
                             # Data checking options
-
                             checkMissingData = TRUE,
-
                             # Blocking options
-
                             blocks = NULL,
                             maxBlockSize = 5000,
                             blockSizePenaltyPower = 5,
                             nPreclusteringCenters = NULL,
                             randomSeed = 12345,
-
                             # Network construction arguments: correlation options
-
                             corType = "pearson",
                             maxPOutliers = 1,
                             quickCor = 0,
                             pearsonFallback = "individual",
                             cosineCorrelation = FALSE,
-
                             # Adjacency function options
-
                             power = 6,
                             networkType = "unsigned",
                             checkPower = TRUE,
                             replaceMissingAdjacencies = FALSE,
-
                             # Topological overlap options
-
                             TOMType = "unsigned",
                             TOMDenom = "min",
-
                             # Save individual TOMs? If not, they will be returned in the session.
-
                             saveTOMs = TRUE,
                             individualTOMFileNames = "individualTOM-Set%s-Block%b.RData",
-
                             # General options
-
                             nThreads = 0,
-                            verbose = 2, indent = 0)
-{
+                            verbose = 2, indent = 0) {
   spaces = indentSpaces(indent);
 
   dataSize = checkSets(multiExpr, checkStructure = TRUE);
-  if (dataSize$structureOK)
-  {
-
-
-#' Number of sets in a multi-set variable
-#'
-#' A convenience function that returns the number of sets in a multi-set
-#' variable.
-#'
-#'
-#' @param multiData vector of lists; in each list there must be a component
-#' named \code{data} whose content is a matrix or dataframe or array of
-#' dimension 2.
-#' @param \dots Other arguments to function \code{\link{checkSets}}.
-#' @return A single integer that equals the number of sets given in the input
-#' \code{multiData}.
-#' @author Peter Langfelder
-#' @seealso \code{\link{checkSets}}
-#' @keywords misc
+  if (dataSize$structureOK) {
     nSets = dataSize$nSets;
     nGenes = dataSize$nGenes;
     multiFormat = TRUE;
@@ -2771,6 +2625,19 @@ lowerTri2matrix = function(x, diag = 1)
 #' eigennode dissimilarity in individual sets is simly 1-correlation of the
 #' eigennodes; the consensus is defined as quantile with probability
 #' \code{consensusQuantile}.
+#' @param individualTOMFileNames character string giving the file names to save
+#' individual TOMs into. The following tags should be used to make the file
+#' names unique for each set and block: \code{%s} will be replaced by the set
+#' number; \code{%N} will be replaced by the set name (taken from
+#' \code{names(multiExpr)}) if it exists, otherwise by set number; \code{%b}
+#' will be replaced by the block number. If the file names turn out to be
+#' non-unique, an error will be generated.
+#' @param consensusTOMFileNames character string containing the file namefiles
+#' containing the consensus topological overlaps. The tag \code{%b} will be
+#' replaced by the block number. If the resulting file names are non-unique
+#' (for example, because the user gives a file name without a \code{%b} tag),
+#' an error will be generated. These files are standard R data files and can be
+#' loaded using the \code{\link{load}} function.
 #' @param stabilityLabels Optional matrix of cluster labels that are to be used
 #' for calculating branch dissimilarity based on split stability. The number of
 #' rows must equal the number of genes in \code{multiExpr}; the number of
@@ -2829,7 +2696,6 @@ lowerTri2matrix = function(x, diag = 1)
 #' make the output progressively more and more verbose.
 #' @param indent indentation for diagnostic messages. Zero means no
 #' indentation, each unit adds two spaces.
-#' @param ... Other arguments. At present these can include
 #' \code{reproduceBranchEigennodeQuantileError} that instructs the function to
 #' reproduce a bug in branch eigennode dissimilarity calculations for purposes
 #' if reproducing old reults.
@@ -4820,8 +4686,7 @@ consensusProjectiveKMeans = function (
       imputeMissing = TRUE,
       useMean = (length(multiExpr) > 3),
       maxIterations = 1000,
-      verbose = 0, indent = 0 )
-{
+      verbose = 0, indent = 0 ) {
 
   centerGeneDist = function(centers, oldDst = NULL, changed = c(1:nCenters))
   {
@@ -4972,8 +4837,7 @@ consensusProjectiveKMeans = function (
   changed = c(1:nCenters); dst = NULL;
   iteration = 0;
   centerDist = NULL;
-  while (!is.null(changed) && (iteration < maxIterations))
-  {
+  while (!is.null(changed) && (iteration < maxIterations)) {
     iteration = iteration + 1;
     if (verbose > 1) printFlush(paste(spaces, " ..iteration", iteration));
     clusterSizes = table(membership);
@@ -4991,20 +4855,17 @@ consensusProjectiveKMeans = function (
     nearest = minRes[[5]]+1;
     changed = NULL;
     rm(minRes); collectGarbage();
-    if (sum(centerDist>nearestDist)>0)
-    {
+    if (sum(centerDist>nearestDist)>0) {
       proposedMemb = nearest;
       accepted = FALSE;
-      while (!accepted && (sum(proposedMemb!=membership)>0))
-      {
+      while (!accepted && (sum(proposedMemb!=membership)>0)) {
         if (verbose > 2)
           cat(paste(spaces, "   ..proposing to move", sum(proposedMemb!=membership), "genes"));
         moved = c(1:nGenes)[proposedMemb!=membership];
         newCentDist = memberCenterDist(dst, proposedMemb);
         gotWorse = newCentDist[moved] > centerDist[moved]
-        if (sum(gotWorse)==0)
-        {
-          accepted = TRUE;
+        if (sum(gotWorse)==0){
+          accepted = TRUE
           if (verbose > 2) printFlush(paste("..move accepted."));
         } else {
           if (verbose > 2) printFlush(paste("..some genes got worse. Trying again."));
@@ -5013,8 +4874,7 @@ consensusProjectiveKMeans = function (
           proposedMemb[moved[gotWorse][ord[c(1:n)]]] = membership[moved[gotWorse][ord[c(1:n)]]];
         }
       }
-      if (accepted)
-      {
+      if (accepted) {
         propSizes = table(proposedMemb);
         keep = as.numeric(names(propSizes));
         for (set in 1:nSets)
@@ -5039,13 +4899,11 @@ consensusProjectiveKMeans = function (
     }
   }
 
-  consCenterDist = function(centers, select)
-  {
-    if (is.logical(select))
-    {
-      nC = sum(select);
+  consCenterDist = function(centers, select) {
+    if (is.logical(select)) {
+      nC = sum(select)
     } else {
-      nC = length(select);
+      nC = length(select)
     }
     distX = array(0, dim=c(nSets, nC, nC));
     for (set in 1:nSets)
@@ -5072,8 +4930,7 @@ consensusProjectiveKMeans = function (
   clusterSizes = as.vector(table(membership));
   small = (clusterSizes < preferredSize);
   done = FALSE;
-  while (!done & (sum(small)>1))
-  {
+  while (!done & (sum(small)>1)) {
     smallIndex = c(1:nCenters)[small]
     nSmall = sum(small);
     clustDist = consCenterDist(centers, smallIndex);
@@ -5081,15 +4938,13 @@ consensusProjectiveKMeans = function (
     diag(clustDist) = 10;
     distOrder = order(as.vector(clustDist))[seq(from=2, to = nSmall * (nSmall-1), by=2)];
     i = 1; canMerge = FALSE;
-    while (i <= length(distOrder) && (!canMerge))
-    {
+    while (i <= length(distOrder) && (!canMerge)) {
       whichJ = smallIndex[as.integer( (distOrder[i]-1)/nSmall + 1)];
       whichI = smallIndex[distOrder[i] - (whichJ-1) * nSmall];
       canMerge = sum(clusterSizes[c(whichI, whichJ)]) < preferredSize;
-      i = i + 1;
+      i = i + 1
     }
-    if (canMerge)
-    {
+    if (canMerge) {
       membership[membership==whichJ] = whichI;
       clusterSizes[whichI] = sum(clusterSizes[c(whichI, whichJ)]);
       #if (verbose > 1)
@@ -5107,11 +4962,10 @@ consensusProjectiveKMeans = function (
       if (verbose > 3)
         printFlush(paste(spaces, "  ..merged clusters", whichI, "and", whichJ,
                    "whose combined size is", clusterSizes[whichI]));
-    } else done = TRUE;
+    } else done = TRUE
   }
 
-  if (checkData)
-  {
+  if (checkData){
     membershipAll = rep(NA, allSize$nGenes);
     membershipAll[gsg$goodGenes] = membership;
   } else
@@ -5119,65 +4973,6 @@ consensusProjectiveKMeans = function (
 
   if (seedSaved) .Random.seed <<- savedSeed;
 
-  return( list(clusters = membershipAll, centers = centers, unmergedClusters = unmergedMembership,
-               unmergedCenters = unmergedCenters) );
+  return(list(clusters = membershipAll, centers = centers, unmergedClusters = unmergedMembership,
+               unmergedCenters = unmergedCenters))
 }
-
-
-# old initialization code:
-
-# signe-set:
-  #n0 = 40;
-  #nSVectors = min(nCenters, as.integer(nSamples/2 * (1+exp(-nSamples/n0))));
-  #svd = svd(datExpr, nu = nSVectors, nv = 0);
-
-  #centers = matrix(0, nSamples, nCenters);
-  #for (sv in 1:nSVectors)
-  #{
-  #  coeffs = matrix(runif(n = nCenters, min = -svd$d[sv], max = svd$d[sv]), nSamples, nCenters,
-  #                         byrow = TRUE);
-  #  centers = centers + coeffs * matrix(svd$u[, sv], nSamples, nCenters);
-  #}
-
-  #centers = scale(centers);
-
-  #dst = centerGeneDist(centers);
-
-  #bestDst = rep(0, nGenes);
-  #best = rep(0, nGenes);
-  #minRes = .C("minWhichMin", as.double(dst), as.integer(nCenters), as.integer(nGenes),
-  #            as.double(bestDst), as.double(best));
-  #centerDist = minRes[[4]];
-  #membership = minRes[[5]]+1;
-  #rm(minRes); collectGarbage();
-
-# Old initialization for consensus projective K means
-#  centers = vector(mode="list", length = nSets);
-#  n0 = 40;
-#  nSVectors = min(nCenters, as.integer(nSamples/2 * (1+exp(-nSamples/n0))));
-#
-#  for (set in 1:nSets)
-#  {
-#    centers[[set]] = list(data = matrix(0, nSamples[set], nCenters));
-#    svd = svd(multiExpr[[set]]$data, nu = nSVectors, nv = 0);
-#
-#    for (sv in 1:nSVectors)
-#    {
-#      coeffs = matrix(runif(n = nCenters, min = -svd$d[sv], max = svd$d[sv]), nSamples[set], nCenters,
-#                             byrow = TRUE);
-#      centers[[set]]$data = centers[[set]]$data + coeffs * matrix(svd$u[, sv], nSamples[set], nCenters);
-#    }
-#
-#    centers[[set]]$data = scale(centers[[set]]$data);
-#  }
-#
-#  dst = centerGeneDist(centers);
-#
-#  bestDst = rep(0, nGenes);
-#  best = rep(0, nGenes);
-#  minRes = .C("minWhichMin", as.double(dst), as.integer(nCenters), as.integer(nGenes),
-#              as.double(bestDst), as.double(best));
-#  centerDist = minRes[[4]];
-#  membership = minRes[[5]]+1;
-#  rm(minRes); collectGarbage();
-

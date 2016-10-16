@@ -9,6 +9,13 @@ initProgInd(leadStr = "..", trailStr = "", quiet = !interactive())
 
 updateProgInd(newFrac, progInd, quiet = !interactive())
 }
+\arguments{
+\item{leadStr}{Leading characters.}
+
+\item{trailStr}{Last characters.}
+
+\item{quiet}{Logical: Run it in interactive mode or not?.}
+}
 \description{
 Describes how much/how long does it takes
 

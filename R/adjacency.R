@@ -443,3 +443,44 @@ signumAdjacency <- function(corMat, threshold) {
     diag(adjmat) <- 0
     adjmat
 }
+#' @rdname adjacency
+#' @inheritParams adjacency
+#' @description
+#' similarity calculates the pairwise correlation of the expression data.
+#' @export
+similarity <- function(datExpr, selectCols = NULL, corFnc = "cor",
+                       corOptions = "use = 'p'", type = "cor",
+                       distFnc = "dist", distOptions = "method = 'euclidean'") {
+    intType <- ifelse(type == "cor", 1, 3)
+    if (intType < 2) {
+        if (is.null(selectCols)) {
+            corExpr = parse(text = paste(corFnc,
+                                         "(datExpr ",
+                                         prepComma(corOptions), ")"))
+            # cor_mat = cor(datExpr, use = "p")
+            cor_mat = eval(corExpr)
+        } else {
+            corExpr = parse(text = paste(
+                corFnc, "(datExpr, datExpr[, selectCols] ",
+                prepComma(corOptions), ")"))
+            #cor_mat = cor(datExpr, datExpr[, selectCols], use = "p")
+            cor_mat = eval(corExpr)
+        }
+    } else {
+        if (!is.null(selectCols)) {
+            stop("The argument 'selectCols' cannot
+                 be used for distance adjacency.")
+        }
+        corExpr = parse(text = paste(distFnc, "(t(datExpr) ",
+                                     prepComma(distOptions), ")"))
+        # cor_mat = cor(datExpr, use = "p")
+        d = eval(corExpr)
+        if (any(d < 0)) {
+            warning("Function WGCNA::adjacency: Distance function
+                    returned (some) negative values.")
+        }
+        cor_mat = 1 - as.matrix((d/max(d, na.rm = TRUE))^2)
+    }
+
+    cor_mat
+}

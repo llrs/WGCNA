@@ -54,9 +54,6 @@ make the output progressively more and more verbose.}
 
 \item{indent}{indentation for diagnostic messages. Zero means no
 indentation, each unit adds two spaces.}
-
-\item{similarity}{similarity matrix: a symmetric matrix with entries between
--1 and 1 and unit diagonal.}
 }
 \value{
 A list with the following components:

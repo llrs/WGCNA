@@ -2,7 +2,7 @@
 % Please edit documentation in R/Functions.R
 \name{moduleEigengenes}
 \alias{moduleEigengenes}
-\title{Calculate module eigengenes}
+\title{Calculate module eigengenes.}
 \usage{
 moduleEigengenes(datExpr, colors, impute = TRUE, nPC = 1,
   align = "along average", excludeGrey = FALSE,
@@ -11,8 +11,8 @@ moduleEigengenes(datExpr, colors, impute = TRUE, nPC = 1,
   scale = TRUE, verbose = 0, indent = 0)
 }
 \arguments{
-\item{datExpr}{data.frame containing expression data. Columns correspond to
-genes and rows to samples.}
+\item{datExpr}{Expression data for a single set in the form of a data frame
+where rows are samples and columns are genes (probes).}
 
 \item{colors}{A vector of the same length as the number of probes in
 \code{expr}, giving module color for all probes (genes). Color \code{"grey"}
@@ -32,9 +32,9 @@ The number of returned variance explained entries is currently
 issued.}
 
 \item{align}{Controls whether eigengenes, whose orientation is undetermined,
-should be aligned with average expression (align = "along average", the
-default) or left as they are (align = ""). Any other value will trigger an
-error.}
+should be aligned with average expression (\code{align = "along average"},
+the default) or left as they are (\code{align = ""}). Any other value will
+trigger an error.}
 
 \item{excludeGrey}{Should the improper module consisting of 'grey' genes be
 excluded from the eigengenes?}
@@ -86,43 +86,6 @@ silent, up to (about) 5 the verbosity gradually increases.}
 \item{indent}{A single non-negative integer controlling indentation of
 printed messages. 0 means no indentation, each unit above that adds two
 spaces.}
-
-\item{nPc}{Calculate module eigengenes.
-
-Calculates module eigengenes (1st principal component) of modules in a given
-single dataset.
-
-Module eigengene is defined as the first principal component of the
-expression matrix of the corresponding module. The calculation may fail if
-the expression data has too many missing entries. Handling of such errors is
-controlled by the arguments \code{subHubs} and \code{trapErrors}.  If
-\code{subHubs==TRUE}, errors in principal component calculation will be
-trapped and a substitute calculation of hubgenes will be attempted. If this
-fails as well, behaviour depends on \code{trapErrors}: if \code{TRUE}, the
-offending module will be ignored and the return value will allow the user to
-remove the module from further analysis; if \code{FALSE}, the function will
-stop.
-
-From the user's point of view, setting \code{trapErrors=FALSE} ensures that
-if the function returns normally, there will be a valid eigengene (principal
-component or hubgene) for each of the input colors. If the user sets
-\code{trapErrors=TRUE}, all calculational (but not input) errors will be
-trapped, but the user should check the output (see below) to make sure all
-modules have a valid returned eigengene.
-
-While the principal component calculation can fail even on relatively sound
-data (it does not take all that many "well-placed" \code{NA} to torpedo the
-calculation), it takes many more irregularities in the data for the hubgene
-calculation to fail. In fact such a failure signals there likely is
-something seriously wrong with the data.}
-
-\item{expr}{Expression data for a single set in the form of a data frame
-where rows are samples and columns are genes (probes).}
-
-\item{align}{Controls whether eigengenes, whose orientation is undetermined,
-should be aligned with average expression (\code{align = "along average"},
-the default) or left as they are (\code{align = ""}). Any other value will
-trigger an error.}
 }
 \value{
 A list with the following components: \item{eigengenes}{Module
@@ -168,6 +131,31 @@ returned if their corresponding eigengenes have been calculated correctly.}
 \description{
 Calculates module eigengenes (1st principal component) of modules in a given
 single dataset.
+}
+\details{
+Module eigengene is defined as the first principal component of the
+expression matrix of the corresponding module. The calculation may fail if
+the expression data has too many missing entries. Handling of such errors is
+controlled by the arguments \code{subHubs} and \code{trapErrors}.  If
+\code{subHubs==TRUE}, errors in principal component calculation will be
+trapped and a substitute calculation of hubgenes will be attempted. If this
+fails as well, behaviour depends on \code{trapErrors}: if \code{TRUE}, the
+offending module will be ignored and the return value will allow the user to
+remove the module from further analysis; if \code{FALSE}, the function will
+stop.
+
+From the user's point of view, setting \code{trapErrors=FALSE} ensures that
+if the function returns normally, there will be a valid eigengene (principal
+component or hubgene) for each of the input colors. If the user sets
+\code{trapErrors=TRUE}, all calculational (but not input) errors will be
+trapped, but the user should check the output (see below) to make sure all
+modules have a valid returned eigengene.
+
+While the principal component calculation can fail even on relatively sound
+data (it does not take all that many "well-placed" \code{NA} to torpedo the
+calculation), it takes many more irregularities in the data for the hubgene
+calculation to fail. In fact such a failure signals there likely is
+something seriously wrong with the data.
 }
 \author{
 Steve Horvath \email{SHorvath@mednet.ucla.edu}, Peter Langfelder

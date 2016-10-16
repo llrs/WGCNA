@@ -42,7 +42,7 @@ c = a + 2;
 
 # Set the colnames on matrix a
 
-colnames(a) = spaste("col_", c(1:4));
+colnames(a) = paste0("col_", c(1:4));
 
 # Example use
 

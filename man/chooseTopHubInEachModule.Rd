@@ -42,7 +42,7 @@ connectivity, looking at all genes in the expression file.
 MEturquoise = sample(1:100,50)
 MEblue      = sample(1:100,50)
 MEbrown     = sample(1:100,50)
-MEyellow    = sample(1:100,50) 
+MEyellow    = sample(1:100,50)
 MEgreen     = c(MEyellow[1:30], sample(1:100,20))
 MEred	    = c(MEbrown [1:20], sample(1:100,30))
 MEblack	    = c(MEblue  [1:25], sample(1:100,25))

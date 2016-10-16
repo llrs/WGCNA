@@ -6,6 +6,13 @@
 \title{Calculation of intramodular connectivity}
 \usage{
 intramodularConnectivity(adjMat, colors, scaleByMax = FALSE)
+
+intramodularConnectivity.fromExpr(datExpr, colors, corFnc = "cor",
+  corOptions = "use = 'p'", distFnc = "dist",
+  distOptions = "method = 'euclidean'", networkType = "unsigned",
+  power = if (networkType == "distance") 1 else 6, scaleByMax = FALSE,
+  ignoreColors = if (is.numeric(colors)) 0 else "grey",
+  getWholeNetworkConnectivity = TRUE)
 }
 \arguments{
 \item{adjMat}{adjacency matrix, a square, symmetric matrix with entries

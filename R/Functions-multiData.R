@@ -115,8 +115,7 @@ multiData.eigengeneSignificance = function(multiData, multiTrait, moduleLabels,
   MES = p = Z = nObs = array(NA, dim = c(nModules, nSets))
 
   haveZs = FALSE
-  for (set in 1:nSets)
-  {
+  for (set in 1:nSets) {
     corOptions$x = multiEigengenes[[set]]$data
     corOptions$y = multiTrait[[set]]$data
     cp = do.call(corAndPvalueFnc, args = corOptions)
@@ -159,12 +158,21 @@ multiData.eigengeneSignificance = function(multiData, multiTrait, moduleLabels,
        nObservations = nObs)
 }
 
-#' Count the number of sets
+#' Number of sets in a multi-set variable
 #'
-#' From a given multiset object calculates the numbers of sets present
-#' @param multiData List of Expression data, creating a multiset object.
-#' @return The number of sets of a multisets object
-#' @export
+#' A convenience function that returns the number of sets in a multi-set
+#' variable.
+#'
+#'
+#' @param multiData vector of lists; in each list there must be a component
+#' named \code{data} whose content is a matrix or dataframe or array of
+#' dimension 2.
+#' @param \dots Other arguments to function \code{\link{checkSets}}.
+#' @return A single integer that equals the number of sets given in the input
+#' \code{multiData}.
+#' @author Peter Langfelder
+#' @seealso \code{\link{checkSets}}
+#' @keywords misc
 nSets = function(multiData, ...) {
   size = checkSets(multiData, ...)
   size$nSets

@@ -51,15 +51,6 @@ text rows should appear.}
 
 \item{cex.rowText}{character expansion factor for text rows (if given).}
 
-\item{order}{A vector giving the order of the objects. Must have the same
-length as \code{colors} if \code{colors} is a vector, or as the number of
-rows if \code{colors} is a matrix or data frame.}
-
-\item{startAt}{A numeric value indicating where in relationship to the left
-edge of the plot the center of the first rectangle should be. Useful values
-are 0 if ploting color under a dendrogram, and 0.5 if ploting colors under a
-barplot.}
-
 \item{\dots}{Other parameters to be passed on to the plotting method (such
 as \code{main} for the main title etc).}
 }

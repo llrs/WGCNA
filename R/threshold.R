@@ -36,8 +36,6 @@
 #' samples and columns to genes.
 #' @param dataIsExpr logical: should the data be interpreted as expression (or
 #' other numeric) data, or as a similarity matrix of network nodes?
-#' @param similarity similarity matrix: a symmetric matrix with entries between
-#' -1 and 1 and unit diagonal.
 #' @param RsquaredCut desired minimum scale free topology fitting index
 #' \eqn{R^2}.
 #' @param cutVector a vector of hard threshold cuts for which the scale free
@@ -167,18 +165,6 @@ pickHardThreshold <- function(data, dataIsExpr = TRUE, RsquaredCut = 0.85,
 # PL: a rewrite that splits the data into a few blocks.
 # SH: more netowkr concepts added.
 # PL: re - written for parallel processing
-#-------------------------------------------------------------------------------
-#
-# adjacency
-#
-#-------------------------------------------------------------------------------
-# Computes the adjacency from the expression data: takes cor, transforms it as
-# appropriate and possibly adds a sign if requested. No subselection on datExpr
-# is performed.
-# A slighly reworked version that assumes one wants the adjacency matrix of data
-# with itself or a subset. The data are given only once, and an additional
-# selection index for columns is given.
-# Caution: no checking of selectCols validity is performed.
 
 
 
@@ -201,12 +187,11 @@ pickHardThreshold <- function(data, dataIsExpr = TRUE, RsquaredCut = 0.85,
 #' processing and set up the parallel calculation back-end.
 #'
 #' @aliases pickSoftThreshold pickSoftThreshold.fromSimilarity
+#' @rdname pickSoftThreshold
 #' @param data expression data in a matrix or data frame. Rows correspond to
 #' samples and columns to genes.
 #' @param dataIsExpr logical: should the data be interpreted as expression (or
 #' other numeric) data, or as a similarity matrix of network nodes?
-#' @param similarity similarity matrix: a symmetric matrix with entries between
-#' -1 and 1 and unit diagonal.
 #' @param RsquaredCut desired minimum scale free topology fitting index
 #' \eqn{R^2}.
 #' @param powerVector a vector of soft thresholding powers for which the scale

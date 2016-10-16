@@ -52,14 +52,6 @@ diagnostic messages.}
 messages. Each unit equals two spaces.}
 
 \item{\dots}{Other arguments to the function \code{FUN}.}
-
-\item{mdaRowIndex}{If given, must be a list of the same length as
-\code{multiData}. Each element must be a logical or numeric vector that
-specifies rows in each \code{data} component to select before applying the
-function.}
-
-\item{mdaColIndex}{A logical or numeric vector that specifies columns in
-each \code{data} component to select before applying the function.}
 }
 \value{
 A multiData structure containing the results of the supplied

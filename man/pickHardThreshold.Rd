@@ -39,9 +39,6 @@ in adjacency calculation.}
 
 \item{corOptions}{further options to the correlation function specified in
 \code{corFnc}.}
-
-\item{similarity}{similarity matrix: a symmetric matrix with entries between
--1 and 1 and unit diagonal.}
 }
 \value{
 A list with the following components:

@@ -1,9 +1,9 @@
 #' @rdname softConnectivity
-#' @rdname softConnectivity
 #' @export
 softConnectivity.fromSimilarity <- function(similarity, type = "unsigned",
                                             power = if (type ==  "signed") 15 else 6,
-                                            blockSize = 1500, verbose = 2, indent = 0) {
+                                            blockSize = 1500, verbose = 2,
+                                            indent = 0) {
     checkSimilarity(similarity)
     softConnectivity(similarity, corFnc = "I", corOptions = "",
                      type = type, power = power,
@@ -26,8 +26,6 @@ softConnectivity.fromSimilarity <- function(similarity, type = "unsigned",
 #' matrix and for each node calculates its connectivity, that is the sum of the
 #' adjacency to the other nodes.
 #'
-#'
-#' @aliases softConnectivity softConnectivity.fromSimilarity
 #' @param datExpr a data frame containing the expression data, with rows
 #' corresponding to samples and columns to genes.
 #' @param similarity a similarity matrix: a square symmetric matrix with
@@ -62,36 +60,34 @@ softConnectivity.fromSimilarity <- function(similarity, type = "unsigned",
 #' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
 #' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 #' @keywords misc
-#' @export softConnectivity
+#' @export
 softConnectivity <- function(datExpr,
                              corFnc = "cor", corOptions = "use = 'p'",
                              type = "unsigned",
                              power = if (type == "signed") 15 else 6,
                              blockSize = 1500, minNSamples = NULL,
-                             verbose = 2, indent = 0)
-{
+                             verbose = 2, indent = 0) {
     spaces = indentSpaces(indent)
     nGenes = dim(datExpr)[[2]]
 
     if (blockSize * nGenes > .largestBlockSize) {
         blockSize = as.integer(.largestBlockSize/nGenes)}
     nSamples = dim(datExpr)[[1]]
-    if (is.null(minNSamples))
-    {
+    if (is.null(minNSamples)) {
         minNSamples = max(..minNSamples, nSamples/3)
     }
 
     if (nGenes<..minNGenes | nSamples<minNSamples)
-        stop(paste("Error: Something seems to be wrong. \n",
-                   "   Make sure that the input data frame has genes as rows and array
+        stop(paste("Something seems to be wrong. \n",
+                   "Make sure that the input data frame has genes as rows and array
                    samples as columns.\n",
                    "   Alternatively, there seem to be fewer than", ..minNGenes,
                    "genes or fewer than",
                    minNSamples, "samples."))
-    if (nGenes<nSamples)
+    if (nGenes<nSamples) {
         printFlush("Warning: There are fewer genes than samples in the
                    function softConnectivity. Maybe you should transpose the data?")
-
+        }
 
     k = rep(NA, nGenes)
     start = 1
@@ -103,8 +99,7 @@ softConnectivity <- function(datExpr,
         cat(paste(spaces, "..calculating connectivities.."))
         pind = initProgInd()
     }
-    while (start < nGenes)
-    {
+    while (start < nGenes) {
         end = min(start + blockSize - 1, nGenes)
         index1 = start:end
         ad1 = adjacency(datExpr, index1, power = power, type = type,
@@ -117,7 +112,9 @@ softConnectivity <- function(datExpr,
         if (verbose > 0) pind = updateProgInd(end/nGenes, pind)
         start = end + 1
     }
-    if (verbose > 0) printFlush("")
+    if (verbose > 0) {
+        printFlush("")
+    }
     k
 } # end of function
 
@@ -132,13 +129,53 @@ softConnectivity <- function(datExpr,
 #' within the same module. Optionally, the connectivities can be scaled by the
 #' maximum connectivy in each module.
 #'
-#' @aliases intramodularConnectivity intramodularConnectivity.fromExpr
 #' @param adjMat adjacency matrix, a square, symmetric matrix with entries
 #' between 0 and 1.
 #' @param colors module labels. A vector of length \code{ncol(adjMat)} giving a
 #' module label for each gene (node) of the network.
 #' @param scaleByMax logical: should intramodular connectivities be scaled by
 #' the maximum IM connectivity in each module?
+#' @return If input \code{getWholeNetworkConnectivity} is \code{TRUE}, a data
+#' frame with 4 columns giving the total connectivity, intramodular
+#' connectivity, extra-modular connectivity, and the difference of the intra-
+#' and extra-modular connectivities for all genes; otherwise a vector of
+#' intramodular connectivities,
+#' @author Steve Horvath and Peter Langfelder
+#' @seealso \code{\link{adjacency}}
+#' @references Dong J, Horvath S (2007) Understanding Network Concepts in
+#' Modules, BMC Systems Biology 2007, 1:24
+#' @keywords misc
+intramodularConnectivity <- function(adjMat, colors, scaleByMax = FALSE) {
+    if (nrow(adjMat) != ncol(adjMat))
+        stop("'adjMat' is not a square matrix.")
+    if (nrow(adjMat) != length(colors))
+        stop("Dimensions of 'adjMat' and length of 'colors' differ.")
+    nNodes = length(colors)
+    colorLevels = levels(factor(colors))
+    nLevels = length(colorLevels)
+    kWithin = rep(- 666, nNodes)
+    diag(adjMat) = 0
+    for (i in c(1:nLevels)) {
+        rest1 = colors == colorLevels[i]
+        if (sum(rest1) <3) {
+            kWithin[rest1] = 0
+        } else {
+            kWithin[rest1] = apply(adjMat[rest1, rest1], 2, sum, na.rm = TRUE)
+            if (scaleByMax) {
+                kWithin[rest1] = kWithin[rest1]/max(kWithin[rest1])
+            }
+        }
+    }
+    kTotal = apply(adjMat, 2, sum, na.rm = TRUE)
+    kOut = kTotal - kWithin
+    if (scaleByMax) {
+        kOut = rep(NA, nNodes)
+    }
+    kDiff = kWithin - kOut
+    data.frame(kTotal, kWithin, kOut, kDiff)
+}
+
+#' @rdname intramodularConnectivity
 #' @param datExpr data frame containing expression data. Columns correspond to
 #' genes and rows to samples.
 #' @param corFnc character string specifying the function to be used to
@@ -166,43 +203,7 @@ softConnectivity <- function(datExpr,
 #' @param getWholeNetworkConnectivity logical: should whole-network
 #' connectivity be computed as well? For large networks, this can be quite
 #' time-consuming.
-#' @return If input \code{getWholeNetworkConnectivity} is \code{TRUE}, a data
-#' frame with 4 columns giving the total connectivity, intramodular
-#' connectivity, extra-modular connectivity, and the difference of the intra-
-#' and extra-modular connectivities for all genes; otherwise a vector of
-#' intramodular connectivities,
-#' @author Steve Horvath and Peter Langfelder
-#' @seealso \code{\link{adjacency}}
-#' @references Dong J, Horvath S (2007) Understanding Network Concepts in
-#' Modules, BMC Systems Biology 2007, 1:24
-#' @keywords misc
-intramodularConnectivity <- function(adjMat, colors, scaleByMax = FALSE) {
-    if (nrow(adjMat) != ncol(adjMat))
-        stop("'adjMat' is not a square matrix.")
-    if (nrow(adjMat) != length(colors))
-        stop("Dimensions of 'adjMat' and length of 'colors' differ.")
-    nNodes = length(colors)
-    colorLevels = levels(factor(colors))
-    nLevels = length(colorLevels)
-    kWithin = rep(- 666, nNodes)
-    diag(adjMat) = 0
-    for (i in c(1:nLevels)) {
-        rest1 = colors == colorLevels[i]
-        if (sum(rest1) <3) {
-            kWithin[rest1] = 0
-        } else {
-            kWithin[rest1] = apply(adjMat[rest1, rest1], 2, sum, na.rm = TRUE)
-            if (scaleByMax) kWithin[rest1] = kWithin[rest1]/max(kWithin[rest1])
-        }
-    }
-    kTotal = apply(adjMat, 2, sum, na.rm = TRUE)
-    kOut = kTotal - kWithin
-    if (scaleByMax) kOut = rep(NA, nNodes)
-    kDiff = kWithin - kOut
-    data.frame(kTotal, kWithin, kOut, kDiff)
-}
-
-
+#' @export
 intramodularConnectivity.fromExpr <- function(datExpr, colors,
                                               corFnc = "cor", corOptions = "use = 'p'",
                                               distFnc = "dist",
@@ -221,25 +222,30 @@ intramodularConnectivity.fromExpr <- function(datExpr, colors,
     colorLevels = colorLevels[!colorLevels %in% ignoreColors]
     nLevels = length(colorLevels)
     kWithin = rep(NA, nNodes)
-    for (i in c(1:nLevels))
-    {
+    for (i in c(1:nLevels)) {
         rest1 = colors == colorLevels[i]
         if (sum(rest1) <3) {
             kWithin[rest1] = 0
         } else {
-            adjMat = adjacency(datExpr[, rest1], type = networkType, power = power,
+            adjMat = adjacency(datExpr[, rest1], type = networkType,
+                               power = power,
                                corFnc = corFnc, corOptions = corOptions,
                                distFnc = distFnc, distOptions = distOptions)
             kWithin[rest1] = colSums(adjMat, na.rm = TRUE) - 1
-            if (scaleByMax) kWithin[rest1] = kWithin[rest1]/max(kWithin[rest1],
-                                                                na.rm = TRUE)
+            if (scaleByMax) {
+                kWithin[rest1] = kWithin[rest1]/max(
+                    kWithin[rest1], na.rm = TRUE)
+            }
         }
     }
     if (getWholeNetworkConnectivity) {
-        kTotal = softConnectivity(datExpr, corFnc = corFnc, corOptions = corOptions,
+        kTotal = softConnectivity(datExpr, corFnc = corFnc,
+                                  corOptions = corOptions,
                                   type = networkType, power = power)
         kOut = kTotal - kWithin
-        if (scaleByMax) kOut = rep(NA, nNodes)
+        if (scaleByMax) {
+            kOut = rep(NA, nNodes)
+        }
         kDiff = kWithin - kOut
         data.frame(kTotal, kWithin, kOut, kDiff)
     } else {

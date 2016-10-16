@@ -47,21 +47,6 @@ moduleColor.getMEprefix <- function() {
 # The theoretical underpinnings are described in Horvath, Dong, Yip (2005)
 # http://www.genetics.ucla.edu/labs/horvath/ModuleConformity/
 # This requires the R library impute
-#' @rdname moduleEigengenes
-#' @name moduleEigengenes
-#' @title Calculate module eigengenes
-#' @description
-#' Calculates module eigengenes (1st principal component) of modules in a given
-#' single dataset.
-#' @inheritParams adjacency
-#' @param align Controls whether eigengenes, whose orientation is undetermined,
-#' should be aligned with average expression (align = "along average", the
-#' default) or left as they are (align = ""). Any other value will trigger an
-#' error.
-#' @param nPc
-#'
-
-
 
 #' Calculate module eigengenes.
 #'
@@ -92,7 +77,7 @@ moduleColor.getMEprefix <- function() {
 #' calculation to fail. In fact such a failure signals there likely is
 #' something seriously wrong with the data.
 #'
-#' @param expr Expression data for a single set in the form of a data frame
+#' @param datExpr Expression data for a single set in the form of a data frame
 #' where rows are samples and columns are genes (probes).
 #' @param colors A vector of the same length as the number of probes in
 #' \code{expr}, giving module color for all probes (genes). Color \code{"grey"}
@@ -1081,10 +1066,11 @@ consensusMEDissimilarity <-
                                       consensusQuantile = 0,
                                       useAbs = FALSE,
                                       greyMEname = "ME0") {
-    nSets = checkSets(multiMEs)$nSets
-    useMEs = c(1:ncol(multiMEs[[1]]$data))[names(multiMEs[[1]]$data) != greyMEname]
-    useNames = names(multiMEs[[1]]$data)[useMEs]
-    nUseMEs = length(useMEs)
+    nSets <- checkSets(multiMEs)$nSets
+    init <- multiMEs[[1]]$data
+    useMEs <- c(1:ncol(init))[names(init) != greyMEname]
+    useNames <- names(init)[useMEs]
+    nUseMEs <- length(useMEs)
     #  if (nUseMEs<2)
     #    stop("Something is wrong: there are two or more proper modules,
     #    but less than two proper",
@@ -1093,18 +1079,18 @@ consensusMEDissimilarity <-
     #         "are correct.")
 
     if (is.null(useSets)) {
-        useSets = c(1:nSets)
+        useSets <- c(1:nSets)
     }
-    nUseSets = length(useSets)
-    MEDiss = array(NA, dim = c(nUseMEs, nUseMEs, nUseSets))
+    nUseSets <- length(useSets)
+    MEDiss <- array(NA, dim = c(nUseMEs, nUseMEs, nUseSets))
     for (set in useSets) {
-        corOptions$x = multiMEs[[set]]$data[, useMEs]
+        corOptions$x <- multiMEs[[set]]$data[, useMEs]
         if (useAbs) {
-            diss = 1 - abs(do.call(corFnc, corOptions))
+            diss <- 1 - abs(do.call(corFnc, corOptions))
         } else {
-            diss = 1 - do.call(corFnc, corOptions)
+            diss <- 1 - do.call(corFnc, corOptions)
         }
-        MEDiss[, , set] = diss
+        MEDiss[, , set] <- diss
     }
 
     if (equalizeQuantiles) {
@@ -1115,13 +1101,13 @@ consensusMEDissimilarity <-
         normalized <- .equalizeQuantiles(distMat, summaryType = quantileSummary)
         MEDiss <- apply(normalized, 2, .turnDistVectorIntoMatrix,
                         size = nUseMEs, Diag = FALSE, Upper = FALSE,
-                        diagValue = 0
-        )
+                        diagValue = 0)
     }
 
     ConsDiss <- apply(MEDiss, c(1:2), quantile, probs = 1 - consensusQuantile,
                       names = FALSE, na.rm = TRUE)
-    colnames(ConsDiss) <- rownames(ConsDiss) = useNames
+    colnames(ConsDiss) <- useNames
+    rownames(ConsDiss) <- useNames
     ConsDiss
 }
 
@@ -2969,9 +2955,6 @@ cutreeStaticColor <-
 #' section.
 #'
 #' @aliases plotColorUnderTree plotOrderedColors
-#' @param order A vector giving the order of the objects. Must have the same
-#' length as \code{colors} if \code{colors} is a vector, or as the number of
-#' rows if \code{colors} is a matrix or data frame.
 #' @param dendro A hierarchical clustering dendrogram such one returned by
 #' \code{\link{hclust}}.
 #' @param colors Coloring of objects on the dendrogram. Either a vector (one
@@ -3001,10 +2984,6 @@ cutreeStaticColor <-
 #' @param cex.rowLabels Font size scale factor for the row labels. See
 #' \code{\link[graphics]{par}}.
 #' @param cex.rowText character expansion factor for text rows (if given).
-#' @param startAt A numeric value indicating where in relationship to the left
-#' edge of the plot the center of the first rectangle should be. Useful values
-#' are 0 if ploting color under a dendrogram, and 0.5 if ploting colors under a
-#' barplot.
 #' @param \dots Other parameters to be passed on to the plotting method (such
 #' as \code{main} for the main title etc).
 #' @return None.
@@ -4841,6 +4820,9 @@ nearestNeighborConnectivityMS <-
 #' Progress indicators
 #'
 #' Describes how much/how long does it takes
+#' @param leadStr Leading characters.
+#' @param trailStr Last characters.
+#' @param quiet Logical: Run it in interactive mode or not?.
 #' @export
 initProgInd <-function(leadStr = "..", trailStr = "", quiet = !interactive()) {
         oldStr = " "

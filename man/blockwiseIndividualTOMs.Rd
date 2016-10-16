@@ -26,8 +26,8 @@ variance? See details.}
 
 \item{blocks}{optional specification of blocks in which hierarchical
 clustering and module detection should be performed. If given, must be a
-numeric vector with one entry per gene of \code{multiExpr} giving the number
-of the block to which the corresponding gene belongs.}
+numeric vector with one entry per column (gene) of \code{exprData} giving
+the number of the block to which the corresponding gene belongs.}
 
 \item{maxBlockSize}{integer giving maximum block size for module detection.
 Ignored if \code{blocks} above is non-NULL. Otherwise, if the number of
@@ -39,9 +39,7 @@ penalized for exceeding the maximum size. Set to a lrge number or \code{Inf}
 if not exceeding maximum block size is very important.}
 
 \item{nPreclusteringCenters}{number of centers for pre-clustering. Larger
-numbers typically results in better but slower pre-clustering. The default
-is \code{as.integer(min(nGenes/20, 100*nGenes/preferredSize))} and is an
-attempt to arrive at a reasonable number given the resources available.}
+numbers typically results in better but slower pre-clustering.}
 
 \item{randomSeed}{integer to be used as seed for the random number generator
 before the function starts. If a current seed exists, it is saved and
@@ -52,7 +50,7 @@ restore the seed.}
 Allowed values are (unique abbreviations of) \code{"pearson"} and
 \code{"bicor"}, corresponding to Pearson and bidweight midcorrelation,
 respectively. Missing values are handled using the
-\code{pariwise.complete.obs} option.}
+\code{pairwise.complete.obs} option.}
 
 \item{maxPOutliers}{only used for \code{corType=="bicor"}. Specifies the
 maximum percentile of data that can be considered outliers on either side of
@@ -71,57 +69,47 @@ missing data in the calculation of correlations. See details.}
 should revert to Pearson when median absolute deviation (mad) is zero.
 Recongnized values are (abbreviations of) \code{"none", "individual",
 "all"}. If set to \code{"none"}, zero mad will result in \code{NA} for the
-corresponding correlation. If set to \code{"individual"}, Pearson
-calculation will be used only for columns that have zero mad. If set to
+corresponding correlation.  If set to \code{"individual"}, Pearson
+calculation will be used only for columns that have zero mad.  If set to
 \code{"all"}, the presence of a single zero mad will cause the whole
 variable to be treated in Pearson correlation manner (as if the
 corresponding \code{robust} option was set to \code{FALSE}). Has no effect
-for Pearson correlation. See \code{\link{bicor}}.}
+for Pearson correlation.  See \code{\link{bicor}}.}
 
 \item{cosineCorrelation}{logical: should the cosine version of the
 correlation calculation be used? The cosine calculation differs from the
 standard one in that it does not subtract the mean.}
 
-\item{power}{soft-thresholding power for netwoek construction.}
+\item{power}{Soft thresholding power, integer used in the function of the
+network type.}
 
 \item{networkType}{network type. Allowed values are (unique abbreviations
 of) \code{"unsigned"}, \code{"signed"}, \code{"signed hybrid"}. See
 \code{\link{adjacency}}.}
 
-\item{checkPower}{logical: should basic sanity check be performed on the
-supplied \code{power}? If you would like to experiment with unusual powers,
-set the argument to \code{FALSE} and proceed with caution.}
-
-\item{replaceMissingAdjacencies}{logical: should missing values in
-calculated adjacency be replaced by 0?}
+\item{replaceMissingAdjacencies}{logical: should missing values in the
+calculation of adjacency be replaced by 0?}
 
 \item{TOMType}{one of \code{"none"}, \code{"unsigned"}, \code{"signed"}. If
 \code{"none"}, adjacency will be used for clustering. If \code{"unsigned"},
 the standard TOM will be used (more generally, TOM function will receive the
 adjacency as input). If \code{"signed"}, TOM will keep track of the sign of
-correlations between neighbors. Note that the \code{"unsigned"} vs.
-\code{"signed"} distinction is only relevant when \code{networkType} is
-\code{"unsigned"}. When \code{networkType} is \code{"signed"} or
-\code{"signed hybrid"}, there is no difference between
-\code{TOMType="signed"} and \code{TOMType="unsigned". }}
+correlations between neighbors.}
 
 \item{TOMDenom}{a character string specifying the TOM variant to be used.
 Recognized values are \code{"min"} giving the standard TOM described in
 Zhang and Horvath (2005), and \code{"mean"} in which the \code{min} function
 in the denominator is replaced by \code{mean}. The \code{"mean"} may produce
-better results in certain special situations but at this time should be
-considered experimental.}
+better results but at this time should be considered experimental.}
 
-\item{saveTOMs}{logical: should calculated TOMs be saved to disk
-(\code{TRUE}) or returned in the return value (\code{FALSE})? Returning
-calculated TOMs via the return value ay be more convenient bt not always
-feasible if the matrices are too big to fit all in memory at the same time.}
+\item{saveTOMs}{logical: should the consensus topological overlap matrices
+for each block be saved and returned?}
 
 \item{nThreads}{non-negative integer specifying the number of parallel
 threads to be used by certain parts of correlation calculations. This option
 only has an effect on systems on which a POSIX thread library is available
-(which currently includes Linux and Mac OSX, but excludes Windows). If zero,
-the number of online processors will be used if it can be determined
+(which currently includes Linux and Mac OSX, but excludes Windows).  If
+zero, the number of online processors will be used if it can be determined
 dynamically, otherwise correlation calculations will use 2 threads.}
 
 \item{verbose}{integer level of verbosity. Zero means silent, higher values
@@ -129,12 +117,6 @@ make the output progressively more and more verbose.}
 
 \item{indent}{indentation for diagnostic messages. Zero means no
 indentation, each unit adds two spaces.}
-
-\item{multiData}{vector of lists; in each list there must be a component
-named \code{data} whose content is a matrix or dataframe or array of
-dimension 2.}
-
-\item{\dots}{Other arguments to function \code{\link{checkSets}}.}
 }
 \value{
 A list with the following components:
@@ -196,9 +178,6 @@ type. }
 \item{nSets}{number of sets in input data.}
 
 \item{setNames}{the \code{names} attribute of input \code{multiExpr}.}
-
-A single integer that equals the number of sets given in the input
-\code{multiData}.
 }
 \description{
 Calculates topological overlaps in the given (expression) data. If the
@@ -227,8 +206,6 @@ that returning all matrices via the return value will be impossible.
 }
 \author{
 Peter Langfelder
-
-Peter Langfelder
 }
 \references{
 For a general discussion of the weighted network formalism, see
@@ -245,23 +222,6 @@ network analysis".  BMC Bioinformatics 2008, 9:559
 }
 \seealso{
 \code{\link{blockwiseConsensusModules}}
-
-\code{\link{checkSets}}
 }
-\keyword{A}
-\keyword{Number}
-\keyword{a}
-\keyword{convenience}
-\keyword{function}
-\keyword{in}
 \keyword{misc}
-\keyword{multi-set}
-\keyword{number}
-\keyword{of}
-\keyword{returns}
-\keyword{sets}
-\keyword{that}
-\keyword{the}
-\keyword{variable}
-\keyword{variable.}
 
