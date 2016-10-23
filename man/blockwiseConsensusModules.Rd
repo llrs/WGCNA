@@ -143,6 +143,14 @@ better results but at this time should be considered experimental.}
 \item{saveIndividualTOMs}{logical: should individual TOMs be saved to disk
 for later use?.}
 
+\item{individualTOMFileNames}{character string giving the file names to save
+individual TOMs into. The following tags should be used to make the file
+names unique for each set and block: \code{\%s} will be replaced by the set
+number; \code{\%N} will be replaced by the set name (taken from
+\code{names(multiExpr)}) if it exists, otherwise by set number; \code{\%b}
+will be replaced by the block number. If the file names turn out to be
+non-unique, an error will be generated.}
+
 \item{networkCalibration}{network calibration method. One of "single
 quantile", "full quantile", "none" (or a unique abbreviation of one of
 them).}
@@ -177,6 +185,13 @@ is \code{TRUE}.}
 
 \item{saveConsensusTOMs}{logical: should the consensus topological overlap
 matrices for each block be saved and returned?.}
+
+\item{consensusTOMFileNames}{character string containing the file namefiles
+containing the consensus topological overlaps. The tag \code{\%b} will be
+replaced by the block number. If the resulting file names are non-unique
+(for example, because the user gives a file name without a \code{\%b} tag),
+an error will be generated. These files are standard R data files and can be
+loaded using the \code{\link{load}} function.}
 
 \item{useDiskCache}{should calculated network similarities in individual
 sets be temporarilly saved to disk? Saving to disk is somewhat slower than

@@ -1,23 +1,9 @@
-# Categories of functions:
-# . network construction (including connectivity calculation)
-# . module detection
-# . gene screening
-# . data simulation
-# . general statistical functions
-# . visualization
+# A collection of functions
 
-
-
-#-------------------------------------------------------------------------------
-#
-# Overall options and settings for the package
-#
-#-------------------------------------------------------------------------------
+# moduleColor.getMEprefix ####
 
 .moduleColorOptions = list(MEprefix = "ME")
 
-
-# moduleColor.getMEprefix ####
 #' Get the prefix used to label module eigengenes.
 #'
 #' Returns the currently used prefix used to label module eigengenes.  When
@@ -185,357 +171,281 @@ moduleEigengenes <- function(datExpr, colors, impute = TRUE, nPC = 1,
                              subHubs = TRUE, trapErrors = FALSE,
                              returnValidOnly = trapErrors, softPower = 6,
                              scale = TRUE, verbose = 0, indent = 0) {
-        spaces = indentSpaces(indent)
+    spaces = indentSpaces(indent)
 
-        if (verbose == 1) {
-            printFlush(
-                paste(
-                    spaces,
-                    "moduleEigengenes: Calculating",
-                    nlevels(as.factor(colors)),
-                    "module eigengenes in given set."
-                )
-            )
-        }
-        if (is.null(datExpr)) {
-            stop("moduleEigengenes: Error: datExpr is NULL.")
-        }
-        if (is.null(colors)) {
-            stop("moduleEigengenes: Error: colors is NULL.")
-        }
-        if (is.null(dim(datExpr)) || length(dim(datExpr)) != 2)
-            stop("moduleEigengenes: Error: datExpr must be two - dimensional.")
+    if (verbose == 1) {
+        printFlush(spaces, " moduleEigengenes: Calculating ",
+                   nlevels(as.factor(colors)),
+                   " module eigengenes in given set.")
+    }
+    if (is.null(datExpr)) {
+        stop("moduleEigengenes: Error: datExpr is NULL.")
+    }
+    if (is.null(colors)) {
+        stop("moduleEigengenes: Error: colors is NULL.")
+    }
+    if (is.null(dim(datExpr)) || length(dim(datExpr)) != 2)
+        stop("moduleEigengenes: Error: datExpr must be two - dimensional.")
 
-        if (dim(datExpr)[2] != length(colors)) {
-            stop(
-                "moduleEigengenes: Error: ncol(datExpr) and length(colors)",
-                "must be equal (one color per gene)."
-            )
-        }
+    if (dim(datExpr)[2] != length(colors)) {
+        stop("moduleEigengenes: Error: ncol(datExpr) and length(colors)",
+             "must be equal (one color per gene).")
+    }
 
-        if (is.factor(colors)) {
-            nl = nlevels(colors)
-            nlDrop = nlevels(colors[, drop = TRUE])
-            if (nl > nlDrop)
-                stop(
-                    paste(
-                        "Argument 'colors' contains unused levels ",
-                        "(empty modules).",
-                        "Use colors[, drop = TRUE] to get rid of them."
-                    )
-                )
+    if (is.factor(colors)) {
+        nl = nlevels(colors)
+        nlDrop = nlevels(colors[, drop = TRUE])
+        if (nl > nlDrop) {
+            stop(paste("Argument 'colors' contains unused levels ",
+                       "(empty modules).",
+                       "Use colors[, drop = TRUE] to get rid of them."))
         }
+    }
 
-        if (softPower < 0) {
-            stop("softPower must be non - negative")
-        }
+    if (softPower < 0) {
+        stop("softPower must be non - negative")
+    }
 
-        alignRecognizedValues = c("", "along average")
-        if (!is.element(align, alignRecognizedValues)) {
-            stop(
-                paste(
-                    "ModulePrincipalComponents: Error:",
-                    "parameter align has an unrecognised value:",
-                    align,
-                    "; Recognized values are ",
-                    alignRecognizedValues
-                )
-            )
-        }
-
-        maxVarExplained = 10
-        if (nPC > maxVarExplained) {
-            warning(paste("Given nPC is too large. Will use value",
-                          maxVarExplained))
-        }
-
-        nVarExplained <- min(nPC, maxVarExplained)
-        modlevels <- levels(factor(colors))
-        if (excludeGrey) {
-            if (sum(as.character(modlevels) != as.character(grey)) > 0) {
-                modlevels <-
-                    modlevels[as.character(modlevels) != as.character(grey)]
-            } else {
-                stop(
-                    "Color levels are empty. Possible reason: ",
-                    "the only color is grey and grey module is excluded ",
-                    "from the calculation."
-                )
-            }
-        }
-        lml <- length(modlevels)
-        PrinComps <-
-            data.frame(matrix(nrow = dim(datExpr)[[1]], ncol = lml))
-        averExpr <-
-            data.frame(matrix(nrow = dim(datExpr)[[1]], ncol = lml))
-        varExpl <- data.frame(matrix(nrow = nVarExplained, ncol = lml))
-        validMEs <- rep(TRUE, lml)
-        validAEs <- rep(FALSE, lml)
-        isPC <- validMEs
-        isHub <- validAEs
-        validColors <- colors
-        names(PrinComps) <-
-            paste0(moduleColor.getMEprefix(), modlevels)
-        names(averExpr) <- paste0("AE", modlevels)
-        for (i in c(1:lml)) {
-            if (verbose > 1) {
-                printFlush(paste(
-                    spaces,
-                    "moduleEigengenes : Working on ME for module",
-                    modlevels[i]
-                ))
-            }
-            modulename <- modlevels[i]
-            restrict1 <-
-                as.character(colors) == as.character(modulename)
-            if (verbose > 2) {
-                printFlush(paste(spaces, " ...", sum(restrict1), "genes"))
-            }
-            datModule <- as.matrix(t(datExpr[, restrict1]))
-            n <- nrow(datModule)
-            p <- ncol(datModule)
-            pc <- try({
-                if (nrow(datModule) > 1 && impute) {
-                    seedSaved <- FALSE
-                    if (exists(".Random.seed")) {
-                        saved.seed <- .Random.seed
-                        seedSaved <- TRUE
-                    }
-                    if (any(is.na(datModule))) {
-                        if (verbose > 5) {
-                            printFlush(paste(spaces,
-                                             " ...imputing missing data"))
-                        }
-                        datModule <- impute.knn(datModule,
-                                                k = min(10,
-                                                        nrow(datModule) - 1))
-                        # some versions of impute.knn return a list and we
-                        # need the data component:
-                        try({
-                            if (!is.null(datModule$data)) {
-                                datModule <- datModule$data
-                            }
-                        }, silent <- TRUE)
-                    }
-                    # The <<- in the next line is extremely important.
-                    # Using = or <- will create a local variable of
-                    # the name .Random.seed and will leave the important global
-                    # .Random.seed untouched.
-                    if (seedSaved) {
-                        .Random.seed <<- saved.seed
-                    }
-                }
-
-                if (verbose > 5) {
-                    printFlush(paste(spaces, " ...scaling"))
-                }
-                if (scale) {
-                    datModule <- t(scale(t(datModule)))
-                }
-                if (verbose > 5) {
-                    printFlush(paste(spaces, " ...calculating SVD"))
-                }
-                svd1 <-
-                    svd(datModule,
-                        nu = min(n, p, nPC),
-                        nv = min(n, p, nPC))
-                # varExpl[, i] = (svd1$d[1:min(n, p,
-                # nVarExplained)])^2/sum(svd1$d^2)
-                if (verbose > 5) {
-                    printFlush(paste(spaces, " ...calculating PVE"))
-                }
-                veMat <-
-                    cor(svd1$v[, c(1:min(n, p, nVarExplained))],
-                        t(datModule), use = "p")
-                varExpl[c(1:min(n, p, nVarExplained)),
-                        i] <-  rowMeans(veMat ^ 2, na.rm = TRUE)
-                # this is the first principal component
-                svd1$v[, 1]
-            }, silent = TRUE)
-            if (class(pc) == 'try - error') {
-                if ((!subHubs) && (!trapErrors)) {
-                    stop(pc)
-                }
-                if (subHubs) {
-                    if (verbose > 0) {
-                        printFlush(
-                            paste(
-                                spaces,
-                                " ..principal component calculation for module",
-                                modulename,
-                                "failed with the following error:"
-                            )
-                        )
-                        printFlush(
-                            paste(
-                                spaces,
-                                "     ",
-                                pc,
-                                spaces,
-                                "..hub genes will be used instead of ",
-                                "principal components."
-                            )
-                        )
-                    }
-                    isPC[i] <- FALSE
-                    pc <- try({
-                        scaledExpr <- scale(t(datModule))
-                        covEx <- cov(scaledExpr, use = "p")
-                        covEx[!is.finite(covEx)] <- 0
-                        modAdj <- abs(covEx) ^ softPower
-                        kIM <- (rowMeans(modAdj, na.rm = TRUE)) ^ 3
-                        if (max(kIM, na.rm = TRUE) > 1) {
-                            kIM <- kIM - 1
-                        }
-                        kIM[is.na(kIM)] <- 0
-                        hub <- which.max(kIM)
-                        alignSign <- sign(covEx[, hub])
-                        alignSign[is.na(alignSign)] <- 0
-                        isHub[i] <- TRUE
-                        pcxMat <- scaledExpr  *
-                            matrix(
-                                kIM * alignSign,
-                                nrow = nrow(scaledExpr),
-                                ncol = ncol(scaledExpr),
-                                byrow = TRUE
-                            ) / sum(kIM)
-                        pcx <- rowMeans(pcxMat, na.rm = TRUE)
-                        varExpl[1, i] <- mean(cor(pcx, t(datModule),
-                                                  use = "p") ^ 2, na.rm = TRUE)
-                        pcx
-                    }, silent = TRUE)
-                }
-            }
-
-            if (class(pc) == 'try - error') {
-                if (!trapErrors) {
-                    stop(pc)
-                }
-                if (verbose > 0) {
-                    printFlush(
-                        paste(
-                            spaces,
-                            " ..ME calculation of module",
-                            modulename,
-                            "failed with the following error:"
-                        )
-                    )
-                    printFlush(
-                        paste(
-                            spaces,
-                            "     ",
-                            pc,
-                            spaces,
-                            " ..the offending module has been removed."
-                        )
-                    )
-                }
-                warning(
-                    paste(
-                        "Eigengene calculation of module",
-                        modulename,
-                        "failed with the following error \n     ",
-                        pc,
-                        "The offending module has been removed.\n"
-                    )
-                )
-                validMEs[i] <- FALSE
-                isPC[i] <- FALSE
-                isHub[i] <- FALSE
-                validColors[restrict1] <- grey
-            } else {
-                PrinComps[, i] <- pc
-                ae <- try({
-                    if (isPC[i]) {
-                        scaledExpr <- scale(t(datModule))
-                    }
-                    averExpr[, i] <-
-                        rowMeans(scaledExpr, na.rm = TRUE)
-                    if (align == "along average") {
-                        if (verbose > 4) {
-                            printFlush(
-                                paste(
-                                    spaces,
-                                    " .. aligning module eigengene",
-                                    "with average expression."
-                                )
-                            )
-                        }
-                        corAve <-
-                            cor(averExpr[, i], PrinComps[, i], use = "p")
-                        if (!is.finite(corAve)) {
-                            corAve <- 0
-                        }
-                        if (corAve < 0) {
-                            PrinComps[, i] <- -PrinComps[, i]
-                        }
-                    }
-                    0
-                }, silent = TRUE)
-                if (class(ae) == 'try - error')
-                {
-                    if (!trapErrors) {
-                        stop(ae)
-                    }
-                    if (verbose > 0) {
-                        printFlush(
-                            paste(
-                                spaces,
-                                " ..Average expression calculation of module",
-                                modulename,
-                                "failed with the following error:"
-                            )
-                        )
-                        printFlush(
-                            paste(
-                                spaces,
-                                "     ",
-                                ae,
-                                spaces,
-                                " ..the returned average expression vector will be invalid."
-                            )
-                        )
-                    }
-                    warning(
-                        paste(
-                            "Average expression calculation of module",
-                            modulename,
-                            "failed with the following error \n     ",
-                            ae,
-                            "The returned average expression vector will be invalid.\n"
-                        )
-                    )
-                }
-                validAEs[i] <- !(class(ae) == 'try - error')
-            }
-        }
-        allOK <- (sum(!validMEs) == 0)
-        if (returnValidOnly && sum(!validMEs) > 0) {
-            PrinComps <- PrinComps[, validMEs]
-            averExpr <- averExpr[, validMEs]
-            varExpl <- varExpl[, validMEs]
-            validMEs <- rep(TRUE, times = ncol(PrinComps))
-            isPC <- isPC[validMEs]
-            isHub <- isHub[validMEs]
-            validAEs <- validAEs[validMEs]
-        }
-        allPC <- (sum(!isPC) == 0)
-        allAEOK <- (sum(!validAEs) == 0)
-        list(
-            eigengenes = PrinComps,
-            averageExpr = averExpr,
-            varExplained = varExpl,
-            nPC = nPC,
-            validMEs = validMEs,
-            validColors = validColors,
-            allOK = allOK,
-            allPC = allPC,
-            isPC = isPC,
-            isHub = isHub,
-            validAEs = validAEs,
-            allAEOK = allAEOK
+    alignRecognizedValues = c("", "along average")
+    if (!is.element(align, alignRecognizedValues)) {
+        stop(paste("ModulePrincipalComponents: Error:",
+                   "parameter align has an unrecognised value:",
+                   align,
+                   "; Recognized values are ",
+                   alignRecognizedValues)
         )
     }
+
+    maxVarExplained = 10
+    if (nPC > maxVarExplained) {
+        warning(paste("Given nPC is too large. Will use value",
+                      maxVarExplained))
+    }
+
+    nVarExplained <- min(nPC, maxVarExplained)
+    modlevels <- levels(factor(colors))
+    if (excludeGrey) {
+        if (sum(as.character(modlevels) != as.character(grey)) > 0) {
+            modlevels <-
+                modlevels[as.character(modlevels) != as.character(grey)]
+        } else {
+            stop("Color levels are empty. Possible reason: ",
+                 "the only color is grey and grey module is excluded ",
+                 "from the calculation.")
+        }
+    }
+    lml <- length(modlevels)
+    PrinComps <- data.frame(matrix(nrow = dim(datExpr)[[1]], ncol = lml))
+    averExpr <- data.frame(matrix(nrow = dim(datExpr)[[1]], ncol = lml))
+    varExpl <- data.frame(matrix(nrow = nVarExplained, ncol = lml))
+    validMEs <- rep(TRUE, lml)
+    validAEs <- rep(FALSE, lml)
+    isPC <- validMEs
+    isHub <- validAEs
+    validColors <- colors
+    names(PrinComps) <- paste0(moduleColor.getMEprefix(), modlevels)
+    names(averExpr) <- paste0("AE", modlevels)
+    for (i in c(1:lml)) {
+        if (verbose > 1) {
+            printFlush(paste(spaces,
+                             "moduleEigengenes : Working on ME for module",
+                             modlevels[i]))
+        }
+        modulename <- modlevels[i]
+        restrict1 <- as.character(colors) == as.character(modulename)
+        if (verbose > 2) {
+            printFlush(paste(spaces, " ...", sum(restrict1), "genes"))
+        }
+        datModule <- as.matrix(t(datExpr[, restrict1]))
+        n <- nrow(datModule)
+        p <- ncol(datModule)
+        pc <- try({
+            if (nrow(datModule) > 1 && impute) {
+                seedSaved <- FALSE
+                if (exists(".Random.seed")) {
+                    saved.seed <- .Random.seed
+                    seedSaved <- TRUE
+                }
+                if (any(is.na(datModule))) {
+                    if (verbose > 5) {
+                        printFlush(paste(spaces,
+                                         " ...imputing missing data"))
+                    }
+                    datModule <- impute.knn(datModule,
+                                            k = min(10,
+                                                    nrow(datModule) - 1))
+                    # some versions of impute.knn return a list and we
+                    # need the data component:
+                    try({
+                        if (!is.null(datModule$data)) {
+                            datModule <- datModule$data
+                        }
+                    }, silent <- TRUE)
+                }
+                # The <<- in the next line is extremely important.
+                # Using = or <- will create a local variable of
+                # the name .Random.seed and will leave the important global
+                # .Random.seed untouched.
+                if (seedSaved) {
+                    .Random.seed <<- saved.seed
+                }
+            }
+
+            if (verbose > 5) {
+                printFlush(paste(spaces, " ...scaling"))
+            }
+            if (scale) {
+                datModule <- t(scale(t(datModule)))
+            }
+            if (verbose > 5) {
+                printFlush(paste(spaces, " ...calculating SVD"))
+            }
+            svd1 <- svd(datModule,
+                        nu = min(n, p, nPC),
+                        nv = min(n, p, nPC))
+            # varExpl[, i] = (svd1$d[1:min(n, p,
+            # nVarExplained)])^2/sum(svd1$d^2)
+            if (verbose > 5) {
+                printFlush(paste(spaces, " ...calculating PVE"))
+            }
+            veMat <- cor(svd1$v[, c(1:min(n, p, nVarExplained))],
+                         t(datModule), use = "p")
+            varExpl[c(1:min(n, p, nVarExplained)),
+                    i] <-  rowMeans(veMat ^ 2, na.rm = TRUE)
+            # this is the first principal component
+            svd1$v[, 1]
+        }, silent = TRUE)
+        if (class(pc) == 'try - error') {
+            if ((!subHubs) && (!trapErrors)) {
+                stop(pc)
+            }
+            if (subHubs) {
+                if (verbose > 0) {
+                    printFlush(
+                        paste(spaces,
+                              " ..principal component calculation for module",
+                              modulename, "failed with the following error:"))
+                    printFlush(paste(spaces, "     ", pc, spaces,
+                                     "..hub genes will be used instead of ",
+                                     "principal components."))
+                }
+                isPC[i] <- FALSE
+                pc <- try({
+                    scaledExpr <- scale(t(datModule))
+                    covEx <- cov(scaledExpr, use = "p")
+                    covEx[!is.finite(covEx)] <- 0
+                    modAdj <- abs(covEx) ^ softPower
+                    kIM <- (rowMeans(modAdj, na.rm = TRUE)) ^ 3
+                    if (max(kIM, na.rm = TRUE) > 1) {
+                        kIM <- kIM - 1
+                    }
+                    kIM[is.na(kIM)] <- 0
+                    hub <- which.max(kIM)
+                    alignSign <- sign(covEx[, hub])
+                    alignSign[is.na(alignSign)] <- 0
+                    isHub[i] <- TRUE
+                    pcxMat <- scaledExpr  *
+                        matrix(
+                            kIM * alignSign,
+                            nrow = nrow(scaledExpr),
+                            ncol = ncol(scaledExpr),
+                            byrow = TRUE
+                        ) / sum(kIM)
+                    pcx <- rowMeans(pcxMat, na.rm = TRUE)
+                    varExpl[1, i] <- mean(cor(pcx, t(datModule),
+                                              use = "p") ^ 2, na.rm = TRUE)
+                    pcx
+                }, silent = TRUE)
+            }
+        }
+
+        if (class(pc) == 'try - error') {
+            if (!trapErrors) {
+                stop(pc)
+            }
+            if (verbose > 0) {
+                printFlush(paste(spaces, " ..ME calculation of module",
+                                 modulename, "failed with the following error:"))
+                printFlush(paste(spaces, "     ", pc, spaces,
+                                 " ..the offending module has been removed."))
+            }
+            warning("Eigengene calculation of module ", modulename,
+                    " failed with the following error \n     ", pc,
+                    " The offending module has been removed.\n")
+validMEs[i] <- FALSE
+isPC[i] <- FALSE
+isHub[i] <- FALSE
+validColors[restrict1] <- grey
+        } else {
+            PrinComps[, i] <- pc
+            ae <- try({
+                if (isPC[i]) {
+                    scaledExpr <- scale(t(datModule))
+                }
+                averExpr[, i] <-
+                    rowMeans(scaledExpr, na.rm = TRUE)
+                if (align == "along average") {
+                    if (verbose > 4) {
+                        printFlush(paste(spaces,
+                                         " .. aligning module eigengene",
+                                         "with average expression."))
+                    }
+                    corAve <- cor(averExpr[, i], PrinComps[, i], use = "p")
+                    if (!is.finite(corAve)) {
+                        corAve <- 0
+                    }
+                    if (corAve < 0) {
+                        PrinComps[, i] <- -PrinComps[, i]
+                    }
+                }
+                0
+            }, silent = TRUE)
+            if (class(ae) == 'try - error') {
+                if (!trapErrors) {
+                    stop(ae)
+                }
+                if (verbose > 0) {
+                    printFlush(paste(spaces,
+                                     " ..Average expression calculation of module",
+                                     modulename, "failed with the following error:"))
+                    printFlush(paste(spaces, "     ", ae, spaces,
+                                     " ..the returned average expression",
+                                     "vector will be invalid."))
+                }
+                warning(paste("Average expression calculation of module",
+                              modulename,
+                              "failed with the following error \n     ", ae,
+                              "The returned average expression vector will",
+                              "be invalid.\n"))
+            }
+            validAEs[i] <- !(class(ae) == 'try - error')
+        }
+    }
+    allOK <- (sum(!validMEs) == 0)
+    if (returnValidOnly && sum(!validMEs) > 0) {
+        PrinComps <- PrinComps[, validMEs]
+        averExpr <- averExpr[, validMEs]
+        varExpl <- varExpl[, validMEs]
+        validMEs <- rep(TRUE, times = ncol(PrinComps))
+        isPC <- isPC[validMEs]
+        isHub <- isHub[validMEs]
+        validAEs <- validAEs[validMEs]
+    }
+    allPC <- (sum(!isPC) == 0)
+    allAEOK <- (sum(!validAEs) == 0)
+    list(eigengenes = PrinComps,
+         averageExpr = averExpr,
+         varExplained = varExpl,
+         nPC = nPC,
+         validMEs = validMEs,
+         validColors = validColors,
+         allOK = allOK,
+         allPC = allPC,
+         isPC = isPC,
+         isHub = isHub,
+         validAEs = validAEs,
+         allAEOK = allAEOK)
+}
 
 # removeGrey ####
 #' Removes the grey eigengene from a given collection of eigengenes.
@@ -664,38 +574,29 @@ orderMEs <- function(MEs,
     if ("eigengenes" %in% names(MEs)) {
         if (is.null(order)) {
             if (verbose > 0) {
-                printFlush(
-                    paste(
-                        spaces,
-                        "orderMEs: order not given, calculating ",
-                        "using given set",
-                        orderBy
-                    )
-                )
+                printFlush(paste(spaces,
+                                 "orderMEs: order not given, calculating ",
+                                 "using given set", orderBy))
             }
             corPC <- cor(MEs$eigengenes, use = "p")
             disPC <- 1 - corPC
-            order <-
-                .clustOrder(disPC, greyLast = greyLast, greyName = greyName)
+            order <- .clustOrder(disPC, greyLast = greyLast,
+                                 greyName = greyName)
         }
 
         if (length(order) != dim(MEs$eigengenes)[2]) {
             stop("orderMEs: given MEs and order have incompatible dimensions.")
         }
         orderedMEs <- MEs
-        orderedMEs$eigengenes <-
-            as.data.frame(MEs$eigengenes[, order])
-        colnames(orderedMEs$eigengenes) <-
-            colnames(MEs$eigengenes)[order]
+        orderedMEs$eigengenes <- as.data.frame(MEs$eigengenes[, order])
+        colnames(orderedMEs$eigengenes) <- colnames(MEs$eigengenes)[order]
         if (!is.null(MEs$averageExpr)) {
             orderedMEs$averageExpr <- as.data.frame(MEs$averageExpr[, order])
-            colnames(orderedMEs$averageExpr) <-
-                colnames(MEs$data)[order]
+            colnames(orderedMEs$averageExpr) <- colnames(MEs$data)[order]
         }
         if (!is.null(MEs$varExplained)) {
             orderedMEs$varExplained <- as.data.frame(MEs$varExplained[, order])
-            colnames(orderedMEs$varExplained) <-
-                colnames(MEs$data)[order]
+            colnames(orderedMEs$varExplained) <- colnames(MEs$data)[order]
         }
         return(orderedMEs)
     } else {
@@ -716,13 +617,9 @@ orderMEs <- function(MEs,
 
             if (is.null(order)) {
                 if (verbose > 0) {
-                    printFlush(
-                        paste(
-                            spaces,
+                    printFlush(paste(spaces,
                             "orderMEs: order not given, calculating using given set",
-                            orderBy
-                        )
-                    )
+                            orderBy))
                 }
                 corPC = cor(MEs[[orderBy]]$data, use = "p")
                 disPC = 1 - corPC
@@ -760,6 +657,9 @@ orderMEs <- function(MEs,
     }
 }
 
+
+# consensusOrderMEs ####
+
 .clustOrder <- function(distM,
                         greyLast = TRUE,
                         greyName = paste0(moduleColor.getMEprefix(), "grey")) {
@@ -794,12 +694,8 @@ orderMEs <- function(MEs,
         }
     }
     order
-
-    # print(paste("names:", names(distM), collapse = ", "))
-    # print(paste("order:", order, collapse = ", "))
 }
 
-# consensusOrderMEs ####
 #' Put close eigenvectors next to each other in several sets.
 #'
 #' Reorder given (eigen-)vectors such that similar ones (as measured by
@@ -1175,12 +1071,9 @@ fixDataStructure <- function(data, verbose = 0, indent = 0) {
     spaces = indentSpaces(indent)
     if ((class(data) != "list") || (class(data[[1]]) != "list")) {
         if (verbose > 0)
-            printFlush(
-                paste(
-                    spaces,
-                    "fixDataStructure: data is not a vector of lists: converting it into one."
-                )
-            )
+            printFlush(paste(spaces,
+                             "fixDataStructure: data is not a vector of lists:",
+                             "converting it into one."))
         x = data
         data = vector(mode = "list", length = 1)
         data[[1]] = list(data = x)
@@ -1190,15 +1083,6 @@ fixDataStructure <- function(data, verbose = 0, indent = 0) {
 }
 
 # checkSets ####
-.permissiveDim <- function(x) {
-    d = dim(x)
-    if (is.null(d))
-        return(c(length(x), 1))
-    return(d)
-}
-
-
-
 #' Check structure and retrieve sizes of a group of datasets.
 #'
 #' Checks whether given sets have the correct format and retrieves dimensions.
@@ -1251,16 +1135,16 @@ checkSets <- function(data, checkStructure = FALSE, useSets = NULL) {
             }
         } else {
             nSamples = vector(length = nSets)
-            nGenes = .permissiveDim(data[[useSets[1]]]$data)[2]
+            nGenes = dim(data[[useSets[1]]]$data)[2]
             for (set in useSets) {
-                if (nGenes != .permissiveDim(data[[set]]$data)[2]) {
+                if (nGenes != dim(data[[set]]$data)[2]) {
                     if (checkStructure) {
                         structureOK = FALSE
                     } else {
-                        stop("Incompatible number of genes in set 1 and ", set))
+                        stop("Incompatible number of genes in set 1 and ", set)
                     }
                 }
-                nSamples[set] = .permissiveDim(data[[set]]$data)[1]
+                nSamples[set] = dim(data[[set]]$data)[1]
             }
         }
 
@@ -1427,16 +1311,9 @@ multiSetMEs <- function(exprData,
                         align = "along average",
                         excludeGrey = FALSE,
                         grey = if (is.null(universalColors)) {
-                            if (is.numeric(colors))
-                                0
-                            else
-                                "grey"
-                        } else
-                            if (is.numeric(universalColors)) {
-                                0
-                            } else {
-                                "grey"
-                            },
+                            if (is.numeric(colors)) {0} else{"grey"}
+                        } else {
+                            if (is.numeric(universalColors)) {0} else {"grey"}},
                         subHubs = TRUE,
                         trapErrors = FALSE,
                         returnValidOnly = trapErrors,
@@ -1504,7 +1381,7 @@ multiSetMEs <- function(exprData,
         for (set in useSets) {
             if (verbose > 0) {
                 printFlush(spaces, "  Working on set", as.character(set),
-                           "..."))
+                           "...")
             }
             if (is.null(universalColors)) {
                 setColors = colors[useGenes, set]
@@ -1911,17 +1788,15 @@ mergeCloseModules <- function(# input data
 
             nOldMods = nlevels(as.factor(colors))
 
-            ConsDiss = .consensusMEDissimilarity(
-                MEs,
-                equalizeQuantiles = equalizeQuantiles,
-                quantileSummary = quantileSummary,
-                consensusQuantile = consensusQuantile,
-                useAbs = useAbs,
-                corFnc = corFnc,
-                corOptions = corOptions,
-                useSets = useSets,
-                greyMEname = greyMEname
-            )
+            ConsDiss = .consensusMEDissimilarity(MEs,
+                                                 equalizeQuantiles = equalizeQuantiles,
+                                                 quantileSummary = quantileSummary,
+                                                 consensusQuantile = consensusQuantile,
+                                                 useAbs = useAbs,
+                                                 corFnc = corFnc,
+                                                 corOptions = corOptions,
+                                                 useSets = useSets,
+                                                 greyMEname = greyMEname)
 
             Tree = fastcluster::hclust(as.dist(ConsDiss), method = "average")
             if (iteration == 1)
@@ -2551,7 +2426,7 @@ subsetTOM <- function(datExpr,
     TOM
 }
 
-
+# cutreeStatic ####
 #' Constant-height tree cut
 #'
 #' Module detection in hierarchical dendrograms using a constant-height tree
@@ -2583,7 +2458,7 @@ cutreeStatic <- function(dendro,
 }
 
 
-
+# cutreeStaticColor ####
 #' Constant height tree cut using color labels
 #'
 #' Cluster detection by a constant height cut of a hierarchical clustering
@@ -2609,16 +2484,12 @@ cutreeStatic <- function(dendro,
 #' constant-height branch cuts, \code{\link{standardColors}} to see the
 #' sequence of color labels that can be assigned.
 #' @keywords misc
-cutreeStaticColor <-
-    function(dendro,
-             cutHeight = 0.9,
-             minSize = 50) {
-        labels2colors(normalizeLabels(moduleNumber(dendro, cutHeight, minSize)))
+cutreeStaticColor <- function(dendro, cutHeight = 0.9, minSize = 50) {
+        labels2colors(normalizeLabels(moduleNumber(
+            dendro, cutHeight, minSize)))
     }
 
-
-
-
+# plotColorUnderTree ####
 #' Plot color rows in a given order, for example under a dendrogram
 #'
 #' Plot color rows encoding information about objects in a given order, for
@@ -2749,8 +2620,7 @@ plotOrderedColors <- function(order,
         axes = FALSE
     )
     charWidth = strwidth("W") / 2
-    if (!is.null(rowText))
-    {
+    if (!is.null(rowText)) {
         if (is.null(textPositions)) {
             textPositions = c(1:nColorRows)
         } else if (is.logical(textPositions)) {
@@ -2928,15 +2798,11 @@ plotOrderedColors <- function(order,
     }
 }
 
-#===============================================================================
+# plotClusterTreeSample ####
 # This function can be used to create an average linkage hierarchical
-# clustering tree
-# or the microarray samples. The rows of datExpr correspond to the samples and
-# the columns to the genes
+# clustering tree or the microarray samples. The rows of datExpr correspond to
+# the samples and the columns to the genes.
 # You can optionally input a quantitative microarray sample trait.
-
-
-
 #' Annotated clustering dendrogram of microarray samples
 #'
 #' This function plots an annotated clustering dendorgram of microarray
@@ -3005,8 +2871,7 @@ plotOrderedColors <- function(order,
 #' @seealso \code{\link[stats]{dist}}, \code{\link[stats]{hclust}},
 #' \code{\link{plotDendroAndColors}}
 #' @keywords hplot misc
-plotClusterTreeSamples <-
-    function(datExpr,
+plotClusterTreeSamples <- function(datExpr,
              y = NULL,
              traitLabels = NULL,
              yLabels = NULL,
@@ -3098,12 +2963,7 @@ plotClusterTreeSamples <-
         }
     }
 
-#===============================================================================
-# The function TOMplot creates a TOM plot
-# Inputs:  distance measure, hierarchical (hclust) object, color label = colors
-
-
-
+# TOMplot ####
 #' Graphical representation of the Topological Overlap Matrix
 #'
 #' Graphical representation of the Topological Overlap Matrix using a heatmap
@@ -3131,14 +2991,8 @@ plotClusterTreeSamples <-
 #' @author Steve Horvath and Peter Langfelder
 #' @seealso \code{\link{heatmap}}, the workhorse function doing the plotting.
 #' @keywords misc
-TOMplot <-
-    function(dissim,
-             dendro,
-             Colors = NULL,
-             ColorsLeft = Colors,
-             terrainColors = FALSE,
-             setLayout = TRUE,
-             ...) {
+TOMplot <- function(dissim, dendro, Colors = NULL, ColorsLeft = Colors,
+                    terrainColors = FALSE, setLayout = TRUE, ...) {
         if (is.null(Colors))
             Colors = rep("white", dim(as.matrix(dissim))[[1]])
         if (is.null(ColorsLeft))
@@ -3197,8 +3051,7 @@ TOMplot <-
         }
     }
 
-
-
+# plotNetworkHeatmap ####
 #' Network heatmap plot
 #'
 #' Network heatmap plot.
@@ -3229,13 +3082,9 @@ TOMplot <-
 #' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
 #' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 #' @keywords hplot
-plotNetworkHeatmap <-
-    function(datExpr,
-             plotGenes,
-             useTOM = TRUE,
-             power = 6 ,
-             networkType = "unsigned",
-             main = "Heatmap of the network") {
+plotNetworkHeatmap <- function(datExpr, plotGenes, useTOM = TRUE, power = 6 ,
+                               networkType = "unsigned",
+                               main = "Heatmap of the network") {
         match1 = match(plotGenes, names(data.frame(datExpr)))
         match1 = match1[!is.na(match1)]
         nGenes = length(match1)
@@ -3286,23 +3135,7 @@ plotNetworkHeatmap <-
         } # end of if (nGenes >  2)
     } # end of function
 
-################################################################################
-################################################################################
-# E) Relating a measure of gene significance to the modules
-################################################################################
-################################################################################
-
-#===============================================================================
-# The function ModuleEnrichment1 creates a bar plot that shows whether modules
-# are enriched with significant genes.
-# More specifically, it reports the mean gene significance for each module.
-# The gene significance can be a binary variable or a quantitative variable.
-# It also plots the 95% confidence interval of the mean
-# (CI = mean +/-  1.96 * standard error).
-# It also reports a Kruskal Wallis p-value.
-
-
-
+# plotModuleSigninficance ####
 #' Barplot of module significance
 #'
 #' Plot a barplot of gene significance.
@@ -3333,14 +3166,9 @@ plotNetworkHeatmap <-
 #' Dong J, Horvath S (2007) Understanding Network Concepts in Modules, BMC
 #' Systems Biology 2007, 1:24
 #' @keywords hplot misc
-plotModuleSignificance <-
-    function(geneSignificance,
-             colors,
-             boxplot = FALSE,
+plotModuleSignificance <- function(geneSignificance, colors, boxplot = FALSE,
              main = "Gene significance across modules, ",
-             ylab = "Gene Significance",
-             ...)
-    {
+             ylab = "Gene Significance", ...) {
         if (length(geneSignificance)  != length(colors))
             stop("Error: 'geneSignificance' and 'colors' do not have the same lengths")
         no.colors = length(names(table(colors)))
@@ -3379,6 +3207,7 @@ plotModuleSignificance <-
         }
     } # end of function
 
+# checkAdjMat ####
 #' Check adjacency matrix
 #'
 #' Checks a given matrix for properties that an adjacency matrix must satisfy.
@@ -3412,13 +3241,7 @@ checkAdjMat <- function(adjMat, min = 0, max = 1) {
         stop("some entries are not between", min, "and", max)
 }
 
-################################################################################
-################################################################################
-# G) Miscellaneous other functions, e.g. for computing the cluster coefficient.
-################################################################################
-################################################################################
-
-
+# signedKME ####
 # The function signedKME computes the module eigengene based connectivity.
 # Input: datExpr = a possibly very large gene expression data set where the rows
 # correspond to samples and the columns represent genes
@@ -3431,9 +3254,6 @@ checkAdjMat <- function(adjMat, min = 0, max = 1) {
 # By splitting the expression data into different blocks, the function can deal
 # with tens of thousands of gene expression data.
 # If there are many eigengenes (say hundreds) consider decreasing the block size
-
-
-
 #' Signed eigengene-based connectivity
 #'
 #' Calculation of (signed) eigengene-based connectivity, also known as module
@@ -3519,15 +3339,7 @@ signedKME <- function(datExpr,
     output
 } # end of function signedKME
 
-
-
-
-#===============================================================================
-# The function clusterCoef computes the cluster coefficients.
-# Input is an adjacency matrix
-
-
-
+# clusterCoef ####
 #' Clustering coefficient calculation
 #'
 #' This function calculates the clustering coefficients for all nodes in the
@@ -3570,13 +3382,7 @@ clusterCoef <- function(adjMat) {
     CChelp
 } # end of function
 
-
-
-#===============================================================================
-# The function addErrorBars  is used to create error bars in a barplot
-# usage: addErrorBars(as.vector(means), as.vector(stderrs), two.side = FALSE)
-
-
+# addErrorBars ####
 #' Add error bars to a barplot.
 #'
 #' This function adds error bars to an existing barplot.
@@ -3621,10 +3427,7 @@ addErrorBars <- function(means, errors, two.side = FALSE) {
     }
 }
 
-#===============================================================================
-# this function computes the standard error
-
-
+# stdErr ####
 #' Standard error of the mean of a given vector.
 #'
 #' Returns the standard error of the mean of a given vector. Missing values are
@@ -3692,6 +3495,7 @@ stdErr <- function(x) {
     text(0.5, 0.5, txt, cex = cex)
 }
 
+# dynamicMergeCut ####
 #' Threshold for module merging
 #'
 #' Calculate a suitable threshold for module merging based on the number of
@@ -3713,9 +3517,7 @@ stdErr <- function(x) {
 #' dynamicMergeCut(20)
 #' dynamicMergeCut(50)
 #' dynamicMergeCut(100)
-dynamicMergeCut <- function(n,
-                            mergeCor = .9,
-                            Zquantile = 2.35) {
+dynamicMergeCut <- function(n, mergeCor = .9, Zquantile = 2.35) {
     if (mergeCor > 1 |
         mergeCor < 0)
         stop("'mergeCor' must be between 0 and 1.")
@@ -3745,30 +3547,7 @@ dynamicMergeCut <- function(n,
     else
         mergethreshold
 }# end of function dynamicMergeCut
-
-
-
-#===============================================================================
-#
-# print.flush
-#
-#===============================================================================
-
-#print.flush <- function(...)
-#{
-#   printFlush(...)
-#}
-
-
-
-#===============================================================================
-#
-# Correlation p-value for multiple correlation values
-#
-#===============================================================================
-
-
-
+# corPvalueFisher ####
 #' Fisher's asymptotic p-value for correlation
 #'
 #' Calculates Fisher's asymptotic p-value for given correlations.
@@ -3795,11 +3574,7 @@ corPvalueFisher <- function(cor, nSamples, twoSided = TRUE) {
     }
 }
 
-# this function compute an asymptotic p-value for a given correlation (r) and
-# sample size (n). Needs a new name before we commit it to the package.
-
-
-
+# corPvalueStudent ####
 #' Student asymptotic p-value for correlation
 #'
 #' Calculates Student asymptotic p-value for given correlations.
@@ -3817,11 +3592,7 @@ corPvalueStudent <- function(cor, nSamples) {
     2 * pt(abs(T), nSamples - 2, lower.tail = FALSE)
 }
 
-
-################################################################################
-
-
-
+# propVarExplained ####
 #' Proportion of variance explained by eigengenes.
 #'
 #' This function calculates the proportion of variance of genes in each module
@@ -3901,15 +3672,7 @@ propVarExplained <- function(datExpr,
 }
 
 
-#===============================================================================
-#
-# addGrid
-#
-#===============================================================================
-# This function adds a horizontal grid to a plot
-
-
-
+# addGrid ####
 #' Add grid lines to an existing plot.
 #'
 #' This function adds horizontal and/or vertical grid lines to an existing
@@ -3932,11 +3695,8 @@ propVarExplained <- function(datExpr,
 #'   plot(c(1:10), c(1:10))
 #'   addGrid();
 #'
-addGrid <- function(linesPerTick = NULL,
-                    horiz = TRUE,
-                    vert = FALSE,
-                    col = "grey30",
-                    lty = 3) {
+addGrid <- function(linesPerTick = NULL, horiz = TRUE, vert = FALSE,
+                    col = "grey30", lty = 3) {
     box = par("usr")
     if (horiz) {
         ticks = par("yaxp")
@@ -3990,15 +3750,7 @@ addGrid <- function(linesPerTick = NULL,
     }
 }
 
-#-------------------------------------------------------------------------------
-#
-# Add vertical "guide" lines to a dendrogram to facilitate identification of
-# clusters with color bars
-#
-#-------------------------------------------------------------------------------
-
-
-
+# addGuidesLines ####
 #' Add vertical ``guide lines'' to a dendrogram plot
 #'
 #' Adds vertical ``guide lines'' to a dendrogram plot.
@@ -4018,14 +3770,8 @@ addGrid <- function(linesPerTick = NULL,
 #' guide lines and the merge heights of the corresponding objects.
 #' @author Peter Langfelder
 #' @keywords hplot
-addGuideLines <-
-    function(dendro,
-             all = FALSE,
-             count = 50,
-             positions = NULL,
-             col = "grey30",
-             lty = 3,
-             hang = 0) {
+addGuideLines <- function(dendro, all = FALSE, count = 50, positions = NULL,
+                          col = "grey30", lty = 3, hang = 0) {
         if (all) {
             positions = 1:(length(dendro$height) + 1)
         } else {
@@ -4057,19 +3803,7 @@ addGuideLines <-
         }
     }
 
-#-------------------------------------------------------------------------------
-#
-# nearestNeighborConnectivity
-#
-#-------------------------------------------------------------------------------
-# This function takes expression data (rows = samples, colummns = genes)
-# and the power exponent used in weighting the
-# correlations to get the network adjacency matrix, and returns an array of
-# dimensions nGenes * nSets containing the connectivities of each gene in each
-# subset.
-
-
-
+# nearestNeighborConnectivity ####
 #' Connectivity to a constant number of nearest neighbors
 #'
 #' Given expression data and basic network parameters, the function calculates
@@ -4113,20 +3847,18 @@ addGuideLines <-
 #' @author Peter Langfelder
 #' @seealso \code{\link{adjacency}}, \code{\link{softConnectivity}}
 #' @keywords misc
-nearestNeighborConnectivity <-
-    function(datExpr,
-             nNeighbors = 50,
-             power = 6,
-             type = "unsigned",
-             corFnc = "cor",
-             corOptions = "use = 'p'",
-             blockSize = 1000,
-             sampleLinks = NULL,
-             nLinks = 5000,
-             setSeed = 38457,
-             verbose = 1,
-             indent = 0)
-    {
+nearestNeighborConnectivity <- function(datExpr,
+                                        nNeighbors = 50,
+                                        power = 6,
+                                        type = "unsigned",
+                                        corFnc = "cor",
+                                        corOptions = "use = 'p'",
+                                        blockSize = 1000,
+                                        sampleLinks = NULL,
+                                        nLinks = 5000,
+                                        setSeed = 38457,
+                                        verbose = 1,
+                                        indent = 0) {
         spaces = indentSpaces(indent)
         nGenes = dim(datExpr)[2]
         nSamples = dim(datExpr)[1]
@@ -4266,20 +3998,7 @@ nearestNeighborConnectivity <-
     }
 
 
-#Try to merge this with the single - set function.
-#-------------------------------------------------------------------------------
-#
-# nearestNeighborConnectivityMS
-#
-#-------------------------------------------------------------------------------
-# This function takes expression data (rows = samples, colummns = genes) in the
-# multi-set format and the power exponent used in weighting the
-# correlations to get the network adjacency matrix, and returns an array of
-# dimensions nGenes * nSets containing the connectivities of each gene in each
-# subset.
-
-
-
+# nearestNeighbourConnectivityMS ####
 #' Connectivity to a constant number of nearest neighbors across multiple data
 #' sets
 #'
@@ -4326,178 +4045,172 @@ nearestNeighborConnectivity <-
 #' @seealso \code{\link{adjacency}}, \code{\link{softConnectivity}},
 #' \code{\link{nearestNeighborConnectivity}}
 #' @keywords misc
-nearestNeighborConnectivityMS <-
-    function(multiExpr,
-             nNeighbors = 50,
-             power = 6,
-             type = "unsigned",
-             corFnc = "cor",
-             corOptions = "use = 'p'",
-             blockSize = 1000,
-             sampleLinks = NULL,
-             nLinks = 5000,
-             setSeed = 36492,
-             verbose = 1,
-             indent = 0) {
-        spaces = indentSpaces(indent)
-        setsize = checkSets(multiExpr)
-        nGenes = setsize$nGenes
-        nSamples = setsize$nSamples
-        nSets = setsize$nSets
+nearestNeighborConnectivityMS <- function(multiExpr,
+                                          nNeighbors = 50,
+                                          power = 6,
+                                          type = "unsigned",
+                                          corFnc = "cor",
+                                          corOptions = "use = 'p'",
+                                          blockSize = 1000,
+                                          sampleLinks = NULL,
+                                          nLinks = 5000,
+                                          setSeed = 36492,
+                                          verbose = 1,
+                                          indent = 0) {
+    spaces = indentSpaces(indent)
+    setsize = checkSets(multiExpr)
+    nGenes = setsize$nGenes
+    nSamples = setsize$nSamples
+    nSets = setsize$nSets
 
-        if (is.null(sampleLinks)) {
-            sampleLinks = (nGenes > nLinks)
-        }
+    if (is.null(sampleLinks)) {
+        sampleLinks = (nGenes > nLinks)
+    }
 
-        if (sampleLinks)
-            nLinks = min(nLinks, nGenes)
-        else
-            nLinks = nGenes
+    if (sampleLinks)
+        nLinks = min(nLinks, nGenes)
+    else
+        nLinks = nGenes
 
-        #printFlush(paste("blockSize  = ", blockSize))
-        #printFlush(paste("nGenes  = ", nGenes))
-        #printFlush(paste(".largestBlockSize  = ", .largestBlockSize))
+    #printFlush(paste("blockSize  = ", blockSize))
+    #printFlush(paste("nGenes  = ", nGenes))
+    #printFlush(paste(".largestBlockSize  = ", .largestBlockSize))
 
-        if (blockSize * nLinks > .largestBlockSize)
-            blockSize = as.integer(.largestBlockSize / nLinks)
+    if (blockSize * nLinks > .largestBlockSize)
+        blockSize = as.integer(.largestBlockSize / nLinks)
 
-        if (length(power) == 1)
-        {
-            power = rep(power, nSets)
-        } else if (length(power) != nSets)
-            stop("Invalid arguments: length of 'power' must equal number sets in
+    if (length(power) == 1)
+    {
+        power = rep(power, nSets)
+    } else if (length(power) != nSets)
+        stop("Invalid arguments: length of 'power' must equal number sets in
                  'multiExpr'")
 
-        intNetworkType = charmatch(type, .networkTypes)
-        if (is.na(intNetworkType))
-            stop(
-                paste(
-                    "Unrecognized networkType argument. Recognized values are
+    intNetworkType = charmatch(type, .networkTypes)
+    if (is.na(intNetworkType))
+        stop(
+            paste(
+                "Unrecognized networkType argument. Recognized values are
                     (unique abbreviations of)",
-                    paste(.networkTypes, collapse = ", ")
-                )
+                paste(.networkTypes, collapse = ", ")
             )
+        )
 
-        subtract = rep(1, nGenes)
-        if (sampleLinks) {
-            if (verbose > 0)
-                printFlush(
-                    paste(
-                        spaces,
-                        "nearestNeighborConnectivityMS: selecting
-                        sample pool of size",
-                        nLinks,
-                        ".."
-                    )
-                )
-            sd = apply(multiExpr[[1]]$data, 2, sd, na.rm = TRUE)
-            order = order(-sd)
-            saved = FALSE
-            if (exists(".Random.seed"))
-            {
-                saved = TRUE
-                savedSeed = .Random.seed
-                if (is.numeric(setSeed))
-                    set.seed(setSeed)
-            }
-            samplePool = order[sample(x = nGenes, size = nLinks)]
-            if (saved) {
-                .Random.seed <<- savedSeed
-            }
-            subtract[-samplePool] = 0
-        }
-
+    subtract = rep(1, nGenes)
+    if (sampleLinks) {
         if (verbose > 0)
             printFlush(
                 paste(
                     spaces,
-                    "nearestNeighborConnectivityMS: received",
-                    nSets,
-                    "datasets with nGenes  = ",
-                    as.character(nGenes)
+                    "nearestNeighborConnectivityMS: selecting
+                        sample pool of size",
+                    nLinks,
+                    ".."
                 )
             )
-        if (verbose > 0)
-            printFlush(paste(spaces, "  Using nNeighbors  = ",
-                             nNeighbors))
-
-        nearestNeighborConn = matrix(nrow = nGenes, ncol = nSets)
-
-        if (sampleLinks) {
-            corEval = parse(
-                text = paste(
-                    corFnc,
-                    "(multiExpr[[set]]$data[, samplePool],
-                    multiExpr[[set]]$data[, blockIndex] ",
-                    prepComma(corOptions),
-                    ")"
-                )
-            )
-        } else {
-            corEval = parse(
-                text = paste(
-                    corFnc,
-                    "(multiExpr[[set]]$data,
-                    multiExpr[[set]]$data[, blockIndex] ",
-                    prepComma(corOptions),
-                    ")"
-                )
-            )
+        sd = apply(multiExpr[[1]]$data, 2, sd, na.rm = TRUE)
+        order = order(-sd)
+        saved = FALSE
+        if (exists(".Random.seed"))
+        {
+            saved = TRUE
+            savedSeed = .Random.seed
+            if (is.numeric(setSeed))
+                set.seed(setSeed)
         }
-
-
-        for (set in 1:nSets) {
-            if (verbose > 0) {
-                cat(paste(spaces, "  Working on set", set))
-                pind = initProgInd(trailStr = " done")
-            }
-            nBlocks = as.integer((nGenes - 1) / blockSize)
-            SetRestrConn = NULL
-            start = 1
-            while (start <= nGenes) {
-                end = start + blockSize - 1
-                if (end > nGenes)
-                    end = nGenes
-                blockIndex = c(start:end)
-                #if (verbose > 1) printFlush(paste(spaces, " .. working on genes",
-                #start, "through", end, "of", nGenes))
-                c = eval(corEval)
-                if (intNetworkType == 1) {
-                    c = abs(c)
-                } else if (intNetworkType == 2) {
-                    c = (1 + c) / 2
-                } else if (intNetworkType == 3) {
-                    c[c < 0] = 0
-                } else {
-                    stop(
-                        "Internal error: intNetworkType has wrong value:",
-                        intNetworkType,
-                        ". Sorry!"
-                    )
-                }
-                adj_mat = as.matrix(c ^ power[set])
-                adj_mat[is.na(adj_mat)] = 0
-                sortedAdj = as.matrix(apply(adj_mat, 2, sort, decreasing = TRUE)[1:(nNeighbors + 1),])
-                nearestNeighborConn[blockIndex, set] = apply(sortedAdj, 2,
-                                                             sum) -
-                    subtract[blockIndex]
-                collectGarbage()
-                start = end + 1
-                if (verbose > 0)
-                    pind = updateProgInd(end / nGenes, pind)
-                collectGarbage()
-            }
-            if (verbose > 0)
-                printFlush(" ")
+        samplePool = order[sample(x = nGenes, size = nLinks)]
+        if (saved) {
+            .Random.seed <<- savedSeed
         }
-        nearestNeighborConn
+        subtract[-samplePool] = 0
     }
 
-#===============================================================================
-#
-# Nifty display of progress.
-#
-#===============================================================================
+    if (verbose > 0)
+        printFlush(
+            paste(
+                spaces,
+                "nearestNeighborConnectivityMS: received",
+                nSets,
+                "datasets with nGenes  = ",
+                as.character(nGenes)
+            )
+        )
+    if (verbose > 0)
+        printFlush(paste(spaces, "  Using nNeighbors  = ",
+                         nNeighbors))
+
+    nearestNeighborConn = matrix(nrow = nGenes, ncol = nSets)
+
+    if (sampleLinks) {
+        corEval = parse(
+            text = paste(
+                corFnc,
+                "(multiExpr[[set]]$data[, samplePool],
+                    multiExpr[[set]]$data[, blockIndex] ",
+                prepComma(corOptions),
+                ")"
+            )
+        )
+    } else {
+        corEval = parse(
+            text = paste(
+                corFnc,
+                "(multiExpr[[set]]$data,
+                    multiExpr[[set]]$data[, blockIndex] ",
+                prepComma(corOptions),
+                ")"
+            )
+        )
+    }
+
+
+    for (set in 1:nSets) {
+        if (verbose > 0) {
+            cat(paste(spaces, "  Working on set", set))
+            pind = initProgInd(trailStr = " done")
+        }
+        nBlocks = as.integer((nGenes - 1) / blockSize)
+        SetRestrConn = NULL
+        start = 1
+        while (start <= nGenes) {
+            end = start + blockSize - 1
+            if (end > nGenes)
+                end = nGenes
+            blockIndex = c(start:end)
+            #if (verbose > 1) printFlush(paste(spaces, " .. working on genes",
+            #start, "through", end, "of", nGenes))
+            c = eval(corEval)
+            if (intNetworkType == 1) {
+                c = abs(c)
+            } else if (intNetworkType == 2) {
+                c = (1 + c) / 2
+            } else if (intNetworkType == 3) {
+                c[c < 0] = 0
+            } else {
+                stop(
+                    "Internal error: intNetworkType has wrong value:",
+                    intNetworkType,
+                    ". Sorry!"
+                )
+            }
+            adj_mat = as.matrix(c ^ power[set])
+            adj_mat[is.na(adj_mat)] = 0
+            sortedAdj = as.matrix(apply(adj_mat, 2, sort, decreasing = TRUE)[1:(nNeighbors + 1),])
+            nearestNeighborConn[blockIndex, set] = apply(sortedAdj, 2,
+                                                         sum) -
+                subtract[blockIndex]
+            collectGarbage()
+            start = end + 1
+            if (verbose > 0)
+                pind = updateProgInd(end / nGenes, pind)
+            collectGarbage()
+        }
+        if (verbose > 0)
+            printFlush(" ")
+    }
+    nearestNeighborConn
+}
+# initProgInd ####
 #' Progress indicators
 #'
 #' Describes how much/how long does it takes
@@ -4515,6 +4228,7 @@ initProgInd <-function(leadStr = "..", trailStr = "", quiet = !interactive()) {
         updateProgInd(0, progInd, quiet)
 }
 
+# updateProgInd  ####
 #' Update the progress as it goes
 #'
 #' Should work on all OS to indicate the evolution of indicator
@@ -4522,23 +4236,19 @@ initProgInd <-function(leadStr = "..", trailStr = "", quiet = !interactive()) {
 #' @param newFrac Unkown parameter.
 #' @param progInd Object of class progressIndicator obtained with initProgInd.
 #' @export
-updateProgInd <- function(newFrac, progInd, quiet = !interactive())
-{
-    if (class(progInd) != "progressIndicator")
-        stop(
-            "Parameter progInd is not of class 'progressIndicator'.
-            Use initProgInd() to initialize",
-            "it prior to use."
-        )
+updateProgInd <- function(newFrac, progInd, quiet = !interactive()) {
+    if (class(progInd) != "progressIndicator") {
+        stop( "Parameter progInd is not of class 'progressIndicator'.\n",
+              "Use initProgInd() to initialize",
+              "it prior to use.")
+    }
 
     newStr = paste0(progInd$leadStr,
                     as.integer(newFrac * 100),
                     "% ",
                     progInd$trailStr)
-    if (newStr != progInd$oldStr)
-    {
-        if (quiet)
-        {
+    if (newStr != progInd$oldStr) {
+        if (quiet) {
             progInd$oldStr = newStr
         } else {
             cat(paste(rep("\b", nchar(
@@ -4553,15 +4263,7 @@ updateProgInd <- function(newFrac, progInd, quiet = !interactive())
     progInd
 }
 
-#===============================================================================
-#
-# Plot a dendrogram and a set of labels underneath
-#
-#===============================================================================
-#
-
-
-
+# plotDendroAndColors ####
 #' Dendrogram plot with color annotation of objects
 #'
 #' This function plots a hierarchical clustering dendrogram and color
@@ -4716,19 +4418,11 @@ plotDendroAndColors <- function(dendro,
         par(mar = oldMar)
 }
 
-################################################################################
-#
-#  Functions included from NetworkScreeningFunctions
-#
-################################################################################
-
+# plotMEpairs ####
 # this function creates pairwise scatter plots between module eigengenes (above
 # the diagonal) Below the diagonal are the absolute values of the Pearson
 # correlation coefficients.
 # The diagonal contains histograms of the module eigengene expressions.
-
-
-
 #' Pairwise scatterplots of eigengenes
 #'
 #' The function produces a matrix of plots containing pairwise scatterplots of
@@ -4798,13 +4492,7 @@ plotMEpairs <- function(datME,
     } # end if
 } # end of function
 
-
-#-------------------------------------------------------------------------------
-#
-# corPredictionSuccess
-#
-#-------------------------------------------------------------------------------
-
+# corPredictionSuccess ####
 # The function corPredictionSuccess can be used to determine which method is
 # best for predicting correlations in a new test set. corTestSet should be a
 # vector of correlations in the test set.
@@ -4818,10 +4506,7 @@ plotMEpairs <- function(datME,
 # meancorTestSetNegative = mean test set correlation among the topNumber of
 # genes which are predicted to have negative correlations.
 # meancorTestSetOverall = (meancorTestSetPositive - meancorTestSetNegative)/2
-
-
-
-#' Qunatification of success of gene screening
+#' Quantification of success of gene screening
 #'
 #' This function calculates the success of gene screening.
 #'
@@ -4842,9 +4527,7 @@ plotMEpairs <- function(datME,
 #' @author Steve Horvath
 #' @seealso \code{\link{relativeCorPredictionSuccess}}
 #' @keywords misc
-corPredictionSuccess <-
-    function(corPrediction, corTestSet, topNumber = 100)
-    {
+corPredictionSuccess <- function(corPrediction, corTestSet, topNumber = 100) {
         nPredictors = dim(as.matrix(corPrediction))[[2]]
         nGenes = dim(as.matrix(corPrediction))[[1]]
         if (length(as.numeric(corTestSet)) != nGenes)
@@ -4887,12 +4570,7 @@ corPredictionSuccess <-
 
 
 
-#-------------------------------------------------------------------------------
-#
-# relativeCorPredictionSuccess
-#
-#-------------------------------------------------------------------------------
-
+# relativeCorPredictionSuccess ####
 # The function relativeCorPredictionSuccess can be used to test whether a gene
 # screening method is significantly better than a standard method.
 # For each gene screening method (column of corPredictionNew) it provides a
@@ -4904,9 +4582,6 @@ corPredictionSuccess <-
 # training data).
 # The function outputs a p-value for the Kruskal test that the new correlation
 # prediction methods outperform the standard correlation prediction method.
-
-
-
 #' Compare prediction success
 #'
 #' Compare prediction success of several gene screening methods.
@@ -4968,19 +4643,11 @@ relativeCorPredictionSuccess <- function(corPredictionNew,
     kruskalp
 } # end of function relativeCorPredictionSuccess
 
-#-------------------------------------------------------------------------------
-#
-# alignExpr
-#
-#-------------------------------------------------------------------------------
-
+# alignExpr ####
 # If y is supplied, it multiplies columns of datExpr by +/- 1 to make all
 # correlations with y positive.
 # If y is not supplied, the first column of datExpr is used as the reference
 # direction.
-
-
-
 #' Align expression data with given vector
 #'
 #' Multiplies genes (columns) in given expression data such that their
@@ -5015,19 +4682,7 @@ alignExpr <- function(datExpr, y = NULL) {
 #    rank(x, ties.method = "first")
 #}
 
-################################################################################
-#
-# Gene expression simulations (functions by P.L.)
-#
-################################################################################
-
-#-------------------------------------------------------------------------------
-#
-# .causalChildren
-#
-#-------------------------------------------------------------------------------
 # Note: The returned vector may contain multiple occurences of the same child.
-
 .causalChildren <- function(parents, causeMat) {
     nNodes = dim(causeMat)[[1]]
 
@@ -5036,8 +4691,7 @@ alignExpr <- function(datExpr, y = NULL) {
         return(NULL)
 
     Child_ind = apply(as.matrix(abs(causeMat[, parents])), 1, sum) > 0
-    if (sum(Child_ind) > 0)
-    {
+    if (sum(Child_ind) > 0) {
         children = c(1:nNodes)[Child_ind]
     } else {
         children = NULL
@@ -5045,24 +4699,14 @@ alignExpr <- function(datExpr, y = NULL) {
     children
 }
 
-
-#-------------------------------------------------------------------------------
-#
-# simulateEigengeneNetwork
-#
-#-------------------------------------------------------------------------------
-#
+# simulateEigengeneNetwork ####
 # Given a set of causal anchors, this function creates a network of vectors that
 # should satisfy the causal relations encoded in the causal matrix causeMat,
 # i.e. causeMat[j, i] is the causal effect of vector i on vector j.
-
 # The function starts by initializing all vectors to noise given in the noise
 # specification. (The noise can be specified for each vector separately.) Then
 # it runs the standard causal network signal propagation and returns the
 # resulting vectors.
-
-
-
 #' Simulate eigengene network from a causal model
 #'
 #' Simulates a set of eigengenes (vectors) from a given set of causal anchors
@@ -5088,114 +4732,106 @@ alignExpr <- function(datExpr, y = NULL) {
 #' \item{anchorIndex}{a copy of the input \code{anchorIndex}. }
 #' @author Peter Langfelder
 #' @keywords misc
-simulateEigengeneNetwork <-
-    function(causeMat,
-             anchorIndex,
-             anchorVectors,
-             noise = 1,
-             verbose = 0,
-             indent = 0) {
-        spaces = indentSpaces(indent)
+simulateEigengeneNetwork <- function(causeMat,
+                                     anchorIndex,
+                                     anchorVectors,
+                                     noise = 1,
+                                     verbose = 0,
+                                     indent = 0) {
+    spaces = indentSpaces(indent)
 
-        if (verbose > 0)
-            printFlush(paste(spaces, "Creating seed vectors..."))
-        nNodes = dim(causeMat)[[1]]
-        nSamples = dim(anchorVectors)[[1]]
+    if (verbose > 0)
+        printFlush(paste(spaces, "Creating seed vectors..."))
+    nNodes = dim(causeMat)[[1]]
+    nSamples = dim(anchorVectors)[[1]]
 
 
-        if (length(anchorIndex) != dim(anchorVectors)[[2]])
-            stop(paste(
-                "Length of anchorIndex must equal the number of vectors in
+    if (length(anchorIndex) != dim(anchorVectors)[[2]])
+        stop(paste(
+            "Length of anchorIndex must equal the number of vectors in
                 anchorVectors."
-            ))
+        ))
 
-        if (length(noise) == 1)
-            noise = rep(noise, nNodes)
-        if (length(noise) != nNodes)
-            stop(
-                paste(
-                    "Length of noise must equal",
-                    "the number of nodes as given by the dimension of the
+    if (length(noise) == 1)
+        noise = rep(noise, nNodes)
+    if (length(noise) != nNodes)
+        stop(
+            paste(
+                "Length of noise must equal",
+                "the number of nodes as given by the dimension of the
                     causeMat matrix."
-                )
             )
-
-        # Initialize all node vectors to noise with given standard deviation
-
-        NodeVectors = matrix(0, nrow = nSamples, ncol = nNodes)
-        for (i in 1:nNodes)
-            NodeVectors[, i] = rnorm(n = nSamples, mean = 0,
-                                     sd = noise[i])
-
-        Levels = rep(0, times = nNodes)
-
-        # Calculate levels for all nodes: start from anchors and go through each
-        # successive level of children
-
-        level = 0
-        parents = anchorIndex
-        Children = .causalChildren(parents = parents, causeMat = causeMat)
-        if (verbose > 1)
-            printFlush(paste(spaces, "..Determining level structure..."))
-        while (!is.null(Children))
-        {
-            # print(paste("level:", level))
-            # print(paste("   parents:", parents))
-            # print(paste("   Children:", Children))
-            level = level + 1
-            if ((verbose > 1) & (level / 10 == as.integer(level / 10)))
-                printFlush(paste(spaces, "  ..Detected level", level))
-            #printFlush(paste("Detected level", level))
-            Levels[Children] = level
-            parents = Children
-            Children = .causalChildren(parents = parents, causeMat = causeMat)
-        }
-
-        HighestLevel = level
-
-        # Generate the whole network
-
-        if (verbose > 1)
-            printFlush(paste(spaces, "..Calculating network..."))
-        NodeVectors[, anchorIndex] = NodeVectors[, anchorIndex] + anchorVectors
-        for (level in (1:HighestLevel))
-        {
-            if ((verbose > 1) & (level / 10 == as.integer(level / 10)))
-                printFlush(paste(spaces, " .Working on level", level))
-            #printFlush(paste("Working on level", level))
-            LevelChildren = c(1:nNodes)[Levels == level]
-            for (child in LevelChildren)
-            {
-                LevelParents = c(1:nNodes)[causeMat[child,] != 0]
-                for (parent in LevelParents)
-                    NodeVectors[, child] = scale(NodeVectors[, child] + causeMat[child, parent]  *
-                                                     NodeVectors[, parent])
-            }
-        }
-
-        Nodes = list(
-            eigengenes = NodeVectors,
-            causeMat = causeMat,
-            levels = Levels,
-            anchorIndex = anchorIndex
         )
-        Nodes
+
+    # Initialize all node vectors to noise with given standard deviation
+
+    NodeVectors = matrix(0, nrow = nSamples, ncol = nNodes)
+    for (i in 1:nNodes)
+        NodeVectors[, i] = rnorm(n = nSamples, mean = 0,
+                                 sd = noise[i])
+
+    Levels = rep(0, times = nNodes)
+
+    # Calculate levels for all nodes: start from anchors and go through each
+    # successive level of children
+
+    level = 0
+    parents = anchorIndex
+    Children = .causalChildren(parents = parents, causeMat = causeMat)
+    if (verbose > 1)
+        printFlush(paste(spaces, "..Determining level structure..."))
+    while (!is.null(Children))
+    {
+        # print(paste("level:", level))
+        # print(paste("   parents:", parents))
+        # print(paste("   Children:", Children))
+        level = level + 1
+        if ((verbose > 1) & (level / 10 == as.integer(level / 10)))
+            printFlush(paste(spaces, "  ..Detected level", level))
+        #printFlush(paste("Detected level", level))
+        Levels[Children] = level
+        parents = Children
+        Children = .causalChildren(parents = parents, causeMat = causeMat)
     }
 
-#-------------------------------------------------------------------------------
-#
-# simulateModule
-#
-#-------------------------------------------------------------------------------
+    HighestLevel = level
+
+    # Generate the whole network
+
+    if (verbose > 1)
+        printFlush(paste(spaces, "..Calculating network..."))
+    NodeVectors[, anchorIndex] = NodeVectors[, anchorIndex] + anchorVectors
+    for (level in (1:HighestLevel))
+    {
+        if ((verbose > 1) & (level / 10 == as.integer(level / 10)))
+            printFlush(paste(spaces, " .Working on level", level))
+        #printFlush(paste("Working on level", level))
+        LevelChildren = c(1:nNodes)[Levels == level]
+        for (child in LevelChildren)
+        {
+            LevelParents = c(1:nNodes)[causeMat[child,] != 0]
+            for (parent in LevelParents)
+                NodeVectors[, child] = scale(NodeVectors[, child] + causeMat[child, parent]  *
+                                                 NodeVectors[, parent])
+        }
+    }
+
+    Nodes = list(
+        eigengenes = NodeVectors,
+        causeMat = causeMat,
+        levels = Levels,
+        anchorIndex = anchorIndex
+    )
+    Nodes
+}
+
+# simulateModule ####
 # The resulting data is normalized.
 # Attributes contain the component trueKME giving simulated correlation with
 # module eigengene for both module genes and near - module genes.
 # corPower controls how fast the correlation drops with index i in the module;
 # the curve is roughly x^{1/corPower} with x<1 and x~0 near the "center", so the
 #  higher the power, the faster the curve rises.
-
-
-
 #' Simulate a gene co-expression module
 #'
 #' Simulation of a single gene co-expression module.
@@ -5269,101 +4905,76 @@ simulateEigengeneNetwork <-
 #' http://www.genetics.ucla.edu/labs/horvath/CoexpressionNetwork/EigengeneNetwork/SupplementSimulations.pdf.
 #' @keywords misc
 simulateModule <- function(ME, nGenes, nNearGenes = 0, minCor = 0.3, maxCor = 1,
-             corPower = 1, signed = FALSE, propNegativeCor = 0.3,
-             geneMeans = NULL, verbose = 0, indent = 0) {
-        nSamples = length(ME)
+                           corPower = 1, signed = FALSE, propNegativeCor = 0.3,
+                           geneMeans = NULL, verbose = 0, indent = 0) {
+    nSamples = length(ME)
 
-        datExpr = matrix(rnorm((nGenes + nNearGenes) * nSamples),
-                         nrow = nSamples,
-                         ncol = nGenes + nNearGenes)
+    datExpr = matrix(rnorm((nGenes + nNearGenes) * nSamples),
+                     nrow = nSamples,
+                     ncol = nGenes + nNearGenes)
 
-        VarME = var(ME)
+    VarME = var(ME)
 
-        # generate the in - module genes
-        CorME = maxCor - (c(1:nGenes) / nGenes) ^ (1 / corPower) * (maxCor - minCor)
+    # generate the in - module genes
+    CorME = maxCor - (c(1:nGenes) / nGenes) ^ (1 / corPower) * (maxCor - minCor)
+    noise = sqrt(VarME * (1 - CorME ^ 2) / CorME ^ 2)
+    sign = rep(1, nGenes)
+    if (!signed) {
+        negGenes = as.integer(
+            seq(
+                from = 1 / propNegativeCor,
+                by = 1 / propNegativeCor,
+                length.out = nGenes * propNegativeCor
+            )
+        )
+        negGenes = negGenes[negGenes <= nGenes]
+        sign[negGenes] = -1
+    }
+    for (gene in 1:nGenes) {
+        datExpr[, gene] = sign[gene] * (ME + rnorm(nSamples, sd = noise[gene]))
+    }
+
+    trueKME = CorME
+    # generate the near - module genes
+
+    if (nNearGenes > 0) {
+        CorME = c(1:nNearGenes) / nNearGenes * minCor
         noise = sqrt(VarME * (1 - CorME ^ 2) / CorME ^ 2)
-        sign = rep(1, nGenes)
-        if (!signed)
-        {
+        sign = rep(1, nNearGenes)
+        if (!signed) {
             negGenes = as.integer(
                 seq(
                     from = 1 / propNegativeCor,
                     by = 1 / propNegativeCor,
-                    length.out = nGenes * propNegativeCor
+                    length.out = nNearGenes * propNegativeCor
                 )
             )
-            negGenes = negGenes[negGenes <= nGenes]
+            negGenes = negGenes[negGenes <= nNearGenes]
             sign[negGenes] = -1
         }
-        for (gene in 1:nGenes)
-        {
-            datExpr[, gene] = sign[gene] * (ME + rnorm(nSamples, sd = noise[gene]))
-        }
-
-        trueKME = CorME
-        # generate the near - module genes
-
-        if (nNearGenes > 0) {
-            CorME = c(1:nNearGenes) / nNearGenes * minCor
-            noise = sqrt(VarME * (1 - CorME ^ 2) / CorME ^ 2)
-            sign = rep(1, nNearGenes)
-            if (!signed) {
-                negGenes = as.integer(
-                    seq(
-                        from = 1 / propNegativeCor,
-                        by = 1 / propNegativeCor,
-                        length.out = nNearGenes * propNegativeCor
-                    )
-                )
-                negGenes = negGenes[negGenes <= nNearGenes]
-                sign[negGenes] = -1
-            }
-            for (gene in 1:nNearGenes)
-                datExpr[, nGenes + gene] = ME + sign[gene] * rnorm(nSamples,
-                                                                   sd = noise[gene])
-            trueKME = c(trueKME, CorME)
-        }
-
-        datExpr = scale(datExpr)
-        if (!is.null(geneMeans)) {
-            if (any(is.na(geneMeans)))
-                stop("All entries of 'geneMeans' must be finite.")
-            if (length(geneMeans) != nGenes + nNearGenes)
-                stop("The lenght of 'geneMeans' must equal nGenes + nNearGenes.")
-            datExpr = datExpr + matrix(geneMeans, nSamples, nGenes + nNearGenes,
-                                       byrow = TRUE)
-        }
-
-        attributes(datExpr)$trueKME = trueKME
-
-        datExpr
-
+        for (gene in 1:nNearGenes)
+            datExpr[, nGenes + gene] = ME + sign[gene] * rnorm(nSamples,
+                                                               sd = noise[gene])
+        trueKME = c(trueKME, CorME)
     }
 
-#.SimulateModule <- function(ME, size, minimumCor = .3) {
-#if (size<3) print("WARNING: module size smaller than 3")
-#if (minimumCor == 0) minimumCor = 0.0001
-#maxnoisevariance = var(ME, na.rm = TRUE) * (1/minimumCor^2 - 1)
-#SDvector = sqrt(c(1:size)/size * maxnoisevariance)
-#datSignal = suppressWarnings(matrix(c(ME, ME, - ME), nrow = size,
-#ncol = length(ME), byrow = TRUE))
-#datNoise = SDvector *  matrix(rnorm(size * length(ME)), nrow = size,
-# ncol = length(ME))
-#datModule = datSignal + datNoise
-#t(datModule)
-#} # end of function
+    datExpr = scale(datExpr)
+    if (!is.null(geneMeans)) {
+        if (any(is.na(geneMeans)))
+            stop("All entries of 'geneMeans' must be finite.")
+        if (length(geneMeans) != nGenes + nNearGenes)
+            stop("The lenght of 'geneMeans' must equal nGenes + nNearGenes.")
+        datExpr = datExpr + matrix(geneMeans, nSamples, nGenes + nNearGenes,
+                                   byrow = TRUE)
+    }
 
+    attributes(datExpr)$trueKME = trueKME
 
+    datExpr
 
-#-------------------------------------------------------------------------------
-#
-# simulateSmallLayer
-#
-#-------------------------------------------------------------------------------
-# Simulates a bunch of small and weakly expressed modules.
+}
 
-
-
+# simulateSmallLayer ####
 #' Simulate small modules
 #'
 #' This function simulates a set of small modules. The primary purpose is to
@@ -5490,26 +5101,15 @@ simulateSmallLayer <- function(order,
     datExpr
 }
 
-
-#-------------------------------------------------------------------------------
-#
-# simulateDatExpr
-#
-#-------------------------------------------------------------------------------
-#
+# simulateDatExpr ####
 # Caution: the last Mod.Props entry gives the number of "true grey" genes
 # the corresponding minCor entry must be absent (i.e.
 # length(minCor) = length(modProportions) - 1
-
 # SubmoduleLayers: layers of small modules with weaker correlation, ordered in
 # the same order as the genes in the big modules. Needs average number of genes
 # in a module (exponential distribution), average expression strength (
 # exponential density) and inverse density.
-
 # ScatteredModuleLayers: Layers of small modules whose order is random.
-
-
-
 #' Simulation of expression data
 #'
 #' Simulation of expression data with a customizable modular structure and
@@ -5887,21 +5487,7 @@ simulateDatExpr <- function(eigengenes,
     )
 } # end of function
 
-#-------------------------------------------------------------------------------
-#
-# simulateMultiExpr
-#
-#-------------------------------------------------------------------------------
-# simulate several sets with some of the modules left out.
-# eigengenes are specified in a standard multi - set data format.
-# leaveOut must be a matrix of No.Modules x No.Sets of TRUE/FALSE values
-# minCor must be a single number here modProportions are a single vector,
-# since the proportions should be the same for all sets.
-# nSamples is a vector specifying the number of samples in each set this must
-# be compatible with the dimensions of the eigengenes.
-
-
-
+# simulateMultiExpr ####
 #' Simulate multi-set expression data
 #'
 #' Simulation of expression data in several sets with relate module structure.
@@ -6111,14 +5697,7 @@ simulateMultiExpr <- function(eigengenes,
     )
 }
 
-#-------------------------------------------------------------------------------
-#
-# simulateDatExpr5Modules
-#
-#-------------------------------------------------------------------------------
-
-
-
+# simulateDatExpr5Modules ####
 #' Simplified simulation of expression data
 #'
 #' This function provides a simplified interface to the expression data
@@ -6223,16 +5802,7 @@ simulateDatExpr5Modules <- function(nGenes = 2000,
          datME = ModuleEigengenes)
 } # end of simulation function
 
-
-#-------------------------------------------------------------------------------
-#
-# automaticNetworkScreening
-#
-#-------------------------------------------------------------------------------
-
-
-
-
+# automaticNetworkScreening ####
 #' One-step automatic network gene screening
 #'
 #' This function performs gene screening based on a given trait and gene
@@ -6392,15 +5962,7 @@ automaticNetworkScreening <- function(datExpr,
     output
 } # end of function automaticNetworkScreening
 
-
-#-------------------------------------------------------------------------------
-#
-# automaticNetworkScreeningGS
-#
-#-------------------------------------------------------------------------------
-
-
-
+# automaticNetworkScreeningGS ####
 #' One-step automatic network gene screening with external gene significance
 #'
 #' This function performs gene screening based on external gene significance
@@ -6508,19 +6070,9 @@ automaticNetworkScreeningGS <- function(datExpr, GS, power = 6,
     output
 } # end of function automaticNetworkScreeningGS
 
-
-#-------------------------------------------------------------------------------
-#
-#  hubGeneSignificance
-#
-#-------------------------------------------------------------------------------
-
-# The following function computes the hub gene significance as defined in
-# in the paper Horvath and Dong. Input a data frame with possibly signed
-# module membership measures (also known as module eigengene based connectivity
-#kME. Further it requires a possibly signed gene significance measure.
-# GS = 0 means that the gene is not significant, high positive or negative values
-#  mean that it is significant.
+#  hubGeneSignificance ####
+# Input a data frame with possibly signed module membership measures (also known
+# as module eigengene based connectivity kME.
 # The input to this function can include the sign of the correlation.
 #' Hubgene significance
 #'
@@ -6552,15 +6104,7 @@ hubGeneSignificance <- function(datKME, GS) {
     as.numeric(HGS)
 } #end of function hubGeneSignificance
 
-
-#-------------------------------------------------------------------------------
-#
-#  networkScreeningGS
-#
-#-------------------------------------------------------------------------------
-
-
-
+#  networkScreeningGS ####
 #' Network gene screening with an external gene significance measure
 #'
 #' This function blends standard and network approaches to selecting genes (or
@@ -6705,14 +6249,7 @@ networkScreeningGS <- function(datExpr,
     datout
 } # end of function
 
-#-------------------------------------------------------------------------------
-#
-# networkScreening
-#
-#-------------------------------------------------------------------------------
-
-
-
+# networkScreening ####
 #' Identification of genes related to a trait
 #'
 #' This function blends standard and network approaches to selecting genes (or
@@ -6776,8 +6313,7 @@ networkScreening <- function(y,
                              addMEy = TRUE,
                              removeDiag = FALSE,
                              weightESy = 0.5,
-                             getQValues = TRUE)
-{
+                             getQValues = TRUE) {
     oddPower = as.integer(oddPower)
     if (as.integer(oddPower / 2) == oddPower / 2) {
         oddPower = oddPower + 1
@@ -6950,27 +6486,6 @@ networkScreening <- function(y,
     datout
 } # end of function
 
-
-################################################################################
-#
-# Functions included from NetworkFunctions - PL - 07.R
-# Selected ones only
-#
-################################################################################
-
-
-#-------------------------------------------------------------------------------
-# labeledHeatmap.R
-#-------------------------------------------------------------------------------
-
-#-------------------------------------------------------------------------------
-#
-# .reverseRows <- function(Matrix)
-#
-#-------------------------------------------------------------------------------
-#
-
-
 .reverseRows <- function(Matrix) {
     ind = seq(from = dim(Matrix)[1],
               to = 1,
@@ -6992,11 +6507,7 @@ networkScreening <- function(y,
     rep(x, nRep)[1:n]
 }
 
-#-------------------------------------------------------------------------------
-#
-# labeledHeatmap <- function(Matrix, xLabels, yLabels, ...) {
-#
-#-------------------------------------------------------------------------------
+# labeledHeatmap  ####
 # This function plots a heatmap of the specified matrix and labels the x and y
 # axes wit the given labels.
 # It is assumed that the number of entries in xLabels and yLabels is consistent
@@ -7007,9 +6518,6 @@ networkScreening <- function(y,
 # The x, yLabels are expected to have the form "..color" as in "MEgrey" or
 # "PCturquoise". xSymbol, ySymbols are additional markers that can be placed
 # next to color labels
-
-
-
 #' Produce a labeled heatmap plot
 #'
 #' Plots a heatmap plot with color legend, row and column annotation, and
@@ -7622,14 +7130,7 @@ labeledHeatmap <- function(Matrix,
     invisible(labPos)
 }
 
-#===============================================================================
-#
-# multi - page labeled heatmap
-#
-#===============================================================================
-
-
-
+# labeledHeatmap.multipage ####
 #' Labeled heatmap divided into several separate plots.
 #'
 #' This function produces labaled heatmaps divided into several plots. This is
@@ -7763,8 +7264,7 @@ labeledHeatmap.multiPage <- function(# Input data and ornaments
     horizontalSeparator.lwd = 1,
     horizontalSeparator.ext = 0,
 
-    ...)
-{
+    ...) {
     nr = nrow(Matrix)
     nc = ncol(Matrix)
 
@@ -7849,20 +7349,7 @@ labeledHeatmap.multiPage <- function(# Input data and ornaments
         }
 }
 
-
-
-
-#-------------------------------------------------------------------------------
-#
-# labeledBarplot <- function(Matrix, labels, ...) {
-#
-#-------------------------------------------------------------------------------
-#
-# Plots a barplot of the Matrix and writes the labels underneath such that they
-# are readable.
-
-
-
+# labeledBarplot  ####
 #' Barplot with text or color labels.
 #'
 #' Produce a barplot with extra annotation.
@@ -7907,129 +7394,112 @@ labeledHeatmap.multiPage <- function(# Input data and ornaments
 #' @return None.
 #' @author Peter Langfelder
 #' @keywords hplot
-labeledBarplot <-
-    function(Matrix,
-             labels,
-             colorLabels = FALSE,
-             colored = TRUE,
-             setStdMargins = TRUE,
-             stdErrors = NULL,
-             cex.lab = NULL,
-             xLabelsAngle = 45,
-             ...)
-    {
-        if (setStdMargins)
-            par(mar = c(3, 3, 2, 2) + 0.2)
+labeledBarplot <- function(Matrix, labels, colorLabels = FALSE, colored = TRUE,
+                           setStdMargins = TRUE, stdErrors = NULL,
+                           cex.lab = NULL, xLabelsAngle = 45, ...) {
+    if (setStdMargins)
+        par(mar = c(3, 3, 2, 2) + 0.2)
 
-        if (colored) {
-            colors = substring(labels, 3)
-        } else {
-            colors = rep("grey", times = ifelse(length(dim(Matrix)) < 2,
-                                                length(Matrix), dim(Matrix)[[2]]))
-        }
-
-        ValidColors = !is.na(match(substring(labels, 3), colors()))
-
-        if (sum(ValidColors) > 0)
-            ColorLabInd = c(1:length(labels))[ValidColors]
-        if (sum(!ValidColors) > 0)
-            TextLabInd = c(1:length(labels))[!ValidColors]
-
-        colors[!ValidColors] = "grey"
-
-        mp = barplot(
-            Matrix,
-            col = colors,
-            xaxt = "n",
-            xlab = "",
-            yaxt = "n",
-            ...
-        )
-
-        if (length(dim(Matrix)) == 2) {
-            means = apply(Matrix, 2, sum)
-        } else {
-            means = Matrix
-        }
-
-        if (!is.null(stdErrors))
-            addErrorBars(means, 1.96 * stdErrors,
-                         two.side = TRUE)
-
-        # axis(1, labels = FALSE)
-        nlabels = length(labels)
-        plotbox = par("usr")
-        xmin = plotbox[1]
-        xmax = plotbox[2]
-        ymin = plotbox[3]
-        yrange = plotbox[4] - ymin
-        ymax = plotbox[4]
-        # print(paste("yrange:", yrange))
-        if (nlabels > 1) {
-            spacing = (mp[length(mp)] - mp[1]) / (nlabels - 1)
-        } else {
-            spacing = (xmax - xmin)
-        }
-        yoffset = yrange / 30
-        xshift = spacing / 2
-        xrange = spacing * nlabels
-        if (is.null(cex.lab))
-            cex.lab = 1
-        if (colorLabels) {
-            #rect(xshift + ((1:nlabels) - 1) * spacing - spacing/2.1,
-            #ymin - spacing/2.1 - spacing/8,
-            #     xshift + ((1:nlabels) - 1) * spacing + spacing/2.1,
-            #     ymin - spacing/8,
-            #     density = - 1, col = substring(labels, 3),
-            #     border = substring(labels, 3), xpd = TRUE)
-            if (sum(!ValidColors) > 0) {
-                text(
-                    mp[!ValidColors],
-                    ymin - 0.02,
-                    srt = 45,
-                    adj = 1,
-                    labels = labels[TextLabInd],
-                    xpd = TRUE,
-                    cex = cex.lab,
-                    srt = xLabelsAngle
-                )
-            }
-            if (sum(ValidColors) > 0) {
-                rect(
-                    mp[ValidColors] - spacing / 2.1,
-                    ymin - 2 * spacing / 2.1 * yrange / xrange - yoffset,
-                    mp[ValidColors] + spacing / 2.1,
-                    ymin - yoffset,
-                    density = -1,
-                    col = substring(labels[ValidColors], 3),
-                    border = substring(labels[ValidColors], 3),
-                    xpd = TRUE
-                )
-            }
-        } else {
-            text(((1:nlabels) - 1) * spacing + spacing / 2,
-                 ymin - 0.02 * yrange,
-                 srt = 45,
-                 adj = 1,
-                 labels = labels,
-                 xpd = TRUE,
-                 cex = cex.lab,
-                 srt = xLabelsAngle
-            )
-        }
-        axis(2, labels = TRUE)
+    if (colored) {
+        colors = substring(labels, 3)
+    } else {
+        colors = rep("grey", times = ifelse(length(dim(Matrix)) < 2,
+                                            length(Matrix), dim(Matrix)[[2]]))
     }
 
-#-------------------------------------------------------------------------------
-#
-# sizeGrWindow
-#
-#-------------------------------------------------------------------------------
-# if the current device isn't of the required dimensions, close it and open a
-# new one.
+    ValidColors = !is.na(match(substring(labels, 3), colors()))
 
+    if (sum(ValidColors) > 0)
+        ColorLabInd = c(1:length(labels))[ValidColors]
+    if (sum(!ValidColors) > 0)
+        TextLabInd = c(1:length(labels))[!ValidColors]
 
+    colors[!ValidColors] = "grey"
 
+    mp = barplot(
+        Matrix,
+        col = colors,
+        xaxt = "n",
+        xlab = "",
+        yaxt = "n",
+        ...
+    )
+
+    if (length(dim(Matrix)) == 2) {
+        means = apply(Matrix, 2, sum)
+    } else {
+        means = Matrix
+    }
+
+    if (!is.null(stdErrors))
+        addErrorBars(means, 1.96 * stdErrors,
+                     two.side = TRUE)
+
+    # axis(1, labels = FALSE)
+    nlabels = length(labels)
+    plotbox = par("usr")
+    xmin = plotbox[1]
+    xmax = plotbox[2]
+    ymin = plotbox[3]
+    yrange = plotbox[4] - ymin
+    ymax = plotbox[4]
+    # print(paste("yrange:", yrange))
+    if (nlabels > 1) {
+        spacing = (mp[length(mp)] - mp[1]) / (nlabels - 1)
+    } else {
+        spacing = (xmax - xmin)
+    }
+    yoffset = yrange / 30
+    xshift = spacing / 2
+    xrange = spacing * nlabels
+    if (is.null(cex.lab))
+        cex.lab = 1
+    if (colorLabels) {
+        #rect(xshift + ((1:nlabels) - 1) * spacing - spacing/2.1,
+        #ymin - spacing/2.1 - spacing/8,
+        #     xshift + ((1:nlabels) - 1) * spacing + spacing/2.1,
+        #     ymin - spacing/8,
+        #     density = - 1, col = substring(labels, 3),
+        #     border = substring(labels, 3), xpd = TRUE)
+        if (sum(!ValidColors) > 0) {
+            text(
+                mp[!ValidColors],
+                ymin - 0.02,
+                srt = 45,
+                adj = 1,
+                labels = labels[TextLabInd],
+                xpd = TRUE,
+                cex = cex.lab,
+                srt = xLabelsAngle
+            )
+        }
+        if (sum(ValidColors) > 0) {
+            rect(
+                mp[ValidColors] - spacing / 2.1,
+                ymin - 2 * spacing / 2.1 * yrange / xrange - yoffset,
+                mp[ValidColors] + spacing / 2.1,
+                ymin - yoffset,
+                density = -1,
+                col = substring(labels[ValidColors], 3),
+                border = substring(labels[ValidColors], 3),
+                xpd = TRUE
+            )
+        }
+    } else {
+        text(((1:nlabels) - 1) * spacing + spacing / 2,
+             ymin - 0.02 * yrange,
+             srt = 45,
+             adj = 1,
+             labels = labels,
+             xpd = TRUE,
+             cex = cex.lab,
+             srt = xLabelsAngle
+        )
+    }
+    axis(2, labels = TRUE)
+}
+
+# sizeGrWindow ####
 #' Opens a graphics window with specified dimensions
 #'
 #' If a graphic device window is already open, it is closed and re-opened with
@@ -8049,12 +7519,7 @@ sizeGrWindow <- function(width, height) {
     }
 }
 
-#===============================================================================
-# GreenToRed.R
-#===============================================================================
-
-
-
+# greenBlackRed ####
 #' Green-black-red color sequence
 #'
 #' Generate a green-black-red color sequence of a given length.
@@ -8097,8 +7562,7 @@ greenBlackRed <- function(n, gamma = 1) {
     col
 }
 
-
-
+# greenWhiteRed ####
 #' Green-white-red color sequence
 #'
 #' Generate a green-white-red color sequence of a given length.
@@ -8156,8 +7620,7 @@ greenWhiteRed <- function(n, gamma = 1, warn = TRUE) {
     col
 }
 
-
-
+# redWhiteGreen  ####
 #' Red-white-green color sequence
 #'
 #' Generate a red-white-green color sequence of a given length.
@@ -8212,14 +7675,7 @@ redWhiteGreen <- function(n, gamma = 1) {
     col
 }
 
-#===============================================================================
-#
-# Color pallettes that are more friendly to people with common color blindness
-#
-#===============================================================================
-
-
-
+# blueWhiteRed ####
 #' Blue-white-red color sequence
 #'
 #' Generate a blue-white-red color sequence of a given length.
@@ -8251,9 +7707,7 @@ redWhiteGreen <- function(n, gamma = 1) {
 #'   displayColors(blueWhiteRed(50, 0.5));
 #'   title("gamma = 0.5")
 #'
-blueWhiteRed <- function(n,
-                         gamma = 1,
-                         endSaturation = 1) {
+blueWhiteRed <- function(n, gamma = 1, endSaturation = 1) {
     if (endSaturation  > 1  | endSaturation < 0)
         stop("'endSaturation' must be between 0 and 1.")
     es = 1 - endSaturation
@@ -8282,16 +7736,7 @@ blueWhiteRed <- function(n,
     rgb(cols[, 1], cols[, 2], cols[, 3], maxColorValue = 1)
 }
 
-#===============================================================================
-#
-# KeepCommonProbes
-#
-#-------------------------------------------------------------------------------
-# Filters out probes that are not common to all datasets, and puts probes into the same order in each
-# set. Works by creating dataframes of probe names and their indices and merging them all.
-
-
-
+# KeepCommonProbes ####
 #' Keep probes that are shared among given data sets
 #'
 #' This function strips out probes that are not shared by all given data sets,
@@ -8336,19 +7781,7 @@ keepCommonProbes <- function(multiExpr, orderBy = 1) {
     multiExpr
 }
 
-#-------------------------------------------------------------------------------
-#
-# addTraitToPCs
-#
-#-------------------------------------------------------------------------------
-
-# Adds a trait vector to a set of eigenvectors.
-# Caution: multiTraits is assumed to be a vector of lists with each list having
-# an entry data which is a nSamples x nTraits data frame with an appropriate
-# column name, not a vector.
-
-
-
+# addTraitToPCs ####
 #' Add trait information to multi-set module eigengene structure
 #'
 #' Adds trait information to multi-set module eigengene structure.
@@ -8396,19 +7829,7 @@ addTraitToMEs <- function(multiME, multiTraits) {
     multiMETs
 }
 
-
-#-------------------------------------------------------------------------------
-#
-# CorrelationPreservation
-#
-#-------------------------------------------------------------------------------
-#
-# Given a set of multiME (or OrderedMEs), calculate the preservation values for
-# each module in each pair
-# of datasets and return them as a matrix
-
-
-
+# CorrelationPreservation ####
 #' Preservation of eigengene correlations
 #'
 #' Calculates a summary measure of preservation of eigengene correlations
@@ -8440,56 +7861,42 @@ addTraitToMEs <- function(multiME, multiTraits) {
 #' the relationships between co-expression modules. BMC Systems Biology 2007,
 #' 1:54
 #' @keywords misc
-correlationPreservation <-
-    function(multiME,
-             setLabels,
-             excludeGrey = TRUE,
-             greyLabel = "grey") {
-        nSets = length(multiME)
-        if (nSets != length(setLabels))
-            stop("The lengths of multiME and setLabels must equal.")
-        if (nSets <= 1)
-            stop("Something is wrong with argument multiME: its length is 0 or 1")
-        Names = names(multiME[[1]]$data)
-        if (excludeGrey) {
-            Use = substring(Names, 3) != greyLabel
-        } else {
-            Use = rep(TRUE, times = length(Names))
-        }
-        No.Mods = ncol(multiME[[1]]$data[, Use])
-        CP = matrix(0, nrow = No.Mods, ncol = nSets * (nSets - 1) / 2)
-        diag(CP) = 1
-        CPInd = 1
-        CPNames = NULL
-        for (i in 1:(nSets - 1))
-            for (j in (i + 1):nSets) {
-                corME1 = cor(multiME[[i]]$data[, Use], use = "p")
-                corME2 = cor(multiME[[j]]$data[, Use], use = "p")
-                d = 1 - abs(tanh((corME1 - corME2) / (abs(corME1) + abs(corME2)) ^
-                                     2))
-                CP[, CPInd] = apply(d, 1, sum) - 1
-                CPNames = c(CPNames,
-                            paste(setLabels[i], "::", setLabels[j], collapse = ""))
-                CPInd = CPInd + 1
-            }
-        CPx = as.data.frame(CP)
-        names(CPx) = CPNames
-        rownames(CPx) = Names[Use]
-        CPx
+correlationPreservation <- function(multiME, setLabels, excludeGrey = TRUE,
+                                    greyLabel = "grey") {
+    nSets = length(multiME)
+    if (nSets != length(setLabels))
+        stop("The lengths of multiME and setLabels must equal.")
+    if (nSets <= 1)
+        stop("Something is wrong with argument multiME: its length is 0 or 1")
+    Names = names(multiME[[1]]$data)
+    if (excludeGrey) {
+        Use = substring(Names, 3) != greyLabel
+    } else {
+        Use = rep(TRUE, times = length(Names))
     }
+    No.Mods = ncol(multiME[[1]]$data[, Use])
+    CP = matrix(0, nrow = No.Mods, ncol = nSets * (nSets - 1) / 2)
+    diag(CP) = 1
+    CPInd = 1
+    CPNames = NULL
+    for (i in 1:(nSets - 1))
+        for (j in (i + 1):nSets) {
+            corME1 = cor(multiME[[i]]$data[, Use], use = "p")
+            corME2 = cor(multiME[[j]]$data[, Use], use = "p")
+            d = 1 - abs(tanh((corME1 - corME2) / (abs(corME1) + abs(corME2)) ^
+                                 2))
+            CP[, CPInd] = apply(d, 1, sum) - 1
+            CPNames = c(CPNames,
+                        paste(setLabels[i], "::", setLabels[j], collapse = ""))
+            CPInd = CPInd + 1
+        }
+    CPx = as.data.frame(CP)
+    names(CPx) = CPNames
+    rownames(CPx) = Names[Use]
+    CPx
+}
 
-
-#-------------------------------------------------------------------------------
-#
-# setCorrelationPreservation
-#
-#-------------------------------------------------------------------------------
-#
-# Given a set of multiME (or OrderedMEs), calculate the preservation values for
-# each each pair of datasets and return them as a matrix.
-
-
-
+# setCorrelationPreservation ####
 #' Summary correlation preservation measure
 #'
 #' Given consensus eigengenes, the function calculates the average correlation
@@ -8528,65 +7935,47 @@ correlationPreservation <-
 #' the relationships between co-expression modules. BMC Systems Biology 2007,
 #' 1:54
 #' @keywords misc
-setCorrelationPreservation <-
-    function(multiME,
-             setLabels,
-             excludeGrey = TRUE,
-             greyLabel = "grey",
-             method = "absolute") {
-        m = charmatch(method, c("absolute", "hyperbolic"))
-        if (is.na(m)) {
-            stop("Unrecognized method given. Recognized methods are absolute,
+setCorrelationPreservation <- function(multiME, setLabels, excludeGrey = TRUE,
+                                       greyLabel = "grey",
+                                       method = "absolute") {
+    m = charmatch(method, c("absolute", "hyperbolic"))
+    if (is.na(m)) {
+        stop("Unrecognized method given. Recognized methods are absolute,
                  hyperbolic.")
-        }
-        nSets = length(multiME)
-        if (nSets != length(setLabels))
-            stop("The lengths of multiME and setLabels must equal.")
-        if (nSets <= 1)
-            stop("Something is wrong with argument multiME: its length is 0 or 1")
-        Names = names(multiME[[1]]$data)
-        if (excludeGrey) {
-            Use = substring(Names, 3) != greyLabel
-        } else {
-            Use = rep(TRUE, times = length(Names))
-        }
-        No.Mods = ncol(multiME[[1]]$data[, Use])
-        SCP = matrix(0, nrow = nSets, ncol = nSets)
-        diag(SCP) = 0
-        for (i in 1:(nSets - 1))
-            for (j in (i + 1):nSets) {
-                corME1 = cor(multiME[[i]]$data[, Use], use = "p")
-                corME2 = cor(multiME[[j]]$data[, Use], use = "p")
-                if (m == 1) {
-                    d = 1 - abs(corME1 - corME2) / 2
-                } else {
-                    d = 1 - abs(tanh((corME1 - corME2) / (abs(corME1) + abs(corME2)) ^ 2))
-                }
-                SCP[i, j] = sum(d[upper.tri(d)]) / sum(upper.tri(d))
-                SCP[j, i] = SCP[i, j]
-            }
-        SCPx = as.data.frame(SCP)
-        names(SCPx) = setLabels
-        rownames(SCPx) = setLabels
-        SCPx
     }
+    nSets = length(multiME)
+    if (nSets != length(setLabels))
+        stop("The lengths of multiME and setLabels must equal.")
+    if (nSets <= 1)
+        stop("Something is wrong with argument multiME: its length is 0 or 1")
+    Names = names(multiME[[1]]$data)
+    if (excludeGrey) {
+        Use = substring(Names, 3) != greyLabel
+    } else {
+        Use = rep(TRUE, times = length(Names))
+    }
+    No.Mods = ncol(multiME[[1]]$data[, Use])
+    SCP = matrix(0, nrow = nSets, ncol = nSets)
+    diag(SCP) = 0
+    for (i in 1:(nSets - 1))
+        for (j in (i + 1):nSets) {
+            corME1 = cor(multiME[[i]]$data[, Use], use = "p")
+            corME2 = cor(multiME[[j]]$data[, Use], use = "p")
+            if (m == 1) {
+                d = 1 - abs(corME1 - corME2) / 2
+            } else {
+                d = 1 - abs(tanh((corME1 - corME2) / (abs(corME1) + abs(corME2)) ^ 2))
+            }
+            SCP[i, j] = sum(d[upper.tri(d)]) / sum(upper.tri(d))
+            SCP[j, i] = SCP[i, j]
+        }
+    SCPx = as.data.frame(SCP)
+    names(SCPx) = setLabels
+    rownames(SCPx) = setLabels
+    SCPx
+}
 
-#-------------------------------------------------------------------------------
-#
-# preservationNetworkDensity
-#
-#-------------------------------------------------------------------------------
-
-#-------------------------------------------------------------------------------
-#
-# preservationNetworkConnectivity
-#
-#-------------------------------------------------------------------------------
-
-# This function returns connectivities of nodes in preservation networks
-
-
-
+# preservationNetworkConnectivity ####
 #' Network preservation calculations
 #'
 #' This function calculates several measures of gene network preservation.
@@ -8928,19 +8317,7 @@ preservationNetworkConnectivity <- function(multiExpr,
     )
 }
 
-#-------------------------------------------------------------------------------
-#
-# plotEigengeneNetworks
-#
-#-------------------------------------------------------------------------------
-# Plots a matrix plot of the ME(T)s. On the diagonal the heatmaps show
-# correlation of MEs in the particular subset; off - diagonal are differences in
-# the correlation matrix.
-# setLabels is a vector of titles for the diagonal diagrams; the off - diagonal
-# will have no title for now.
-
-
-
+# plotEigengeneNetworks ####
 #' Eigengene network plot
 #'
 #' This function plots dendrogram and eigengene representations of (consensus)
@@ -9360,17 +8737,7 @@ plotEigengeneNetworks <- function(multiME,
             }
 }
 
-#===============================================================================
-#
-# numbers2colors: convert a vector of numbers to colors
-#
-#===============================================================================
-
-# Turn a numerical variable into a color indicator. x can be a matrix or a vector.
-# For discrete variables, consider also labels2colors.
-
-
-
+# numbers2colors ####
 #' Color representation for a numeric variable
 #'
 #' The function creates a color represenation for the given numeric input.
@@ -9417,8 +8784,7 @@ numbers2colors <- function(x,
                            } else {
                                blueWhiteRed(100)[51:100]
                            },
-                           naColor = "grey")
-{
+                           naColor = "grey") {
     x = as.matrix(x)
     if (!is.numeric(x))
         stop("'x' must be numeric. For a factor, please use as.numeric(x) in
@@ -9506,12 +8872,8 @@ numbers2colors <- function(x,
     xCol
 }
 
-#===============================================================================
-#
+# randIndex ####
 #  Rand index calculation
-#
-#===============================================================================
-
 # this function is used for computing the Rand index below...
 #
 .choosenew <- function(n, k) {
@@ -9527,12 +8889,6 @@ numbers2colors <- function(x,
     }
     out1
 }
-
-
-# the following function computes the Rand index between 2 clusterings
-# assesses how similar two clusterings are
-
-
 #' Rand index of two partitions
 #'
 #' Computes the Rand index, a measure of the similarity between two
@@ -9547,8 +8903,7 @@ numbers2colors <- function(x,
 #' clustering methods". Journal of the American Statistical Association 66:
 #' 846-850
 #' @keywords misc
-randIndex <- function(tab, adjust = TRUE)
-{
+randIndex <- function(tab, adjust = TRUE) {
     a <- 0
     b <- 0
     c <- 0
@@ -9581,11 +8936,7 @@ randIndex <- function(tab, adjust = TRUE)
 }
 
 
-#===============================================================================
-#
-# Check expression data: mark genes and samples with too many missing entries
-#
-#===============================================================================
+# goodGenes ####
 #' Filter genes with too many missing entries
 #'
 #' This function checks data for missing entries and returns a list of genes
@@ -9639,8 +8990,7 @@ goodGenes <- function(datExpr,
                       minNGenes = ..minNGenes,
                       tol = NULL,
                       verbose = 1,
-                      indent = 0)
-{
+                      indent = 0) {
     datExpr = as.matrix(datExpr)
     if (is.atomic(datExpr) && (mode(datExpr) != 'numeric'))
         stop("datExpr must contain numeric data.")
@@ -9687,7 +9037,7 @@ goodGenes <- function(datExpr,
     gg
 }
 
-
+# goodSamples ####
 #' Filter samples with too many missing entries
 #'
 #' This function checks data for missing entries and returns a list of samples
@@ -9769,8 +9119,7 @@ goodSamples <- function(datExpr,
     goodSamples
 }
 
-
-
+# goodGenesMS ####
 #' Filter genes with too many missing entries across multiple sets
 #'
 #' This function checks data for missing entries and returns a list of genes
@@ -9823,95 +9172,92 @@ goodSamples <- function(datExpr,
 #' \code{\link{goodSamplesMS}}, \code{\link{goodSamplesGenesMS}} for additional
 #' cleaning of multiple data sets together.
 #' @keywords misc
-goodGenesMS <-
-    function(multiExpr,
-             useSamples = NULL,
-             useGenes = NULL,
-             minFraction = 1 / 2,
-             minNSamples = ..minNSamples,
-             minNGenes = ..minNGenes,
-             tol = NULL,
-             verbose = 1,
-             indent = 0)
+goodGenesMS <- function(multiExpr,
+                        useSamples = NULL,
+                        useGenes = NULL,
+                        minFraction = 1 / 2,
+                        minNSamples = ..minNSamples,
+                        minNGenes = ..minNGenes,
+                        tol = NULL,
+                        verbose = 1,
+                        indent = 0) {
+    dataSize = checkSets(multiExpr)
+    nSets = dataSize$nSets
+    if (is.null(useGenes))
+        useGenes = rep(TRUE, dataSize$nGenes)
+    if (is.null(useSamples))
     {
-        dataSize = checkSets(multiExpr)
-        nSets = dataSize$nSets
-        if (is.null(useGenes))
-            useGenes = rep(TRUE, dataSize$nGenes)
-        if (is.null(useSamples))
-        {
-            useSamples = list()
-            for (set in 1:nSets)
-                useSamples[[set]] = rep(TRUE, dataSize$nSamples[set])
-        }
-
-        if (length(useGenes) != dataSize$nGenes)
-            stop("Length of nGenes is not compatible with number of genes in
-                 multiExpr.")
-        if (length(useSamples) != nSets)
-            stop("Length of nSamples is not compatible with number of sets in
-                 multiExpr.")
-
+        useSamples = list()
         for (set in 1:nSets)
-            if (length(useSamples[[set]]) != dataSize$nSamples[set])
-                stop(
-                    paste(
-                        "Number of samples in useSamples[[",
-                        set,
-                        "]] incompatible\n   ",
-                        "with number of samples in the corresponding set of multiExpr."
-                    )
-                )
-
-        nSamples = sapply(useSamples, sum)
-        nGenes = sum(useGenes)
-
-        goodGenes = useGenes
-        for (set in 1:nSets) {
-            if (is.null(tol)) {
-                tol1 = 1e-10 * max(abs(multiExpr[[set]]$data),
-                                   na.rm = TRUE)
-            } else {
-                tol1 = tol
-            }
-            if (sum(goodGenes) == 0)
-                break
-            if (sum(useSamples[[set]]) == 0)
-                next
-            expr1 = multiExpr[[set]]$data[useSamples[[set]], goodGenes, drop = FALSE]
-            if (mode(expr1) == "list")
-                expr1 = as.matrix(expr1)
-            nPresent = colSums(!is.na(expr1))
-            goodGenes[goodGenes] = (nPresent >= minNGenes)
-            expr1 = expr1[, nPresent >= minNGenes, drop = FALSE]
-            if (any(goodGenes)) {
-                var = colVars(expr1, na.rm = TRUE)
-                nNAsGenes = colSums(is.na(expr1))
-                goodGenes[goodGenes][nNAsGenes > (1 - minFraction) * nSamples[set] |
-                                         var <= tol1 ^ 2 |
-                                         (nSamples[set] - nNAsGenes < minNSamples)] = FALSE
-            }
-        }
-        if (sum(goodGenes) < minNGenes)
-            stop(
-                "Too few genes with valid expression levels in the required number
-                of samples in all sets."
-            )
-
-        if (verbose > 0 & (nGenes - sum(goodGenes) > 0))
-            printFlush(
-                paste(
-                    "  ..Excluding",
-                    nGenes - sum(goodGenes),
-                    "genes from the calculation due to too many missing
-                    samples or zero variance."
-                )
-            )
-        goodGenes
+            useSamples[[set]] = rep(TRUE, dataSize$nSamples[set])
     }
 
+    if (length(useGenes) != dataSize$nGenes)
+        stop("Length of nGenes is not compatible with number of genes in
+                 multiExpr.")
+    if (length(useSamples) != nSets)
+        stop("Length of nSamples is not compatible with number of sets in
+                 multiExpr.")
 
+    for (set in 1:nSets)
+        if (length(useSamples[[set]]) != dataSize$nSamples[set])
+            stop(
+                paste(
+                    "Number of samples in useSamples[[",
+                    set,
+                    "]] incompatible\n   ",
+                    "with number of samples in the corresponding set of multiExpr."
+                )
+            )
 
+    nSamples = sapply(useSamples, sum)
+    nGenes = sum(useGenes)
+
+    goodGenes = useGenes
+    for (set in 1:nSets) {
+        if (is.null(tol)) {
+            tol1 = 1e-10 * max(abs(multiExpr[[set]]$data),
+                               na.rm = TRUE)
+        } else {
+            tol1 = tol
+        }
+        if (sum(goodGenes) == 0)
+            break
+        if (sum(useSamples[[set]]) == 0)
+            next
+        expr1 = multiExpr[[set]]$data[useSamples[[set]], goodGenes, drop = FALSE]
+        if (mode(expr1) == "list")
+            expr1 = as.matrix(expr1)
+        nPresent = colSums(!is.na(expr1))
+        goodGenes[goodGenes] = (nPresent >= minNGenes)
+        expr1 = expr1[, nPresent >= minNGenes, drop = FALSE]
+        if (any(goodGenes)) {
+            var = colVars(expr1, na.rm = TRUE)
+            nNAsGenes = colSums(is.na(expr1))
+            goodGenes[goodGenes][nNAsGenes > (1 - minFraction) * nSamples[set] |
+                                     var <= tol1 ^ 2 |
+                                     (nSamples[set] - nNAsGenes < minNSamples)] = FALSE
+        }
+    }
+    if (sum(goodGenes) < minNGenes)
+        stop(
+            "Too few genes with valid expression levels in the required number
+                of samples in all sets."
+        )
+
+    if (verbose > 0 & (nGenes - sum(goodGenes) > 0))
+        printFlush(
+            paste(
+                "  ..Excluding",
+                nGenes - sum(goodGenes),
+                "genes from the calculation due to too many missing
+                    samples or zero variance."
+            )
+        )
+    goodGenes
+}
+
+# goodSamplesMS ####
 #' Filter samples with too many missing entries across multiple data sets
 #'
 #' This function checks data for missing entries and returns a list of samples
@@ -9955,82 +9301,79 @@ goodGenesMS <-
 #' \code{\link{goodGenesMS}}, \code{\link{goodSamplesGenesMS}} for additional
 #' cleaning of multiple data sets together.
 #' @keywords misc
-goodSamplesMS <-
-    function(multiExpr,
-             useSamples = NULL,
-             useGenes = NULL,
-             minFraction = 1 / 2,
-             minNSamples = ..minNSamples,
-             minNGenes = ..minNGenes,
-             verbose = 1,
-             indent = 0)
+goodSamplesMS <- function(multiExpr,
+                          useSamples = NULL,
+                          useGenes = NULL,
+                          minFraction = 1 / 2,
+                          minNSamples = ..minNSamples,
+                          minNGenes = ..minNGenes,
+                          verbose = 1,
+                          indent = 0) {
+    dataSize = checkSets(multiExpr)
+    nSets = dataSize$nSets
+    if (is.null(useGenes))
+        useGenes = rep(TRUE, dataSize$nGenes)
+    if (is.null(useSamples))
     {
-        dataSize = checkSets(multiExpr)
-        nSets = dataSize$nSets
-        if (is.null(useGenes))
-            useGenes = rep(TRUE, dataSize$nGenes)
-        if (is.null(useSamples))
-        {
-            useSamples = list()
-            for (set in 1:nSets)
-                useSamples[[set]] = rep(TRUE, dataSize$nSamples[set])
-        }
-
-        if (length(useGenes) != dataSize$nGenes)
-            stop("Length of nGenes is not compatible with number of genes in
-                 multiExpr.")
-        if (length(useSamples) != dataSize$nSets)
-            stop("Length of nSamples is not compatible with number of sets
-                 in multiExpr.")
-
+        useSamples = list()
         for (set in 1:nSets)
-            if (length(useSamples[[set]]) != dataSize$nSamples[set])
-                stop(
-                    paste(
-                        "Number of samples in useSamples[[",
-                        set,
-                        "]] incompatible\n   ",
-                        "with number of samples in the corresponding set of multiExpr."
-                    )
-                )
-
-        nSamples = sapply(useSamples, sum)
-        nGenes = sum(useGenes)
-
-        goodSamples = useSamples
-        for (set in 1:nSets) {
-            if (sum(useGenes) == 0)
-                break
-            if (sum(goodSamples[[set]]) == 0)
-                next
-            nNAsSamples = rowSums(is.na(multiExpr[[set]]$data[useSamples[[set]],
-                                                              useGenes, drop = FALSE]))
-            goodSamples[[set]][useSamples[[set]]]  =
-                ((nNAsSamples < (1 - minFraction) * nGenes) & (nGenes - nNAsSamples >= minNGenes))
-            if (sum(goodSamples[[set]]) < minNSamples)
-                stop(
-                    "Too few samples with valid expression levels for the required n
-                    umber of genes in set",
-                    set
-                )
-            if (verbose > 0 &
-                (nSamples[set] - sum(goodSamples[[set]]) > 0))
-                printFlush(
-                    paste(
-                        "  ..Set",
-                        set,
-                        ": Excluding",
-                        nSamples[set] -
-                            sum(goodSamples[[set]]),
-                        "samples from the calculation due to too many missing genes."
-                    )
-                )
-        }
-        goodSamples
+            useSamples[[set]] = rep(TRUE, dataSize$nSamples[set])
     }
 
+    if (length(useGenes) != dataSize$nGenes)
+        stop("Length of nGenes is not compatible with number of genes in
+                 multiExpr.")
+    if (length(useSamples) != dataSize$nSets)
+        stop("Length of nSamples is not compatible with number of sets
+                 in multiExpr.")
 
+    for (set in 1:nSets)
+        if (length(useSamples[[set]]) != dataSize$nSamples[set])
+            stop(
+                paste(
+                    "Number of samples in useSamples[[",
+                    set,
+                    "]] incompatible\n   ",
+                    "with number of samples in the corresponding set of multiExpr."
+                )
+            )
 
+    nSamples = sapply(useSamples, sum)
+    nGenes = sum(useGenes)
+
+    goodSamples = useSamples
+    for (set in 1:nSets) {
+        if (sum(useGenes) == 0)
+            break
+        if (sum(goodSamples[[set]]) == 0)
+            next
+        nNAsSamples = rowSums(is.na(multiExpr[[set]]$data[useSamples[[set]],
+                                                          useGenes, drop = FALSE]))
+        goodSamples[[set]][useSamples[[set]]]  =
+            ((nNAsSamples < (1 - minFraction) * nGenes) & (nGenes - nNAsSamples >= minNGenes))
+        if (sum(goodSamples[[set]]) < minNSamples)
+            stop(
+                "Too few samples with valid expression levels for the required n
+                    umber of genes in set",
+                set
+            )
+        if (verbose > 0 &
+            (nSamples[set] - sum(goodSamples[[set]]) > 0))
+            printFlush(
+                paste(
+                    "  ..Set",
+                    set,
+                    ": Excluding",
+                    nSamples[set] -
+                        sum(goodSamples[[set]]),
+                    "samples from the calculation due to too many missing genes."
+                )
+            )
+    }
+    goodSamples
+}
+
+# goodSamplesGenes ####
 #' Iterative filtering of samples and genes with too many missing entries
 #'
 #' This function checks data for missing entries and zero-variance genes, and
@@ -10081,8 +9424,7 @@ goodSamplesGenes <- function(datExpr,
                              minNGenes = ..minNGenes,
                              tol = NULL,
                              verbose = 1,
-                             indent = 0)
-{
+                             indent = 0) {
     spaces = indentSpaces(indent)
     goodGenes = NULL
     goodSamples = NULL
@@ -10132,8 +9474,7 @@ goodSamplesGenes <- function(datExpr,
          allOK = allOK)
 }
 
-
-
+# goodSamplesGenesMS ####
 #' Iterative filtering of samples and genes with too many missing entries
 #' across multiple data sets
 #'
@@ -10192,8 +9533,7 @@ goodSamplesGenesMS <- function(multiExpr,
                                minNGenes = ..minNGenes,
                                tol = NULL,
                                verbose = 2,
-                               indent = 0)
-{
+                               indent = 0) {
     spaces = indentSpaces(indent)
     size = checkSets(multiExpr)
     nSets = size$nSets
@@ -10257,290 +9597,281 @@ goodSamplesGenesMS <- function(multiExpr,
          allOK = allOK)
 }
 
-#===============================================================================
-#
 # modified heatmap plot: allow specifying the hang parameter for both side and
 # top dendrograms
-#
-#===============================================================================
-.heatmap <-
-    function(x,
-             Rowv = NULL,
-             Colv = if (symm)
-                 "Rowv"
-             else
-                 NULL,
-             distfun = dist,
-             hclustfun = fastcluster::hclust,
-             reorderfun = function(d, w) {
-                 reorder(d, w)
-             },
-             add.expr,
-             symm = FALSE,
-             revC = identical(Colv, "Rowv"),
-             scale = c("row", "column", "none"),
-             na.rm = TRUE,
-             margins = c(1.2, 1.2),
-             ColSideColors,
-             RowSideColors,
-             cexRow = 0.2  +
-                 1 / log10(nr),
-             cexCol = 0.2 + 1 / log10(nc),
-             labRow = NULL,
-             labCol = NULL,
-             main = NULL,
-             xlab = NULL,
-             ylab = NULL,
-             keep.dendro = FALSE,
-             verbose = getOption("verbose"),
-             setLayout = TRUE,
-             hang = 0.04,
-             ...)
-    {
-        scale <- if (symm && missing(scale))
-            "none"
-        else
-            match.arg(scale)
-        if (length(di <- dim(x))  != 2 || !is.numeric(x))
-            stop("'x' must be a numeric matrix")
-        nr <- di[1L]
-        nc <- di[2L]
-        if (nr <= 1 || nc <= 1)
-            stop("'x' must have at least 2 rows and 2 columns")
-        if (!is.numeric(margins) || length(margins)  != 2L)
-            stop("'margins' must be a numeric vector of length 2")
+.heatmap <- function(x,
+                     Rowv = NULL,
+                     Colv = if (symm)
+                         "Rowv"
+                     else
+                         NULL,
+                     distfun = dist,
+                     hclustfun = fastcluster::hclust,
+                     reorderfun = function(d, w) {
+                         reorder(d, w)
+                     },
+                     add.expr,
+                     symm = FALSE,
+                     revC = identical(Colv, "Rowv"),
+                     scale = c("row", "column", "none"),
+                     na.rm = TRUE,
+                     margins = c(1.2, 1.2),
+                     ColSideColors,
+                     RowSideColors,
+                     cexRow = 0.2  +
+                         1 / log10(nr),
+                     cexCol = 0.2 + 1 / log10(nc),
+                     labRow = NULL,
+                     labCol = NULL,
+                     main = NULL,
+                     xlab = NULL,
+                     ylab = NULL,
+                     keep.dendro = FALSE,
+                     verbose = getOption("verbose"),
+                     setLayout = TRUE,
+                     hang = 0.04,
+                     ...) {
+    scale <- if (symm && missing(scale))
+        "none"
+    else
+        match.arg(scale)
+    if (length(di <- dim(x))  != 2 || !is.numeric(x))
+        stop("'x' must be a numeric matrix")
+    nr <- di[1L]
+    nc <- di[2L]
+    if (nr <= 1 || nc <= 1)
+        stop("'x' must have at least 2 rows and 2 columns")
+    if (!is.numeric(margins) || length(margins)  != 2L)
+        stop("'margins' must be a numeric vector of length 2")
 
-        doRdend <- !identical(Rowv, NA)
-        doCdend <- !identical(Colv, NA)
-        if (!doRdend && identical(Colv, "Rowv"))
-            doCdend <- FALSE
-        ## by default order by row/col means
-        if (is.null(Rowv))
-            Rowv <- rowMeans(x, na.rm = na.rm)
-        if (is.null(Colv))
-            Colv <- colMeans(x, na.rm = na.rm)
+    doRdend <- !identical(Rowv, NA)
+    doCdend <- !identical(Colv, NA)
+    if (!doRdend && identical(Colv, "Rowv"))
+        doCdend <- FALSE
+    ## by default order by row/col means
+    if (is.null(Rowv))
+        Rowv <- rowMeans(x, na.rm = na.rm)
+    if (is.null(Colv))
+        Colv <- colMeans(x, na.rm = na.rm)
 
-        ## get the dendrograms and reordering indices
-        if (doRdend) {
-            if (inherits(Rowv, "dendrogram"))
-                ddr <- Rowv
-            else {
-                hcr <- hclustfun(distfun(x))
-                if (class(hcr) == 'hclust')
-                {
-                    hcr$height = hcr$height - min(hcr$height) + hang * (max(hcr$height) - min(hcr$height))
-                }
-                ddr <- as.dendrogram(hcr, hang = hang)
-                if (!is.logical(Rowv) || Rowv)
-                    ddr <- reorderfun(ddr, Rowv)
+    ## get the dendrograms and reordering indices
+    if (doRdend) {
+        if (inherits(Rowv, "dendrogram"))
+            ddr <- Rowv
+        else {
+            hcr <- hclustfun(distfun(x))
+            if (class(hcr) == 'hclust')
+            {
+                hcr$height = hcr$height - min(hcr$height) + hang * (max(hcr$height) - min(hcr$height))
             }
-            if (nr  != length(rowInd <- order.dendrogram(ddr)))
-                stop("row dendrogram ordering gave index of wrong length")
+            ddr <- as.dendrogram(hcr, hang = hang)
+            if (!is.logical(Rowv) || Rowv)
+                ddr <- reorderfun(ddr, Rowv)
         }
-        else
-            rowInd <- 1:nr
-        if (doCdend) {
-            if (inherits(Colv, "dendrogram"))
-                ddc <- Colv
-            else if (identical(Colv, "Rowv")) {
-                if (nr  != nc)
-                    stop("Colv = \"Rowv\" but nrow(x)  != ncol(x)")
-                ddc <- ddr
+        if (nr  != length(rowInd <- order.dendrogram(ddr)))
+            stop("row dendrogram ordering gave index of wrong length")
+    }
+    else
+        rowInd <- 1:nr
+    if (doCdend) {
+        if (inherits(Colv, "dendrogram"))
+            ddc <- Colv
+        else if (identical(Colv, "Rowv")) {
+            if (nr  != nc)
+                stop("Colv = \"Rowv\" but nrow(x)  != ncol(x)")
+            ddc <- ddr
+        }
+        else {
+            hcc <- hclustfun(distfun(if (symm)
+                x
+                else
+                    t(x)))
+            if (class(hcr) == 'hclust')
+            {
+                hcc$height = hcc$height - min(hcc$height) + hang * (max(hcc$height) - min(hcc$height))
             }
-            else {
-                hcc <- hclustfun(distfun(if (symm)
-                    x
-                    else
-                        t(x)))
-                if (class(hcr) == 'hclust')
-                {
-                    hcc$height = hcc$height - min(hcc$height) + hang * (max(hcc$height) - min(hcc$height))
-                }
-                ddc <- as.dendrogram(hcc, hang = hang)
-                if (!is.logical(Colv) ||
-                    Colv)
-                    ddc <- reorderfun(ddc, Colv)
-            }
-            if (nc  != length(colInd <- order.dendrogram(ddc)))
-                stop("column dendrogram ordering gave index of wrong length")
+            ddc <- as.dendrogram(hcc, hang = hang)
+            if (!is.logical(Colv) ||
+                Colv)
+                ddc <- reorderfun(ddc, Colv)
         }
-        else
-            colInd <- 1:nc
+        if (nc  != length(colInd <- order.dendrogram(ddc)))
+            stop("column dendrogram ordering gave index of wrong length")
+    }
+    else
+        colInd <- 1:nc
 
-        ## reorder x
-        x <- x[rowInd, colInd]
+    ## reorder x
+    x <- x[rowInd, colInd]
 
-        labRow <- if (is.null(labRow))
-            if (is.null(rownames(x)))
-                (1:nr)[rowInd]
-        else
-            rownames(x)
-        else
-            labRow[rowInd]
-        labCol <- if (is.null(labCol))
-            if (is.null(colnames(x)))
-                (1:nc)[colInd]
-        else
-            colnames(x)
-        else
-            labCol[colInd]
-        if (scale == "row") {
-            x <- sweep(x, 1, rowMeans(x, na.rm = na.rm))
-            sx <- apply(x, 1, sd, na.rm = na.rm)
-            x <- sweep(x, 1, sx, "/")
-        }
-        else if (scale == "column") {
-            x <- sweep(x, 2, colMeans(x, na.rm = na.rm))
-            sx <- apply(x, 2, sd, na.rm = na.rm)
-            x <- sweep(x, 2, sx, "/")
-        }
-
-        ## Calculate the plot layout
-        lmat <- rbind(c(NA, 3), 2:1)
-        lwid <- c(if (doRdend)
-            1
-            else
-                0.05, 4)
-        lhei <-
-            c((if (doCdend)
-                1
-               else
-                   0.05) + if (!is.null(main))
-                       0.5
-              else
-                  0, 4)
-        if (!missing(ColSideColors)) {
-            if (!is.character(ColSideColors) || length(ColSideColors)  != nc)
-                stop("'ColSideColors' must be a character vector of length ncol(x)")
-            lmat <- rbind(lmat[1,] + 1, c(NA, 1), lmat[2,] + 1)
-            lhei <- c(lhei[1], 0.2, lhei[2])
-        }
-        if (!missing(RowSideColors)) {
-            if (!is.character(RowSideColors) || length(RowSideColors)  != nr)
-                stop("'RowSideColors' must be a character vector of length nrow(x)")
-            lmat <- cbind(lmat[, 1] + 1, c(rep(NA, nrow(lmat) - 1), 1),
-                          lmat[, 2] + 1)
-            lwid <- c(lwid[1], 0.2, lwid[2])
-        }
-        lmat[is.na(lmat)] <- 0
-        if (verbose) {
-            cat("layout: widths = ", lwid, ", heights = ", lhei, "; lmat = \n")
-            print(lmat)
-        }
-        if (!symm || scale  != "none")
-            x <- t(x)
-        op <- par(no.readonly = TRUE)
-        if (revC) {
-            iy <- nc:1
-            ddr <- rev(ddr)
-            rowInd.colors = rev(rowInd)
-            x <- x[, iy]
-        } else
-            iy <- 1:nr
-        #on.exit(par(op))
-        # print(paste("main:", main))
-        if (setLayout)
-            layout(lmat,
-                   widths = lwid,
-                   heights = lhei,
-                   respect = TRUE)
-        if (!missing(RowSideColors)) {
-            par(mar = c(margins[1], 0, 0, 0.5))
-            image(rbind(1:nr), col = RowSideColors[rowInd.colors], axes = FALSE)
-        }
-        if (!missing(ColSideColors)) {
-            par(mar = c(0.5, 0, 0, margins[2]))
-            image(cbind(1:nc), col = ColSideColors[colInd], axes = FALSE)
-        }
-        par(mar = c(margins[1], 0, 0, margins[2]))
-        image(
-            1:nc,
-            1:nr,
-            x,
-            xlim = 0.5 + c(0, nc),
-            ylim = 0.5 + c(0, nr),
-            axes = FALSE,
-            xlab = "",
-            ylab = "",
-            ...
-        )
-        axis(
-            1,
-            1:nc,
-            labels = labCol,
-            las = 2,
-            line = -0.5,
-            tick = 0,
-            cex.axis = cexCol
-        )
-        if (!is.null(xlab))
-            mtext(xlab, side = 1, line = margins[1] - 1.25)
-        axis(
-            4,
-            iy,
-            labels = labRow,
-            las = 2,
-            line = -0.5,
-            tick = 0,
-            cex.axis = cexRow
-        )
-        if (!is.null(ylab))
-            mtext(ylab, side = 4, line = margins[2] - 1.25)
-        if (!missing(add.expr))
-            eval.parent(substitute(add.expr))
-        par(mar = c(margins[1], 0, 0, 0))
-        if (doRdend) {
-            .plotDendrogram(
-                as.hclust(ddr),
-                horiz = TRUE,
-                labels = FALSE,
-                axes = FALSE
-            )
-            #    plot(ddr, horiz = TRUE, axes = FALSE, yaxs = "i", leaflab = "none")
-        }
-        else
-            frame()
-        par(mar = c(0, 0, if (!is.null(main))
-            1.8
-            else
-                0, margins[2]))
-        if (doCdend)
-        {
-            .plotDendrogram(
-                as.hclust(ddc),
-                horiz = FALSE,
-                labels = FALSE,
-                axes = FALSE
-            )
-            #    plot(ddc, axes = FALSE, xaxs = "i", leaflab = "none")
-        }
-        else if (!is.null(main))
-            frame()
-        if (!is.null(main))
-            title(main, cex.main = 1.2 * op[["cex.main"]])
-        invisible(list(
-            rowInd = rowInd,
-            colInd = colInd,
-            Rowv = if (keep.dendro && doRdend)
-                ddr,
-            Colv = if (keep.dendro && doCdend)
-                ddc
-        ))
+    labRow <- if (is.null(labRow))
+        if (is.null(rownames(x)))
+            (1:nr)[rowInd]
+    else
+        rownames(x)
+    else
+        labRow[rowInd]
+    labCol <- if (is.null(labCol))
+        if (is.null(colnames(x)))
+            (1:nc)[colInd]
+    else
+        colnames(x)
+    else
+        labCol[colInd]
+    if (scale == "row") {
+        x <- sweep(x, 1, rowMeans(x, na.rm = na.rm))
+        sx <- apply(x, 1, sd, na.rm = na.rm)
+        x <- sweep(x, 1, sx, "/")
+    }
+    else if (scale == "column") {
+        x <- sweep(x, 2, colMeans(x, na.rm = na.rm))
+        sx <- apply(x, 2, sd, na.rm = na.rm)
+        x <- sweep(x, 2, sx, "/")
     }
 
+    ## Calculate the plot layout
+    lmat <- rbind(c(NA, 3), 2:1)
+    lwid <- c(if (doRdend)
+        1
+        else
+            0.05, 4)
+    lhei <-
+        c((if (doCdend)
+            1
+           else
+               0.05) + if (!is.null(main))
+                   0.5
+          else
+              0, 4)
+    if (!missing(ColSideColors)) {
+        if (!is.character(ColSideColors) || length(ColSideColors)  != nc)
+            stop("'ColSideColors' must be a character vector of length ncol(x)")
+        lmat <- rbind(lmat[1,] + 1, c(NA, 1), lmat[2,] + 1)
+        lhei <- c(lhei[1], 0.2, lhei[2])
+    }
+    if (!missing(RowSideColors)) {
+        if (!is.character(RowSideColors) || length(RowSideColors)  != nr)
+            stop("'RowSideColors' must be a character vector of length nrow(x)")
+        lmat <- cbind(lmat[, 1] + 1, c(rep(NA, nrow(lmat) - 1), 1),
+                      lmat[, 2] + 1)
+        lwid <- c(lwid[1], 0.2, lwid[2])
+    }
+    lmat[is.na(lmat)] <- 0
+    if (verbose) {
+        cat("layout: widths = ", lwid, ", heights = ", lhei, "; lmat = \n")
+        print(lmat)
+    }
+    if (!symm || scale  != "none")
+        x <- t(x)
+    op <- par(no.readonly = TRUE)
+    if (revC) {
+        iy <- nc:1
+        ddr <- rev(ddr)
+        rowInd.colors = rev(rowInd)
+        x <- x[, iy]
+    } else
+        iy <- 1:nr
+    #on.exit(par(op))
+    # print(paste("main:", main))
+    if (setLayout)
+        layout(lmat,
+               widths = lwid,
+               heights = lhei,
+               respect = TRUE)
+    if (!missing(RowSideColors)) {
+        par(mar = c(margins[1], 0, 0, 0.5))
+        image(rbind(1:nr), col = RowSideColors[rowInd.colors], axes = FALSE)
+    }
+    if (!missing(ColSideColors)) {
+        par(mar = c(0.5, 0, 0, margins[2]))
+        image(cbind(1:nc), col = ColSideColors[colInd], axes = FALSE)
+    }
+    par(mar = c(margins[1], 0, 0, margins[2]))
+    image(
+        1:nc,
+        1:nr,
+        x,
+        xlim = 0.5 + c(0, nc),
+        ylim = 0.5 + c(0, nr),
+        axes = FALSE,
+        xlab = "",
+        ylab = "",
+        ...
+    )
+    axis(
+        1,
+        1:nc,
+        labels = labCol,
+        las = 2,
+        line = -0.5,
+        tick = 0,
+        cex.axis = cexCol
+    )
+    if (!is.null(xlab))
+        mtext(xlab, side = 1, line = margins[1] - 1.25)
+    axis(
+        4,
+        iy,
+        labels = labRow,
+        las = 2,
+        line = -0.5,
+        tick = 0,
+        cex.axis = cexRow
+    )
+    if (!is.null(ylab))
+        mtext(ylab, side = 4, line = margins[2] - 1.25)
+    if (!missing(add.expr))
+        eval.parent(substitute(add.expr))
+    par(mar = c(margins[1], 0, 0, 0))
+    if (doRdend) {
+        .plotDendrogram(
+            as.hclust(ddr),
+            horiz = TRUE,
+            labels = FALSE,
+            axes = FALSE
+        )
+        #    plot(ddr, horiz = TRUE, axes = FALSE, yaxs = "i", leaflab = "none")
+    }
+    else
+        frame()
+    par(mar = c(0, 0, if (!is.null(main))
+        1.8
+        else
+            0, margins[2]))
+    if (doCdend)
+    {
+        .plotDendrogram(
+            as.hclust(ddc),
+            horiz = FALSE,
+            labels = FALSE,
+            axes = FALSE
+        )
+        #    plot(ddc, axes = FALSE, xaxs = "i", leaflab = "none")
+    }
+    else if (!is.null(main))
+        frame()
+    if (!is.null(main))
+        title(main, cex.main = 1.2 * op[["cex.main"]])
+    invisible(list(
+        rowInd = rowInd,
+        colInd = colInd,
+        Rowv = if (keep.dendro && doRdend)
+            ddr,
+        Colv = if (keep.dendro && doCdend)
+            ddc
+    ))
+}
 
-#===============================================================================
+
+# vectorizeMatrix ####
 # The vectorize functions turns a matrix or data frame into a vector. If the
-# matrix is not #symmetric the number of entries of the vector equals the number
+# matrix is not symmetric the number of entries of the vector equals the number
 # of rows times the #number of columns of the matrix.
-# But if the matrix is symmetrical then it only uses the #entries in the upper
+# But if the matrix is symmetrical then it only uses the entries in the upper
 # triangular matrix.
 # If the option diag  = TRUE, it also includes the diagonal elements of the
 # symmetric matrix. By default it  excludes the diagonal elements of a symmetric
 #  matrix.
-
-
-
 #' Turn a matrix into a vector of non-redundant components
 #'
 #' A convenient function to turn a matrix into a vector of non-redundant
@@ -10554,8 +9885,7 @@ goodSamplesGenesMS <- function(multiExpr,
 #' @return A vector containing the non-redundant entries of the input matrix.
 #' @author Steve Horvath
 #' @keywords misc
-vectorizeMatrix <- function(M, diag = FALSE)
-{
+vectorizeMatrix <- function(M, diag = FALSE) {
     if (is.null(dim(M)))
         stop("The input of the vectorize function is not a matrix or data frame.")
     if (length(dim(M)) != 2)
@@ -10575,10 +9905,7 @@ vectorizeMatrix <- function(M, diag = FALSE)
     out
 } # end
 
-#===============================================================================
-
-
-
+# scaleFreeFitIndex ####
 #' Calculation of fitting statistics for evaluating scale free topology fit.
 #'
 #' The function scaleFreeFitIndex calculates several indices (fitting
@@ -10599,46 +9926,40 @@ vectorizeMatrix <- function(M, diag = FALSE)
 #' the truncated exponential model given by lm2 = lm(log.p.dk ~ log.dk + dk).}
 #' @author Steve Horvath
 #' @keywords misc
-scaleFreeFitIndex <-
-    function(k,
-             nBreaks = 10,
-             removeFirst = FALSE) {
-        # TODO: What does this do?
-        discretized.k <- cut(k, nBreaks)
-        dk <- tapply(k, discretized.k, mean)
-        p.dk <- as.vector(tapply(k, discretized.k, length) / length(k))
-        breaks1 <- seq(from = min(k),
-                       to = max(k),
-                       length = nBreaks + 1)
-        hist1 <- hist(k,
-                      breaks = breaks1,
-                      plot = FALSE,
-                      right = TRUE)
-        dk2 <- hist1$mids
-        dk <- ifelse(is.na(dk), dk2, dk)
-        dk <- ifelse(dk == 0, dk2, dk)
-        p.dk <- ifelse(is.na(p.dk), 0, p.dk)
-        log.dk <- as.vector(log10(dk))
-        if (removeFirst) {
-            p.dk <- p.dk[-1]
-            log.dk <- log.dk[-1]
-        }
-        log.p.dk <- as.numeric(log10(p.dk + 1e-09))
-        lm1 <- lm(log.p.dk ~ log.dk)
-        lm2 <- lm(log.p.dk ~ log.dk + I(10 ^ log.dk))
-        datout <- data.frame(
-            Rsquared.SFT <- summary(lm1)$r.squared,
-            slope.SFT <- summary(lm1)$coefficients[2, 1],
-            truncatedExponentialAdjRsquared <-
-                summary(lm2)$adj.r.squared
-        )
-        datout
-    } # end of function scaleFreeFitIndex
+scaleFreeFitIndex <- function(k, nBreaks = 10, removeFirst = FALSE) {
+    # TODO: What does this do?
+    discretized.k <- cut(k, nBreaks)
+    dk <- tapply(k, discretized.k, mean)
+    p.dk <- as.vector(tapply(k, discretized.k, length) / length(k))
+    breaks1 <- seq(from = min(k),
+                   to = max(k),
+                   length = nBreaks + 1)
+    hist1 <- hist(k,
+                  breaks = breaks1,
+                  plot = FALSE,
+                  right = TRUE)
+    dk2 <- hist1$mids
+    dk <- ifelse(is.na(dk), dk2, dk)
+    dk <- ifelse(dk == 0, dk2, dk)
+    p.dk <- ifelse(is.na(p.dk), 0, p.dk)
+    log.dk <- as.vector(log10(dk))
+    if (removeFirst) {
+        p.dk <- p.dk[-1]
+        log.dk <- log.dk[-1]
+    }
+    log.p.dk <- as.numeric(log10(p.dk + 1e-09))
+    lm1 <- lm(log.p.dk ~ log.dk)
+    lm2 <- lm(log.p.dk ~ log.dk + I(10 ^ log.dk))
+    datout <- data.frame(
+        Rsquared.SFT <- summary(lm1)$r.squared,
+        slope.SFT <- summary(lm1)$coefficients[2, 1],
+        truncatedExponentialAdjRsquared <-
+            summary(lm2)$adj.r.squared
+    )
+    datout
+} # end of function scaleFreeFitIndex
 
-#===============================================================================
-
-
-
+# standardScreeningCensoredTime ####
 #' Standard Screening with regard to a Censored Time Variable
 #'
 #' The function standardScreeningCensoredTime computes association measures
@@ -10734,8 +10055,7 @@ standardScreeningCensoredTime <- function(time,
                                           percentiles = seq(from = 0.1, to = 0.9, by = 0.2),
                                           dichotomizationResults = FALSE,
                                           qValues = TRUE,
-                                          fastCalculation = TRUE)
-{
+                                          fastCalculation = TRUE) {
     datExpr = data.frame(datExpr)
     no.Columns = dim(as.matrix(datExpr))[[2]]
     m = dim(as.matrix(datExpr))[[1]]
@@ -10903,14 +10223,7 @@ standardScreeningCensoredTime <- function(time,
 } # end of function standardScreeningCensoredTime
 
 
-#===============================================================================
-#
-# standardScreeningNumericTrait
-#
-#===============================================================================
-
-
-
+# standardScreeningNumericTrait ####
 #' Standard screening for numeric traits
 #'
 #' Standard screening for numeric traits based on Pearson correlation.
@@ -10953,8 +10266,7 @@ standardScreeningNumericTrait <- function(datExpr,
                                           corOptions = list(use = 'p'),
                                           alternative = c("two.sided", "less", "greater"),
                                           qValues = TRUE,
-                                          areaUnderROC = TRUE)
-{
+                                          areaUnderROC = TRUE) {
     datExpr = as.matrix(datExpr)
     nGenes = ncol(datExpr)
     nSamples = nrow(datExpr)
@@ -11038,15 +10350,7 @@ standardScreeningNumericTrait <- function(datExpr,
     output
 }
 
-
-#===============================================================================
-#
-# metaZfunction
-#
-#===============================================================================
-
-
-
+# metaZfunction ####
 #' Meta-analysis Z statistic
 #'
 #' The function calculates a meta analysis Z statistic based on an input data
@@ -11080,14 +10384,7 @@ metaZfunction <- function(datZ, columnweights = NULL) {
     sumZ / sqrt(variance)
 }
 
-#===============================================================================
-#
-# rankPvalue
-#
-#===============================================================================
-
-
-
+# rankPvalue ####
 #' Estimate the p-value for ranking consistently high (or low) on multiple
 #' lists
 #'
@@ -11228,8 +10525,7 @@ rankPvalue <- function(datS,
                        na.last = "keep",
                        ties.method = "average",
                        calculateQvalue = TRUE,
-                       pValueMethod = "all")
-{
+                       pValueMethod = "all") {
     no.rows = dim(datS)[[1]]
     no.cols = dim(datS)[[2]]
     if (!is.null(columnweights) & no.cols  != length(columnweights))
@@ -11353,14 +10649,7 @@ rankPvalue <- function(datS,
     datout
 } # End of function
 
-#===============================================================================
-#
-# utility function: add a comma to string if the string is non - empty
-#
-#===============================================================================
-
-
-
+# prepComma ####
 #' Prepend a comma to a non-empty string
 #'
 #' Utility function that prepends a comma before the input string if the string
@@ -11374,25 +10663,16 @@ rankPvalue <- function(datS,
 #' @keywords misc
 #' @examples
 #'
-#' prepComma("abc");
-#' prepComma("");
+#' prepComma("abc")
+#' prepComma("")
 #'
-prepComma <- function(s)
-{
+prepComma <- function(s) {
     if (s == "")
         return (s)
     paste(", ", s)
 }
 
-
-#===============================================================================
-#
-# "restricted" q - value calculation
-#
-#===============================================================================
-
-
-
+# qvalue.restricted ####
 #' qvalue convenience wrapper
 #'
 #' This function calls \code{\link{qvalue}} on finite input p-values,
@@ -11423,55 +10703,43 @@ qvalue.restricted <- function(p, trapErrors = TRUE, ...) {
     q
 }
 
+# consensusKME ####
+.interleave <- function(matrices,
+                        nameBase = names(matrices),
+                        sep = ".",
+                        baseFirst = TRUE) {
+    # Drop null entries in the list
+    keep = sapply(matrices, function(x)
+        ! is.null(x))
+    nameBase = nameBase[keep]
+    matrices = matrices[keep]
 
-#===============================================================================
-#
-# consensusKME
-#
-#===============================================================================
+    nMats = length(matrices)
+    nCols = ncol(matrices[[1]])
 
+    dims = lapply(matrices, dim)
 
-.interleave <-
-    function(matrices,
-             nameBase = names(matrices),
-             sep = ".",
-             baseFirst = TRUE)
+    if (baseFirst)
     {
-        # Drop null entries in the list
-        keep = sapply(matrices, function(x)
-            ! is.null(x))
-        nameBase = nameBase[keep]
-        matrices = matrices[keep]
-
-        nMats = length(matrices)
-        nCols = ncol(matrices[[1]])
-
-        dims = lapply(matrices, dim)
-
-        if (baseFirst)
-        {
-            for (m in 1:nMats)
-                colnames(matrices[[m]]) = paste0(nameBase[m],
-                                                 sep, colnames(matrices[[m]]))
-        } else {
-            for (m in 1:nMats)
-                colnames(matrices[[m]]) = paste0(colnames(matrices[[m]]),
-                                                 sep, nameBase[m])
-        }
-
-        out = as.data.frame(lapply(1:nCols,
-                                   function(index, matrices)
-                                       as.data.frame(lapply(matrices,
-                                                            function(x, i)
-                                                                x[, i, drop = FALSE], index)),
-                                   matrices))
-
-        rownames(out) = rownames(matrices[[1]])
-        out
+        for (m in 1:nMats)
+            colnames(matrices[[m]]) = paste0(nameBase[m],
+                                             sep, colnames(matrices[[m]]))
+    } else {
+        for (m in 1:nMats)
+            colnames(matrices[[m]]) = paste0(colnames(matrices[[m]]),
+                                             sep, nameBase[m])
     }
 
+    out = as.data.frame(lapply(1:nCols,
+                               function(index, matrices)
+                                   as.data.frame(lapply(matrices,
+                                                        function(x, i)
+                                                            x[, i, drop = FALSE], index)),
+                               matrices))
 
-
+    rownames(out) = rownames(matrices[[1]])
+    out
+}
 
 #' Calculate consensus kME (eigengene-based connectivities) across multiple
 #' data sets.
@@ -11722,349 +10990,342 @@ qvalue.restricted <- function(p, trapErrors = TRUE, ...) {
 #' @references Langfelder P, Horvath S., WGCNA: an R package for weighted
 #' correlation network analysis. BMC Bioinformatics. 2008 Dec 29; 9:559.
 #' @keywords misc
-consensusKME <-
-    function(multiExpr,
-             moduleLabels,
-             multiEigengenes = NULL,
-             consensusQuantile = 0,
-             signed = TRUE,
-             useModules = NULL,
-             metaAnalysisWeights = NULL,
-             corAndPvalueFnc = corAndPvalue,
-             corOptions = list(),
-             corComponent = "cor",
-             getQvalues = FALSE,
-             useRankPvalue = TRUE,
-             rankPvalueOptions = list(calculateQvalue = getQvalues,
-                                      pValueMethod = "scale"),
-             setNames = NULL,
-             excludeGrey = TRUE,
-             greyLabel = if (is.numeric(moduleLabels))
-                 0
-             else
-                 "grey")
+consensusKME <-function(multiExpr,
+                        moduleLabels,
+                        multiEigengenes = NULL,
+                        consensusQuantile = 0,
+                        signed = TRUE,
+                        useModules = NULL,
+                        metaAnalysisWeights = NULL,
+                        corAndPvalueFnc = corAndPvalue,
+                        corOptions = list(),
+                        corComponent = "cor",
+                        getQvalues = FALSE,
+                        useRankPvalue = TRUE,
+                        rankPvalueOptions = list(calculateQvalue = getQvalues,
+                                                 pValueMethod = "scale"),
+                        setNames = NULL,
+                        excludeGrey = TRUE,
+                        greyLabel = if (is.numeric(moduleLabels))
+                            0
+                        else
+                            "grey") {
+    corAndPvalueFnc = match.fun(corAndPvalueFnc)
+
+    size = checkSets(multiExpr)
+    nSets = size$nSets
+    nGenes = size$nGenes
+    nSamples = size$nSamples
+
+    if (!is.null(metaAnalysisWeights))
+        if (length(metaAnalysisWeights) != nSets)
+            stop("Length of 'metaAnalysisWeights' must equal number of",
+                 " input sets.")
+
+    if (!is.null(useModules))
     {
-        corAndPvalueFnc = match.fun(corAndPvalueFnc)
-
-        size = checkSets(multiExpr)
-        nSets = size$nSets
-        nGenes = size$nGenes
-        nSamples = size$nSamples
-
-        if (!is.null(metaAnalysisWeights))
-            if (length(metaAnalysisWeights) != nSets)
-                stop("Length of 'metaAnalysisWeights' must equal number of",
-                     " input sets.")
-
-        if (!is.null(useModules))
-        {
-            if (greyLabel %in% useModules)
-                stop(
-                    paste(
-                        "Grey module (or module 0) cannot be used with ",
-                        "'useModules'.\n Use 'excludeGrey = FALSE' to obtain ",
-                        "results for the grey module as well."
-                    )
+        if (greyLabel %in% useModules)
+            stop(
+                paste(
+                    "Grey module (or module 0) cannot be used with ",
+                    "'useModules'.\n Use 'excludeGrey = FALSE' to obtain ",
+                    "results for the grey module as well."
                 )
-            keep = moduleLabels %in% useModules
-            if (sum(keep) == 0)
-                stop("Incorrectly specified 'useModules': no such module(s).")
-            moduleLabels [!keep] = greyLabel
-        }
-
-        if (is.null(multiEigengenes))
-            multiEigengenes = multiSetMEs(
-                multiExpr,
-                universalColors = moduleLabels,
-                verbose = 0,
-                excludeGrey = excludeGrey,
-                grey = greyLabel
             )
+        keep = moduleLabels %in% useModules
+        if (sum(keep) == 0)
+            stop("Incorrectly specified 'useModules': no such module(s).")
+        moduleLabels [!keep] = greyLabel
+    }
 
-        modLevels = substring(colnames(multiEigengenes[[1]]$data), 3)
-        nModules = length(modLevels)
+    if (is.null(multiEigengenes))
+        multiEigengenes = multiSetMEs(
+            multiExpr,
+            universalColors = moduleLabels,
+            verbose = 0,
+            excludeGrey = excludeGrey,
+            grey = greyLabel
+        )
 
-        kME = p = Z = nObs = array(NA, dim = c(nGenes, nModules, nSets))
+    modLevels = substring(colnames(multiEigengenes[[1]]$data), 3)
+    nModules = length(modLevels)
 
-        corOptions$alternative = c("two.sided", "greater")[signed + 1]
+    kME = p = Z = nObs = array(NA, dim = c(nGenes, nModules, nSets))
 
-        haveZs = FALSE
-        for (set in 1:nSets) {
-            corOptions$x = multiExpr[[set]]$data
-            corOptions$y = multiEigengenes[[set]]$data
-            cp = do.call(corAndPvalueFnc, args = corOptions)
-            corComp = grep(corComponent, names(cp))
-            pComp = match("p", names(cp))
-            if (is.na(pComp))
-                pComp = match("p.value", names(cp))
-            if (is.na(pComp))
-                stop("Function `corAndPvalueFnc' did not return a p-value.")
-            kME[, , set] = cp[[corComp]]
-            p[, , set] = cp[[pComp]]
-            if (!is.null(cp$Z)) {
-                Z[, , set] = cp$Z
-                haveZs = TRUE
-            }
-            if (!is.null(cp$nObs)) {
-                nObs[, , set] = cp$nObs
-            } else
-                nObs[, , set] = t(is.na(multiExpr[[set]]$data)) %*% (!is.na(multiEigengenes[[set]]$data))
+    corOptions$alternative = c("two.sided", "greater")[signed + 1]
+
+    haveZs = FALSE
+    for (set in 1:nSets) {
+        corOptions$x = multiExpr[[set]]$data
+        corOptions$y = multiEigengenes[[set]]$data
+        cp = do.call(corAndPvalueFnc, args = corOptions)
+        corComp = grep(corComponent, names(cp))
+        pComp = match("p", names(cp))
+        if (is.na(pComp))
+            pComp = match("p.value", names(cp))
+        if (is.na(pComp))
+            stop("Function `corAndPvalueFnc' did not return a p-value.")
+        kME[, , set] = cp[[corComp]]
+        p[, , set] = cp[[pComp]]
+        if (!is.null(cp$Z)) {
+            Z[, , set] = cp$Z
+            haveZs = TRUE
         }
-
-        if (getQvalues)
-        {
-            q = apply(p, c(2:3), qvalue.restricted)
+        if (!is.null(cp$nObs)) {
+            nObs[, , set] = cp$nObs
         } else
-            q = NULL
-        # not neccessary since weighted average also contains it
-        # kME.average = rowMeans(kME, dims = 2)
+            nObs[, , set] = t(is.na(multiExpr[[set]]$data)) %*% (!is.na(multiEigengenes[[set]]$data))
+    }
 
-        powers = c(0, 0.5, 1)
-        nPowers = length(powers)
-        nWeights = nPowers+!is.null(metaAnalysisWeights)
-        weightNames = c("equalWeights",
-                        "RootDoFWeights",
-                        "DoFWeights",
-                        "userWeights")[1:nWeights]
-        kME.weightedAverage = array(NA, dim = c(nGenes, nWeights, nModules))
+    if (getQvalues)
+    {
+        q = apply(p, c(2:3), qvalue.restricted)
+    } else
+        q = NULL
+    # not neccessary since weighted average also contains it
+    # kME.average = rowMeans(kME, dims = 2)
+
+    powers = c(0, 0.5, 1)
+    nPowers = length(powers)
+    nWeights = nPowers+!is.null(metaAnalysisWeights)
+    weightNames = c("equalWeights",
+                    "RootDoFWeights",
+                    "DoFWeights",
+                    "userWeights")[1:nWeights]
+    kME.weightedAverage = array(NA, dim = c(nGenes, nWeights, nModules))
+    for (m in 1:nWeights) {
+        if (m <= nPowers) {
+            weights = nObs ^ powers[m]
+        } else
+            weights = array(rep(metaAnalysisWeights, rep(nGenes * nModules,
+                                                         nSets)),
+                            dim = c(nGenes, nModules, nSets))
+        kME.weightedAverage[, m,] = rowSums(kME * weights, na.rm = TRUE,
+                                            dims = 2) /
+            rowSums(weights, dims = 2, na.rm = TRUE)
+    }
+
+    dim(kME.weightedAverage) = c(nGenes * nWeights, nModules)
+
+    if (any(is.na(kME)))
+    {
+        kME.consensus.1 = apply(kME,
+                                c(1, 2),
+                                quantile,
+                                prob = consensusQuantile,
+                                na.rm = TRUE)
+        kME.consensus.2 = apply(kME,
+                                c(1, 2),
+                                quantile,
+                                prob = 1 - consensusQuantile,
+                                na.rm = TRUE)
+        kME.median = apply(kME, c(1, 2), median, na.rm = TRUE)
+    } else {
+        kME.consensus.1 = matrix(colQuantileC(t(
+            matrix(kME, nGenes * nModules, nSets)
+        ),
+        p = consensusQuantile),
+        nGenes,
+        nModules)
+        kME.consensus.2 = matrix(colQuantileC(t(
+            matrix(kME, nGenes * nModules, nSets)
+        ),
+        p = 1 - consensusQuantile),
+        nGenes,
+        nModules)
+        kME.median = matrix(colQuantileC(t(
+            matrix(kME, nGenes * nModules, nSets)
+        ), p = 0.5),
+        nGenes, nModules)
+    }
+    kME.consensus = ifelse(kME.median > 0, kME.consensus.1, kME.consensus.2)
+
+    kME.consensus[kME.consensus * kME.median < 0] = 0
+
+    # Prepare identifiers for the variables (genes)
+    if (is.null(colnames(multiExpr[[1]]$data)))
+    {
+        ID = paste0("Variable.", 1:nGenes)
+    } else
+        ID = colnames(multiExpr[[1]]$data)
+
+    # Get meta - Z, - p, - q values
+    if (haveZs)
+    {
+        Z.kME.meta = p.kME.meta = array(0, dim = c(nGenes, nWeights, nModules))
+        if (getQvalues)
+            q.kME.meta = array(0, dim = c(nGenes, nWeights, nModules))
         for (m in 1:nWeights) {
             if (m <= nPowers) {
                 weights = nObs ^ powers[m]
             } else
-                weights = array(rep(metaAnalysisWeights, rep(nGenes * nModules,
-                                                             nSets)),
+                weights = array(rep(metaAnalysisWeights,
+                                    rep(nGenes * nModules, nSets)),
                                 dim = c(nGenes, nModules, nSets))
-            kME.weightedAverage[, m,] = rowSums(kME * weights, na.rm = TRUE,
-                                                dims = 2) /
-                rowSums(weights, dims = 2, na.rm = TRUE)
-        }
 
-        dim(kME.weightedAverage) = c(nGenes * nWeights, nModules)
-
-        if (any(is.na(kME)))
-        {
-            kME.consensus.1 = apply(kME,
-                                    c(1, 2),
-                                    quantile,
-                                    prob = consensusQuantile,
-                                    na.rm = TRUE)
-            kME.consensus.2 = apply(kME,
-                                    c(1, 2),
-                                    quantile,
-                                    prob = 1 - consensusQuantile,
-                                    na.rm = TRUE)
-            kME.median = apply(kME, c(1, 2), median, na.rm = TRUE)
-        } else {
-            kME.consensus.1 = matrix(colQuantileC(t(
-                matrix(kME, nGenes * nModules, nSets)
-            ),
-            p = consensusQuantile),
-            nGenes,
-            nModules)
-            kME.consensus.2 = matrix(colQuantileC(t(
-                matrix(kME, nGenes * nModules, nSets)
-            ),
-            p = 1 - consensusQuantile),
-            nGenes,
-            nModules)
-            kME.median = matrix(colQuantileC(t(
-                matrix(kME, nGenes * nModules, nSets)
-            ), p = 0.5),
-            nGenes, nModules)
-        }
-        kME.consensus = ifelse(kME.median > 0, kME.consensus.1, kME.consensus.2)
-
-        kME.consensus[kME.consensus * kME.median < 0] = 0
-
-        # Prepare identifiers for the variables (genes)
-        if (is.null(colnames(multiExpr[[1]]$data)))
-        {
-            ID = paste0("Variable.", 1:nGenes)
-        } else
-            ID = colnames(multiExpr[[1]]$data)
-
-        # Get meta - Z, - p, - q values
-        if (haveZs)
-        {
-            Z.kME.meta = p.kME.meta = array(0, dim = c(nGenes, nWeights, nModules))
-            if (getQvalues)
-                q.kME.meta = array(0, dim = c(nGenes, nWeights, nModules))
-            for (m in 1:nWeights) {
-                if (m <= nPowers) {
-                    weights = nObs ^ powers[m]
-                } else
-                    weights = array(rep(metaAnalysisWeights,
-                                        rep(nGenes * nModules, nSets)),
-                                    dim = c(nGenes, nModules, nSets))
-
-                Z1 = rowSums(Z * weights, na.rm = TRUE, dims = 2) / sqrt(rowSums(weights ^
-                                                                                     2, na.rm = TRUE, dims = 2))
-                if (signed) {
-                    p1 = pnorm(Z1, lower.tail = FALSE)
-                } else
-                    p1 = 2 * pnorm(abs(Z1), lower.tail = FALSE)
-                Z.kME.meta[, m,] = Z1
-                p.kME.meta[, m,] = p1
-                if (getQvalues) {
-                    q1 = apply(p1, 2, qvalue.restricted)
-                    q.kME.meta[, m,] = q1
-                }
-            }
-            dim(Z.kME.meta) = dim(p.kME.meta) = c(nGenes *  nWeights, nModules)
-            if (getQvalues) {
-                dim(q.kME.meta) = c(nGenes * nWeights, nModules)
+            Z1 = rowSums(Z * weights, na.rm = TRUE, dims = 2) / sqrt(rowSums(weights ^
+                                                                                 2, na.rm = TRUE, dims = 2))
+            if (signed) {
+                p1 = pnorm(Z1, lower.tail = FALSE)
             } else
-                q.kME.meta = NULL
-        } else {
-            Z.kME.meta = p.kME.meta = q.kME.meta = NULL
+                p1 = 2 * pnorm(abs(Z1), lower.tail = FALSE)
+            Z.kME.meta[, m,] = Z1
+            p.kME.meta[, m,] = p1
+            if (getQvalues) {
+                q1 = apply(p1, 2, qvalue.restricted)
+                q.kME.meta[, m,] = q1
+            }
         }
-
-        # Call rankPvalue
-
-        if (useRankPvalue) {
-            for (mod in 1:nModules)
-                for (m in 1:nWeights)
-                {
-                    if (m <= nPowers) {
-                        weights = nObs[, mod,] ^ powers[m]
-                    } else
-                        weights = matrix(metaAnalysisWeights, nGenes, nSets,
-                                         byrow = TRUE)
-                    # rankPvalue requires a vector of weights... so compress the weights to a vector.
-                    # Output a warning if the compression loses information.
-                    nDifferent = apply(weights, 2, function(x) {
-                        length(unique(x))
-                    })
-                    if (any(nDifferent) > 1)
-                        printFlush(
-                            paste(
-                                "Warning in consensusKME: rankPvalue requires compressed weights.\n",
-                                "Some weights may not be entirely accurate."
-                            )
-                        )
-                    cw = colMeans(weights, na.rm = TRUE)
-                    rankPvalueOptions$columnweights = cw / sum(cw)
-
-                    rankPvalueOptions$datS = kME[, mod,]
-                    rp1 = do.call(rankPvalue, rankPvalueOptions)
-                    colnames(rp1) = paste0(colnames(rp1),
-                                           ".ME",
-                                           modLevels[mod],
-                                           ".",
-                                           weightNames[m])
-                    if (mod == 1 && m == 1) {
-                        rp = rp1
-                    } else
-                        rp = cbind(rp, rp1)
-                }
-        }
-
-        # Format the output... this will entail some rearranging of the individual set results.
-        if (is.null(setNames))
-            setNames = names(multiExpr)
-
-        if (is.null(setNames))
-            setNames = paste0("Set_", c(1:nSets))
-
-        if (!haveZs)
-            Z = NULL
-
-        keep = c(TRUE, TRUE, getQvalues, haveZs)
-        varNames = c("kME", "p.kME", "q.kME", "Z.kME")[keep]
-        nVars = sum(keep)
-
-        dimnames(kME) = list(mtd.colnames(multiExpr),
-                             paste0("k", mtd.colnames(multiEigengenes)),
-                             setNames)
-
-        dimnames(p) = list(mtd.colnames(multiExpr),
-                           paste0("p.k", mtd.colnames(multiEigengenes)),
-                           setNames)
-
-        if (getQvalues)
-            dimnames(q) = list(mtd.colnames(multiExpr),
-                               paste0("q.k", mtd.colnames(multiEigengenes)),
-                               setNames)
-
-        if (haveZs)
-            dimnames(Z) = list(mtd.colnames(multiExpr),
-                               paste0("Z.k", mtd.colnames(multiEigengenes)),
-                               setNames)
-
-
-        varList = list(
-            kME = kME,
-            p = p,
-            q = if (getQvalues)
-                q
-            else
-                NULL,
-            Z = if (haveZs)
-                Z
-            else
-                NULL
-        )
-        varList.interleaved = lapply(varList,
-                                     function(arr) {
-                                         if (!is.null(dim(arr))) {
-                                             split = lapply(1:dim(arr)[3], function(i)
-                                                 arr[, , i])
-                                             .interleave(split, nameBase = setNames,
-                                                         baseFirst = FALSE)
-                                         } else
-                                             NULL
-                                     })
-
-        # the following seems to choke on larger data sets, at least in R 3.2.1
-        # combined = array(c (kME, p, q, Z), dim = c(nGenes, nModules, nSets, nVars))
-        # recast = matrix(c(cast(melt(combined), X1~X4~X3~X2)), nGenes,
-        # nSets * nModules * nVars)
-
-        # ... so I will replace it with more cumbersome but hopefully workable code.
-
-        recast = .interleave(varList.interleaved,
-                             nameBase = rep("", 4),
-                             sep = "")
-
-        combinedMeta.0 = rbind(kME.consensus,
-                               kME.weightedAverage,
-                               Z.kME.meta,
-                               p.kME.meta,
-                               q.kME.meta)
-
-        combinedMeta = matrix(combinedMeta.0, nGenes,
-                              (1 + nWeights + (2 * haveZs + haveZs * getQvalues) *
-                                   nWeights) * nModules)
-        metaNames = c(
-            "consensus.kME",
-            paste0("weightedAverage.", weightNames, ".kME"),
-            paste0("meta.Z.", weightNames, ".kME"),
-            paste0("meta.p.", weightNames, ".kME"),
-            paste0("meta.q.", weightNames, ".kME")
-        )[c(
-            rep(TRUE, nWeights + 1),
-            rep(haveZs, nWeights),
-            rep(haveZs, nWeights),
-            rep(haveZs && getQvalues, nWeights)
-        )]
-        nMetaVars = length(metaNames)
-        colnames(combinedMeta) = paste0 (rep(metaNames, nModules),
-                                         rep(modLevels, rep(nMetaVars, nModules)))
-
-        if (useRankPvalue) {
-            out = data.frame(ID = ID, combinedMeta, rp, recast)
+        dim(Z.kME.meta) = dim(p.kME.meta) = c(nGenes *  nWeights, nModules)
+        if (getQvalues) {
+            dim(q.kME.meta) = c(nGenes * nWeights, nModules)
         } else
-            out = data.frame(ID = ID, combinedMeta, recast)
-
-        out
+            q.kME.meta = NULL
+    } else {
+        Z.kME.meta = p.kME.meta = q.kME.meta = NULL
     }
 
-#===============================================================================
-#
-# Meta - analysis
-#
-#===============================================================================
+    # Call rankPvalue
 
+    if (useRankPvalue) {
+        for (mod in 1:nModules)
+            for (m in 1:nWeights)
+            {
+                if (m <= nPowers) {
+                    weights = nObs[, mod,] ^ powers[m]
+                } else
+                    weights = matrix(metaAnalysisWeights, nGenes, nSets,
+                                     byrow = TRUE)
+                # rankPvalue requires a vector of weights... so compress the weights to a vector.
+                # Output a warning if the compression loses information.
+                nDifferent = apply(weights, 2, function(x) {
+                    length(unique(x))
+                })
+                if (any(nDifferent) > 1)
+                    printFlush(
+                        paste(
+                            "Warning in consensusKME: rankPvalue requires compressed weights.\n",
+                            "Some weights may not be entirely accurate."
+                        )
+                    )
+                cw = colMeans(weights, na.rm = TRUE)
+                rankPvalueOptions$columnweights = cw / sum(cw)
+
+                rankPvalueOptions$datS = kME[, mod,]
+                rp1 = do.call(rankPvalue, rankPvalueOptions)
+                colnames(rp1) = paste0(colnames(rp1),
+                                       ".ME",
+                                       modLevels[mod],
+                                       ".",
+                                       weightNames[m])
+                if (mod == 1 && m == 1) {
+                    rp = rp1
+                } else
+                    rp = cbind(rp, rp1)
+            }
+    }
+
+    # Format the output... this will entail some rearranging of the individual set results.
+    if (is.null(setNames))
+        setNames = names(multiExpr)
+
+    if (is.null(setNames))
+        setNames = paste0("Set_", c(1:nSets))
+
+    if (!haveZs)
+        Z = NULL
+
+    keep = c(TRUE, TRUE, getQvalues, haveZs)
+    varNames = c("kME", "p.kME", "q.kME", "Z.kME")[keep]
+    nVars = sum(keep)
+
+    dimnames(kME) = list(mtd.colnames(multiExpr),
+                         paste0("k", mtd.colnames(multiEigengenes)),
+                         setNames)
+
+    dimnames(p) = list(mtd.colnames(multiExpr),
+                       paste0("p.k", mtd.colnames(multiEigengenes)),
+                       setNames)
+
+    if (getQvalues)
+        dimnames(q) = list(mtd.colnames(multiExpr),
+                           paste0("q.k", mtd.colnames(multiEigengenes)),
+                           setNames)
+
+    if (haveZs)
+        dimnames(Z) = list(mtd.colnames(multiExpr),
+                           paste0("Z.k", mtd.colnames(multiEigengenes)),
+                           setNames)
+
+
+    varList = list(
+        kME = kME,
+        p = p,
+        q = if (getQvalues)
+            q
+        else
+            NULL,
+        Z = if (haveZs)
+            Z
+        else
+            NULL
+    )
+    varList.interleaved = lapply(varList,
+                                 function(arr) {
+                                     if (!is.null(dim(arr))) {
+                                         split = lapply(1:dim(arr)[3], function(i)
+                                             arr[, , i])
+                                         .interleave(split, nameBase = setNames,
+                                                     baseFirst = FALSE)
+                                     } else
+                                         NULL
+                                 })
+
+    # the following seems to choke on larger data sets, at least in R 3.2.1
+    # combined = array(c (kME, p, q, Z), dim = c(nGenes, nModules, nSets, nVars))
+    # recast = matrix(c(cast(melt(combined), X1~X4~X3~X2)), nGenes,
+    # nSets * nModules * nVars)
+
+    # ... so I will replace it with more cumbersome but hopefully workable code.
+
+    recast = .interleave(varList.interleaved,
+                         nameBase = rep("", 4),
+                         sep = "")
+
+    combinedMeta.0 = rbind(kME.consensus,
+                           kME.weightedAverage,
+                           Z.kME.meta,
+                           p.kME.meta,
+                           q.kME.meta)
+
+    combinedMeta = matrix(combinedMeta.0, nGenes,
+                          (1 + nWeights + (2 * haveZs + haveZs * getQvalues) *
+                               nWeights) * nModules)
+    metaNames = c(
+        "consensus.kME",
+        paste0("weightedAverage.", weightNames, ".kME"),
+        paste0("meta.Z.", weightNames, ".kME"),
+        paste0("meta.p.", weightNames, ".kME"),
+        paste0("meta.q.", weightNames, ".kME")
+    )[c(
+        rep(TRUE, nWeights + 1),
+        rep(haveZs, nWeights),
+        rep(haveZs, nWeights),
+        rep(haveZs && getQvalues, nWeights)
+    )]
+    nMetaVars = length(metaNames)
+    colnames(combinedMeta) = paste0 (rep(metaNames, nModules),
+                                     rep(modLevels, rep(nMetaVars, nModules)))
+
+    if (useRankPvalue) {
+        out = data.frame(ID = ID, combinedMeta, rp, recast)
+    } else
+        out = data.frame(ID = ID, combinedMeta, recast)
+
+    out
+}
+
+# Meta - analysis
 .isBinary <- function(multiTrait) {
     bin = TRUE
     for (set in 1:length(multiTrait))
@@ -12073,8 +11334,7 @@ consensusKME <-
         bin
 }
 
-
-
+# metaAnalysis ####
 #' Meta-analysis of binary and continuous variables
 #'
 #' This is a meta-analysis complement to functions
@@ -12341,8 +11601,7 @@ metaAnalysis <- function(multiExpr,
                          kruskalTest = FALSE,
                          var.equal = FALSE,
                          metaKruskal = kruskalTest,
-                         na.action = "na.exclude")
-{
+                         na.action = "na.exclude") {
     size = checkSets(multiExpr)
     nSets = size$nSets
 
@@ -12557,15 +11816,7 @@ metaAnalysis <- function(multiExpr,
     out
 }
 
-
-#===============================================================================
-#
-# multiUnion and multiIntersect
-#
-#===============================================================================
-
-
-
+# multiUnion ####
 #' Union and intersection of multiple sets
 #'
 #' Union and intersection of multiple sets. These function generalize the
@@ -12593,6 +11844,7 @@ multiUnion <- function(setList) {
     out
 }
 
+# multiIntersect ####
 multiIntersect <- function(setList) {
     len = length(setList)
     if (len == 0)
@@ -12607,16 +11859,7 @@ multiIntersect <- function(setList) {
     out
 }
 
-#===============================================================================
-#
-# prependZeros
-#
-#===============================================================================
-# prepend as many zeros as necessary to fill number to a certain width.
-# Assumes an integer input.
-
-
-
+# prependZeros ####
 #' Pad numbers with leading zeros to specified total width
 #'
 #' This function pads the specified numbers with zeros to a specified total
@@ -12647,14 +11890,7 @@ prependZeros <- function(x, width = max(nchar(x))) {
     out
 }
 
-#===============================================================================
-#
-# Text formatting
-#
-#===============================================================================
-
-
-
+# formatLabels  ####
 #' Break long character strings into multiple lines
 #'
 #' This function attempts to break lomg character strings into multiple lines
@@ -12720,11 +11956,7 @@ formatLabels <-function(labels, maxCharPerLine = 14, split = " ", fixed = TRUE,
         substring(newLabels, nchar(newsplit) + 1)
     }
 
-#===============================================================================
-#
-# shortenStrings
-#
-#===============================================================================
+# shortenStrings ####
 
 .listRep <- function(data, n) {
     out = list()
@@ -12733,11 +11965,6 @@ formatLabels <-function(labels, maxCharPerLine = 14, split = " ", fixed = TRUE,
             out[[i]] = data
         out
 }
-
-# Truncate labels at the last 'split' before given maximum length, add ...
-# if the label is shortened.
-
-
 
 #' Shorten given character strings by truncating at a suitable separator.
 #'
@@ -12772,61 +11999,56 @@ formatLabels <-function(labels, maxCharPerLine = 14, split = " ", fixed = TRUE,
 #' @seealso \code{\link{gregexpr}}, the workhorse pattern matching function
 #' \code{\link{formatLabels}} for splitting strings into multiple lines
 #' @keywords misc
-shortenStrings <-
-    function(strings,
-             maxLength = 25,
-             minLength = 10,
-             split = " ",
-             fixed = TRUE,
-             ellipsis = "...",
-             countEllipsisInLength = FALSE) {
-        dims = dim(strings)
-        dnames = dimnames(strings)
-        if (is.data.frame(strings))
-        {
-            strings = as.matrix(strings)
-            outputDF = TRUE
-        } else {
-            outputDF = FALSE
-        }
-        strings = as.character(strings)
-        n = length(strings)
-        if (n == 0)
-            return(character(0))
-
-        newLabels = rep("", n)
-        if (length(split) > 0)
-        {
-            splitPositions = gregexpr(pattern = split,
-                                      text = strings,
-                                      fixed = fixed)
-        } else {
-            splitPositions = .listRep(numeric(0), n)
-        }
-        if (countEllipsisInLength) {
-            maxLength = maxLength - nchar(ellipsis)
-            minLength = minLength - nchar(ellipsis)
-        }
-        for (l in 1:n) {
-            if (nchar(strings[l]) <= maxLength) {
-                newLabels[l] = strings[l]
-            } else {
-                splits.1 = splitPositions[[l]]
-                suitableSplits = which(splits.1 > minLength &
-                                           splits.1 <= maxLength)
-                if (length(suitableSplits) > 0) {
-                    splitPosition = max(splits.1[suitableSplits])
-                } else {
-                    splitPosition = maxLength + 1
-                }
-                newLabels[l] = paste0(substring(strings[l], 1, splitPosition - 1), ellipsis)
-            }
-        }
-
-        dim(newLabels) = dims
-        dimnames(newLabels) = dnames
-        if (outputDF)
-            as.data.frame(newLabels)
-        else
-            newLabels
+shortenStrings <- function(strings, maxLength = 25, minLength = 10,
+                           split = " ", fixed = TRUE, ellipsis = "...",
+                           countEllipsisInLength = FALSE) {
+    dims = dim(strings)
+    dnames = dimnames(strings)
+    if (is.data.frame(strings))
+    {
+        strings = as.matrix(strings)
+        outputDF = TRUE
+    } else {
+        outputDF = FALSE
     }
+    strings = as.character(strings)
+    n = length(strings)
+    if (n == 0)
+        return(character(0))
+
+    newLabels = rep("", n)
+    if (length(split) > 0)
+    {
+        splitPositions = gregexpr(pattern = split,
+                                  text = strings,
+                                  fixed = fixed)
+    } else {
+        splitPositions = .listRep(numeric(0), n)
+    }
+    if (countEllipsisInLength) {
+        maxLength = maxLength - nchar(ellipsis)
+        minLength = minLength - nchar(ellipsis)
+    }
+    for (l in 1:n) {
+        if (nchar(strings[l]) <= maxLength) {
+            newLabels[l] = strings[l]
+        } else {
+            splits.1 = splitPositions[[l]]
+            suitableSplits = which(splits.1 > minLength &
+                                       splits.1 <= maxLength)
+            if (length(suitableSplits) > 0) {
+                splitPosition = max(splits.1[suitableSplits])
+            } else {
+                splitPosition = maxLength + 1
+            }
+            newLabels[l] = paste0(substring(strings[l], 1, splitPosition - 1), ellipsis)
+        }
+    }
+
+    dim(newLabels) = dims
+    dimnames(newLabels) = dnames
+    if (outputDF)
+        as.data.frame(newLabels)
+    else
+        newLabels
+}

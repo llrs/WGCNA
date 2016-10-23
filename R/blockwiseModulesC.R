@@ -1840,16 +1840,16 @@ recutBlockwiseTrees = function(datExpr,
 #' supplied \code{power}? If you would like to experiment with unusual powers,
 #' set the argument to \code{FALSE} and proceed with caution.
 #' individual TOMs into. The following tags should be used to make the file
-#' names unique for each set and block: \code{%s} will be replaced by the set
-#' number; \code{%N} will be replaced by the set name (taken from
-#' \code{names(multiExpr)}) if it exists, otherwise by set number; \code{%b}
+#' names unique for each set and block: \code{\%s} will be replaced by the set
+#' number; \code{\%N} will be replaced by the set name (taken from
+#' \code{names(multiExpr)}) if it exists, otherwise by set number; \code{\%b}
 #' will be replaced by the block number. If the file names turn out to be
 #' non-unique, an error will be generated.
 #' @param individualTOMFileNames character string giving the file names to save
 #' individual TOMs into. The following tags should be used to make the file
-#' names unique for each set and block: \code{%s} will be replaced by the set
-#' number; \code{%N} will be replaced by the set name (taken from
-#' \code{names(multiExpr)}) if it exists, otherwise by set number; \code{%b}
+#' names unique for each set and block: \code{\%s} will be replaced by the set
+#' number; \code{\%N} will be replaced by the set name (taken from
+#' \code{names(multiExpr)}) if it exists, otherwise by set number; \code{\%b}
 #' will be replaced by the block number. If the file names turn out to be
 #' non-unique, an error will be generated.
 #' @return A list with the following components:
@@ -2444,9 +2444,9 @@ lowerTri2matrix = function(x, diag = 1) {
 #' for later use?.
 #' @param individualTOMFileNames character string giving the file names to save
 #' individual TOMs into. The following tags should be used to make the file
-#' names unique for each set and block: \code{%s} will be replaced by the set
-#' number; \code{%N} will be replaced by the set name (taken from
-#' \code{names(multiExpr)}) if it exists, otherwise by set number; \code{%b}
+#' names unique for each set and block: \code{\%s} will be replaced by the set
+#' number; \code{\%N} will be replaced by the set name (taken from
+#' \code{names(multiExpr)}) if it exists, otherwise by set number; \code{\%b}
 #' will be replaced by the block number. If the file names turn out to be
 #' non-unique, an error will be generated.
 #' @param networkCalibration network calibration method. One of "single
@@ -2476,9 +2476,9 @@ lowerTri2matrix = function(x, diag = 1) {
 #' @param saveConsensusTOMs logical: should the consensus topological overlap
 #' matrices for each block be saved and returned?.
 #' @param consensusTOMFileNames character string containing the file namefiles
-#' containing the consensus topological overlaps. The tag \code{%b} will be
+#' containing the consensus topological overlaps. The tag \code{\%b} will be
 #' replaced by the block number. If the resulting file names are non-unique
-#' (for example, because the user gives a file name without a \code{%b} tag),
+#' (for example, because the user gives a file name without a \code{\%b} tag),
 #' an error will be generated. These files are standard R data files and can be
 #' loaded using the \code{\link{load}} function.
 #' @param useDiskCache should calculated network similarities in individual
@@ -2536,19 +2536,6 @@ lowerTri2matrix = function(x, diag = 1) {
 #' eigennode dissimilarity in individual sets is simly 1-correlation of the
 #' eigennodes; the consensus is defined as quantile with probability
 #' \code{consensusQuantile}.
-#' @param individualTOMFileNames character string giving the file names to save
-#' individual TOMs into. The following tags should be used to make the file
-#' names unique for each set and block: \code{%s} will be replaced by the set
-#' number; \code{%N} will be replaced by the set name (taken from
-#' \code{names(multiExpr)}) if it exists, otherwise by set number; \code{%b}
-#' will be replaced by the block number. If the file names turn out to be
-#' non-unique, an error will be generated.
-#' @param consensusTOMFileNames character string containing the file namefiles
-#' containing the consensus topological overlaps. The tag \code{%b} will be
-#' replaced by the block number. If the resulting file names are non-unique
-#' (for example, because the user gives a file name without a \code{%b} tag),
-#' an error will be generated. These files are standard R data files and can be
-#' loaded using the \code{\link{load}} function.
 #' @param stabilityLabels Optional matrix of cluster labels that are to be used
 #' for calculating branch dissimilarity based on split stability. The number of
 #' rows must equal the number of genes in \code{multiExpr}; the number of

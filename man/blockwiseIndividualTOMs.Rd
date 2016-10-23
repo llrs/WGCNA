@@ -87,6 +87,16 @@ network type.}
 of) \code{"unsigned"}, \code{"signed"}, \code{"signed hybrid"}. See
 \code{\link{adjacency}}.}
 
+\item{checkPower}{logical: should basic sanity check be performed on the
+supplied \code{power}? If you would like to experiment with unusual powers,
+set the argument to \code{FALSE} and proceed with caution.
+individual TOMs into. The following tags should be used to make the file
+names unique for each set and block: \code{\%s} will be replaced by the set
+number; \code{\%N} will be replaced by the set name (taken from
+\code{names(multiExpr)}) if it exists, otherwise by set number; \code{\%b}
+will be replaced by the block number. If the file names turn out to be
+non-unique, an error will be generated.}
+
 \item{replaceMissingAdjacencies}{logical: should missing values in the
 calculation of adjacency be replaced by 0?}
 
@@ -104,6 +114,14 @@ better results but at this time should be considered experimental.}
 
 \item{saveTOMs}{logical: should the consensus topological overlap matrices
 for each block be saved and returned?}
+
+\item{individualTOMFileNames}{character string giving the file names to save
+individual TOMs into. The following tags should be used to make the file
+names unique for each set and block: \code{\%s} will be replaced by the set
+number; \code{\%N} will be replaced by the set name (taken from
+\code{names(multiExpr)}) if it exists, otherwise by set number; \code{\%b}
+will be replaced by the block number. If the file names turn out to be
+non-unique, an error will be generated.}
 
 \item{nThreads}{non-negative integer specifying the number of parallel
 threads to be used by certain parts of correlation calculations. This option

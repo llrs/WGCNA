@@ -7,10 +7,10 @@
 multiSetMEs(exprData, colors, universalColors = NULL, useSets = NULL,
   useGenes = NULL, impute = TRUE, nPC = 1, align = "along average",
   excludeGrey = FALSE, grey = if (is.null(universalColors)) {     if
-  (is.numeric(colors))          0     else "grey" } else if
-  (is.numeric(universalColors)) {     0 } else {     "grey" }, subHubs = TRUE,
-  trapErrors = FALSE, returnValidOnly = trapErrors, softPower = 6,
-  verbose = 1, indent = 0)
+  (is.numeric(colors)) {         0     }     else {         "grey"     } } else
+  {     if (is.numeric(universalColors)) {         0     }     else {        
+  "grey"     } }, subHubs = TRUE, trapErrors = FALSE,
+  returnValidOnly = trapErrors, softPower = 6, verbose = 1, indent = 0)
 }
 \arguments{
 \item{exprData}{Expression data in a multi-set format (see

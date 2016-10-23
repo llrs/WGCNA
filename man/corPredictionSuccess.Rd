@@ -2,7 +2,7 @@
 % Please edit documentation in R/Functions.R
 \name{corPredictionSuccess}
 \alias{corPredictionSuccess}
-\title{Qunatification of success of gene screening}
+\title{Quantification of success of gene screening}
 \usage{
 corPredictionSuccess(corPrediction, corTestSet, topNumber = 100)
 }

@@ -233,13 +233,6 @@
 #' better results but at this time should be considered experimental.
 #' @param saveIndividualTOMs logical: should individual TOMs be saved to disk
 #' for later use?
-#' @param individualTOMFileNames character string giving the file names to save
-#' individual TOMs into. The following tags should be used to make the file
-#' names unique for each set and block: \code{%s} will be replaced by the set
-#' number; \code{%N} will be replaced by the set name (taken from
-#' \code{names(multiExpr)}) if it exists, otherwise by set number; \code{%b}
-#' will be replaced by the block number. If the file names turn out to be
-#' non-unique, an error will be generated.
 #' @param individualTOMInfo Optional data for TOM matrices in individual data
 #' sets. This object is returned by the function
 #' \code{\link{blockwiseIndividualTOMs}}. If not given, appropriate topological
@@ -280,12 +273,6 @@
 #' is \code{TRUE}.
 #' @param saveConsensusTOMs logical: should the consensus topological overlap
 #' matrices for each block be saved and returned?
-#' @param consensusTOMFileNames character string containing the file namefiles
-#' containing the consensus topological overlaps. The tag \code{%b} will be
-#' replaced by the block number. If the resulting file names are non-unique
-#' (for example, because the user gives a file name without a \code{%b} tag),
-#' an error will be generated. These files are standard R data files and can be
-#' loaded using the \code{\link{load}} function.
 #' @param returnTOMs logical: should calculated consensus TOM(s) be returned?
 #' @param useDiskCache should calculated network similarities in individual
 #' sets be temporarilly saved to disk? Saving to disk is somewhat slower than

@@ -19,8 +19,8 @@ is non-empty.
 }
 \examples{
 
-prepComma("abc");
-prepComma("");
+prepComma("abc")
+prepComma("")
 
 }
 \author{
