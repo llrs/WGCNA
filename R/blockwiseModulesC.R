@@ -1830,12 +1830,14 @@ recutBlockwiseTrees = function(datExpr,
 #' particular, if the block-wise calculation is necessary, it is nearly certain
 #' that returning all matrices via the return value will be impossible.
 #'
+#' @inheritParams adjacency
+#' @inheritParams blockwiseModules
 #' @param multiExpr expression data in the multi-set format (see
 #' \code{\link{checkSets}}). A vector of lists, one per set. Each set must
 #' contain a component \code{data} that contains the expression data, with rows
 #' corresponding to samples and columns to genes or probes.
 #' @param checkPower logical: should basic sanity check be performed on the
-#' supplied \code{power} ? If you would like to experiment with unusual powers,
+#' supplied \code{power}? If you would like to experiment with unusual powers,
 #' set the argument to \code{FALSE} and proceed with caution.
 #' individual TOMs into. The following tags should be used to make the file
 #' names unique for each set and block: \code{%s} will be replaced by the set
@@ -1843,10 +1845,6 @@ recutBlockwiseTrees = function(datExpr,
 #' \code{names(multiExpr)}) if it exists, otherwise by set number; \code{%b}
 #' will be replaced by the block number. If the file names turn out to be
 #' non-unique, an error will be generated.
-#' @param individualTomFileNames character string giving the file names to save
-#' individual TOMs into. The following tags should be used to make the file
-#' names unique for each set and block: \code{%s} will be replaced by the set number;
-#' \code{%N} will be replaced by the set.
 #' @param individualTOMFileNames character string giving the file names to save
 #' individual TOMs into. The following tags should be used to make the file
 #' names unique for each set and block: \code{%s} will be replaced by the set
@@ -1854,8 +1852,6 @@ recutBlockwiseTrees = function(datExpr,
 #' \code{names(multiExpr)}) if it exists, otherwise by set number; \code{%b}
 #' will be replaced by the block number. If the file names turn out to be
 #' non-unique, an error will be generated.
-#' @inheritParams adjacency
-#' @inheritParams blockwiseModules
 #' @return A list with the following components:
 #'
 #' \item{actualTOMFileNames}{Only returned if input \code{saveTOMs} is

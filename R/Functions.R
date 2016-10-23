@@ -17,7 +17,7 @@
 .moduleColorOptions = list(MEprefix = "ME")
 
 
-
+# moduleColor.getMEprefix ####
 #' Get the prefix used to label module eigengenes.
 #'
 #' Returns the currently used prefix used to label module eigengenes.  When
@@ -41,13 +41,7 @@ moduleColor.getMEprefix <- function() {
     .moduleColorOptions$MEprefix
 }
 
-#===============================================================================
-# The function moduleEigengenes finds the first principal component (eigengene)
-# in each module defined by the colors of the input vector "colors".
-# The theoretical underpinnings are described in Horvath, Dong, Yip (2005)
-# http://www.genetics.ucla.edu/labs/horvath/ModuleConformity/
-# This requires the R library impute
-
+# moduleEigengenes ####
 #' Calculate module eigengenes.
 #'
 #' Calculates module eigengenes (1st principal component) of modules in a given
@@ -543,14 +537,7 @@ moduleEigengenes <- function(datExpr, colors, impute = TRUE, nPC = 1,
         )
     }
 
-#-------------------------------------------------------------------------------
-#
-# removeGrey
-#
-#-------------------------------------------------------------------------------
-# This function removes the grey eigengene from supplied module eigengenes.
-
-
+# removeGrey ####
 #' Removes the grey eigengene from a given collection of eigengenes.
 #'
 #' Given module eigengenes either in a single data frame or in a multi-set
@@ -569,8 +556,7 @@ moduleEigengenes <- function(datExpr, colors, impute = TRUE, nPC = 1,
 #' frame or a vector of lists) with the grey eigengene removed.
 #' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
 #' @keywords misc
-removeGreyME <- function(MEs,
-                         greyMEName = paste0(moduleColor.getMEprefix(),
+removeGreyME <- function(MEs, greyMEName = paste0(moduleColor.getMEprefix(),
                                              "grey")) {
     newMEs = MEs
     if (is.vector(MEs) & mode(MEs) == "list") {
@@ -578,12 +564,8 @@ removeGreyME <- function(MEs,
         newMEs <- vector(mode = "list", length = length(MEs))
         for (set in 1:length(MEs)) {
             if (!is.data.frame(MEs[[set]]$data)) {
-                stop(
-                    paste0(
-                        "MEs is a vector list but the list structure ",
-                        "is missing the correct 'data' component."
-                    )
-                )
+                stop("MEs is a vector list but the list structure ",
+                     "is missing the correct 'data' component.")
             }
             newMEs[[set]] <- MEs[[set]]
             if (greyMEName %in% names(MEs[[set]]$data)) {
@@ -591,13 +573,9 @@ removeGreyME <- function(MEs,
                                                       names(MEs[[set]]$data) != greyMEName]
             } else {
                 if (warned == 0) {
-                    warning(
-                        paste0(
-                            "removeGreyME: The given grey ME name was ",
+                    warning("removeGreyME: The given grey ME name was ",
                             "not found ",
-                            "among the names of given MEs."
-                        )
-                    )
+                            "among the names of given MEs.")
                     warned <- 1
                 }
             }
@@ -618,18 +596,8 @@ removeGreyME <- function(MEs,
     }
     newMEs
 }
-#-------------------------------------------------------------------------------
-#
-#  ModulePrincipalComponents
-#
-#-------------------------------------------------------------------------------
-# Has been superseded by moduleEigengenes above.
 
-#===============================================================================
-# This function collects garbage
-
-
-
+# collectGarbage ####
 #' Iterative garbage collection.
 #'
 #' Performs garbage collection until free memory idicators show no change.
@@ -643,16 +611,7 @@ collectGarbage <- function() {
     }
 }
 
-#-------------------------------------------------------------------------------
-#
-# orderMEs
-#
-#-------------------------------------------------------------------------------
-#
-# performs hierarchical clustering on MEs and returns the order suitable for plotting.
-
-
-
+# orderMEs ####
 #' Put close eigenvectors next to each other
 #'
 #' Reorder given (eigen-)vectors such that similar ones (as measured by
@@ -801,12 +760,6 @@ orderMEs <- function(MEs,
     }
 }
 
-#-------------------------------------------------------------------------------
-#
-# .clustOrder
-#
-#-------------------------------------------------------------------------------
-
 .clustOrder <- function(distM,
                         greyLast = TRUE,
                         greyName = paste0(moduleColor.getMEprefix(), "grey")) {
@@ -846,14 +799,7 @@ orderMEs <- function(MEs,
     # print(paste("order:", order, collapse = ", "))
 }
 
-#-------------------------------------------------------------------------------
-#
-# consensusOrderMEs
-#
-#-------------------------------------------------------------------------------
-# Orders MEs by the dendrogram of their consensus dissimilarity.
-
-
+# consensusOrderMEs ####
 #' Put close eigenvectors next to each other in several sets.
 #'
 #' Reorder given (eigen-)vectors such that similar ones (as measured by
@@ -902,8 +848,7 @@ consensusOrderMEs <- function(MEs,
                               greyLast = TRUE,
                               greyName = paste0(moduleColor.getMEprefix(),
                                                 "grey"),
-                              method = "consensus")
-{
+                              method = "consensus") {
     # Debugging code:
     #printFlush("consensusOrderMEs:")
     #size = checkSets(MEs)
@@ -924,18 +869,7 @@ consensusOrderMEs <- function(MEs,
     )
 }
 
-#-------------------------------------------------------------------------------
-#
-# consensusMEDissimilarity
-#
-#-------------------------------------------------------------------------------
-# This function calcualtes a consensus dissimilarity (i.e., correlation) among
-# sets of MEs (more generally, any sets of vectors).
-# CAUTION: when not using absolute value, the minimum similarity will favor the
-# large negative values!
-
-
-
+# consensusMEDissimilarity ####
 #' Consensus dissimilarity of module eigengenes.
 #'
 #' Calculates consensus dissimilarity \code{(1-cor)} of given module eigengenes
@@ -962,12 +896,8 @@ consensusOrderMEs <- function(MEs,
 #' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
 #' @seealso \code{\link{checkSets}}
 #' @keywords misc
-consensusMEDissimilarity <-
-    function(MEs,
-             useAbs = FALSE,
-             useSets = NULL,
-             method = "consensus")
-    {
+consensusMEDissimilarity <- function(MEs, useAbs = FALSE, useSets = NULL,
+                                     method = "consensus") {
         methods = c("consensus", "majority")
         m = charmatch(method, methods)
         if (is.na(m))
@@ -1017,18 +947,15 @@ consensusMEDissimilarity <-
 # The final value for each quantile is the 'summaryType' of the corresponding
 # quantiles across the columns
 
-.equalizeQuantiles <-
-    function(data, summaryType = c("median", "mean"))
-    {
+.equalizeQuantiles <- function(data, summaryType = c("median", "mean")) {
         summaryType = match.arg(summaryType)
         data.sorted = apply(data, 2, sort)
 
-        if (summaryType == "median")
-        {
+        if (summaryType == "median") {
             refSample = rowMedians(data.sorted, na.rm = TRUE)
-        } else if (summaryType == "mean")
+        } else if (summaryType == "mean") {
             refSample = rowMeans(data.sorted, na.rm = TRUE)
-
+        }
         ranks = round(colRanks(data, ties.method = "average", preserveShape = TRUE))
         out = refSample [ranks]
         dim(out) = dim(data)
@@ -1037,8 +964,7 @@ consensusMEDissimilarity <-
         out
     }
 
-.turnVectorIntoDist <- function(x, size, Diag, Upper)
-{
+.turnVectorIntoDist <- function(x, size, Diag, Upper) {
     attr(x, "Size") = size
     attr(x, "Diag") = FALSE
     attr(x, "Upper") = FALSE
@@ -1046,14 +972,13 @@ consensusMEDissimilarity <-
     x
 }
 
-.turnDistVectorIntoMatrix <-
-    function(x, size, Diag, Upper, diagValue)
-    {
+.turnDistVectorIntoMatrix <- function(x, size, Diag, Upper, diagValue) {
         mat = as.matrix(.turnVectorIntoDist(x, size, Diag, Upper))
-        if (!Diag)
+        if (!Diag) {
             diag(mat) = diagValue
+        }
         mat
-    }
+}
 
 # This function calculates consensus dissimilarity of module eigengenes
 
@@ -1150,16 +1075,7 @@ nExtras <- length(ExtraColors)
 
 rm(BaseColors, RColors, ExtraColors, nExtras, InBase)
 
-#-------------------------------------------------------------------------------
-#
-# normalizeLabels
-#
-#-------------------------------------------------------------------------------
-# "Normalizes" numerical labels such that the largest group is labeled 1, the
-# next largest 2 etc. If KeepZero == TRUE, label zero is preserved.
-
-
-
+# normalizeLabels ####
 #' Transform numerical labels into normal order.
 #'
 #' Transforms numerical labels into normal order, that is the largest group
@@ -1187,27 +1103,7 @@ normalizeLabels <- function(labels, keepZero = TRUE) {
     norm_labs
 }
 
-
-#===============================================================================
-#
-# MergeCloseModules
-#
-#===============================================================================
-
-#-------------------------------------------------------------------------------
-#
-# moduleNumber
-#
-#-------------------------------------------------------------------------------
-# Similar to modulecolor2 above, but returns numbers instead of colors, which is
-# oftentimes more useful. 0 means unassigned.
-# Return value is a simple vector, not a factor.
-# Caution: the module numbers are neither sorted nor sequential, the only
-# guarranteed fact is that grey probes are labeled by 0 and all probes belonging
-# to the same module have the same number.
-
-
-
+# moduleNumber ####
 #' Fixed-height cut of a dendrogram.
 #'
 #' Detects branches of on the input dendrogram by performing a fixed-height
@@ -1240,16 +1136,7 @@ moduleNumber <- function(dendro,
     Branches
 }
 
-#-------------------------------------------------------------------------------
-#
-# fixDataStructure
-#
-#-------------------------------------------------------------------------------
-# Check input data: if they are not a vector of lists, put them into the form of
-# a vector of lists.
-
-
-
+# fixDataStructure ####
 #' Put single-set data into a form useful for multiset calculations.
 #'
 #' Encapsulates single-set data in a wrapper that makes the data suitable for
@@ -1283,10 +1170,8 @@ moduleNumber <- function(dendro,
 #' dim(encapsData[[1]]$data)
 #' all.equal(encapsData[[1]]$data, singleSetData);
 #'
-#'
-fixDataStructure <- function(data,
-                             verbose = 0,
-                             indent = 0) {
+#' @export
+fixDataStructure <- function(data, verbose = 0, indent = 0) {
     spaces = indentSpaces(indent)
     if ((class(data) != "list") || (class(data[[1]]) != "list")) {
         if (verbose > 0)
@@ -1304,13 +1189,7 @@ fixDataStructure <- function(data,
     data
 }
 
-#-------------------------------------------------------------------------------
-#
-# checkSets
-#
-#-------------------------------------------------------------------------------
-# Checks sets for consistency and returns some diagnostics.
-
+# checkSets ####
 .permissiveDim <- function(x) {
     d = dim(x)
     if (is.null(d))
@@ -1351,29 +1230,24 @@ fixDataStructure <- function(data,
 #' errors rather than be bulletproof.}
 #' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
 #' @keywords misc
-checkSets <-
-    function(data,
-             checkStructure = FALSE,
-             useSets = NULL) {
+checkSets <- function(data, checkStructure = FALSE, useSets = NULL) {
         nSets = length(data)
-        if (is.null(useSets))
+        if (is.null(useSets)) {
             useSets = c(1:nSets)
-        if (nSets <= 0)
+        }
+        if (nSets <= 0) {
             stop("No data given.")
+        }
         structureOK = TRUE
-        if ((class(data) != "list") ||
-            (class(data[[useSets[1]]]) != "list"))     {
-            if (checkStructure)         {
+        if ((class(data) != "list") || (class(data[[useSets[1]]]) != "list")) {
+            if (checkStructure) {
                 structureOK = FALSE
                 nGenes = 0
                 nSamples = 0
             } else {
-                stop(
-                    "data does not appear to have the correct format. Consider using
-                    fixDataStructure",
-                    "or setting checkStructure = TRUE when calling
-                    this function."
-                )
+                stop("data does not appear to have the correct format. ",
+                     "Consider using fixDataStructure or setting ",
+                     "checkStructure = TRUE when calling this function.")
             }
         } else {
             nSamples = vector(length = nSets)
@@ -1383,33 +1257,19 @@ checkSets <-
                     if (checkStructure) {
                         structureOK = FALSE
                     } else {
-                        stop(paste(
-                            "Incompatible number of genes in set 1 and",
-                            set
-                        ))
+                        stop("Incompatible number of genes in set 1 and ", set))
                     }
                 }
                 nSamples[set] = .permissiveDim(data[[set]]$data)[1]
             }
         }
 
-        list(
-            nSets = nSets,
-            nGenes = nGenes,
-            nSamples = nSamples,
-            structureOK = structureOK
-        )
+        list(nSets = nSets, nGenes = nGenes, nSamples = nSamples,
+             structureOK = structureOK)
     }
 
 
-#-------------------------------------------------------------------------------
-#
-# multiSetMEs
-#
-#-------------------------------------------------------------------------------
-
-
-
+# multiSetMEs ####
 #' Calculate module eigengenes.
 #'
 #' Calculates module eigengenes for several sets.
@@ -1582,8 +1442,7 @@ multiSetMEs <- function(exprData,
                         returnValidOnly = trapErrors,
                         softPower = 6,
                         verbose = 1,
-                        indent = 0)
-{
+                        indent = 0) {
     spaces = indentSpaces(indent)
     nSets = length(exprData)
     setsize = checkSets(exprData, useSets = useSets)
@@ -1594,12 +1453,11 @@ multiSetMEs <- function(exprData,
     }
     MEs = vector(mode = "list", length = nSets)
     consValidMEs = NULL
-    if (!is.null(universalColors))
-        consValidColors = universalColors
-    if (is.null(useSets))
-        useSets = c(1:nSets)
-    if (is.null(useGenes))
-    {
+    if (!is.null(universalColors)) {
+        consValidColors = universalColors}
+    if (is.null(useSets)) {
+        useSets = c(1:nSets)}
+    if (is.null(useGenes)) {
         for (set in useSets) {
             if (verbose > 0)
                 printFlush(paste(spaces, "  Working on set", as.character(set), "..."))
@@ -1623,8 +1481,7 @@ multiSetMEs <- function(exprData,
                 verbose = verbose - 1,
                 indent = indent + 1
             )
-            if (!is.null(universalColors) && (!setMEs$allOK))
-            {
+            if (!is.null(universalColors) && (!setMEs$allOK)) {
                 if (is.null(consValidMEs)) {
                     consValidMEs = setMEs$validMEs
                 } else {
@@ -1646,12 +1503,8 @@ multiSetMEs <- function(exprData,
     } else {
         for (set in useSets) {
             if (verbose > 0) {
-                printFlush(paste(
-                    spaces,
-                    "  Working on set",
-                    as.character(set),
-                    "..."
-                ))
+                printFlush(spaces, "  Working on set", as.character(set),
+                           "..."))
             }
             if (is.null(universalColors)) {
                 setColors = colors[useGenes, set]
@@ -1673,34 +1526,31 @@ multiSetMEs <- function(exprData,
                 verbose = verbose - 1,
                 indent = indent + 1
             )
-            if (!is.null(universalColors) && (!setMEs$allOK))
-            {
+            if (!is.null(universalColors) && (!setMEs$allOK)) {
                 if (is.null(consValidMEs)) {
                     consValidMEs = setMEs$validMEs
                 } else {
                     consValidMEs = consValidMEs * setMEs$validMEs
                 }
-                consValidColors[setMEs$validColors != universalColors[useGenes]]  =
-                    setMEs$validColors[setMEs$validColors != universalColors[useGenes]]
+                consValidColors[
+                    setMEs$validColors != universalColors[useGenes]]  =
+                    setMEs$validColors[
+                        setMEs$validColors != universalColors[useGenes]]
             }
             MEs[[set]] = setMEs
             names(MEs[[set]])[names(setMEs) == 'eigengenes'] = 'data'
         }
     }
-    if (!is.null(universalColors))
-    {
-        for (set in 1:nSets)
-        {
+    if (!is.null(universalColors)) {
+        for (set in 1:nSets) {
             if (!is.null(consValidMEs))
                 MEs[[set]]$validMEs = consValidMEs
             MEs[[set]]$validColors = consValidColors
         }
     }
-    for (set in 1:nSets)
-    {
+    for (set in 1:nSets) {
         MEs[[set]]$allOK = (sum(!MEs[[set]]$validMEs) == 0)
-        if (returnValidOnly)
-        {
+        if (returnValidOnly) {
             valid = (MEs[[set]]$validMEs > 0)
             MEs[[set]]$data = MEs[[set]]$data[, valid]
             MEs[[set]]$averageExpr = MEs[[set]]$averageExpr[, valid]
@@ -1713,19 +1563,10 @@ multiSetMEs <- function(exprData,
             MEs[[set]]$validMEs = rep(TRUE, times = ncol(MEs[[set]]$data))
         }
     }
-
     MEs
 }
 
-#-------------------------------------------------------------------------------
-#
-# MergeCloseModules
-#
-#-------------------------------------------------------------------------------
-
-
-
-
+# MergeCloseModules ####
 #' Merge close modules in gene expression data
 #'
 #' Merges modules in gene expression networks that are too close as measured by
@@ -1892,8 +1733,7 @@ mergeCloseModules <- function(# input data
     # Options controlling behaviour of the function
     trapErrors = FALSE,
     verbose = 1,
-    indent = 0)
-{
+    indent = 0) {
     MEsInSingleFrame = FALSE
     spaces = indentSpaces(indent)
 
@@ -2282,19 +2122,13 @@ mergeCloseModules <- function(# input data
     }
 }
 
-
-#===============================================================================
+# ScaleFreePlot ####
 # The function ScaleFreePlot creates a plot for checking scale free topology
 # when truncated1 = TRUE is specificed, it provides the R^2 measures for the
 # following degree distributions:
 # a) scale free topology,
 # b) log - log R^2 and
 # c) truncated exponential R^2
-
-# The function ScaleFreePlot1 creates a plot for checking scale free topology
-
-
-
 #' Visual check of scale-free topology
 #'
 #' A simple visula check of scale-free network ropology.
@@ -2319,13 +2153,8 @@ mergeCloseModules <- function(# input data
 #' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
 #' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 #' @keywords misc
-scaleFreePlot <-
-    function(connectivity,
-             nBreaks = 10,
-             truncated = FALSE,
-             removeFirst = FALSE,
-             main = "",
-             ...) {
+scaleFreePlot <- function(connectivity, nBreaks = 10, truncated = FALSE,
+                          removeFirst = FALSE, main = "", ...) {
         k = connectivity
         discretized.k = cut(k, nBreaks)
         dk = tapply(k, discretized.k, mean)
@@ -2396,8 +2225,7 @@ scaleFreePlot <-
             lines(log.dk, predict(lm2), col = 2)
         OUTPUT
     } # end of function
-
-#===============================================================================
+# GTOMdist ####
 # This function computes a TOMk dissimilarity
 # which generalizes the topological overlap matrix (Ravasz et al)
 # Input: an Adjacency matrix with entries in [0, 1]
@@ -2405,13 +2233,10 @@ scaleFreePlot <-
 # binary entries...
 # This function is explained in Yip and Horvath (2005)
 # http://www.genetics.ucla.edu/labs/horvath/GTOM/
-
-
 #' Generalized Topological Overlap Measure
 #'
 #' Generalized Topological Overlap Measure, taking into account interactions of
 #' higher degree.
-#'
 #'
 #' @param adjMat adjacency matrix. See details below.
 #' @param degree integer specifying the maximum degree to be calculated.
@@ -2420,8 +2245,7 @@ scaleFreePlot <-
 #' @references Yip A, Horvath S (2007) Gene network interconnectedness and the
 #' generalized topological overlap measure. BMC Bioinformatics 2007, 8:22
 #' @keywords misc
-GTOMdist <- function(adjMat, degree = 1)
-{
+GTOMdist <- function(adjMat, degree = 1) {
     maxh1 = max(as.dist(adjMat))
     minh1 = min(as.dist(adjMat))
     if (degree != round(abs(degree)))
@@ -2443,15 +2267,14 @@ GTOMdist <- function(adjMat, degree = 1)
 
     B <- adjMat
     if (degree >= 2)
-        for (i in 2:degree)
-        {
+        for (i in 2:degree) {
             diag(B) <- diag(B) + 1
             # Calculates the number of paths with length at most degree connecting
             #  a pair
             B = B %*% adjMat
         }
-    B <-
-        (B > 0) # this gives the degree - step reachability from a node to another
+    # this gives the degree - step reachability from a node to another
+    B <- (B > 0)
     diag(B) <- 0 # exclude each node being its own neighbor
     # this gives the number of common degree-step-neighbor that a pair of nodes
     # share
@@ -2465,16 +2288,10 @@ GTOMdist <- function(adjMat, degree = 1)
     1 - B / denomTOM   # this turns the TOM matrix into a dissimilarity
 }
 
-#===============================================================================
-#
+# vectorTOM ####
 # vectorTOM: calculate TOM of a vector (or a 'small' matrix) with expression
 # data. If the number of columns in vect is small (or 1), number of columns in
 # datExpr can be large.
-#
-#===============================================================================
-
-
-
 #' Topological overlap for a subset of the whole set of genes
 #'
 #' This function calculates topological overlap of a small set of vectors with
@@ -2517,18 +2334,10 @@ GTOMdist <- function(adjMat, degree = 1)
 #' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
 #' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 #' @keywords misc
-vectorTOM <-
-    function(datExpr,
-             vect,
-             subtract1 = FALSE,
-             blockSize = 2000,
-             corFnc = "cor",
-             corOptions = "use = 'p'",
-             networkType = "unsigned",
-             power = 6,
-             verbose = 1,
-             indent = 0)
-    {
+vectorTOM <-function(datExpr, vect, subtract1 = FALSE, blockSize = 2000,
+                     corFnc = "cor", corOptions = "use = 'p'",
+                     networkType = "unsigned", power = 6, verbose = 1,
+                     indent = 0) {
         spaces = indentSpaces(indent)
 
         intType = charmatch(networkType, .networkTypes)
@@ -2637,16 +2446,9 @@ vectorTOM <-
         TOM
     }
 
-#===============================================================================
-#
+# subsetTOM  ####
 # subsetTOM: calculate TOM of a subset of vectors with respect to a full set of
 # vectors.
-#
-#===============================================================================
-
-
-
-
 #' Topological overlap for a subset of a whole set of genes
 #'
 #' This function calculates topological overlap of a subset of vectors with

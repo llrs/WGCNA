@@ -325,7 +325,9 @@ dynamically, otherwise correlation calculations will use 2 threads.}
 make the output progressively more and more verbose.}
 
 \item{indent}{indentation for diagnostic messages. Zero means no
-indentation, each unit adds two spaces.
+indentation, each unit adds two spaces.}
+
+\item{\dots}{Other arguments to be passed.
 \code{reproduceBranchEigennodeQuantileError} that instructs the function to
 reproduce a bug in branch eigennode dissimilarity calculations for purposes
 if reproducing old reults.}
