@@ -7594,15 +7594,15 @@ greenBlackRed <- function(n, gamma = 1) {
 #' representation for continuous numbers.
 #' @keywords color
 #' @examples
-#'\donotrun{
+#' \dontrun{
 #'   par(mfrow = c(3, 1))
 #'   displayColors(greenWhiteRed(50));
 #'   title("gamma = 1")
 #'   displayColors(greenWhiteRed(50, 3));
 #'   title("gamma = 3")
 #'   displayColors(greenWhiteRed(50, 0.5));
-#'   title("gamma = 0.5")}
-#'
+#'   title("gamma = 0.5")
+#' }
 greenWhiteRed <- function(n, gamma = 1, warn = TRUE) {
     if (warn)
         warning("WGCNA::greenWhiteRed: this palette is not suitable for people\n",
