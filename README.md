@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.org/llrs/WGCNA.svg?branch=master)](https://travis-ci.org/llrs/WGCNA)
 
+[![Code Coverage](https://img.shields.io/codecov/c/github/llrs/master.svg)](https://codecov.io/gh/llrs/WGCNA)
+
 # WGCNA
 :exclamation: This is a modified version of the WGCNA package  
 WGCNA — Weighted Correlation Network Analysis. [Homepage](http://www.genetics.ucla.edu/labs/horvath/CoexpressionNetwork/Rpackages/WGCNA/)
