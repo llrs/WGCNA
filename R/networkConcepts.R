@@ -1,9 +1,5 @@
-# This code was written by Jun Dong, modified by Peter Langfelder
-# datExpr: expression profiles with rows=samples and cols=genes/probesets
-# power: for contruction of the weighted network
-# trait: the quantitative external trait
-#
-
+# This code was written by Jun Dong, modified by Peter Langfelder and
+# by Lluís Revilla
 
 #' Calculations of network concepts
 #'
@@ -185,24 +181,22 @@
 #' Network Analysis. PLoS Comput Biol 4(8): e1000117
 #' @keywords misc
 #' @export networkConcepts
-networkConcepts = function(datExpr, power=1, trait=NULL, networkType = "unsigned")
-{
+networkConcepts <- function(datExpr, power = 1, trait = NULL,
+                            networkType = "unsigned") {
 
   networkTypeC = charmatch(networkType, .networkTypes)
   if (is.na(networkTypeC))
     stop(paste("Unrecognized networkType argument.",
          "Recognized values are (unique abbreviations of)", paste(.networkTypes, collapse = ", ")))
 
-  if(networkTypeC==1)
-  {
-        adj <- abs(cor(datExpr,use="p"))^power
-  } else if (networkTypeC==2)
-  {
-  	adj <- abs((cor(datExpr,use="p")+1)/2)^power
+  if(networkTypeC==1) {
+      adj <- abs(cor(datExpr,use="p"))^power
+  } else if (networkTypeC==2) {
+      adj <- abs((cor(datExpr,use="p")+1)/2)^power
   } else {
-        cor = cor(datExpr,use="p")
-        cor[cor < 0] = 0
-  	adj <- cor^power
+      cor = cor(datExpr,use="p")
+      cor[cor < 0] = 0
+      adj <- cor^power
   }
   diag(adj)=0 # Therefore adj=A-I.
 
@@ -228,9 +222,10 @@ networkConcepts = function(datExpr, power=1, trait=NULL, networkType = "unsigned
   Heterogeneity.CF=sqrt(Size*sum(Connectivity.CF^2)/sum(Connectivity.CF)^2-1)
   #ClusterCoef.CF=.ClusterCoef.fun(outer(Conformity,Conformity)-diag(Conformity^2) )
   ClusterCoef.CF=c(NA, Size)
-  for(i in 1:Size )
+  for(i in 1:Size ) {
      ClusterCoef.CF[i]=( sum(Conformity[-i]^2)^2 - sum(Conformity[-i]^4) )/
        ( sum(Conformity[-i])^2 - sum(Conformity[-i]^2) )
+  }
 
   ### Approximate Conformity-Based Network Concepts
   Connectivity.CF.App=sum(Conformity)*Conformity
@@ -287,44 +282,6 @@ MAR=MAR, ConformityE=ConformityE)
 	output
 }
 
-
-
-
-#
-# Network functions for network concepts
-#
-
-# Function definitions
-
-
-
-#   Cohesiveness/Conformity/Factorizability etc
-# Check if adj is a valid adjacency matrix:  square matrix, non-negative entries, symmetric and no missing entries.
-# Parameters:
-#   adj - the input adjacency matrix
-#   tol - the tolerence level to measure the difference from 0 (symmetric matrix: upper diagonal minus lower diagonal)
-# Remarks:
-#   1. This function is not supposed to be used directly. Instead, it should appear in function definitions.
-#   2. We release the requirement that the diagonal elements be 1 or 0. Users should assign appropriate values
-#      at the beginning of their function definitions.
-# Usage:
-# if(!.is.adjmat(adj)) stop("The input matrix is not a valid adjacency matrix!")
-
-.is.adjmat = function(adj, tol=10^(-15)){
-	n=dim(adj)
-	is.adj=1
-	if (n[1] != n[2]){ message("The adjacency matrix is not a square matrix!"); is.adj=0;}
-	if ( sum(is.na(adj))>0 ){ message("There are missing values in the adjacency matrix!"); is.adj=0;}
-	if ( sum(adj<0)>0 ){ message("There are negative entries in the adjacency matrix!"); is.adj=0;}
-	if ( max(abs(adj-t(adj))) > tol){ message("The adjacency matrix is not symmetric!"); is.adj=0;}
-			#if ( max(abs(diag(adj)-1)) > tol){ message("The diagonal elements are not all one!"); is.adj=0;}
-			#The last criteria is removed because of different definitions on diagonals with other papers.
-			#Always let "diagonal=1" INSIDE the function calls when using functions for Factorizability paper.
-	is.adj
-}
-
-
-
 # .NPC.direct=function(adj)
 # Calculates the square root of Normalized Product Connectivity (.NPC), by way of definition of .NPC. ( \sqrt{t})
 # Parameters:
@@ -339,7 +296,8 @@ MAR=MAR, ConformityE=ConformityE)
 #   4. If the adjacency matrix is a ZERO matrix, then a warning message is issued and vector of 0 is returned.
 
 .NPC.direct=function(adj){
-	if(!.is.adjmat(adj)) stop("The input matrix is not a valid adjacency matrix!")
+
+	checkAdjMat(adj)
 	n=dim(adj)[1]
 	if(n==2) {
 		warning("The adjacecny matrix is only 2 by 2. .NPC may not be unique!")
@@ -385,7 +343,7 @@ MAR=MAR, ConformityE=ConformityE)
 #   3. If the adjacency matrix is a ZERO matrix, then a warning message is issued and vector of 0 is returned.
 
 .NPC.iterate <- function(adj, loop=10^(10), tol=10^(-10)){
-	if(!.is.adjmat(adj)) stop("The input matrix is not a valid adjacency matrix!")
+	checkAdjMat(adj)
 	n=dim(adj)[1]
 	if(n==2) warning("The adjacecny matrix is only 2 by 2. .NPC may not be unique!")
 	diag(adj)=0
@@ -411,8 +369,7 @@ MAR=MAR, ConformityE=ConformityE)
 
 # The function .ClusterCoef.fun computes the cluster coefficients.
 # Input is an adjacency matrix
-.ClusterCoef.fun=function(adjmat1)
-{
+.ClusterCoef.fun <- function(adjmat1) {
   # diag(adjmat1)=0
   no.nodes=dim(adjmat1)[[1]]
   computeLinksInNeighbors <- function(x, imatrix){x %*% imatrix %*% x}
@@ -440,18 +397,18 @@ MAR=MAR, ConformityE=ConformityE)
 
 # The function err.bp  is used to create error bars in a barplot
 # usage: err.bp(as.vector(means), as.vector(stderrs), two.side=F)
-.err.bp<-function(daten,error,two.side=F)
-{
+.err.bp<-function(daten,error,two.side=F) {
    if(!is.numeric(daten)) {
         stop("All arguments must be numeric")}
    if(is.vector(daten)){
       xval<-(cumsum(c(0.7,rep(1.2,length(daten)-1))))
-   }else{
-      if (is.matrix(daten)){
+   } else {
+      if (is.matrix(daten)) {
         xval<-cumsum(array(c(1,rep(0,dim(daten)[1]-1)),
                             dim=c(1,length(daten))))+0:(length(daten)-1)+.5
-      }else{
-        stop("First argument must either be a vector or a matrix") }
+      } else {
+        stop("First argument must either be a vector or a matrix")
+      }
    }
    MW<-0.25*(max(xval)/length(xval))
    ERR1<-daten+error
@@ -465,11 +422,6 @@ MAR=MAR, ConformityE=ConformityE)
       }
    }
 }
-
-
-
-
-
 
 #' Calculation of conformity-based network concepts.
 #'
@@ -557,67 +509,65 @@ MAR=MAR, ConformityE=ConformityE)
 #' Interpretation of Gene Coexpression Network Analysis. PLoS Comput Biol 4(8):
 #' e1000117
 #' @keywords misc
-conformityBasedNetworkConcepts = function(adj, GS=NULL)
-{
-  if(!.is.adjmat(adj)) stop("The input matrix is not a valid adjacency matrix!")
+conformityBasedNetworkConcepts <- function(adj, GS=NULL) {
+  checkAdjMat(adj)
   diag(adj)=0 # Therefore adj=A-I.
-  if (dim(adj)[[1]]<3)
-    stop("The adjacency matrix has fewer than 3 rows. This network is trivial and will not be evaluated.")
-  if (!is.null(GS))
-  {
-    if( length(GS) !=dim(adj)[[1]])
-    {
+  if (dim(adj)[[1]]<3) {
+    stop("The adjacency matrix has fewer than 3 rows. This network is trivial ",
+         "and will not be evaluated.")
+  }
+  if (!is.null(GS)) {
+    if( length(GS) !=dim(adj)[[1]]) {
        stop(paste("The length of the node significnce GS does not equal the number",
                   "of rows of the adjcency matrix. length(GS) != dim(adj)[[1]]. \n",
                   "Something is wrong with your input"))
     }
   }
 
-	### Fundamental Network Concepts
-	Size=dim(adj)[1]
-	Connectivity=apply(adj, 2, sum)
-	Density=sum(Connectivity)/(Size*(Size-1))
-	Centralization=Size*(max(Connectivity)-mean(Connectivity))/((Size-1)*(Size-2))
-	Heterogeneity=sqrt(Size*sum(Connectivity^2)/sum(Connectivity)^2-1)
-	ClusterCoef=.ClusterCoef.fun(adj)
-	fMAR=function(v) sum(v^2)/sum(v)
-	MAR=apply(adj, 1, fMAR)
-	### Conformity-Based Network Concepts
-	Conformity=.NPC.iterate(adj)$v1
-	Factorizability=1- sum( (adj-outer(Conformity,Conformity)+ diag(Conformity^2))^2 )/sum(adj^2)
-	Connectivity.CF=sum(Conformity)*Conformity-Conformity^2
-	Density.CF=sum(Connectivity.CF)/(Size*(Size-1))
-	Centralization.CF=Size*(max(Connectivity.CF)-mean(Connectivity.CF))/((Size-1)*(Size-2))
-	Heterogeneity.CF=sqrt(Size*sum(Connectivity.CF^2)/sum(Connectivity.CF)^2-1)
-	#ClusterCoef.CF=.ClusterCoef.fun(outer(Conformity,Conformity)-diag(Conformity^2) )
-	ClusterCoef.CF=c(NA, Size)
-  for(i in 1:Size )
+  ### Fundamental Network Concepts
+  Size=dim(adj)[1]
+  Connectivity=apply(adj, 2, sum)
+  Density=sum(Connectivity)/(Size*(Size-1))
+  Centralization=Size*(max(Connectivity)-mean(Connectivity))/((Size-1)*(Size-2))
+  Heterogeneity=sqrt(Size*sum(Connectivity^2)/sum(Connectivity)^2-1)
+  ClusterCoef=.ClusterCoef.fun(adj)
+  fMAR=function(v) sum(v^2)/sum(v)
+  MAR=apply(adj, 1, fMAR)
+  ### Conformity-Based Network Concepts
+  Conformity=.NPC.iterate(adj)$v1
+  Factorizability=1- sum( (adj-outer(Conformity,Conformity)+ diag(Conformity^2))^2 )/sum(adj^2)
+  Connectivity.CF=sum(Conformity)*Conformity-Conformity^2
+  Density.CF=sum(Connectivity.CF)/(Size*(Size-1))
+  Centralization.CF=Size*(max(Connectivity.CF)-mean(Connectivity.CF))/((Size-1)*(Size-2))
+  Heterogeneity.CF=sqrt(Size*sum(Connectivity.CF^2)/sum(Connectivity.CF)^2-1)
+  #ClusterCoef.CF=.ClusterCoef.fun(outer(Conformity,Conformity)-diag(Conformity^2) )
+  ClusterCoef.CF=c(NA, Size)
+  for(i in 1:Size ) {
     ClusterCoef.CF[i]=( sum(Conformity[-i]^2)^2 - sum(Conformity[-i]^4) )/
                           ( sum(Conformity[-i])^2 - sum(Conformity[-i]^2) )
+  }
   MAR.CF=ifelse(sum(Conformity,na.rm=T)-Conformity==0, NA,
-                Conformity*(sum(Conformity^2,na.rm=T)-Conformity^2)/(sum(Conformity,na.rm=T)-Conformity))
+                Conformity*(sum(Conformity^2,na.rm=T)-Conformity^2)/(
+                    sum(Conformity,na.rm=T)-Conformity))
 
-	### Approximate Conformity-Based Network Concepts
-	Connectivity.CF.App=sum(Conformity)*Conformity
-	Density.CF.App=sum(Connectivity.CF.App)/(Size*(Size-1))
-	Centralization.CF.App=Size*(max(Connectivity.CF.App)-mean(Connectivity.CF.App))/((Size-1)*(Size-2))
-	Heterogeneity.CF.App=sqrt(Size*sum(Connectivity.CF.App^2)/sum(Connectivity.CF.App)^2-1)
+  ### Approximate Conformity-Based Network Concepts
+  Connectivity.CF.App=sum(Conformity)*Conformity
+  Density.CF.App=sum(Connectivity.CF.App)/(Size*(Size-1))
+  Centralization.CF.App=Size*(max(Connectivity.CF.App)-mean(Connectivity.CF.App))/((Size-1)*(Size-2))
+  Heterogeneity.CF.App=sqrt(Size*sum(Connectivity.CF.App^2)/sum(Connectivity.CF.App)^2-1)
 
-  if(sum(Conformity,na.rm=T)==0)
-  {
+  if(sum(Conformity,na.rm=T)==0) {
       warning(paste("The sum of conformities equals zero.\n",
                     "Maybe you used an input adjacency matrix with lots of zeroes?\n",
                     "Specifically, sum(Conformity,na.rm=T)==0."))
       MAR.CF.App= rep(NA,Size)
       ClusterCoef.CF.App= rep(NA,Size)
   } #end of if
-  if(sum(Conformity,na.rm=T) !=0)
-  {
+  if(sum(Conformity,na.rm=T) !=0) {
     MAR.CF.App=Conformity*sum(Conformity^2,na.rm=T) /sum(Conformity,na.rm=T)
     ClusterCoef.CF.App=rep((sum(Conformity^2)/sum(Conformity))^2,Size)
   }# end of if
-  output=list(
-              Factorizability =Factorizability,
+  output=list(Factorizability =Factorizability,
               fundamentalNCs=list(
                   ScaledConnectivity=Connectivity/max(Connectivity,na.rm=T),
                   Connectivity=Connectivity,
@@ -642,19 +592,13 @@ conformityBasedNetworkConcepts = function(adj, GS=NULL)
                   Density.CF.App= Density.CF.App,
                   Centralization.CF.App =Centralization.CF.App,
                   Heterogeneity.CF.App= Heterogeneity.CF.App))
-  if ( !is.null(GS) )
-  {
+  if ( !is.null(GS) ) {
     output$FundamentalNC$NetworkSignificance = mean(GS,na.rm=T)
     K = Connectivity/max(Connectivity)
     output$FundamentalNC$HubNodeSignificance = sum(GS * K,na.rm=T)/sum(K^2,na.rm=T)
   }
   output
 } # end of function
-
-
-
-
-
 
 #' Calculation of fundamental network concepts from an adjacency matrix.
 #'
@@ -714,19 +658,27 @@ conformityBasedNetworkConcepts = function(adj, GS=NULL)
 #' Horvath S, Dong J (2008) Geometric Interpretation of Gene Coexpression
 #' Network Analysis. PLoS Comput Biol 4(8): e1000117
 #' @keywords misc
-fundamentalNetworkConcepts=function(adj,GS=NULL)
-{
-   if(!.is.adjmat(adj)) stop("The input matrix is not a valid adjacency matrix!")
+fundamentalNetworkConcepts <- function(adj,GS=NULL) {
+   checkAdjMat(adj)
    diag(adj)=0 # Therefore adj=A-I.
 
-   if (dim(adj)[[1]]<3) stop("The adjacency matrix has fewer than 3 rows. This network is trivial and will not be evaluated.")
+   if (dim(adj)[[1]]<3) {
+       stop("The adjacency matrix has fewer than 3 rows. This network is ",
+            "trivial and will not be evaluated.")
+   }
 
-if (!is.null(GS)) { if( length(GS) !=dim(adj)[[1]]){ stop("The length of the node significnce GS does not
-equal the number of rows of the adjcency matrix. length(GS) unequal dim(adj)[[1]]. GS should be a vector whosecomponents correspond to the nodes.")}}
+   if (!is.null(GS)) {
+       if( length(GS) !=dim(adj)[[1]]){
+           stop("The length of the node significnce GS does not equal the ",
+                "number of rows of the adjcency matrix. length(GS) unequal ",
+                "dim(adj)[[1]]. GS should be a vector whosecomponents ",
+                "correspond to the nodes.")
+       }
+   }
 
 	Size=dim(adj)[1]
 
-### Fundamental Network Concepts
+	### Fundamental Network Concepts
 	Connectivity=apply(adj, 2, sum) # Within Module Connectivities
 	Density=sum(Connectivity)/(Size*(Size-1))
 	Centralization=Size*(max(Connectivity)-mean(Connectivity))/((Size-1)*(Size-2))
@@ -745,7 +697,8 @@ equal the number of rows of the adjcency matrix. length(GS) unequal dim(adj)[[1]
 
    if ( !is.null(GS) ) {
         output$NetworkSignificance = mean(GS,na.rm=T)
-        output$HubNodeSignificance = sum(GS * ScaledConnectivity,na.rm=T)/sum(ScaledConnectivity^2,na.rm=T)
+        output$HubNodeSignificance = sum(GS * ScaledConnectivity,na.rm=T)/sum(
+            ScaledConnectivity^2,na.rm=T)
    }
    output
 } # end of function

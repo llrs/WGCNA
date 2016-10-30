@@ -6,6 +6,8 @@
 \title{Union and intersection of multiple sets}
 \usage{
 multiUnion(setList)
+
+multiIntersect(setList)
 }
 \arguments{
 \item{setList}{A list containing the sets to be performed upon.}
@@ -21,8 +23,7 @@ standard functions \code{\link{union}} and \code{\link{intersect}}.
 Peter Langfelder
 }
 \seealso{
-The "standard" functions \code{\link{union}} and
-\code{\link{intersect}}.
+The "standard" functions \code{\link{union}} and \code{\link{intersect}}.
 }
 \keyword{misc}
 

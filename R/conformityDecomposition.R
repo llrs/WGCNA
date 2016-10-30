@@ -125,12 +125,14 @@
 #'
 #'
 #' @export conformityDecomposition
-conformityDecomposition = function (adj, Cl = NULL)
-{
-    if (  is.null(dim(adj) )) stop("Input adj is not a matrix or data frame. ")
-    if ( dim(adj)[[1]] < 3)   stop("The adjacency matrix has fewer than 3 rows. This network is trivial and will not be evaluated.")
-    if (!.is.adjmat(adj))
-        stop("The input matrix is not a valid adjacency matrix!")
+conformityDecomposition = function (adj, Cl = NULL) {
+
+    checkAdjMat(adj)
+    if (dim(adj)[[1]] < 3) {
+        stop("The adjacency matrix has fewer than 3 rows. This network is ",
+             "trivial and will not be evaluated.")
+    }
+
     diag(adj) = 0
     if (!is.null(Cl)) {
         if (length(Cl) != dim(adj)[[1]]) {
@@ -155,8 +157,11 @@ conformityDecomposition = function (adj, Cl = NULL)
     if ( !is.null(Cl) )  {
         Cl=factor(Cl)
         Cl.level=levels( Cl )
-        if ( length(Cl.level)>100 ) warning(paste("Your class assignment variable Cl contains",  length(Cl.level), "different classes. I assume this is a proper class assignment variable. But if not, stop the calculation, e.g. by using the Esc key on your keybord."))
-
+        if ( length(Cl.level)>100 ) {
+            warning("Your class assignment variable Cl contains ",
+                    length(Cl.level), "different classes. I assume this is a ",
+                    "proper class assignment variable.")
+        }
         Conformity=rep(NA, length(Cl) )
         listConformity=list()
         IntramodularFactorizability=rep(NA, length(Cl.level) )

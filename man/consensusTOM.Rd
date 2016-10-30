@@ -65,7 +65,7 @@ Allowed values are (unique abbreviations of) \code{"pearson"} and
 respectively. Missing values are handled using the
 \code{pariwise.complete.obs} option.}
 
-\item{maxPOutliers}{only used for \code{corType=="bicor"}. Specifies the
+\item{maxPOutliers}{only used for \code{corType == "bicor"}. Specifies the
 maximum percentile of data that can be considered outliers on either side of
 the median separately. For each side of the median, if higher percentile
 than \code{maxPOutliers} is considered an outlier by the weight function

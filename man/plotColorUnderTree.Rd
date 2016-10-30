@@ -83,7 +83,7 @@ Steve Horvath \email{SHorvath@mednet.ucla.edu} and Peter Langfelder
 }
 \seealso{
 \code{\link[dynamicTreeCut]{cutreeDynamic}} for module detection in
-a dendrogram;
+a dendrogram
 
 \code{\link{plotDendroAndColors}} for automated plotting of dendrograms and
 colors in one step.

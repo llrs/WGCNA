@@ -1,4 +1,4 @@
-
+# Convert modules numbers to colors
 
 #' Convert numerical labels to colors.
 #'

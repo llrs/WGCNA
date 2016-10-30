@@ -1,7 +1,5 @@
 # slight re-definition of the bicor function
 
-
-
 #' Biweight Midcorrelation
 #'
 #' Calculate biweight midcorrelation efficiently for matrices.
@@ -139,20 +137,25 @@ bicor = function(x, y = NULL, robustX = TRUE, robustY = TRUE, use = 'all.obs', m
       stop(paste("Unrecognized 'pearsonFallback'. Recognized values are (unique abbreviations of)\n",
            paste(.pearsonFallbacks, collapse = ", ")))
 
-  if (quick < 0) stop("quick must be non-negative.")
-  if (nThreads < 0) stop("nThreads must be non-negative.")
-  if (is.null(nThreads) || (nThreads==0)) nThreads = .useNThreads()
-
+  if (quick < 0) {
+      stop("quick must be non-negative.")
+  }
+  if (nThreads < 0) {
+      stop("nThreads must be non-negative.")
+  }
+  if (is.null(nThreads) || (nThreads==0)) {
+      nThreads = .useNThreads()
+  }
   x = as.matrix(x)
-  if (prod(dim(x))==0) stop("'x' has a zero dimension.");
+  if (prod(dim(x))==0) {
+      stop("'x' has a zero dimension.")
+  }
   nNA = 0
   err = 0
   warnX = 0
   warnY = 0
-  if (is.null(y))
-  {
-    if (!robustX)
-    {
+  if (is.null(y)) {
+    if (!robustX) {
       bi = cor(x, use = use)
     } else {
       bi = matrix(0, ncol(x), ncol(x))
@@ -168,17 +171,22 @@ bicor = function(x, y = NULL, robustX = TRUE, robustY = TRUE, use = 'all.obs', m
                NAOK = TRUE, PACKAGE = "WGCNA")
     }
     dim(res$res) = dim(bi)
-    if (!is.null(dimnames(x)[[2]])) dimnames(res$res) = list(dimnames(x)[[2]],  dimnames(x)[[2]] )
-    if (res$warn > 0)
-    {
+    if (!is.null(dimnames(x)[[2]])) {
+        dimnames(res$res) = list(dimnames(x)[[2]],  dimnames(x)[[2]] )
+    }
+    if (res$warn > 0) {
       # For now have only one warning
-      warning(paste("bicor: zero MAD in variable 'x'.", .zeroMADWarnings[fallback]))
+      warning("bicor: zero MAD in variable 'x'. ", .zeroMADWarnings[fallback])
     }
   } else {
     y = as.matrix(y)
-    if (prod(dim(y))==0) stop("'y' has a zero dimension.");
-    if (nrow(x)!=nrow(y))
-      stop("'x' and 'y' have incompatible dimensions (unequal numbers of rows).")
+    if (prod(dim(y))==0) {
+        stop("'y' has a zero dimension.")
+    }
+    if (nrow(x)!=nrow(y)) {
+      stop("'x' and 'y' have incompatible dimensions (unequal numbers",
+           " of rows).")
+    }
     bi = matrix(0, ncol(x), ncol(y))
     res = .C("bicorFast", x = as.double(x), nrow = as.integer(nrow(x)), ncolx = as.integer(ncol(x)),
              y = as.double(y), ncoly = as.integer(ncol(y)),
@@ -202,19 +210,17 @@ bicor = function(x, y = NULL, robustX = TRUE, robustY = TRUE, use = 'all.obs', m
     if (res$warnY > 0)
       warning(paste("bicor: zero MAD in variable 'y'.", .zeroMADWarnings[fallback]))
   }
-  if (res$err > 0)
-  {
-    if (err > nKnownErrors)
-    {
+  if (res$err > 0) {
+    if (err > nKnownErrors) {
       stop(paste("An error occurred in compiled code. Error code is", err))
     } else {
       stop(paste(Cerrors[err], "occurred in compiled code. "))
     }
   }
-  if (res$nNA > 0)
-  {
-    warning(paste("Missing values generated in calculation of bicor.",
-                  "Likely cause: too many missing entries, zero median absolute deviation, or zero variance."))
+  if (res$nNA > 0) {
+    warning("Missing values generated in calculation of bicor.\nLikely cause: ",
+            "too many missing entries, zero median absolute deviation, or zero ",
+            "variance.")
   }
   res$res
 }
