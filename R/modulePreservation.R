@@ -1,10 +1,10 @@
 # module preservation for networks specified by adjacency matrices, not expression data.
 # this version can handle both expression and adjacency matrices.
 
-# 
+#
 # Changelog:
 
-# 2010/08/04: 
+# 2010/08/04:
 #   . Adding clusterCoeff and MAR to density preservation statistics
 #   . Adding cor.clusterCoeff and cor.MAR to connectivity preservation statistics
 #   . Adding silhuette width to separability statistics
@@ -19,7 +19,7 @@
 #
 #=====================================================================================================
 # Assumes Z in the form of a list, Z[[ref]][[test]] is a matrix of Z scores except the first column is
-# assumed to be moduleSize. 
+# assumed to be moduleSize.
 # Returned value is log10 of the p-value
 
 .pValueFromZ = function(Z, bonf = FALSE, summaryCols = NULL, summaryInd = NULL)
@@ -55,7 +55,7 @@
           p[[ref]][[test]][,summaryCols[c]] = medians
         }
         colnames(p[[ref]][[test]])[range] = pnames
-      } 
+      }
     }
   }
   p
@@ -77,7 +77,7 @@
         # Try to be a bit intelligent about whether to ignore the first column
         if (names[1]=="moduleSize")
         {
-           ignoreFirst = TRUE 
+           ignoreFirst = TRUE
         } else
            ignoreFirst = FALSE
         ncol = ncol(pp)
@@ -91,7 +91,7 @@
             q[[ref]][[test]][, col] = rep(NA, nrow)
             printFlush(paste("Warning in modulePreservation: qvalue calculation failed for",
                              "column", col, "for reference set", ref, "and test set", test))
-          } else 
+          } else
             q[[ref]][[test]][, col] = xx$qvalues
         }
         colnames(q[[ref]][[test]])[range] = sub("log.p", "q", names[range], fixed= TRUE)
@@ -112,30 +112,85 @@
 
 
 
+# dynamicMergeCut ####
+#' Threshold for module merging
+#'
+#' Calculate a suitable threshold for module merging based on the number of
+#' samples and a desired Z quantile.
+#'
+#' This function calculates the threshold for module merging. The threshold is
+#' calculated as the lower boundary of the interval around the theoretical
+#' correlation \code{mergeCor} whose width is given by the Z value
+#' \code{Zquantile}.
+#'
+#' @param n number of samples
+#' @param mergeCor theoretical correlation threshold for module merging
+#' @param Zquantile Z quantile for module merging
+#' @return The correlation threshold for module merging; a single number.
+#' @author Steve Horvath
+#' @seealso \code{\link{moduleEigengenes}}, \code{\link{mergeCloseModules}}
+#' @keywords misc
+#' @examples
+#' dynamicMergeCut(20)
+#' dynamicMergeCut(50)
+#' dynamicMergeCut(100)
+dynamicMergeCut <- function(n, mergeCor = .9, Zquantile = 2.35) {
+    if (mergeCor > 1 | mergeCor < 0) {
+        stop("'mergeCor' must be between 0 and 1.")
+    }
+    if (mergeCor == 1) {
+        printFlush("dynamicMergeCut: given mergeCor = 1 will be set to .999.")
+        mergeCor = .999
+    }
+    if (n < 4) {
+        printFlush(
+            paste(
+                "Warning in function dynamicMergeCut: too few observations
+                for the dynamic",
+                "assignment of the merge threshold.\n
+                Will set the threshold to .35"
+            )
+        )
+        mergethreshold = .35
+    } else {
+        # Fisher transform of the true merge correlation
+        FishermergeCor = .5 * log((1 + mergeCor) / (1 - mergeCor))
+        E = exp(2 * (FishermergeCor  - Zquantile / sqrt(n - 3)))
+        LowerBoundCIcor = (E - 1) / (E + 1)
+        mergethreshold = 1 -  LowerBoundCIcor
+    }
+    if (mergethreshold > 1) {
+        1
+    }
+    else {
+        mergethreshold
+    }
+}# end of function dynamicMergeCut
 
+# modulePreservation ####
 #' Calculation of module preservation statistics
-#' 
+#'
 #' Calculations of module preservation statistics between independent data
 #' sets.
-#' 
+#'
 #' This function calculates module preservation statistics pair-wise between
 #' given reference sets and all other sets in \code{multiExpr}. Reference sets
 #' must have their corresponding module assignment specified in
 #' \code{multiColor}; module assignment is optional for test sets. Individual
 #' expression sets and their module labels are matched using \code{names} of
 #' the corresponding components in \code{multiExpr} and \code{multiColor}.
-#' 
+#'
 #' For each reference-test pair, the function calculates module preservation
 #' statistics that measure how well the modules of the reference set are
 #' preserved in the test set.  If the \code{multiColor} also contains module
 #' assignment for the test set, the calculated statistics also include
 #' cross-tabulation statistics that make use of the test module assignment.
-#' 
+#'
 #' For each reference-test pair, the function only uses genes (columns of the
 #' \code{data} component of each component of \code{multiExpr}) that are in
 #' common between the reference and test set. Columns are matched by column
 #' names, so column names must be valid.
-#' 
+#'
 #' In addition to preservation statistics, the function also calculates several
 #' statistics of module quality, that is measures of how well-defined modules
 #' are in the reference set. The quality statistics are calculated with respect
@@ -143,7 +198,7 @@
 #' of quality statistics for each reference-test pair. This may be somewhat
 #' counter-intuitive, but it allows a direct comparison of corresponding
 #' quality and preservation statistics.
-#' 
+#'
 #' The calculated p-values are determined from the Z scores of individual
 #' measures under assumption of normality. No p-value is calculated for the
 #' Zsummary measures. Bonferoni correction to the number of tested modules.
@@ -151,9 +206,9 @@
 #' the function reports natural logarithms (base e) of the p-values. However,
 #' q-values are reported untransformed since they are calculated that way in
 #' package qvalue.
-#' 
+#'
 #' Missing data are removed (but see \code{quickCor} above).
-#' 
+#'
 #' @param multiData expression data or adjacency data in the multi-set format
 #' (see \code{\link{checkSets}}). A vector of lists, one per set. Each set must
 #' contain a component \code{data} that contains the expression or adjacency
@@ -287,7 +342,7 @@
 #' \code{log.pBonf}, optionally \code{q}, and additional components
 #' \code{observedOverlapCounts} and \code{observedFisherPvalues} that contain
 #' the observed matrices of overlap counts and Fisher test p-values.
-#' 
+#'
 #' Each of the lists \code{observed}, \code{Z}, \code{log.p}, \code{log.pBonf},
 #' optionally \code{q}, \code{observedOverlapCounts} and
 #' \code{observedFisherPvalues} is structured as a 2-level list where the outer
@@ -301,7 +356,7 @@
 #' sampled objects and that represents a whole-network average. Each column
 #' corresponds to a statistic as indicated by the column name.
 #' @note
-#' 
+#'
 #' For large data sets, the permutation study may take a while (typically on
 #' the order of several hours). Use \code{verbose = 3} to get detailed progress
 #' report as the calculations advance.
@@ -310,7 +365,7 @@
 #' package such as \code{\link{adjacency}}, \code{\link{blockwiseModules}};
 #' rudimentary cleaning in \code{\link{goodSamplesGenesMS}}; the WGCNA
 #' implementation of correlation in \code{\link{cor}}.
-#' 
+#'
 #' @references Peter Langfelder, Rui Luo, Michael C. Oldham, and Steve Horvath,
 #' to appear
 #' @keywords misc
@@ -326,19 +381,19 @@ modulePreservation = function(
    nPermutations = 100,
    includekMEallInSummary = FALSE,
    restrictSummaryForGeneralNetworks = TRUE,
-   calculateQvalue = FALSE, 
-   randomSeed = 12345, 
-   maxGoldModuleSize = 1000, maxModuleSize = 1000, 
+   calculateQvalue = FALSE,
+   randomSeed = 12345,
+   maxGoldModuleSize = 1000, maxModuleSize = 1000,
    quickCor = 1,
    ccTupletSize = 2,
-   calculateCor.kIMall = FALSE, 
+   calculateCor.kIMall = FALSE,
    calculateClusterCoeff = FALSE,
    useInterpolation = FALSE,
    checkData = TRUE,
    greyName = NULL,
    savePermutedStatistics = TRUE,
    loadPermutedStatistics = FALSE,
-   permutedStatisticsFile = 
+   permutedStatisticsFile =
       if (useInterpolation) "permutedStats-intrModules.RData" else "permutedStats-actualModules.RData",
    plotInterpolation = TRUE,
    interpolationPlotFile = "modulePreservationInterpolationPlots.pdf",
@@ -374,7 +429,7 @@ modulePreservation = function(
    if (checkData)
    {
      if (dataIsExpr)
-     {  
+     {
        .checkExpr(multiData, verbose, indent)
      } else {
        .checkAdj(multiData, verbose, indent)
@@ -386,7 +441,7 @@ modulePreservation = function(
    if (is.null(setNames))
    {
      setNames = paste("Set", c(1:nNets), sep="")
-   } 
+   }
 
    # Check that referenceNetworks is valid
 
@@ -408,13 +463,13 @@ modulePreservation = function(
    }
 
    # Check that testNetworks was specified correctly
-   if (!is.list(testNetworks) && nRefNets > 1) 
+   if (!is.list(testNetworks) && nRefNets > 1)
      stop("When there are more than 1 reference networks, 'testNetworks' must\n",
           "  be a list with one component per reference network.")
 
    if (!is.list(testNetworks)) testNetworks = list(testNetworks)
 
-   if (length(testNetworks)!=nRefNets) 
+   if (length(testNetworks)!=nRefNets)
      stop("Length of 'testNetworks' must be the same as length of 'referenceNetworks'.")
 
    for (ref in 1:nRefNets)
@@ -422,7 +477,7 @@ modulePreservation = function(
      if (any(testNetworks[[ref]] < 1 || testNetworks[[ref]] > nNets))
        stop("Some entries of testNetworks[[", ref, "]] are out of range.")
    }
-   
+
    # Check multiColor
 
    if (class(multiColor)!="list")
@@ -470,7 +525,7 @@ modulePreservation = function(
      if (is.numeric(greyName)) goldName = 0.1 else goldName = "gold"
    }
 
-   if (verbose > 2) printFlush(paste("  ..unassigned 'module' name:", greyName, 
+   if (verbose > 2) printFlush(paste("  ..unassigned 'module' name:", greyName,
                                      "\n  ..all network sample 'module' name:", goldName))
 
    MEgrey = paste("ME", greyName, sep="")
@@ -513,8 +568,8 @@ modulePreservation = function(
    # Check that multiData has valid colnames
 
    for (s in 1:nNets)
-      if (is.null(colnames(multiData[[s]]$data))) 
-         stop(paste("Matrix of data in set", names(multiData)[s], 
+      if (is.null(colnames(multiData[[s]]$data)))
+         stop(paste("Matrix of data in set", names(multiData)[s],
                     "has no colnames. Colnames are needed to match variables."))
 
    # For now we use numeric labels for permutations.
@@ -526,18 +581,18 @@ modulePreservation = function(
    if (verbose > 0) printFlush(paste(spaces, " ..calculating observed preservation values"))
    observed = .modulePreservationInternal(multiData, multiColor, dataIsExpr = dataIsExpr,
                      calculatePermutation = FALSE, networkType = networkType,
-                     referenceNetworks = referenceNetworks, 
-                     testNetworks = testNetworks, 
+                     referenceNetworks = referenceNetworks,
+                     testNetworks = testNetworks,
                      densityOnly = useInterpolation,
                      maxGoldModuleSize = maxGoldModuleSize,
-                     maxModuleSize = maxModuleSize, 
-                     corFnc = corFnc, corOptions = corOptions, 
+                     maxModuleSize = maxModuleSize,
+                     corFnc = corFnc, corOptions = corOptions,
                      quickCor = quickCor,
                      # calculateQuality = calculateQuality,
                      ccTupletSize = ccTupletSize,
                      calculateCor.kIMall = calculateCor.kIMall,
                      calculateClusterCoeff = calculateClusterCoeff,
-                     checkData = FALSE, greyName = greyName, 
+                     checkData = FALSE, greyName = greyName,
                      verbose = verbose -3, indent = indent + 2)
 
    if (nPermutations==0) return(list(observed = observed))
@@ -553,7 +608,7 @@ modulePreservation = function(
      {
        printFlush(paste("failed. Error message returned by system:\n", x))
      } else {
-       expectVars = c("regModuleSizes", "regStatNames", "regModuleNames", "fixStatNames", "fixModuleNames", 
+       expectVars = c("regModuleSizes", "regStatNames", "regModuleNames", "fixStatNames", "fixModuleNames",
                       "permutationsPresent", "permOut", "interpolationUsed")
        e2x = match(expectVars, x)
        if (any(is.na(e2x)) | length(x)!=length(expectVars))
@@ -571,16 +626,16 @@ modulePreservation = function(
        }
      }
      if (!psLoaded)
-       printFlush(paste(spaces, "\n ..will recalculate permutations.", 
+       printFlush(paste(spaces, "\n ..will recalculate permutations.",
                                 "Hit Ctrl-C (Esc in Windows) to stop the calculation."))
    }
 
    nRegStats = 20
    nFixStats = 3
-   
+
    if (!psLoaded)
    {
-      permOut=list()      
+      permOut=list()
       regModuleSizes = list()
       regModuleNames = list();      permutationsPresent = matrix(FALSE, nNets, nRefNets)
       interpolationUsed = matrix(FALSE, nNets, nRefNets)
@@ -589,14 +644,14 @@ modulePreservation = function(
       {
          ref = referenceNetworks[iref]
          if (verbose > 0) printFlush(paste(spaces, "..Working with set", ref, "as reference set"))
-         permOut[[iref]] = list()      
+         permOut[[iref]] = list()
          regModuleSizes[[iref]] = list()
          regModuleNames[[iref]] = list()
          nRefMods = length(unique(multiColor[[ref]]))
          if (nRefMods==1)
          {
-           printFlush(paste(spaces, "*+*+*+*+* Reference set contains a single module.\n", 
-                            spaces, 
+           printFlush(paste(spaces, "*+*+*+*+* Reference set contains a single module.\n",
+                            spaces,
                             "A permutation analysis is not meaningful for a single module; skipping."))
            next
          }
@@ -619,13 +674,13 @@ modulePreservation = function(
             }
             testName=setNames[tnet]
             nRefGenes = ncol(datRef)
-              
+
             #if(!is.na(multiColor[[tnet]][1])||length(multiColor[[tnet]])!=1)
             if (.cvPresent(multiColor[[tnet]]))
             {
                colorTest=multiColor[[tnet]][loc2]
             } else  {
-               colorTest=NA 
+               colorTest=NA
             }
             name=paste(refName,"vs",testName,sep="")
             obsModSizes=list()
@@ -639,7 +694,7 @@ modulePreservation = function(
                permRefColors = colorRef
                interpolationUsed[tnet, iref] = FALSE
                nPermMods = nObsMods[1]
-               if (useInterpolation && (verbose > 1)) 
+               if (useInterpolation && (verbose > 1))
                   printFlush(paste(spaces, "    FYI: interpolation will not be used for this comparison."))
             } else {
                obsModSizes[[1]][obsModSizes[[1]]<3]=3
@@ -677,10 +732,10 @@ modulePreservation = function(
                      if (logStep > log(2))
                      {
                         logmax = logmax - logStep
-                     } 
+                     }
                   } else {
-                     # It appears we don't have enough genes to form meaningful modules for interpolation. 
-                     # Decrease logmin as well, but only to a certain degree. 
+                     # It appears we don't have enough genes to form meaningful modules for interpolation.
+                     # Decrease logmin as well, but only to a certain degree.
                      logminFloor = 3
                      if (logmin > logminFloor)
                      {
@@ -688,7 +743,7 @@ modulePreservation = function(
                      } else {
                         # For now we give up, but in the future may have to add a non-interpolation approach here
                         # as well.
-                        printFlush(paste(spaces, 
+                        printFlush(paste(spaces,
                                     "*+*+*+*+*+ There are not enough genes and/or modules for",
                                     "reference set", ref, "and test set", tnet, ".\n",
                                     spaces, "Will skip this combination."))
@@ -697,8 +752,8 @@ modulePreservation = function(
                      }
                   }
                }
-      
-               if (skip) 
+
+               if (skip)
                {
                   # Instead of skipping, use the actual colors
                   permRefColors = colorRef
@@ -712,16 +767,16 @@ modulePreservation = function(
                   interpolationUsed[tnet, iref] = TRUE
                }
             }
-            
+
             permExpr=list()
             permExpr[[1]]=list(data=datRef)
             permExpr[[2]]=list(data=datTest)
             names(permExpr) = setNames[c(ref, tnet)]
             permOut[[iref]][[tnet]]=list(
-                      regStats = array(NA, dim = c(nPermMods+2-(!interpolationUsed[tnet, iref]), 
+                      regStats = array(NA, dim = c(nPermMods+2-(!interpolationUsed[tnet, iref]),
                                                    nRegStats, nPermutations)),
                       fixStats = array(NA, dim = c(nObsMods[[1]], nFixStats, nPermutations)))
-   
+
             # Perform actual permutations
             #oldRNG = NULL
             permColors = list()
@@ -741,19 +796,19 @@ modulePreservation = function(
                  list(...)
                }
                seed = sample(1e8, 1)
-               if (verbose > 2) 
+               if (verbose > 2)
                   printFlush(paste(spaces, " ......parallel calculation of permuted statistics.."))
                datout = foreach(perm = 1:nPermutations, .combine = combineCalculations,
-                                .multicombine = TRUE, .maxcombine = nPermutations+10)%dopar% 
+                                .multicombine = TRUE, .maxcombine = nPermutations+10)%dopar%
                {
-                      set.seed(seed + perm + perm^2); 
+                      set.seed(seed + perm + perm^2);
                       collectGarbage()
                       .modulePreservationInternal(permExpr, permColors, dataIsExpr = dataIsExpr,
                                                   calculatePermutation = TRUE,
                                                   multiColorForAccuracy = permColorsForAcc,
                                                   networkType = networkType,
                                                   corFnc = corFnc, corOptions = corOptions,
-                                                  referenceNetworks = 1, 
+                                                  referenceNetworks = 1,
                                                   testNetworks = list(2),
                                                   densityOnly = useInterpolation,
                                                   maxGoldModuleSize = maxGoldModuleSize,
@@ -778,7 +833,7 @@ modulePreservation = function(
                  permOut[[iref]][[tnet]]$fixStats[, , perm] = as.matrix(datout[[perm]] [[1]]$accuracy[[2]])
                }
                datout = datout[[1]] # For the name stting procedures that follow...
-            } else for (perm in 1:nPermutations ) 
+            } else for (perm in 1:nPermutations )
             {
                if (verbose > 2) printFlush(paste(spaces, " ......working on permutation", perm))
                #newRNG = .Random.seed
@@ -787,12 +842,12 @@ modulePreservation = function(
                #    printFlush("WARNING: something's wrong with the RNG... old and new RNG equal.")
                #oldRNG = .Random.seed
                #set.seed(perm*2)
-               datout= .modulePreservationInternal(permExpr, permColors, dataIsExpr = dataIsExpr, 
+               datout= .modulePreservationInternal(permExpr, permColors, dataIsExpr = dataIsExpr,
                                                   calculatePermutation = TRUE,
-                                                  multiColorForAccuracy = permColorsForAcc, 
+                                                  multiColorForAccuracy = permColorsForAcc,
                                                   networkType = networkType,
                                                   corFnc = corFnc, corOptions = corOptions,
-                                                  referenceNetworks=1, 
+                                                  referenceNetworks=1,
                                                   testNetworks = list(2),
                                                   densityOnly = useInterpolation,
                                                   maxGoldModuleSize = maxGoldModuleSize,
@@ -802,18 +857,18 @@ modulePreservation = function(
                                                   calculateClusterCoeff = calculateClusterCoeff,
                                                   # calculateQuality = calculateQuality,
                                                   greyName = greyName,
-                                                  checkData = FALSE, 
+                                                  checkData = FALSE,
                                                   verbose = verbose -3, indent = indent + 3)
                if (!datout[[1]]$netPresent[2])
                   stop(paste("Internal error: no data in permuted set preservation measures. \n",
                              "Please contact the package maintainers. Sorry!"))
-               permOut[[iref]][[tnet]]$regStats[, , perm] = as.matrix(cbind(datout[[1]]$quality[[2]][, -1], 
-                                                                  datout[[1]]$intra[[2]], 
+               permOut[[iref]][[tnet]]$regStats[, , perm] = as.matrix(cbind(datout[[1]]$quality[[2]][, -1],
+                                                                  datout[[1]]$intra[[2]],
                                                                   datout[[1]]$inter[[2]]))
                permOut[[iref]][[tnet]]$fixStats[, , perm] = as.matrix(datout[[1]]$accuracy[[2]])
                collectGarbage()
             }
-            regStatNames = c(colnames(datout[[1]]$quality[[2]])[-1], colnames(datout[[1]]$intra[[2]]), 
+            regStatNames = c(colnames(datout[[1]]$quality[[2]])[-1], colnames(datout[[1]]$intra[[2]]),
                              colnames(datout[[1]]$inter[[2]]))
             regModuleNames[[iref]][[tnet]] = rownames(datout[[1]]$quality[[2]])
             regModuleSizes[[iref]][[tnet]] = datout[[1]]$quality[[2]][, 1]
@@ -830,9 +885,9 @@ modulePreservation = function(
             permOut[[iref]][[tnet]] = NA
           }
       }
-         
-      if (savePermutedStatistics) 
-         save(regModuleSizes, regStatNames, regModuleNames, fixStatNames, 
+
+      if (savePermutedStatistics)
+         save(regModuleSizes, regStatNames, regModuleNames, fixStatNames,
               fixModuleNames, permutationsPresent, interpolationUsed, permOut, file=permutedStatisticsFile)
    }  # if (!psLoaded)
 
@@ -847,7 +902,7 @@ modulePreservation = function(
    # Define a "class" indicating that no valid fit was obtained
 
    invalidFit = "invalidFit"
-     
+
    LogIndex = c(rep(c(1, 0, 0, 0, 0, 0, 0), 2), 0, 0, 0, 0, 0, 0)
    dfMean = c( rep(c(2, 2, 2, 1, 1, 1, 1), 2), 3, 3, 3, 2, 2, 2)
    dfSD = c( rep(c(2, 2, 2, 2, 2, 2, 2), 2), 2, 2, 2, 2, 2, 2)
@@ -856,23 +911,23 @@ modulePreservation = function(
    meanLM=list()
    seLM=list()
    OmitModule=c(permGoldName,permGreyName)
-   for (iref in 1:nRefNets) 
+   for (iref in 1:nRefNets)
    {
       ref = referenceNetworks[iref]
       meanLM[[iref]]=list()
       seLM[[iref]]=list()
-      for (tnet in 1:nNets) if (observed[[iref]]$netPresent[tnet] & 
-                                permutationsPresent[tnet, iref] & interpolationUsed[tnet, iref]) 
+      for (tnet in 1:nNets) if (observed[[iref]]$netPresent[tnet] &
+                                permutationsPresent[tnet, iref] & interpolationUsed[tnet, iref])
       {
          NotGold = !is.element(regModuleNames[[iref]][[tnet]], OmitModule)
          meanLM[[iref]][[tnet]] = list()
          seLM[[iref]][[tnet]] = list()
-         logName=matrix("", sum(NotGold), 1) 
+         logName=matrix("", sum(NotGold), 1)
          for (stat in 1:nRegStats)
          {
-            means = c(apply(permOut[[iref]][[tnet]]$regStats[NotGold, stat, , drop = FALSE], c(1:2), 
+            means = c(apply(permOut[[iref]][[tnet]]$regStats[NotGold, stat, , drop = FALSE], c(1:2),
                          mean, na.rm=TRUE))
-            SD=try( c(apply(permOut[[iref]][[tnet]]$regStats[NotGold, stat, , drop = FALSE], c(1:2), 
+            SD=try( c(apply(permOut[[iref]][[tnet]]$regStats[NotGold, stat, , drop = FALSE], c(1:2),
                          sd, na.rm = TRUE)),
                     silent = TRUE)
             if (class(SD)=='try-error') SD = NA
@@ -885,7 +940,7 @@ modulePreservation = function(
             } else {
                modSizes = regModuleSizes[[iref]][[tnet]][NotGold]
                xx = log(modSizes)
-               if(LogIndex[stat]==1) 
+               if(LogIndex[stat]==1)
                {
                   means[means<epsilon]=epsilon
                   yy=log(means)
@@ -896,7 +951,7 @@ modulePreservation = function(
                }
                name1=regStatNames[stat]
                name2 = paste(setNames[ref], "vs", setNames[tnet])
-               meanLM[[iref]][[tnet]][[stat]]=lm(yy~ ns(xx, df=dfMean[stat] )) 
+               meanLM[[iref]][[tnet]][[stat]]=lm(yy~ ns(xx, df=dfMean[stat] ))
                names( meanLM[[iref]][[tnet]])[stat]=paste(name1,"_meanInterpolation",sep="")
                PredictedMedian=as.numeric( predict(meanLM[[iref]][[tnet]][[stat]]))
                if(all(!is.na(means))&&length(table(means))>1)
@@ -921,7 +976,7 @@ modulePreservation = function(
                }
                epsilon2=0.0000000001
                SD[SD<epsilon2]=epsilon2
-                  
+
                yy2=log(SD)
                xx2=log(modSizes)
                seLM[[iref]][[tnet]][[stat]]=lm(yy2~ ns(xx2, df=dfSD[stat] ) )
@@ -940,11 +995,11 @@ modulePreservation = function(
                                      cex.axis = 1, cex.lab = 1, cex.main = 1.2)
                      abline(0,1,col="green")
                }
-            } 
+            }
          }
-      }      
+      }
    }
-       
+
    if (any(interpolationUsed))
    {
       if (plotInterpolation) dev.off()
@@ -991,8 +1046,8 @@ modulePreservation = function(
        rownames(accuracy2) = rownames(inter)
        colnames(accuracy2) = colnames(accuracy)
        modSizes = observed[[iref]]$quality[[tnet]][, 1]
-       allObsStats = cbind(observed[[iref]]$quality[[tnet]][, -1], 
-                           observed[[iref]]$intra[[tnet]], 
+       allObsStats = cbind(observed[[iref]]$quality[[tnet]][, -1],
+                           observed[[iref]]$intra[[tnet]],
                            accuracy2, inter)
        sepCol = match("separability.qual", colnames(observed[[iref]]$quality[[tnet]]))
        sepCol2 = match("separability.pres", colnames(observed[[iref]]$intra[[tnet]]))
@@ -1005,14 +1060,14 @@ modulePreservation = function(
          rankColsQuality = c(5)
          rankColsDensity = 4
        }
-     
+
        ranks = apply(-quality[, rankColsQuality, drop = FALSE], 2, rank, na.last = "keep")
        medRank = apply(as.matrix(ranks), 1, median, na.rm = TRUE)
        observedQuality[[iref]][[tnet]] = cbind(moduleSize = modSizes,
                                                medianRank.qual = medRank,
                                                quality[, -1])
        preservation = cbind(observed[[iref]]$intra[[tnet]][, -sepCol2], inter )
-    
+
        ranksDensity = apply(-preservation[, rankColsDensity, drop = FALSE], 2, rank, na.last = "keep")
        medRankDensity = apply(as.matrix(ranksDensity), 1, median, na.rm = TRUE)
        if (dataIsExpr | (!restrictSummaryForGeneralNetworks))
@@ -1029,17 +1084,17 @@ modulePreservation = function(
        ranksConnectivity = apply(-preservation[, connSummaryInd, drop = FALSE], 2, rank, na.last = "keep")
        medRankConnectivity = apply(as.matrix(ranksConnectivity), 1, median, na.rm = TRUE)
        medRank = apply(cbind(ranksDensity, ranksConnectivity), 1, median, na.rm = TRUE)
-       observedPreservation[[iref]][[tnet]] = cbind(moduleSize = modSizes, 
+       observedPreservation[[iref]][[tnet]] = cbind(moduleSize = modSizes,
                                                     medianRank.pres = medRank,
                                                     medianRankDensity.pres = medRankDensity,
                                                     medianRankConnectivity.pres = medRankConnectivity,
                                                     preservation)
        observedAccuracy[[iref]][[tnet]] = cbind(moduleSize = modSizes[a2i], accuracy)
-       observedReferenceSeparability[[iref]][[tnet]] = cbind(moduleSize = modSizes, 
+       observedReferenceSeparability[[iref]][[tnet]] = cbind(moduleSize = modSizes,
                                                      observed[[iref]]$quality[[tnet]][sepCol])
-       observedTestSeparability[[iref]][[tnet]] = cbind(moduleSize = modSizes, 
+       observedTestSeparability[[iref]][[tnet]] = cbind(moduleSize = modSizes,
                                                 observed[[iref]]$intra[[tnet]][sepCol2])
-       
+
        observedOverlapCounts[[iref]][[tnet]] = observed[[iref]]$overlapTables[[tnet]]$countTable
        observedOverlapPvalues[[iref]][[tnet]] = observed[[iref]]$overlapTables[[tnet]]$pTable
 
@@ -1052,7 +1107,7 @@ modulePreservation = function(
        goldRowObs = match(goldName, rownames(inter))
        fixInd = 1
        regInd = 1
-       for (stat in 1:nAllStats) 
+       for (stat in 1:nAllStats)
          if (interpolationStat[stat])
          {
            if (interpolationUsed[tnet, iref])
@@ -1063,10 +1118,10 @@ modulePreservation = function(
                  prediction = predict(meanLM[[iref]][[tnet]][[regInd]],
                                            newdata = data.frame(xx = logModSizes), se.fit = TRUE)
                  predictedMean = as.numeric(prediction$fit)
-                 if (LogIndex[regInd]==1) 
+                 if (LogIndex[regInd]==1)
                     predictedMean = exp(predictedMean)
                  predictedSD = exp(as.numeric(predict(seLM[[iref]][[tnet]][[regInd]],
-                                                   newdata = data.frame(xx2 = logModSizes)))); 
+                                                   newdata = data.frame(xx2 = logModSizes))));
                  zAll[, stat] = (allObsStats[, stat] - predictedMean)/predictedSD
                  # For the gold module : take the direct observations.
                  goldMean = mean(permOut[[iref]][[tnet]]$regStats[goldRowPerm, regInd, ], na.rm = TRUE)
@@ -1074,9 +1129,9 @@ modulePreservation = function(
                  zAll[goldRowObs, stat] = (allObsStats[goldRowObs, stat] - goldMean)/goldSD
               }
            } else {
-              means = c(apply(permOut[[iref]][[tnet]]$regStats[, regInd, , drop = FALSE], 
+              means = c(apply(permOut[[iref]][[tnet]]$regStats[, regInd, , drop = FALSE],
                         c(1:2), mean, na.rm = TRUE))
-              SDs = c(apply(permOut[[iref]][[tnet]]$regStats[, regInd, , drop = FALSE], 
+              SDs = c(apply(permOut[[iref]][[tnet]]$regStats[, regInd, , drop = FALSE],
                         c(1:2), sd, na.rm = TRUE))
               z = ( allObsStats[, stat] - means) / SDs
               if (any(is.finite(z)))
@@ -1091,9 +1146,9 @@ modulePreservation = function(
          } else {
             if (.cvPresent(multiColor[[tnet]]) )
             {
-               means = c(apply(permOut[[iref]][[tnet]]$fixStats[, fixInd, , drop = FALSE], 
+               means = c(apply(permOut[[iref]][[tnet]]$fixStats[, fixInd, , drop = FALSE],
                               c(1:2), mean, na.rm = TRUE))
-               SDs = c(apply(permOut[[iref]][[tnet]]$fixStats[, fixInd, , drop = FALSE], 
+               SDs = c(apply(permOut[[iref]][[tnet]]$fixStats[, fixInd, , drop = FALSE],
                               c(1:2), sd, na.rm = TRUE))
                z = ( allObsStats[a2i, stat] - means) / SDs
                if (any(is.finite(z)))
@@ -1110,10 +1165,10 @@ modulePreservation = function(
        sepCol = match("Z.separability.qual", colnames(zAll)[1:nQualiStats])
        zQual = zAll[, c(1:nQualiStats)][ , -sepCol]
        summaryColsQuality = rankColsQuality -1 # quality also contains module sizes, Z does not
-       summZ = apply(zQual[, summaryColsQuality, drop = FALSE], 1, median, na.rm = TRUE); 
-       Z.quality[[iref]][[tnet]] = data.frame(cbind(moduleSize = modSizes, Zsummary.qual = summZ, 
+       summZ = apply(zQual[, summaryColsQuality, drop = FALSE], 1, median, na.rm = TRUE);
+       Z.quality[[iref]][[tnet]] = data.frame(cbind(moduleSize = modSizes, Zsummary.qual = summZ,
                                                     zQual))
-       Z.referenceSeparability[[iref]][[tnet]] = 
+       Z.referenceSeparability[[iref]][[tnet]] =
              data.frame(cbind(moduleSize = modSizes, zAll[sepCol]))
        st = nQualiStats + 1; en = nQualiStats + nIntraStats + nInterStats
        sepCol2 = match("Z.separability.pres", colnames(zAll)[st:en])
@@ -1126,11 +1181,11 @@ modulePreservation = function(
          summZMat[, g] = apply(zPres[, summaryColsPreservation[[g]], drop = FALSE], 1, median, na.rm = TRUE)
        colnames(summZMat) = c("Zdensity.pres", "Zconnectivity.pres")
        summZ = apply(summZMat, 1, mean, na.rm = TRUE)
-       Z.preservation[[iref]][[tnet]] = data.frame(cbind(moduleSize = modSizes, Zsummary.pres = summZ, 
+       Z.preservation[[iref]][[tnet]] = data.frame(cbind(moduleSize = modSizes, Zsummary.pres = summZ,
                                                          summZMat, zPres))
-       Z.testSeparability[[iref]][[tnet]] = 
+       Z.testSeparability[[iref]][[tnet]] =
              data.frame(cbind(moduleSize = modSizes, zAll[nQualiStats + sepCol2]))
-       Z.accuracy[[iref]][[tnet]] = 
+       Z.accuracy[[iref]][[tnet]] =
              data.frame(cbind(moduleSize = modSizes, zAll[st:en][accuracyCols]))
      } else {
        observedQuality[[iref]][[tnet]] = NA
@@ -1170,7 +1225,7 @@ modulePreservation = function(
                                                     setNames)
      names(Z.accuracy[[iref]]) = paste("inColumnsAlsoPresentIn", sep = ".",
                                                     setNames)
-   } 
+   }
 
    names(observedQuality) = paste("ref", setNames[referenceNetworks], sep=".")
    names(observedPreservation) = paste("ref", setNames[referenceNetworks], sep=".")
@@ -1203,7 +1258,7 @@ modulePreservation = function(
    if (calculateQvalue)
    {
      q.quality = .qValueFromP(p.quality, summaryCols = 2, summaryInd = summaryIndQuality)
-     q.preservation = .qValueFromP(p.preservation, summaryCols = c(3,4,2), 
+     q.preservation = .qValueFromP(p.preservation, summaryCols = c(3,4,2),
                                    summaryInd = summaryIndPreservation)
      q.referenceSeparability = .qValueFromP(p.referenceSeparability)
      q.testSeparability = .qValueFromP(p.testSeparability)
@@ -1216,8 +1271,8 @@ modulePreservation = function(
      q.accuracy = NULL
    }
 
-   output=list(quality = list(observed = observedQuality, Z = Z.quality, 
-                              log.p = p.quality, 
+   output=list(quality = list(observed = observedQuality, Z = Z.quality,
+                              log.p = p.quality,
                               log.pBonf = pBonf.quality,
                               q = q.quality ),
                preservation = list(observed = observedPreservation, Z = Z.preservation,
@@ -1240,7 +1295,7 @@ modulePreservation = function(
                                        log.p = p.testSeparability,
                                        log.pBonf = pBonf.testSeparability,
                                        q = q.testSeparability),
-               permutationDetails = list(permutedStatistics = permOut, 
+               permutationDetails = list(permutedStatistics = permOut,
                                          interpolationModuleSizes = regModuleSizes,
                                          interpolationStatNames = regStatNames,
                                          permutationsPresent = permutationsPresent,
@@ -1265,7 +1320,7 @@ modulePreservation = function(
             }
          }
        }
-     } 
+     }
    }
 
    return(output)
@@ -1317,7 +1372,7 @@ modulePreservation = function(
       if (sum(!greyRow) > 0 & sum(!greyCol)>0)
       {
          bestCount[!greyCol] = apply(overlap$countTable[!greyRow, !greyCol, drop = FALSE], 2, max)
-         accuracy[!greyCol, 2] = 
+         accuracy[!greyCol, 2] =
                            -log10(apply(overlap$pTable[!greyRow, !greyCol, drop = FALSE], 2, min))
          ccNumer = apply(overlap$countTable[!greyRow, !greyCol, drop = FALSE], 2, choose,
                          ccTupletSize)
@@ -1349,18 +1404,18 @@ modulePreservation = function(
 .modulePreservationInternal = function(multiData, multiColor, dataIsExpr,
                               calculatePermutation,
                               multiColorForAccuracy = NULL,
-                              networkType = "signed", 
-                              corFnc = "cor", 
+                              networkType = "signed",
+                              corFnc = "cor",
                               corOptions = "use = 'p'",
                               referenceNetworks=1,
                               testNetworks,
                               densityOnly = FALSE,
-                              maxGoldModuleSize = 1000, 
+                              maxGoldModuleSize = 1000,
                               maxModuleSize = 1000, quickCor = 1,
                               ccTupletSize,
                               calculateCor.kIMall,
                               calculateClusterCoeff,
-                              # calculateQuality = FALSE, 
+                              # calculateQuality = FALSE,
                               checkData = TRUE,
                               greyName,
                               pEpsilon = 1e-200,
@@ -1380,7 +1435,7 @@ modulePreservation = function(
            "Recognized values are (unique abbreviations of)", paste(.networkTypes, collapse = ", ")))
 
    setNames = names(multiData)
-   # Check multiColor. 
+   # Check multiColor.
 
    if (length(multiColor)!=nNets)
    {
@@ -1394,10 +1449,10 @@ modulePreservation = function(
      {
         multiData[[s]]$data = as.matrix(multiData[[s]]$data)
         loc = which(names(multiColor) %in% names(multiData)[s])
-        if (length(loc)==0) 
+        if (length(loc)==0)
         {
           multiColor2[[s]] = NA
-        } else 
+        } else
           multiColor2[[s]]=multiColor[[loc]]
      }
      multiColor = multiColor2
@@ -1408,7 +1463,7 @@ modulePreservation = function(
 
    MEgrey = paste("ME", greyName, sep="")
    MEgold = paste("ME", goldName, sep="")
-     
+
    collectGarbage()
 
    for (s in 1:nNets)
@@ -1418,14 +1473,14 @@ modulePreservation = function(
    }
 
    keepGenes = list()
-   for (s in 1:nNets) 
+   for (s in 1:nNets)
       keepGenes[[s]] = rep(TRUE, nGenes[s])
 
    nNAs = sapply(multiColor, .nNAColors)
    if (any(nNAs > 0))
    {
      if (verbose > 0) printFlush(paste(spaces, " ..removing genes with missing color..."))
-     for (s in 1:nNets) 
+     for (s in 1:nNets)
        if (.cvPresent(multiColor[[s]]))
        {
           keepGenes[[s]] = !is.na(multiColor[[s]])
@@ -1436,22 +1491,22 @@ modulePreservation = function(
              multiData[[s]]$data = multiData[[s]]$data[keepGenes[[s]], keepGenes[[s]]]
           }
           multiColor[[s]] = multiColor[[s]][keepGenes[[s]]]
-       } 
+       }
    }
 
    #if (verbose > 0) printFlush(paste(spaces, " ..preservation tests based on different reference networks"))
-        
+
    datout=list()
    if (nNets==1) # && length(multiColor)==1)
-   {     
+   {
       # For now stop; in the future we'll bring this up to speed as well.
       stop("Calculation of quality in an idividual network is not supported at this time. Sorry!")
-   } else {  		
+   } else {
      for (iref in 1:length(referenceNetworks))
      {
        ref = referenceNetworks[iref]
        if (!.cvPresent(multiColor[[ref]]))
-          stop(paste("Network", ref, 
+          stop(paste("Network", ref,
                      "does not have a color vector and cannot be used as reference network."))
        if (verbose > 0) printFlush(paste(spaces, "..working on reference network",setNames[ref]))
        accuracy=list()
@@ -1467,7 +1522,7 @@ modulePreservation = function(
           overlap=intersect(colnames(multiData[[ref]]$data),colnames(multiData[[tnet]]$data))
           if (length(overlap)==0)
           {
-            printFlush(paste(spaces, "WARNING: sets", ref, "and", tnet, 
+            printFlush(paste(spaces, "WARNING: sets", ref, "and", tnet,
                              "have no overlapping genes with valid colors.\n",
                              spaces, "No preservation measures can be calculated."))
             next
@@ -1478,7 +1533,7 @@ modulePreservation = function(
           {
              colorTest=multiColor[[tnet]][loc2]
           } else  {
-             colorTest=NA 
+             colorTest=NA
           }
           if (dataIsExpr)
           {
@@ -1499,7 +1554,7 @@ modulePreservation = function(
             if (.cvPresent(multiColorForAccuracy[[tnet]]))
             {
                colorTestAcc = multiColorForAccuracy[[tnet]][loc2]
-            } else 
+            } else
                colorTestAcc = NA
           } else {
             colorRefAcc = colorRef
@@ -1513,7 +1568,7 @@ modulePreservation = function(
              colorRefAcc = sample(colorRefAcc)
              colorTestAcc = sample(colorRefAcc)
           }
-          x = .accuracyStatistics(colorRefAcc, colorTestAcc, 
+          x = .accuracyStatistics(colorRefAcc, colorTestAcc,
                                  ccTupletSize = ccTupletSize, greyName = greyName, pEpsilon = pEpsilon)
           accuracy[[tnet]] = x$accuracy
           overlapTables[[tnet]] = x$overlapTable
@@ -1541,7 +1596,7 @@ modulePreservation = function(
              goldModT = sample(nRefGenes, goldModSize)
           } else
              goldModT = goldModR
- 
+
           if (dataIsExpr)
           {
             goldRef = datRef[, goldModR]
@@ -1626,42 +1681,42 @@ modulePreservation = function(
              datTest = .combineAdj(datTest, goldTest)
              collectGarbage()
           }
-             
+
           gold = rep(goldName, goldModSize)
           colorRef_2 = c(as.character(colorRef),gold)
           colorLevels = sort(unique(colorRef_2))
-          opt = list(corFnc = corFnc, corOptions = corOptions, quickCor = quickCor, 
-                     nType = nType, 
-                     MEgold = MEgold, MEgrey = MEgrey, 
+          opt = list(corFnc = corFnc, corOptions = corOptions, quickCor = quickCor,
+                     nType = nType,
+                     MEgold = MEgold, MEgrey = MEgrey,
                      densityOnly = densityOnly, calculatePermutation = calculatePermutation,
-                     calculateCor.kIMall = calculateCor.kIMall, 
+                     calculateCor.kIMall = calculateCor.kIMall,
                      calculateClusterCoeff = calculateClusterCoeff)
-             
+
           if (dataIsExpr)
           {
             stats = .coreCalcForExpr(datRef, datRefP, datTest, colorRef_2, opt)
-            interPresNames = paste0(corFnc, c(".kIM", ".kME", ".kMEall", 
+            interPresNames = paste0(corFnc, c(".kIM", ".kME", ".kMEall",
                                              paste0(".", corFnc), ".clusterCoeff", ".MAR"))
-            measureNames = c("propVarExplained", "meanSignAwareKME", "separability", 
+            measureNames = c("propVarExplained", "meanSignAwareKME", "separability",
                              "meanSignAwareCorDat", "meanAdj", "meanClusterCoeff", "meanMAR")
- 
+
           } else {
             stats = .coreCalcForAdj(datRef, datRefP, datTest, colorRef_2, opt)
             interPresNames = paste0(corFnc, c(".kIM", ".kME", ".kIMall", ".adj", ".clusterCoeff", ".MAR"))
-            measureNames = c("propVarExplained", "meanKIM", "separability", 
+            measureNames = c("propVarExplained", "meanKIM", "separability",
                              "meanSignAwareCorDat", "meanAdj", "meanClusterCoeff", "meanMAR")
           }
 
-          name1=paste(setNames[[ref]],"_vs_",setNames[[tnet]],sep="")  
-          quality[[tnet]] = cbind(stats$modSizes, 
-                                  stats$proVar[, 1], 
+          name1=paste(setNames[[ref]],"_vs_",setNames[[tnet]],sep="")
+          quality[[tnet]] = cbind(stats$modSizes,
+                                  stats$proVar[, 1],
                                   if (dataIsExpr) stats$meanSignAwareKME[, 1] else stats$meankIM[, 1],
                                   stats$Separability[, 1], stats$MeanSignAwareCorDat[,1],
-                                  stats$MeanAdj[, 1], stats$meanClusterCoeff[, 1], 
+                                  stats$MeanAdj[, 1], stats$meanClusterCoeff[, 1],
                                   stats$meanMAR[, 1])
-          intraPres[[tnet]]=cbind(stats$proVar[, 2], 
+          intraPres[[tnet]]=cbind(stats$proVar[, 2],
                                   if (dataIsExpr) stats$meanSignAwareKME[, 2] else stats$meankIM[, 2],
-                                  stats$Separability[, 2], stats$MeanSignAwareCorDat[, 2], 
+                                  stats$Separability[, 2], stats$MeanSignAwareCorDat[, 2],
                                   stats$MeanAdj[, 2], stats$meanClusterCoeff[, 2],
                                   stats$meanMAR[, 2])
           #colnames(quality[[tnet]]) = paste(c("moduleSize", measureNames), setNames[ref], sep = "_")
@@ -1680,22 +1735,22 @@ modulePreservation = function(
           names(interPres)[[tnet]]=paste(name1,sep="")
           netPresent[tnet] = TRUE
       } # of for (test in testNetworks[[iref]])
-              
-      datout[[iref]]=list(netPresent = netPresent, quality = quality, 
+
+      datout[[iref]]=list(netPresent = netPresent, quality = quality,
                           intra = intraPres, inter = interPres, accuracy = accuracy,
                           overlapTables = overlapTables)
     } # of for (iref in 1:length(referenceNetworkss))
     names(datout)=setNames[referenceNetworks]
   }  # of else for if (nNets==1)
   return(datout)
-        
+
 }
 
 .checkExpr = function(multiExpr, verbose, indent)
 {
    spaces = indentSpaces(indent)
    nNets = length(multiExpr)
-   if (verbose > 0) 
+   if (verbose > 0)
           printFlush(paste(spaces, " ..checking data for excessive amounts of missing data.."))
    for (set in 1:nNets)
    {
@@ -1714,7 +1769,7 @@ modulePreservation = function(
 {
    spaces = indentSpaces(indent)
    nNets = length(multiAdj)
-   if (verbose > 0) 
+   if (verbose > 0)
      printFlush(paste(spaces, " ..checking adjacencies for excessive amounts of missing data"))
    for (set in 1:nNets)
    {
@@ -1761,7 +1816,7 @@ modulePreservation = function(
   #CChelp=rep(-666, no.nodes)
   CChelp=ifelse(total.edge==0,0, (nolinksNeighbors-subTerm)/total.edge)
   CChelp
-} 
+}
 
 # This function assumes that the diagonal of the adjacency matrix is 1
 .MAR = function(adjacency)
@@ -1772,7 +1827,7 @@ modulePreservation = function(
   mar
 }
 
-    
+
 
 #=======================================================================================
 #
@@ -1791,14 +1846,14 @@ modulePreservation = function(
   act = (modSizes>1)
 
   kME=list()
-          
+
   ME=list()
   if (!opt$densityOnly)
-  {            
+  {
      ME[[1]]=moduleEigengenes(datRef, colors)$eigengenes
      kME[[1]]=as.matrix(signedKME(datRef,ME[[1]], corFnc = opt$corFnc, corOptions = opt$corOptions))
   }
-   
+
   if (opt$calculatePermutation | opt$densityOnly)
   {
     #printFlush("Calculating ME[[2]]")
@@ -1815,7 +1870,7 @@ modulePreservation = function(
   modGenes = list()
   for (m in 1:nMods)
     modGenes[[m]] = c(1:nGenes)[colors==colorLevels[m]]
-              
+
   #kME correlation
   #if (verbose > 1) printFlush(paste(spaces, "....calculating kME..."))
   corkME = rep(NA, nMods)
@@ -1828,7 +1883,7 @@ modulePreservation = function(
         names1=substring(colnames(kME[[1]]),4)
         j1=which(names1==colorLevels[j])
         #corkME[j]=cor(kME[[1]][loc,j1],kME[[3]][loc,j1], use = "p")
-        corExpr = parse(text=paste(opt$corFnc, "(kME[[1]][modGenes[[j]],j1],kME[[3]][modGenes[[j]],j1]", 
+        corExpr = parse(text=paste(opt$corFnc, "(kME[[1]][modGenes[[j]],j1],kME[[3]][modGenes[[j]],j1]",
                                    prepComma(opt$corOptions), ")"))
         corkME[j] = abs(eval(corExpr))
 
@@ -1839,17 +1894,17 @@ modulePreservation = function(
    #     meanProductkME[j] = scalarProduct(kME[[1]][loc,j1],kME[[3]][loc,j1])
      }
   }
-      
-  #proportion of variance explained 
-      
-  #if (verbose > 1) 
+
+  #proportion of variance explained
+
+  #if (verbose > 1)
   #  printFlush(paste(spaces, "....calculating proprotion of variance explained..."))
-      
+
   proVar=matrix(NA, nMods ,2)
   meanSignAwareKME=matrix(NA, nMods ,2)
   names1=substring(colnames(kME[[2]]),4)
   for(j in 1:nMods ) if(act[j])
-  {       
+  {
      j1=which(names1==colorLevels[j])
      proVar[j,1]=mean((kME[[2]][modGenes[[j]],j1])^2,na.rm=TRUE)
      proVar[j,2]=mean((kME[[3]][modGenes[[j]],j1])^2,na.rm=TRUE)
@@ -1869,7 +1924,7 @@ modulePreservation = function(
 TRUE))
      }
   }
-  
+
   # if (verbose > 1) printFlush(paste(spaces, "....calculating separability..."))
   Separability=matrix(NA, nMods ,2)
   # for(k in (2-calculateQuality):2)
@@ -1881,7 +1936,7 @@ TRUE))
      corME= eval(corExpr)
      if (opt$nType==0) corME = abs(corME)
      diag(corME) = 0
-     Separability[,k]=1-apply(corME[, -Gold, drop = FALSE], 1, max, na.rm = TRUE)                        
+     Separability[,k]=1-apply(corME[, -Gold, drop = FALSE], 1, max, na.rm = TRUE)
   }
 
   #mean signed correlation&inter array correlation
@@ -1897,20 +1952,20 @@ TRUE))
   meanMAR = matrix(NA,nMods ,2)
   for(j in 1:nMods ) if(act[j])
   {
-     if (!opt$densityOnly) 
+     if (!opt$densityOnly)
      {
         #ModuleCorData1=cor(datRef[,modGenes[[j]]],use="p", quick = as.numeric(opt$quickCor))
-        corExpr = parse(text=paste(opt$corFnc, "(datRef[,modGenes[[j]]]", prepComma(opt$corOptions), 
+        corExpr = parse(text=paste(opt$corFnc, "(datRef[,modGenes[[j]]]", prepComma(opt$corOptions),
                                            ", quick = as.numeric(opt$quickCor))"))
         ModuleCorData1=eval(corExpr)
      }
      if (opt$calculatePermutation | opt$densityOnly)
      {
         #ModuleCorData2=cor(datRefP[,modGenes[[j]]],use="p", quick = as.numeric(opt$quickCor))
-        corExpr = parse(text=paste(opt$corFnc, "(datRefP[,modGenes[[j]]]", prepComma(opt$corOptions), 
+        corExpr = parse(text=paste(opt$corFnc, "(datRefP[,modGenes[[j]]]", prepComma(opt$corOptions),
                                            ", quick = as.numeric(opt$quickCor))"))
         ModuleCorData2 = eval(corExpr)
-     } else 
+     } else
         ModuleCorData2 = ModuleCorData1
 
      #ModuleCorData3=cor(datTest[,modGenes[[j]]],use="p", quick = as.numeric(opt$quickCor))
@@ -1920,7 +1975,7 @@ TRUE))
      if (opt$nType==1)
      {
         SignedModuleCorData2 = abs(ModuleCorData2)
-     } else 
+     } else
         SignedModuleCorData2 = ModuleCorData2
      if (opt$densityOnly)
      {
@@ -1942,21 +1997,21 @@ TRUE))
      }
 
      if (opt$nType==1)
-     {                            
+     {
         if (!opt$densityOnly) adjacency1 = ModuleCorData1^6
-        if (opt$calculatePermutation | opt$densityOnly) 
+        if (opt$calculatePermutation | opt$densityOnly)
         {
             adjacency2 = ModuleCorData2^6
-        } else 
+        } else
             adjacency2 = adjacency1
         adjacency3 = ModuleCorData3^6
      } else if (opt$nType==2)
      {
         if (!opt$densityOnly) adjacency1 = ( (1+ModuleCorData1)/2 ) ^12
-        if (opt$calculatePermutation | opt$densityOnly) 
+        if (opt$calculatePermutation | opt$densityOnly)
         {
             adjacency2 = ( (1+ModuleCorData2)/2 ) ^12
-        } else 
+        } else
             adjacency2 = adjacency1
         adjacency3 = ( (1+ModuleCorData3)/2 ) ^12
      } else {
@@ -1983,7 +2038,7 @@ TRUE))
          corExpr = parse(text=paste(opt$corFnc, "(ccRef, ccTest ", prepComma(opt$corOptions), ")"))
          corCC[j] = eval(corExpr)
        }
-     } 
+     }
      marRef = .MAR(adjacency1)
      marRefP = .MAR(adjacency2)
      marTest = .MAR(adjacency3)
@@ -2001,9 +2056,9 @@ TRUE))
 
      MeanAdj[j,1]=mean(as.dist(adjacency2), na.rm=TRUE)
      MeanAdj[j,2]=mean(as.dist(adjacency3), na.rm=TRUE)
-  }  
-  list(modSizes = modSizes, 
-       corkIM = corkIM, corkME = corkME, corkMEall = corkMEall, 
+  }
+  list(modSizes = modSizes,
+       corkIM = corkIM, corkME = corkME, corkMEall = corkMEall,
        proVar = proVar, meanSignAwareKME = meanSignAwareKME,
        Separability = Separability, MeanSignAwareCorDat = MeanSignAwareCorDat, ICORdat = ICORdat,
        MeanAdj = MeanAdj, meanClusterCoeff = meanCC, meanMAR = meanMAR, corCC = corCC, corMAR = corMAR)
@@ -2066,12 +2121,12 @@ TRUE))
 
 # Here is the main function
 
-# Summary: 
+# Summary:
 #     PVE: from svd$d
 #     kME: from svd$u (to make it different from kIM)
 #     kIM: as usual
 #     kMEall: from kIMall
-#     meanSignAwareKME: from svd$u 
+#     meanSignAwareKME: from svd$u
 #     Separability: as in the paper
 #     MeanSignAwareCorDat: ??
 #     meanAdj: mean adjacency
@@ -2095,11 +2150,11 @@ TRUE))
   kIM = list()
   #printFlush(".coreCalcForAdj:getting svds and kIM")
   if (!opt$densityOnly)
-  {            
+  {
      svds[[1]] = .getSVDs(datRef, colors)
      kIM[[1]] = .kIM(datRef, colors, calculateAll = opt$calculateCor.kIMall)
   }
-   
+
   if (opt$calculatePermutation | opt$densityOnly)
   {
     svds[[2]] = .getSVDs(datRefP, colors)
@@ -2118,8 +2173,8 @@ TRUE))
   for (m in 1:nMods)
   {
     modGenes[[m]] = c(1:nGenes)[colors==colorLevels[m]]
-    proVar[m, 1] = svds[[2]][[m]]$d[1]/sum(svds[[2]][[m]]$d); 
-    proVar[m, 2] = svds[[3]][[m]]$d[1]/sum(svds[[3]][[m]]$d); 
+    proVar[m, 1] = svds[[2]][[m]]$d[1]/sum(svds[[2]][[m]]$d);
+    proVar[m, 2] = svds[[3]][[m]]$d[1]/sum(svds[[3]][[m]]$d);
   }
 
   #printFlush(".coreCalcForAdj:getting corkME and ICOR")
@@ -2138,12 +2193,12 @@ TRUE))
 
         if (opt$calculateCor.kIMall)
         {
-          corExpr = parse(text=paste(opt$corFnc, "(kIM[[1]][,m],kIM[[3]][,m] ", 
+          corExpr = parse(text=paste(opt$corFnc, "(kIM[[1]][,m],kIM[[3]][,m] ",
                                                 prepComma(opt$corOptions), ")"))
           corkMEall[m] = eval(corExpr)
         }
 
-        corExpr = parse(text=paste(opt$corFnc, "(kIM[[1]][modGenes[[m]],m],kIM[[3]][modGenes[[m]],m] ", 
+        corExpr = parse(text=paste(opt$corFnc, "(kIM[[1]][modGenes[[m]],m],kIM[[3]][modGenes[[m]],m] ",
                                    prepComma(opt$corOptions), ")"))
         corkIM[m] = eval(corExpr)
 
@@ -2154,11 +2209,11 @@ TRUE))
         ICORdat[m] = eval(corExpr)
      }
   }
-      
+
   meanSignAwareKME=matrix(NA, nMods ,2)
   meankIM=matrix(NA, nMods ,2)
   for(m in 1:nMods ) if(act[m])
-  {       
+  {
      meankIM[m, 1] = mean(kIM[[2]][modGenes[[m]], m], na.rm = TRUE)
      meankIM[m, 2] = mean(kIM[[3]][modGenes[[m]], m], na.rm = TRUE)
      if (opt$densityOnly)
@@ -2176,7 +2231,7 @@ TRUE))
         meanSignAwareKME[m,2]=abs(mean(sign(svds[[1]][[m]]$u) * svds[[3]][[m]]$u,na.rm = TRUE))
      }
   }
-  
+
   MeanAdj = matrix(NA, nMods, 2)
   sepMat = array(NA, dim = c(nMods, nMods, 2))
   corCC = rep(NA, nMods)
@@ -2194,7 +2249,7 @@ TRUE))
     modAdj = datRef[modGenes[[m]], modGenes[[m]]]
     if (opt$calculateClusterCoeff) ccRef = .clusterCoeff(modAdj)
     marRef = .MAR(modAdj)
-  
+
     modAdj = datTest[modGenes[[m]], modGenes[[m]]]
     if (opt$calculateClusterCoeff) ccTest = .clusterCoeff(modAdj)
     marTest = .MAR(modAdj)
@@ -2219,7 +2274,7 @@ TRUE))
           tmp = mean(interAdj, na.rm = TRUE)
           if (tmp!=0) {
             sepMat[m, m2, 1] = mean(interAdj, na.rm = TRUE)/sqrt(MeanAdj[m, 1] * MeanAdj[m2, 1])
-          } else 
+          } else
             sepMat[m, m2, 1] = 0
           sepMat[m2, m, 1] = sepMat[m, m2, 1]
           interAdj = datTest[modGenes[[m]], modGenes[[m2]]]
@@ -2235,11 +2290,11 @@ TRUE))
   Separability=matrix(NA, nMods ,2)
   notGold = colorLevels!=gold
   for(k in 1:2)
-     Separability[notGold, k]=1-apply(sepMat[notGold, notGold, k, drop = FALSE], 1, max, na.rm = TRUE)                        
+     Separability[notGold, k]=1-apply(sepMat[notGold, notGold, k, drop = FALSE], 1, max, na.rm = TRUE)
   MeanSignAwareCorDat=matrix(NA,nMods ,2)
-  list(modSizes = modSizes, 
-       corkIM = corkIM, corkME = corkME, corkMEall = corkMEall, 
-       proVar = proVar, 
+  list(modSizes = modSizes,
+       corkIM = corkIM, corkME = corkME, corkMEall = corkMEall,
+       proVar = proVar,
        meanSignAwareKME = meanSignAwareKME,
        meankIM = meankIM,
        Separability = Separability, MeanSignAwareCorDat = MeanSignAwareCorDat, ICORdat = ICORdat,

@@ -1,3 +1,39 @@
+
+# checkAdjMat ####
+#' Check adjacency matrix
+#'
+#' Checks a given matrix for properties that an adjacency matrix must satisfy.
+#'
+#' The function checks whether the given matrix really is a 2-dimensional
+#' numeric matrix, whether it is square, symmetric, and all finite entries are
+#' between \code{min} and \code{max}.  If any of the conditions is not met, the
+#' function issues an error.
+#'
+#' @aliases checkAdjMat checkSimilarity
+#' @param adjMat matrix to be checked
+#' @param similarity matrix to be checked
+#' @param min minimum allowed value for entries of the input
+#' @param max maximum allowed value for entries of the input
+#' @return None. The function returns normally if all conditions are met.
+#' @author Peter Langfelder
+#' @seealso \code{\link{adjacency}}
+#' @keywords misc
+checkAdjMat <- function(adjMat, min = 0, max = 1) {
+    dim = dim(adjMat)
+    if (is.null(dim) || length(dim) != 2)
+        stop("adjacency is not two - dimensional")
+    if (!is.numeric(adjMat))
+        stop("adjacency is not numeric")
+    if (dim[1] != dim[2])
+        stop("adjacency is not square")
+    if (max(abs(adjMat - t(adjMat)), na.rm = TRUE) > 1e-12)
+        stop("adjacency is not symmetric")
+    if (min(adjMat, na.rm = TRUE) < min ||
+        max(adjMat, na.rm = TRUE) > max)
+        stop("some entries are not between", min, "and", max)
+}
+
+# unsignedAdjacency ####
 #' Calculation of unsigned adjacency
 #'
 #' Calculation of the unsigned network adjacency from expression data. The
@@ -35,6 +71,7 @@ unsignedAdjacency <- function(datExpr, datExpr2 = NULL, power = 6,
     abs(eval(corExpr))^power
 }
 
+# adjacnecy ####
 #' Calculate network adjacency
 #'
 #' Calculates (correlation or distance) network adjacency from given expression
@@ -173,6 +210,49 @@ adjacency <- function(datExpr, selectCols = NULL, type = "unsigned",
     cor_mat^power
 }
 
+#' @rdname adjacency
+#' @inheritParams adjacency
+#' @description
+#' similarity calculates the pairwise correlation of the expression data.
+#' @export
+similarity <- function(datExpr, selectCols = NULL, corFnc = "cor",
+                       corOptions = "use = 'p'", type = "cor",
+                       distFnc = "dist", distOptions = "method = 'euclidean'") {
+    intType <- ifelse(type == "cor", 1, 3)
+    if (intType < 2) {
+        if (is.null(selectCols)) {
+            corExpr = parse(text = paste(corFnc,
+                                         "(datExpr ",
+                                         prepComma(corOptions), ")"))
+            # cor_mat = cor(datExpr, use = "p")
+            cor_mat = eval(corExpr)
+        } else {
+            corExpr = parse(text = paste(
+                corFnc, "(datExpr, datExpr[, selectCols] ",
+                prepComma(corOptions), ")"))
+            #cor_mat = cor(datExpr, datExpr[, selectCols], use = "p")
+            cor_mat = eval(corExpr)
+        }
+    } else {
+        if (!is.null(selectCols)) {
+            stop("The argument 'selectCols' cannot
+                 be used for distance adjacency.")
+        }
+        corExpr = parse(text = paste(distFnc, "(t(datExpr) ",
+                                     prepComma(distOptions), ")"))
+        # cor_mat = cor(datExpr, use = "p")
+        d = eval(corExpr)
+        if (any(d < 0)) {
+            warning("Function WGCNA::adjacency: Distance function
+                    returned (some) negative values.")
+        }
+        cor_mat = 1 - as.matrix((d/max(d, na.rm = TRUE))^2)
+    }
+
+    cor_mat
+}
+
+# adjacency.polyReg ####
 #' Adjacency matrix based on polynomial regression
 #'
 #' adjacency.polyReg calculates a network adjacency matrix by fitting
@@ -284,6 +364,7 @@ adjacency.polyReg = function(datExpr, degree=3, symmetrizationMethod = "mean") {
 
 }
 
+# adjacency.splineReg ####
 #' Calculate network adjacency based on natural cubic spline regression
 #'
 #' adjacency.splineReg calculates a network adjacency matrix by fitting spline
@@ -395,6 +476,7 @@ adjacency.splineReg = function(datExpr,
     adj
 }
 
+# sigmoidAdjacency ####
 #' Sigmoid-type adacency function.
 #'
 #' Sigmoid-type function that converts a similarity to a weighted network
@@ -418,6 +500,7 @@ sigmoidAdjacency <- function(ss, mu = 0.8, alpha = 20) {
     1/(1 + exp(- alpha * (ss - mu)))
 }
 
+# SignumAdjacency ####
 #' Hard-thresholding adjacency function
 #'
 #' This function transforms correlations or other measures of similarity into
@@ -442,45 +525,4 @@ signumAdjacency <- function(corMat, threshold) {
     dimnames(adjmat) <- dimnames(corMat)
     diag(adjmat) <- 0
     adjmat
-}
-#' @rdname adjacency
-#' @inheritParams adjacency
-#' @description
-#' similarity calculates the pairwise correlation of the expression data.
-#' @export
-similarity <- function(datExpr, selectCols = NULL, corFnc = "cor",
-                       corOptions = "use = 'p'", type = "cor",
-                       distFnc = "dist", distOptions = "method = 'euclidean'") {
-    intType <- ifelse(type == "cor", 1, 3)
-    if (intType < 2) {
-        if (is.null(selectCols)) {
-            corExpr = parse(text = paste(corFnc,
-                                         "(datExpr ",
-                                         prepComma(corOptions), ")"))
-            # cor_mat = cor(datExpr, use = "p")
-            cor_mat = eval(corExpr)
-        } else {
-            corExpr = parse(text = paste(
-                corFnc, "(datExpr, datExpr[, selectCols] ",
-                prepComma(corOptions), ")"))
-            #cor_mat = cor(datExpr, datExpr[, selectCols], use = "p")
-            cor_mat = eval(corExpr)
-        }
-    } else {
-        if (!is.null(selectCols)) {
-            stop("The argument 'selectCols' cannot
-                 be used for distance adjacency.")
-        }
-        corExpr = parse(text = paste(distFnc, "(t(datExpr) ",
-                                     prepComma(distOptions), ")"))
-        # cor_mat = cor(datExpr, use = "p")
-        d = eval(corExpr)
-        if (any(d < 0)) {
-            warning("Function WGCNA::adjacency: Distance function
-                    returned (some) negative values.")
-        }
-        cor_mat = 1 - as.matrix((d/max(d, na.rm = TRUE))^2)
-    }
-
-    cor_mat
 }

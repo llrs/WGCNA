@@ -1,4 +1,70 @@
 
+# formatLabels  ####
+#' Break long character strings into multiple lines
+#'
+#' This function attempts to break lomg character strings into multiple lines
+#' by replacing a given pattern by a newline character.
+#'
+#' Each given element of \code{labels} is processed independently. The
+#' character string is split using \code{strsplit}, with \code{split} as the
+#' splitting pattern. The resulting shorter character strings are then
+#' concatenated together with \code{newsplit} as the separator. Whenever the
+#' length of the combined result from the start or the previous newline
+#' character exceeds \code{maxCharPerLine}, a newline character is inserted (at
+#' the previous split).
+#'
+#' Note that individual segements (i.e., sections of the input between
+#' occurrences of \code{split}) whose number of characters exceeds
+#' \code{maxCharPerLine} will not be split.
+#'
+#' @param labels Character strings to be formatted.
+#' @param maxCharPerLine Integer giving the maximum number of characters per
+#' line.
+#' @param split Pattern to be replaced by newline (\code{'\n'}) characters.
+#' @param fixed Logical: Should the pattern be interpreted literally
+#' (\code{TRUE}) or as a regular expression (\code{FALSE})? See
+#' \code{\link{strsplit}} and its argument \code{fixed}.
+#' @param newsplit Character string to replace the occurrences of \code{split}
+#' above with.
+#' @param keepSplitAtEOL When replacing an occurrence of \code{split} with a
+#' newline character, should the \code{newsplit} be added before the newline as
+#' well?
+#' @return A character vector of the same length as input \code{labels}.
+#' @author Peter Langfelder
+#' @keywords misc
+#' @examples
+#'
+#' s = "A quick hare jumps over the brown fox"
+#' formatLabels(s)
+#'
+formatLabels <- function(labels, maxCharPerLine = 14, split = " ", fixed = TRUE,
+                         newsplit = split, keepSplitAtEOL = TRUE) {
+    n = length(labels)
+    splitX = strsplit(labels, split = split, fixed = fixed)
+    newLabels = rep("", n)
+    for (l in 1:n) {
+        nl = ""
+        line = ""
+        if (nchar(labels[l]) > 0) {
+            for (s in 1:length(splitX[[l]])) {
+                newLen = nchar(line) + nchar(splitX [[l]] [s])
+                if (nchar(line) < 5 | newLen <= maxCharPerLine) {
+                    nl = paste(nl, splitX[[l]] [s], sep = newsplit)
+                    line = paste(line, splitX[[l]] [s], sep = newsplit)
+                } else {
+                    nl = paste(nl, splitX[[l]] [s],
+                               sep = paste0(
+                                   ifelse(keepSplitAtEOL, newsplit, ""),
+                                   "\n"))
+                    line = splitX[[l]] [s]
+                }
+            }
+        }
+        newLabels[l] = nl
+    }
+    substring(newLabels, nchar(newsplit) + 1)
+}
+
 # labeledHeatmap  ####
 # This function plots a heatmap of the specified matrix and labels the x and y
 # axes wit the given labels.
@@ -990,4 +1056,104 @@ labeledBarplot <- function(Matrix, labels, colorLabels = FALSE, colored = TRUE,
         )
     }
     axis(2, labels = TRUE)
+}
+
+# shortenStrings ####
+
+.listRep <- function(data, n) {
+    out = list()
+    if (n >  0) {
+        for (i in 1:n) {
+            out[[i]] = data
+        }
+    }
+    out
+}
+
+#' Shorten given character strings by truncating at a suitable separator.
+#'
+#' This function shortens given character strings so they are not longer than a
+#' given maximum length.
+#'
+#' Strings whose length (number of characters) is at most \code{maxLength} are
+#' returned unchanged. For those that are longer, the function uses
+#' \code{\link{gregexpr}} to search for the occurrences of \code{split} in each
+#' given character string. If such occurrences are found at positions between
+#' \code{minLength} and \code{maxLength}, the string will be truncated at the
+#' last such \code{split}; otherwise, the string will be truncated at
+#' \code{maxLength}. The \code{ellipsis} is appended to each truncated string.
+#'
+#' @param strings Character strings to be shortened.
+#' @param maxLength Maximum length (number of characters) in the strings to be
+#' retained. See details for when the returned strings can exceed this length.
+#' @param minLength Minimum length of the returned strings. See details.
+#' @param split Character string giving the split at which the strings can be
+#' truncated. This can be a literal string or a regular expression (if the
+#' latter, \code{fixed} below must be set to \code{FALSE}).
+#' @param fixed Logical: should \code{split} be interpreted as a literal
+#' specification (\code{TRUE}) or as a regular expression (\code{FALSE})?
+#' @param ellipsis Character string that will be appended to every shorten
+#' string, to indicate that the string has been shortened.
+#' @param countEllipsisInLength Logical: should the length of the ellipsis
+#' count toward the minimum and maximum length?
+#' @return A character vector of strings, shortened as necessary. If the input
+#' \code{strings} had non-NULL dimensions and dimnames, these are copied to the
+#' output.
+#' @author Peter Langfelder
+#' @seealso
+#' \code{\link{gregexpr}}, the workhorse pattern matching function
+#' \code{\link{formatLabels}} for splitting strings into multiple lines
+#' @keywords misc
+shortenStrings <- function(strings, maxLength = 25, minLength = 10,
+                           split = " ", fixed = TRUE, ellipsis = "...",
+                           countEllipsisInLength = FALSE) {
+    dims = dim(strings)
+    dnames = dimnames(strings)
+    if (is.data.frame(strings)) {
+        strings = as.matrix(strings)
+        outputDF = TRUE
+    } else {
+        outputDF = FALSE
+    }
+    strings = as.character(strings)
+    n = length(strings)
+    if (n == 0)
+        return(character(0))
+
+    newLabels = rep("", n)
+    if (length(split) > 0) {
+        splitPositions = gregexpr(pattern = split,
+                                  text = strings,
+                                  fixed = fixed)
+    } else {
+        splitPositions = .listRep(numeric(0), n)
+    }
+    if (countEllipsisInLength) {
+        maxLength = maxLength - nchar(ellipsis)
+        minLength = minLength - nchar(ellipsis)
+    }
+    for (l in 1:n) {
+        if (nchar(strings[l]) <= maxLength) {
+            newLabels[l] = strings[l]
+        } else {
+            splits.1 = splitPositions[[l]]
+            suitableSplits = which(splits.1 > minLength &
+                                       splits.1 <= maxLength)
+            if (length(suitableSplits) > 0) {
+                splitPosition = max(splits.1[suitableSplits])
+            } else {
+                splitPosition = maxLength + 1
+            }
+            newLabels[l] = paste0(substring(strings[l], 1, splitPosition - 1),
+                                  ellipsis)
+        }
+    }
+
+    dim(newLabels) = dims
+    dimnames(newLabels) = dnames
+    if (outputDF) {
+        as.data.frame(newLabels)
+    } else {
+        newLabels
+    }
 }

@@ -388,3 +388,37 @@ standardScreeningNumericTrait <- function(datExpr,
 
     output
 }
+
+# hubGeneSignificance ####
+# Input a data frame with possibly signed module membership measures (also known
+# as module eigengene based connectivity kME.
+# The input to this function can include the sign of the correlation.
+#' Hubgene significance
+#'
+#' Calculate approximate hub gene significance for all modules in network.
+#'
+#' In \code{datKME} rows correspond to genes and columns to modules.
+#'
+#' @param datKME a data frame (or a matrix-like object) containing
+#' eigengene-based connectivities of all genes in the network.
+#' @param GS a vector with one entry for every gene containing its gene
+#' significance.
+#' @return A vector whose entries are the hub gene significances for each
+#' module.
+#' @author Steve Horvath
+#' @references Dong J, Horvath S (2007) Understanding Network Concepts in
+#' Modules, BMC Systems Biology 2007, 1:24
+#' @keywords misc
+hubGeneSignificance <- function(datKME, GS) {
+    nMEs = dim(as.matrix(datKME))[[2]]
+    nGenes = dim(as.matrix(datKME))[[1]]
+    if (length(GS)  != nGenes)
+        stop("Numbers of genes in 'datKME' and 'GS' are not compatible.")
+    Kmax = as.numeric(apply(as.matrix(abs(datKME)), 2, max, na.rm = TRUE))
+    Kmax[Kmax == 0] = 1
+    datKME = scale(datKME, center = FALSE, scale = Kmax)
+    sumKsq = as.numeric(apply(as.matrix(datKME ^ 2), 2, sum, na.rm = TRUE))
+    sumKsq[sumKsq == 0] = 1
+    HGS = as.numeric(apply(I(GS) * datKME, 2, sum, na.rm = TRUE)) / sumKsq
+    as.numeric(HGS)
+} #end of function hubGeneSignificance

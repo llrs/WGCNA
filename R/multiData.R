@@ -1,8 +1,4 @@
-#========================================================================================================
-#
 # Convenience functions for manipulating multiData structures
-#
-#========================================================================================================
 
 # Note: many of these function would be simpler to use if I used some sort of
 # class/method technique to keep track of the class of each object internally.
@@ -10,6 +6,464 @@
 # consistently on lists and multiData objects. Similarly, multiData2list would
 # simply become a method of as.list, and as.list would be safe to use both on
 # lists and on multiData objects.
+
+# multiUnion ####
+#' Union and intersection of multiple sets
+#'
+#' Union and intersection of multiple sets. These function generalize the
+#' standard functions \code{\link{union}} and \code{\link{intersect}}.
+#'
+#'
+#' @aliases multiUnion multiIntersect
+#' @param setList A list containing the sets to be performed upon.
+#' @return The union or intersection of the given sets.
+#' @author Peter Langfelder
+#' @seealso
+#' The "standard" functions \code{\link{union}} and \code{\link{intersect}}.
+#' @keywords misc
+multiUnion <- function(setList) {
+    len = length(setList)
+    if (len == 0) {
+        return(NULL)
+    }
+    if (len == 1) {
+        return(setList[[1]])
+    }
+
+    out = setList[[1]]
+    for (elem in 2:len) {
+        out <- union(out, setList[[elem]])
+    }
+    out
+}
+
+#' @export
+#' @rdname multiUnion
+multiIntersect <- function(setList) {
+    len = length(setList)
+    if (len == 0) {
+        return(NULL)
+    }
+    if (len == 1) {
+        return(setList[[1]])
+    }
+
+    out = setList[[1]]
+    for (elem in 2:len) {
+        out <- intersect(out, setList[[elem]])
+    }
+    out
+}
+
+# fixDataStructure ####
+#' Put single-set data into a form useful for multiset calculations.
+#'
+#' Encapsulates single-set data in a wrapper that makes the data suitable for
+#' functions working on multiset data collections.
+#'
+#' For multiset calculations, many quantities (such as expression data, traits,
+#' module eigengenes etc) are presented by a common structure, a vector of
+#' lists (one list for each set) where each list has a component \code{data}
+#' that contains the actual (expression, trait, eigengene) data for the
+#' corresponding set in the form of a dataframe. This funtion creates a vector
+#' of lists of length 1 and fills the component \code{data} with the content of
+#' parameter \code{data}.
+#'
+#' @param data A dataframe, matrix or array with two dimensions to be
+#' encapsulated.
+#' @param verbose Controls verbosity. 0 is silent.
+#' @param indent Controls indentation of printed progress messages. 0 means no
+#' indentation, every unit adds two spaces.
+#' @return As described above, input data in a format suitable for functions
+#' operating on multiset data collections.
+#' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
+#' @seealso \code{\link{checkSets}}
+#' @keywords misc
+#' @examples
+#'
+#'
+#' singleSetData = matrix(rnorm(100), 10,10);
+#' encapsData = fixDataStructure(singleSetData);
+#' length(encapsData)
+#' names(encapsData[[1]])
+#' dim(encapsData[[1]]$data)
+#' all.equal(encapsData[[1]]$data, singleSetData);
+#'
+#' @export
+fixDataStructure <- function(data, verbose = 0, indent = 0) {
+    spaces = indentSpaces(indent)
+    if ((class(data) != "list") || (class(data[[1]]) != "list")) {
+        if (verbose > 0)
+            printFlush(paste(spaces,
+                             "fixDataStructure: data is not a vector of lists:",
+                             "converting it into one."))
+        x = data
+        data = vector(mode = "list", length = 1)
+        data[[1]] = list(data = x)
+        rm(x)
+    }
+    data
+}
+
+# multiSetMEs ####
+#' Calculate module eigengenes.
+#'
+#' Calculates module eigengenes for several sets.
+#'
+#' This function calls \code{\link{moduleEigengenes}} for each set in
+#' \code{exprData}.
+#'
+#' Module eigengene is defined as the first principal component of the
+#' expression matrix of the corresponding module. The calculation may fail if
+#' the expression data has too many missing entries. Handling of such errors is
+#' controlled by the arguments \code{subHubs} and \code{trapErrors}. If
+#' \code{subHubs==TRUE}, errors in principal component calculation will be
+#' trapped and a substitute calculation of hubgenes will be attempted. If this
+#' fails as well, behaviour depends on \code{trapErrors}: if \code{TRUE}, the
+#' offending module will be ignored and the return value will allow the user to
+#' remove the module from further analysis; if \code{FALSE}, the function will
+#' stop. If \code{universalColors} is given, any offending module will be
+#' removed from all sets (see \code{validMEs} in return value below).
+#'
+#' From the user's point of view, setting \code{trapErrors=FALSE} ensures that
+#' if the function returns normally, there will be a valid eigengene (principal
+#' component or hubgene) for each of the input colors. If the user sets
+#' \code{trapErrors=TRUE}, all calculational (but not input) errors will be
+#' trapped, but the user should check the output (see below) to make sure all
+#' modules have a valid returned eigengene.
+#'
+#' While the principal component calculation can fail even on relatively sound
+#' data (it does not take all that many "well-placed" \code{NA} to torpedo the
+#' calculation), it takes many more irregularities in the data for the hubgene
+#' calculation to fail. In fact such a failure signals there likely is
+#' something seriously wrong with the data.
+#'
+#' @param exprData Expression data in a multi-set format (see
+#' \code{\link{checkSets}}). A vector of lists, with each list corresponding to
+#' one microarray dataset and expression data in the component \code{data},
+#' that is \code{expr[[set]]$data[sample, probe]} is the expression of probe
+#' \code{probe} in sample \code{sample} in dataset \code{set}. The number of
+#' samples can be different between the sets, but the probes must be the same.
+#' @param colors A matrix of dimensions (number of probes, number of sets)
+#' giving the module assignment of each gene in each set. The color "grey" is
+#' interpreted as unassigned.
+#' @param universalColors Alternative specification of module assignment. A
+#' single vector of length (number of probes) giving the module assignment of
+#' each gene in all sets (that is the modules are common to all sets). If
+#' given, takes precedence over \code{color}.
+#' @param useSets If calculations are requested in (a) selected set(s) only,
+#' the set(s) can be specified here. Defaults to all sets.
+#' @param useGenes Can be used to restrict calculation to a subset of genes
+#' (the same subset in all sets). If given, \code{validColors} in the returned
+#' list will only contain colors for the genes specified in \code{useGenes}.
+#' @param impute Logical. If \code{TRUE}, expression data will be checked for
+#' the presence of \code{NA} entries and if the latter are present, numerical
+#' data will be imputed, using function \code{impute.knn} and probes from the
+#' same module as the missing datum. The function \code{impute.knn} uses a
+#' fixed random seed giving repeatable results.
+#' @param nPC Number of principal components to be calculated. If only
+#' eigengenes are needed, it is best to set it to 1 (default). If variance
+#' explained is needed as well, use value \code{NULL}. This will cause all
+#' principal components to be computed, which is slower.
+#' @param align Controls whether eigengenes, whose orientation is undetermined,
+#' should be aligned with average expression (\code{align = "along average"},
+#' the default) or left as they are (\code{align = ""}). Any other value will
+#' trigger an error.
+#' @param excludeGrey Should the improper module consisting of 'grey' genes be
+#' excluded from the eigengenes?
+#' @param grey Value of \code{colors} or \code{universalColors} (whichever
+#' applies) designating the improper module. Note that if the appropriate
+#' colors argument is a factor of numbers, the default value will be incorrect.
+#' @param subHubs Controls whether hub genes should be substituted for missing
+#' eigengenes. If \code{TRUE}, each missing eigengene (i.e., eigengene whose
+#' calculation failed and the error was trapped) will be replaced by a weighted
+#' average of the most connected hub genes in the corresponding module. If this
+#' calculation fails, or if \code{subHubs==FALSE}, the value of
+#' \code{trapErrors} will determine whether the offending module will be
+#' removed or whether the function will issue an error and stop.
+#' @param trapErrors Controls handling of errors from that may arise when there
+#' are too many \code{NA} entries in expression data. If \code{TRUE}, errors
+#' from calling these functions will be trapped without abnormal exit. If
+#' \code{FALSE}, errors will cause the function to stop. Note, however, that
+#' \code{subHubs} takes precedence in the sense that if \code{subHubs==TRUE}
+#' and \code{trapErrors==FALSE}, an error will be issued only if both the
+#' principal component and the hubgene calculations have failed.
+#' @param returnValidOnly Boolean. Controls whether the returned data frames of
+#' module eigengenes contain columns corresponding only to modules whose
+#' eigengenes or hub genes could be calculated correctly in every set
+#' (\code{TRUE}), or whether the data frame should have columns for each of the
+#' input color labels (\code{FALSE}).
+#' @param softPower The power used in soft-thresholding the adjacency matrix.
+#' Only used when the hubgene approximation is necessary because the principal
+#' component calculation failed. It must be non-negative. The default value
+#' should only be changed if there is a clear indication that it leads to
+#' incorrect results.
+#' @param verbose Controls verbosity of printed progress messages. 0 means
+#' silent, up to (about) 5 the verbosity gradually increases.
+#' @param indent A single non-negative integer controlling indentation of
+#' printed messages. 0 means no indentation, each unit above that adds two
+#' spaces.
+#' @return A vector of lists similar in spirit to the input \code{exprData}.
+#' For each set there is a list with the following components:
+#' \item{data}{Module eigengenes in a data frame, with each column
+#' corresponding to one eigengene. The columns are named by the corresponding
+#' color with an \code{"ME"} prepended, e.g., \code{MEturquoise} etc. Note
+#' that, when \code{trapErrors == TRUE} and \code{returnValidOnly==FALSE}, this
+#' data frame also contains entries corresponding to removed modules, if any.
+#' (\code{validMEs} below indicates which eigengenes are valid and \code{allOK}
+#' whether all module eigengens were successfully calculated.) }
+#' \item{averageExpr}{If \code{align == "along average"}, a dataframe
+#' containing average normalized expression in each module. The columns are
+#' named by the corresponding color with an \code{"AE"} prepended, e.g.,
+#' \code{AEturquoise} etc.} \item{varExplained}{A dataframe in which each
+#' column corresponds to a module, with the component \code{varExplained[PC,
+#' module]} giving the variance of module \code{module} explained by the
+#' principal component no. \code{PC}. This is only accurate if all principal
+#' components have been computed (input \code{nPC = NULL}). At most 5 principal
+#' components are recorded in this dataframe.} \item{nPC}{A copy of the input
+#' \code{nPC}.} \item{validMEs}{A boolean vector. Each component (corresponding
+#' to the columns in \code{data}) is \code{TRUE} if the corresponding eigengene
+#' is valid, and \code{FALSE} if it is invalid. Valid eigengenes include both
+#' principal components and their hubgene approximations. When
+#' \code{returnValidOnly==FALSE}, by definition all returned eigengenes are
+#' valid and the entries of \code{validMEs} are all \code{TRUE}. }
+#' \item{validColors}{A copy of the input colors (\code{universalColors} if
+#' set, otherwise \code{colors[, set]}) with entries corresponding to invalid
+#' modules set to \code{grey} if given, otherwise 0 if the appropriate input
+#' colors are numeric and "grey" otherwise.} \item{allOK}{Boolean flag
+#' signalling whether all eigengenes have been calculated correctly, either as
+#' principal components or as the hubgene approximation. If
+#' \code{universalColors} is set, this flag signals whether all eigengenes are
+#' valid in all sets.} \item{allPC}{Boolean flag signalling whether all
+#' returned eigengenes are principal components. This flag (as well as the
+#' subsequent ones) is set independently for each set.} \item{isPC}{Boolean
+#' vector. Each component (corresponding to the columns in \code{eigengenes})
+#' is \code{TRUE} if the corresponding eigengene is the first principal
+#' component and \code{FALSE} if it is the hubgene approximation or is invalid.
+#' } \item{isHub}{Boolean vector. Each component (corresponding to the columns
+#' in \code{eigengenes}) is \code{TRUE} if the corresponding eigengene is the
+#' hubgene approximation and \code{FALSE} if it is the first principal
+#' component or is invalid.} \item{validAEs}{Boolean vector. Each component
+#' (corresponding to the columns in \code{eigengenes}) is \code{TRUE} if the
+#' corresponding module average expression is valid.} \item{allAEOK}{Boolean
+#' flag signalling whether all returned module average expressions contain
+#' valid data. Note that \code{returnValidOnly==TRUE} does not imply
+#' \code{allAEOK==TRUE}: some invalid average expressions may be returned if
+#' their corresponding eigengenes have been calculated correctly.}
+#' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
+#' @seealso \code{\link{moduleEigengenes}}
+#' @keywords misc
+multiSetMEs <- function(exprData,
+                        colors,
+                        universalColors = NULL,
+                        useSets = NULL,
+                        useGenes = NULL,
+                        impute = TRUE,
+                        nPC = 1,
+                        align = "along average",
+                        excludeGrey = FALSE,
+                        grey = if (is.null(universalColors)) {
+                            if (is.numeric(colors)) {0} else{"grey"}
+                        } else {
+                            if (is.numeric(universalColors)) {0} else {"grey"}},
+                        subHubs = TRUE,
+                        trapErrors = FALSE,
+                        returnValidOnly = trapErrors,
+                        softPower = 6,
+                        verbose = 1,
+                        indent = 0) {
+    spaces = indentSpaces(indent)
+    nSets = length(exprData)
+    setsize = checkSets(exprData, useSets = useSets)
+    nGenes = setsize$nGenes
+    nSamples = setsize$nSamples
+    if (verbose > 0) {
+        printFlush(paste(spaces, "multiSetMEs: Calculating module MEs."))
+    }
+    MEs = vector(mode = "list", length = nSets)
+    consValidMEs = NULL
+    if (!is.null(universalColors)) {
+        consValidColors = universalColors}
+    if (is.null(useSets)) {
+        useSets = c(1:nSets)}
+    if (is.null(useGenes)) {
+        for (set in useSets) {
+            if (verbose > 0)
+                printFlush(paste(spaces, "  Working on set", as.character(set), "..."))
+            if (is.null(universalColors)) {
+                setColors = colors[, set]
+            } else {
+                setColors = universalColors
+            }
+            setMEs = moduleEigengenes(
+                datExpr = exprData[[set]]$data,
+                colors = setColors,
+                impute = impute,
+                nPC = nPC,
+                align = align,
+                excludeGrey = excludeGrey,
+                grey = grey,
+                trapErrors = trapErrors,
+                subHubs = subHubs,
+                returnValidOnly = FALSE,
+                softPower = softPower,
+                verbose = verbose - 1,
+                indent = indent + 1
+            )
+            if (!is.null(universalColors) && (!setMEs$allOK)) {
+                if (is.null(consValidMEs)) {
+                    consValidMEs = setMEs$validMEs
+                } else {
+                    consValidMEs = consValidMEs * setMEs$validMEs
+                }
+                consValidColors[setMEs$validColors != universalColors]  =
+                    setMEs$validColors[setMEs$validColors != universalColors]
+            }
+            MEs[[set]] = setMEs
+            names(MEs[[set]])[names(setMEs) == 'eigengenes'] = 'data'
+            # Here's what moduleEigengenes returns:
+            #
+            #  list(eigengenes = PrinComps, averageExpr = averExpr,
+            #  varExplained = varExpl, nPC = nPC,
+            #       validMEs = validMEs, validColors = validColors, allOK = allOK,
+            #       allPC = allPC, isPC = isPC,
+            #       isHub = isHub, validAEs = validAEs, allAEOK = allAEOK)
+        }
+    } else {
+        for (set in useSets) {
+            if (verbose > 0) {
+                printFlush(spaces, "  Working on set", as.character(set),
+                           "...")
+            }
+            if (is.null(universalColors)) {
+                setColors = colors[useGenes, set]
+            } else {
+                setColors = universalColors[useGenes]
+            }
+            setMEs = moduleEigengenes(
+                datExpr = exprData[[set]]$data[, useGenes],
+                colors = setColors,
+                impute = impute,
+                nPC = nPC,
+                align = align,
+                excludeGrey = excludeGrey,
+                grey = grey,
+                trapErrors = trapErrors,
+                subHubs = subHubs,
+                returnValidOnly = FALSE,
+                softPower = softPower,
+                verbose = verbose - 1,
+                indent = indent + 1
+            )
+            if (!is.null(universalColors) && (!setMEs$allOK)) {
+                if (is.null(consValidMEs)) {
+                    consValidMEs = setMEs$validMEs
+                } else {
+                    consValidMEs = consValidMEs * setMEs$validMEs
+                }
+                consValidColors[
+                    setMEs$validColors != universalColors[useGenes]]  =
+                    setMEs$validColors[
+                        setMEs$validColors != universalColors[useGenes]]
+            }
+            MEs[[set]] = setMEs
+            names(MEs[[set]])[names(setMEs) == 'eigengenes'] = 'data'
+        }
+    }
+    if (!is.null(universalColors)) {
+        for (set in 1:nSets) {
+            if (!is.null(consValidMEs))
+                MEs[[set]]$validMEs = consValidMEs
+            MEs[[set]]$validColors = consValidColors
+        }
+    }
+    for (set in 1:nSets) {
+        MEs[[set]]$allOK = (sum(!MEs[[set]]$validMEs) == 0)
+        if (returnValidOnly) {
+            valid = (MEs[[set]]$validMEs > 0)
+            MEs[[set]]$data = MEs[[set]]$data[, valid]
+            MEs[[set]]$averageExpr = MEs[[set]]$averageExpr[, valid]
+            MEs[[set]]$varExplained = MEs[[set]]$varExplained[, valid]
+            MEs[[set]]$isPC = MEs[[set]]$isPC[valid]
+            MEs[[set]]$allPC = (sum(!MEs[[set]]$isPC) == 0)
+            MEs[[set]]$isHub = MEs[[set]]$isHub[valid]
+            MEs[[set]]$validAEs = MEs[[set]]$validAEs[valid]
+            MEs[[set]]$allAEOK = (sum(!MEs[[set]]$validAEs) == 0)
+            MEs[[set]]$validMEs = rep(TRUE, times = ncol(MEs[[set]]$data))
+        }
+    }
+    MEs
+}
+
+# checkSets ####
+#' Check structure and retrieve sizes of a group of datasets.
+#'
+#' Checks whether given sets have the correct format and retrieves dimensions.
+#'
+#' For multiset calculations, many quantities (such as expression data, traits,
+#' module eigengenes etc) are presented by a common structure, a vector of
+#' lists (one list for each set) where each list has a component \code{data}
+#' that contains the actual (expression, trait, eigengene) data for the
+#' corresponding set in the form of a dataframe. This funtion checks whether
+#' \code{data} conforms to this convention and retrieves some basic dimension
+#' information (see output).
+#'
+#' @param data A vector of lists; in each list there must be a component named
+#' \code{data} whose content is a matrix or dataframe or array of dimension 2.
+#' @param checkStructure If \code{FALSE}, incorrect structure of \code{data}
+#' will trigger an error. If \code{TRUE}, an appropriate flag (see output) will
+#' be set to indicate whether \code{data} has correct structure.
+#' @param useSets Optional specification of entries of the vector \code{data}
+#' that are to be checked. Defaults to all components. This may be useful when
+#' \code{data} only contains information for some of the sets.
+#' @return A list with components \item{nSets}{Number of sets (length of the
+#' vector \code{data}).} \item{nGenes}{Number of columns in the \code{data}
+#' components in the lists. This number must be the same for all sets.}
+#' \item{nSamples}{A vector of length \code{nSets} giving the number of rows in
+#' the \code{data} components.} \item{structureOK}{Only set if the argument
+#' \code{checkStructure} equals \code{TRUE}.  The value is \code{TRUE} if the
+#' paramter \code{data} passes a few tests of its structure, and \code{FALSE}
+#' otherwise. The tests are not exhaustive and are meant to catch obvious user
+#' errors rather than be bulletproof.}
+#' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
+#' @keywords misc
+checkSets <- function(data, checkStructure = FALSE, useSets = NULL) {
+    nSets = length(data)
+    if (is.null(useSets)) {
+        useSets = c(1:nSets)
+    }
+    if (nSets <= 0) {
+        stop("No data given.")
+    }
+    structureOK = TRUE
+    if ((class(data) != "list") || (class(data[[useSets[1]]]) != "list")) {
+        if (checkStructure) {
+            structureOK = FALSE
+            nGenes = 0
+            nSamples = 0
+        } else {
+            stop("data does not appear to have the correct format. ",
+                 "Consider using fixDataStructure or setting ",
+                 "checkStructure = TRUE when calling this function.")
+        }
+    } else {
+        nSamples = vector(length = nSets)
+        nGenes = dim(data[[useSets[1]]]$data)[2]
+        for (set in useSets) {
+            if (nGenes != dim(data[[set]]$data)[2]) {
+                if (checkStructure) {
+                    structureOK = FALSE
+                } else {
+                    stop("Incompatible number of genes in set 1 and ", set)
+                }
+            }
+            nSamples[set] = dim(data[[set]]$data)[1]
+        }
+    }
+
+    list(nSets = nSets, nGenes = nGenes, nSamples = nSamples,
+         structureOK = structureOK)
+}
 
 # mtd.subset ####
 #' Subset rows and columns in a multiData structure
@@ -351,7 +805,6 @@ mtd.applyToSubset = function(
   return(res)
 }
 
-
 # mtd.simplify ####
 #' If possible, simplify a multiData structure to a 3-dimensional array.
 #'
@@ -432,7 +885,6 @@ mtd.simplify = function(multiData) {
   return(multiData)
 }
 
-
 # isMultiData ####
 #' Determine whether the supplied object is a valid multiData structure
 #'
@@ -470,7 +922,6 @@ isMultiData = function(x, strict = TRUE) {
     all(hasData)
   }
 }
-
 
 # mtd.mapply ####
 #' Apply a function to elements of given multiData structures.
@@ -607,8 +1058,6 @@ mtd.mapply = function(
   return(res)
 }
 
-
-
 # mtd.rbindSelf ####
 #' Turn a multiData structure into a single matrix or data frame.
 #'
@@ -648,7 +1097,6 @@ mtd.rbindSelf = function(multiData){
   out
 }
 
-
 # mtd.setAttr ####
 #' Set attributes on each component of a multiData structure
 #'
@@ -676,7 +1124,6 @@ mtd.setAttr = function(multiData, attribute, valueList) {
   }
   multiData
 }
-
 
 # mtd.setColnames ####
 #' Get and set column names in a multiData structure.
@@ -759,9 +1206,6 @@ mtd.colnames = function(multiData) {
 multiData = function(...) {
   list2multiData(list(...))
 }
-
-
-
 
 # KeepCommonProbes ####
 #' Keep probes that are shared among given data sets
