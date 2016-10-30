@@ -5,14 +5,9 @@
 .threadAllowVar <- "ALLOW_WGCNA_THREADS"
 
 
-.zeroMADWarnings <- c("Some results will be NA.",
-                     paste("Pearson correlation was used for individual ",
-                           "columns with zero (or missing) MAD."),
-                     "Pearson correlation was used for entire variable.")
-
 ..minNGenes <- 4
 ..minNSamples <- 4
-
+.moduleColorOptions <- list(MEprefix = "ME")
 .largestBlockSize <- 1e8
 
 .networkTypes <- c("unsigned", "signed", "signed hybrid")

@@ -5,8 +5,8 @@
 \title{Relabel module labels to best match the given reference labels}
 \usage{
 matchLabels(source, reference, pThreshold = 0.05, na.rm = TRUE,
-  ignoreLabels = if (is.numeric(reference)) 0 else "grey", extraLabels = if
-  (is.numeric(reference)) c(1:1000) else standardColors())
+  ignoreLabels = ifelse(is.numeric(reference), 0, "grey"),
+  extraLabels = ifelse(is.numeric(reference), c(1:1000), standardColors()))
 }
 \arguments{
 \item{source}{a vector or a matrix of reference labels. The labels may be

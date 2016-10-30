@@ -87,16 +87,25 @@ TOMsimilarityFromExpr = function(datExpr, corType = "pearson",
     stop(paste("Invalid 'corType'. Recognized values are", paste(.corTypes, collapse = ", ")))
 
   TOMTypeC = as.integer(pmatch(TOMType, .TOMTypes)-1);
-  if (is.na(TOMTypeC))
-    stop(paste("Invalid 'TOMType'. Recognized values are", paste(.TOMTypes, collapse = ", ")))
+  if (is.na(TOMTypeC)) {
+    stop(paste("Invalid 'TOMType'. Recognized values are",
+               paste(.TOMTypes, collapse = ", ")))
+  }
 
   TOMDenomC = as.integer(pmatch(TOMDenom, .TOMDenoms)-1);
-  if (is.na(TOMDenomC))
-    stop(paste("Invalid 'TOMDenom'. Recognized values are", paste(.TOMDenoms, collapse = ", ")))
-
-  if ( (maxPOutliers < 0) | (maxPOutliers > 1)) stop("maxPOutliers must be between 0 and 1.");
-  if (quickCor < 0) stop("quickCor must be positive.");
-  if ( (maxPOutliers < 0) | (maxPOutliers > 1)) stop("maxPOutliers must be between 0 and 1.");
+  if (is.na(TOMDenomC)) {
+    stop(paste("Invalid 'TOMDenom'. Recognized values are",
+               paste(.TOMDenoms, collapse = ", ")))
+  }
+  if ( (maxPOutliers < 0) | (maxPOutliers > 1)) {
+      stop("maxPOutliers must be between 0 and 1.")
+  }
+  if (quickCor < 0) {
+      stop("quickCor must be positive.")
+  }
+  if ( (maxPOutliers < 0) | (maxPOutliers > 1)) {
+      stop("maxPOutliers must be between 0 and 1.")
+  }
 
   fallback = as.integer(pmatch(pearsonFallback, .pearsonFallbacks));
   if (is.na(fallback))

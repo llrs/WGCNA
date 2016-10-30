@@ -2,7 +2,7 @@
 # consensusOrderMEs ####
 .clustOrder <- function(distM,
                         greyLast = TRUE,
-                        greyName = paste0(moduleColor.getMEprefix(), "grey")) {
+                        greyName = paste0(getMEprefix(), "grey")) {
     distM = as.matrix(distM)
     distNames = dimnames(distM)[[1]]
     greyInd = match(greyName, distNames)
@@ -83,8 +83,7 @@ consensusOrderMEs <- function(MEs,
                               useAbs = FALSE,
                               useSets = NULL,
                               greyLast = TRUE,
-                              greyName = paste0(moduleColor.getMEprefix(),
-                                                "grey"),
+                              greyName = paste0(getMEprefix(), "grey"),
                               method = "consensus") {
     # Debugging code:
     #printFlush("consensusOrderMEs:")

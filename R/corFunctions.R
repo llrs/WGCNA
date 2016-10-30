@@ -133,10 +133,12 @@ bicor = function(x, y = NULL, robustX = TRUE, robustY = TRUE, use = 'all.obs', m
   }
 
   fallback = pmatch(pearsonFallback, .pearsonFallbacks)
-  if (is.na(na.method))
-      stop(paste("Unrecognized 'pearsonFallback'. Recognized values are (unique abbreviations of)\n",
-           paste(.pearsonFallbacks, collapse = ", ")))
-
+  if (is.na(na.method)) {
+      .pearsonFallbacks <- c("none", "individual", "all")
+      stop("Unrecognized 'pearsonFallback'. Recognized values are (unique ",
+           "abbreviations of)\n",
+           paste(.pearsonFallbacks, collapse = ", "))
+  }
   if (quick < 0) {
       stop("quick must be non-negative.")
   }
@@ -174,6 +176,10 @@ bicor = function(x, y = NULL, robustX = TRUE, robustY = TRUE, use = 'all.obs', m
     if (!is.null(dimnames(x)[[2]])) {
         dimnames(res$res) = list(dimnames(x)[[2]],  dimnames(x)[[2]] )
     }
+    .zeroMADWarnings <- c("Some results will be NA.",
+                          paste("Pearson correlation was used for individual ",
+                                "columns with zero (or missing) MAD."),
+                          "Pearson correlation was used for entire variable.")
     if (res$warn > 0) {
       # For now have only one warning
       warning("bicor: zero MAD in variable 'x'. ", .zeroMADWarnings[fallback])
@@ -205,22 +211,20 @@ bicor = function(x, y = NULL, robustX = TRUE, robustY = TRUE, use = 'all.obs', m
     dim(res$res) = dim(bi)
     if (!is.null(dimnames(x)[[2]]) || !is.null(dimnames(y)[[2]]))
         dimnames(res$res) = list(dimnames(x)[[2]], dimnames(y)[[2]])
-    if (res$warnX > 0)
-      warning(paste("bicor: zero MAD in variable 'x'.", .zeroMADWarnings[fallback]))
-    if (res$warnY > 0)
-      warning(paste("bicor: zero MAD in variable 'y'.", .zeroMADWarnings[fallback]))
+    if (res$warnX > 0) {
+      warning("bicor: zero MAD in variable 'x'.", .zeroMADWarnings[fallback])
+    }
+    if (res$warnY > 0){
+      warning("bicor: zero MAD in variable 'y'.", .zeroMADWarnings[fallback])
+    }
   }
   if (res$err > 0) {
-    if (err > nKnownErrors) {
-      stop(paste("An error occurred in compiled code. Error code is", err))
-    } else {
-      stop(paste(Cerrors[err], "occurred in compiled code. "))
-    }
+      stop("An error occurred in compiled code. Error code is ", err)
   }
   if (res$nNA > 0) {
     warning("Missing values generated in calculation of bicor.\nLikely cause: ",
-            "too many missing entries, zero median absolute deviation, or zero ",
-            "variance.")
+            "too many missing entries, zero median absolute deviation, or zero",
+            " variance.")
   }
   res$res
 }

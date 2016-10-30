@@ -29,7 +29,7 @@ which case a color is specified for the label of each column of \code{x}.}
 
 \item{\dots}{graphical parameters may also be supplied as arguments to the
 function (see \code{\link{par}}). For comparison purposes, it is good to set
-\code{zlim=c(-1,1)}.}
+\code{zlim=c(-1, 1)}.}
 }
 \description{
 This function produces a red and green color image of a correlation matrix
@@ -41,7 +41,7 @@ correlations are represented with greens of increasing intensity.
 Sandrine Dudoit, \email{sandrine@stat.berkeley.edu}
 }
 \seealso{
-\code{\link{plotMat}},\code{\link{rgcolors.func}},
+\code{\link{plotMat}}, \code{\link{rgcolors.func}},
 \code{\link{cor}}, \code{\link{image}}, \code{\link{rgb}}.
 }
 \keyword{hplot}

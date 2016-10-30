@@ -402,8 +402,7 @@ consensusKME <-function(multiExpr,
 
     dim(kME.weightedAverage) = c(nGenes * nWeights, nModules)
 
-    if (any(is.na(kME)))
-    {
+    if (any(is.na(kME))) {
         kME.consensus.1 = apply(kME,
                                 c(1, 2),
                                 quantile,

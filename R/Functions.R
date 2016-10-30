@@ -1,9 +1,6 @@
 # A collection of functions
 
-# moduleColor.getMEprefix ####
-
-.moduleColorOptions = list(MEprefix = "ME")
-
+# getMEprefix ####
 #' Get the prefix used to label module eigengenes.
 #'
 #' Returns the currently used prefix used to label module eigengenes.  When
@@ -23,7 +20,7 @@
 #' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
 #' @seealso \code{\link{moduleEigengenes}}
 #' @keywords misc
-moduleColor.getMEprefix <- function() {
+getMEprefix <- function() {
     .moduleColorOptions$MEprefix
 }
 
@@ -241,7 +238,7 @@ moduleEigengenes <- function(datExpr, colors, impute = TRUE, nPC = 1,
     isPC <- validMEs
     isHub <- validAEs
     validColors <- colors
-    names(PrinComps) <- paste0(moduleColor.getMEprefix(), modlevels)
+    names(PrinComps) <- paste0(getMEprefix(), modlevels)
     names(averExpr) <- paste0("AE", modlevels)
     for (i in c(1:lml)) {
         if (verbose > 1) {
@@ -462,8 +459,7 @@ moduleEigengenes <- function(datExpr, colors, impute = TRUE, nPC = 1,
 #' frame or a vector of lists) with the grey eigengene removed.
 #' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
 #' @keywords misc
-removeGreyME <- function(MEs, greyMEName = paste0(moduleColor.getMEprefix(),
-                                             "grey")) {
+removeGreyME <- function(MEs, greyMEName = paste0(getMEprefix(), "grey")) {
     newMEs = MEs
     if (is.vector(MEs) & mode(MEs) == "list") {
         warned <- 0
@@ -560,7 +556,7 @@ collectGarbage <- function() {
 #' @keywords misc
 orderMEs <- function(MEs,
                      greyLast = TRUE,
-                     greyName = paste0(moduleColor.getMEprefix(), "grey"),
+                     greyName = paste0(getMEprefix(), "grey"),
                      orderBy = 1,
                      order = NULL,
                      useSets = NULL,
@@ -1305,7 +1301,7 @@ mergeCloseModules <- function(# input data
 
     colors = colors[, drop = TRUE]
 
-    greyMEname = paste0(moduleColor.getMEprefix(), unassdColor)
+    greyMEname = paste0(getMEprefix(), unassdColor)
 
     if (verbose > 0) {
         printFlush(
@@ -1783,70 +1779,6 @@ scaleFreePlot <- function(connectivity, nBreaks = 10, truncated = FALSE,
             lines(log.dk, predict(lm2), col = 2)
         OUTPUT
     } # end of function
-
-# cutreeStatic ####
-#' Constant-height tree cut
-#'
-#' Module detection in hierarchical dendrograms using a constant-height tree
-#' cut. Only branches whose size is at least \code{minSize} are retained.
-#'
-#' This function performs a straightforward constant-height cut as implemented
-#' by \code{\link{cutree}}, then calculates the number of objects on each
-#' branch and only keeps branches that have at least \code{minSize} objects on
-#' them.
-#'
-#' @param dendro a hierarchical clustering dendrogram such as returned by
-#' \code{\link{hclust}}.
-#' @param cutHeight height at which branches are to be cut.
-#' @param minSize minimum number of object on a branch to be considered a
-#' cluster.
-#' @return A numeric vector giving labels of objects, with 0 meaning
-#' unassigned. The largest cluster is conventionally labeled 1, the next
-#' largest 2, etc.
-#' @author Peter Langfelder
-#' @seealso
-#' \code{\link{hclust}} for hierarchical clustering,
-#' \code{\link{cutree}} and \code{\link{cutreeStatic}} for other
-#' constant-height branch cuts, \code{\link{standardColors}} to convert the
-#' retuned numerical lables into colors for easier visualization.
-#' @keywords misc
-cutreeStatic <- function(dendro,
-                         cutHeight = 0.9,
-                         minSize = 50) {
-    normalizeLabels(moduleNumber(dendro, cutHeight, minSize))
-}
-
-# cutreeStaticColor ####
-#' Constant height tree cut using color labels
-#'
-#' Cluster detection by a constant height cut of a hierarchical clustering
-#' dendrogram.
-#'
-#' This function performs a straightforward constant-height cut as implemented
-#' by \code{\link{cutree}}, then calculates the number of objects on each
-#' branch and only keeps branches that have at least \code{minSize} objects on
-#' them.
-#'
-#' @param dendro a hierarchical clustering dendrogram such as returned by
-#' \code{\link{hclust}}.
-#' @param cutHeight height at which branches are to be cut.
-#' @param minSize minimum number of object on a branch to be considered a
-#' cluster.
-#' @return A character vector giving color labels of objects, with "grey"
-#' meaning unassigned. The largest cluster is conventionally labeled
-#' "turquoise", next "blue" etc. Run \code{standardColors()} to see the
-#' sequence of standard color labels.
-#' @author Peter Langfelder
-#' @seealso
-#' \code{\link{hclust}} for hierarchical clustering,
-#' \code{\link{cutree}} and \code{\link{cutreeStatic}} for other
-#' constant-height branch cuts, \code{\link{standardColors}} to see the
-#' sequence of color labels that can be assigned.
-#' @keywords misc
-cutreeStaticColor <- function(dendro, cutHeight = 0.9, minSize = 50) {
-        labels2colors(normalizeLabels(moduleNumber(
-            dendro, cutHeight, minSize)))
-    }
 
 # plotColorUnderTree ####
 #' Plot color rows in a given order, for example under a dendrogram
@@ -2580,18 +2512,6 @@ checkAdjMat <- function(adjMat, min = 0, max = 1) {
 }
 
 # signedKME ####
-# The function signedKME computes the module eigengene based connectivity.
-# Input: datExpr = a possibly very large gene expression data set where the rows
-# correspond to samples and the columns represent genes
-# datME = data frame of module eigengenes (columns correspond to module
-# eigengenes or MEs)
-# A module eigengene based connectivity KME value will be computed if the gene
-# has a non missing expression value in at least minNSamples arrays.
-# Output a data frame where columns are the KME values
-# corresponding to different modules.
-# By splitting the expression data into different blocks, the function can deal
-# with tens of thousands of gene expression data.
-# If there are many eigengenes (say hundreds) consider decreasing the block size
 #' Signed eigengene-based connectivity
 #'
 #' Calculation of (signed) eigengene-based connectivity, also known as module
@@ -2634,40 +2554,32 @@ signedKME <- function(datExpr,
     datExpr = data.frame(datExpr)
     datME = data.frame(datME)
     output = list()
-    if (dim(as.matrix(datME))[[1]]  != dim(as.matrix(datExpr))[[1]])
-        stop("Number of samples (rows) in 'datExpr' and 'datME' must be the same.")
+    if (dim(as.matrix(datME))[[1]]  != dim(as.matrix(datExpr))[[1]]) {
+        stop("Number of samples (rows) in 'datExpr' and 'datME' must be the ",
+             "same.")
+    }
     varianceZeroIndicatordatExpr = as.vector(apply(as.matrix(datExpr), 2, var,
                                                    na.rm = TRUE)) == 0
     varianceZeroIndicatordatME  = as.vector(apply(as.matrix(datME), 2, var,
                                                   na.rm = TRUE)) == 0
-    if (sum(varianceZeroIndicatordatExpr, na.rm = TRUE) > 0)
-        warning("Some genes are constant. Hint: consider removing constant columns
-                from datExpr.")
-    if (sum(varianceZeroIndicatordatME, na.rm = TRUE) > 0)
-        warning(
-            paste(
-                "Some module eigengenes are constant, which is suspicious.\n",
-                "    Hint: consider removing constant columns from datME."
-            )
-        )
+    if (sum(varianceZeroIndicatordatExpr, na.rm = TRUE) > 0) {
+        warning("Some genes are constant. Hint: consider removing constant ",
+                "columns from datExpr.")
+    }
+    if (sum(varianceZeroIndicatordatME, na.rm = TRUE) > 0) {
+        warning("Some module eigengenes are constant, which is suspicious.\n",
+                "    Hint: consider removing constant columns from datME.")
+    }
     no.presentdatExpr = as.vector(apply(!is.na(as.matrix(datExpr)), 2, sum))
-    if (min(no.presentdatExpr) < ..minNSamples)
-        warning(
-            paste(
-                "Some gene expressions have fewer than 4 observations.\n",
+    if (min(no.presentdatExpr) < ..minNSamples) {
+        warning("Some gene expressions have fewer than 4 observations.\n",
                 "    Hint: consider removing genes with too many missing values or
-                collect more arrays."
-            )
-        )
+                collect more arrays.")
+    }
 
     #output = data.frame(cor(datExpr, datME, use = "p"))
-    corExpr = parse(text = paste(
-        "data.frame(",
-        corFnc,
-        "(datExpr, datME ",
-        prepComma(corOptions),
-        "))"
-    ))
+    corExpr = parse(text = paste("data.frame(", corFnc, "(datExpr, datME ",
+                                 prepComma(corOptions), "))"))
     output = eval(corExpr)
 
     output[no.presentdatExpr < ..minNSamples,] = NA
@@ -3228,10 +3140,6 @@ plotDendroAndColors <- function(dendro,
 }
 
 # plotMEpairs ####
-# this function creates pairwise scatter plots between module eigengenes (above
-# the diagonal) Below the diagonal are the absolute values of the Pearson
-# correlation coefficients.
-# The diagonal contains histograms of the module eigengene expressions.
 #' Pairwise scatterplots of eigengenes
 #'
 #' The function produces a matrix of plots containing pairwise scatterplots of
@@ -3392,48 +3300,6 @@ sizeGrWindow <- function(width, height) {
         dev.off()
         dev.new(width = width, height = height)
     }
-}
-
-# KeepCommonProbes ####
-#' Keep probes that are shared among given data sets
-#'
-#' This function strips out probes that are not shared by all given data sets,
-#' and orders the remaining common probes using the same order in all sets.
-#'
-#'
-#' @param multiExpr expression data in the multi-set format (see
-#' \code{\link{checkSets}}). A vector of lists, one per set. Each set must
-#' contain a component \code{data} that contains the expression data, with rows
-#' corresponding to samples and columns to genes or probes.
-#' @param orderBy index of the set by which probes are to be ordered.
-#' @return Expression data in the same format as the input data, containing
-#' only common probes.
-#' @author Peter Langfelder
-#' @seealso \code{\link{checkSets}}
-#' @keywords misc
-keepCommonProbes <- function(multiExpr, orderBy = 1) {
-    size = checkSets(multiExpr)
-    nSets = size$nSets
-    if (nSets <= 0) {
-        stop("No expression data given!")
-    }
-
-    Names = data.frame(Names = names(multiExpr[[orderBy]]$data))
-
-    if (nSets > 1) {
-        for (set in (1:nSets)) {
-            SetNames = data.frame(Names = names(multiExpr[[set]]$data),
-                                  index = c(1:dim(multiExpr[[set]]$data)[2]))
-            Names = merge(Names, SetNames, by.x = "Names", by.y = "Names",
-                          all = FALSE, sort = FALSE)
-        }
-    }
-
-    for (set in 1:nSets) {
-        multiExpr[[set]]$data = multiExpr[[set]]$data[, Names[, set + 1]]
-    }
-
-    multiExpr
 }
 
 # addTraitToPCs ####

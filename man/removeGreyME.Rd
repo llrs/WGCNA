@@ -4,7 +4,7 @@
 \alias{removeGreyME}
 \title{Removes the grey eigengene from a given collection of eigengenes.}
 \usage{
-removeGreyME(MEs, greyMEName = paste0(moduleColor.getMEprefix(), "grey"))
+removeGreyME(MEs, greyMEName = paste0(getMEprefix(), "grey"))
 }
 \arguments{
 \item{MEs}{Module eigengenes, either in a single data frame (typicaly for a

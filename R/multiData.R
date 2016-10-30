@@ -4,13 +4,14 @@
 #
 #========================================================================================================
 
-# Note: many of these function would be simpler to use if I used some sort of class/method technique to keep
-# track of the class of each object internally. For example, I could then write a generic function "subset" that
-# would work consistently on lists and multiData objects. Similarly, multiData2list would simply become a
-# method of as.list, and as.list would be safe to use both on lists and on multiData objects.
+# Note: many of these function would be simpler to use if I used some sort of
+# class/method technique to keep track of the class of each object internally.
+# For example, I could then write a generic function "subset" that would work
+# consistently on lists and multiData objects. Similarly, multiData2list would
+# simply become a method of as.list, and as.list would be safe to use both on
+# lists and on multiData objects.
 
-
-
+# mtd.subset ####
 #' Subset rows and columns in a multiData structure
 #'
 #' The function restricts each \code{data} component to the given columns and
@@ -49,8 +50,8 @@
 #' @author Peter Langfelder
 #' @seealso \code{\link{multiData}} to create a multiData structure.
 #' @keywords misc
-mtd.subset = function(multiData, rowIndex = NULL, colIndex = NULL, permissive = FALSE, drop = FALSE)
-{
+mtd.subset = function(multiData, rowIndex = NULL, colIndex = NULL,
+                      permissive = FALSE, drop = FALSE) {
   size = checkSets(multiData, checkStructure = permissive)
   if (!size$structureOK && !is.null(colIndex))
     warning(immediate. = TRUE,
@@ -80,16 +81,7 @@ mtd.subset = function(multiData, rowIndex = NULL, colIndex = NULL, permissive = 
   out
 }
 
-#' @rdname list2multiData
-#' @aliases multiData2list
-#' @param multiData A multiData structure to be converted to a list.
-#' @export
-multiData2list = function(multiData) {
-  lapply(multiData, getElement, 'data')
-}
-
-
-
+# list2multiData ####
 #' Convert a list to a multiData structure and vice-versa.
 #'
 #' \code{list2multiData} converts a list to a multiData structure;
@@ -104,8 +96,7 @@ multiData2list = function(multiData) {
 #' \code{multiData2list}, the corresponding list.
 #' @author Peter Langfelder
 #' @keywords misc
-list2multiData = function(data)
-{
+list2multiData = function(data) {
   out = list()
   for (set in 1:length(data))
     out[[set]] = list(data = data[[set]])
@@ -113,32 +104,42 @@ list2multiData = function(data)
   out
 }
 
-mtd.colnames = function(multiData)
-{
-  colnames(multiData[[1]]$data)
+#' @rdname list2multiData
+#' @aliases multiData2list
+#' @param multiData A multiData structure to be converted to a list.
+#' @export
+multiData2list = function(multiData) {
+    lapply(multiData, getElement, 'data')
 }
 
-.calculateIndicator = function(nSets, mdaExistingResults, mdaUpdateIndex)
-{
-  if (length(mdaUpdateIndex)==0) mdaUpdateIndex = NULL
+.calculateIndicator = function(nSets, mdaExistingResults, mdaUpdateIndex) {
+  if (length(mdaUpdateIndex)==0) {
+      mdaUpdateIndex = NULL
+  }
   calculate = rep(TRUE, nSets)
-  if (!is.null(mdaExistingResults))
-  {
+  if (!is.null(mdaExistingResults)) {
     nSets.existing = length(mdaExistingResults)
-    if (nSets.existing>nSets)
-      stop("Number of sets in 'mdaExistingResults' is higher than the number of sets in 'multiData'.\n",
-           "  Please supply a valid 'mdaExistingResults' or NULL to recalculate all results.")
-    if (nSets.existing==0)
+    if (nSets.existing>nSets){
+      stop("Number of sets in 'mdaExistingResults' is higher than the number ",
+           "of sets in 'multiData'.\n  Please supply a valid ",
+           "'mdaExistingResults' or NULL to recalculate all results.")
+    }
+    if (nSets.existing==0) {
       stop("Number of sets in 'mdaExistingResults' is zero.\n",
-           "  Please supply a valid 'mdaExistingResults' or NULL to recalculate all results.")
-    if (is.null(mdaUpdateIndex))
-    {
+           "  Please supply a valid 'mdaExistingResults' or NULL to ",
+           "recalculate all results.")
+    }
+    if (is.null(mdaUpdateIndex)) {
       calculate[1:length(mdaExistingResults)] = FALSE
     } else {
-      if (any(! mdaUpdateIndex %in% c(1:nSets)))
-        stop("All entries in 'mdaUpdateIndex' must be between 1 and the number of sets in 'multiData'.")
+      if (any(! mdaUpdateIndex %in% c(1:nSets))) {
+        stop("All entries in 'mdaUpdateIndex' must be between 1 and the number",
+             " of sets in 'multiData'.")
+      }
       calculateIndex = sort(unique(c(mdaUpdateIndex,
-                                      if (nSets.existing<nSets) c((nSets.existing+1):nSets) else NULL)))
+                                      ifelse(nSets.existing<nSets,
+                                             c((nSets.existing+1):nSets),
+                                             NULL))))
       calculate[ c(1:nSets)[-calculateIndex] ] = FALSE
     }
   }
@@ -146,10 +147,7 @@ mtd.colnames = function(multiData)
   calculate
 }
 
-
-
-
-
+# mtd.apply ####
 #' Apply a function to each set in a multiData structure.
 #'
 #' Inspired by \code{\link{lapply}}, these functions apply a given function to
@@ -228,8 +226,7 @@ mtd.apply = function(
 
     # Internal behaviour options
     mdaVerbose = 0, mdaIndent = 0
-)
-{
+) {
   printSpaces = indentSpaces(mdaIndent)
 
   if (!isMultiData(multiData, strict = FALSE))
@@ -244,31 +241,35 @@ mtd.apply = function(
   calculate = .calculateIndicator(nSets, mdaExistingResults, mdaUpdateIndex)
 
   FUN = match.fun(FUN)
-  for (set in 1:nSets)
-  {
-    if (calculate[set])
-    {
-      if (mdaVerbose > 0)
-        printFlush(paste0(printSpaces, "mtd.apply: working on set ", set));
+  for (set in 1:nSets) {
+    if (calculate[set]) {
+      if (mdaVerbose > 0) {
+        printFlush(paste0(printSpaces, "mtd.apply: working on set ", set))
+      }
       out[[set]] = list(data = FUN(multiData[[set]]$data, ...))
-    } else
+    } else {
       out[set] = mdaExistingResults[set]
+    }
   }
 
   names(out) = names(multiData)
 
-  if (mdaSimplify)
-  {
-    if (mdaVerbose > 0)
-      printFlush(paste0(printSpaces, "mtd.apply: attempting to simplify..."));
+  if (mdaSimplify) {
+    if (mdaVerbose > 0) {
+      printFlush(paste0(printSpaces, "mtd.apply: attempting to simplify..."))
+    }
     return (mtd.simplify(out))
   } else if (returnList) {
-    return (multiData2list(out))
+    return(multiData2list(out))
   }
 
   out
 }
 
+#' @rdname mtd.apply
+#' @param mdaRowIndex Index of rows to keep
+#' @param mdaColIndex Index of columns to keep
+#' @export
 mtd.applyToSubset = function(
     # What to do
     multiData, FUN, ...,
@@ -285,9 +286,7 @@ mtd.applyToSubset = function(
     returnList = FALSE,
 
     # Internal behaviour options
-    mdaVerbose = 0, mdaIndent = 0
-)
-{
+    mdaVerbose = 0, mdaIndent = 0) {
   printSpaces = indentSpaces(mdaIndent)
 
   size = checkSets(multiData)
@@ -306,12 +305,13 @@ mtd.applyToSubset = function(
     mdaColIndex = c(1:size$nGenes)
   }
 
-  if (!is.null(mdaRowIndex))
-  {
-    if (!is.list(mdaRowIndex))
+  if (!is.null(mdaRowIndex)) {
+    if (!is.list(mdaRowIndex)) {
        stop("mdaRowIndex must be a list, with one component per set.")
-    if (length(mdaRowIndex)!=size$nSets)
+    }
+    if (length(mdaRowIndex)!=size$nSets) {
        stop("Number of components in 'mdaRowIndex' must equal number of sets.")
+    }
     doSelection = TRUE
   } else {
     mdaRowIndex = lapply(size$nSamples, function(n) { c(1:n) })
@@ -320,25 +320,29 @@ mtd.applyToSubset = function(
   calculate = .calculateIndicator(nSets, mdaExistingResults, mdaUpdateIndex)
 
   fun = match.fun(FUN)
-  for (set in 1:size$nSets)
-  {
-    if (calculate[set])
-    {
-       if (mdaVerbose > 0)
-         printFlush(paste0(printSpaces, "mtd.applyToSubset: working on set ", set))
+  for (set in 1:size$nSets) {
+    if (calculate[set]) {
+       if (mdaVerbose > 0) {
+         printFlush(paste0(printSpaces, "mtd.applyToSubset: working on set ",
+                           set))
+       }
        res[[set]] = list(data = fun(
-                if (doSelection) multiData[[set]] $ data[mdaRowIndex[[set]], mdaColIndex, drop = FALSE] else
-                                 multiData[[set]] $ data, ...))
-    } else
+                ifelse(doSelection,
+                       multiData[[set]]$data[mdaRowIndex[[set]],
+                                             mdaColIndex, drop = FALSE],
+                                 multiData[[set]]$data, ...)))
+    } else {
        res[set] = mdaExistingResults[set]
+    }
   }
 
   names(res) = names(multiData)
 
-  if (mdaSimplify)
-  {
-    if (mdaVerbose > 0)
-      printFlush(paste0(printSpaces, "mtd.applyToSubset: attempting to simplify..."))
+  if (mdaSimplify) {
+    if (mdaVerbose > 0) {
+      printFlush(paste0(printSpaces,
+                        "mtd.applyToSubset: attempting to simplify..."))
+        }
     return (mtd.simplify(res))
   } else if (returnList) {
     return (multiData2list(res))
@@ -348,7 +352,7 @@ mtd.applyToSubset = function(
 }
 
 
-
+# mtd.simplify ####
 #' If possible, simplify a multiData structure to a 3-dimensional array.
 #'
 #' This function attempts to put all \code{data} components into a
@@ -377,48 +381,59 @@ mtd.applyToSubset = function(
 #' \code{\link{multiData2list}} for converting multiData structures to plain
 #' lists.
 #' @keywords misc
-mtd.simplify = function(multiData)
-{
+mtd.simplify = function(multiData) {
   len = length(multiData[[1]]$data)
   dim = dim(multiData[[1]]$data)
   simplifiable = TRUE
   nSets = length(multiData)
-  for (set in 1:nSets)
-  {
-    if (len!=length(multiData[[set]]$data)) simplifiable = FALSE
-    if (!isTRUE(all.equal( dim, dim(multiData[[set]]$data)))) simplifiable = FALSE
+  for (set in 1:nSets){
+    if (len!=length(multiData[[set]]$data)) {
+        simplifiable = FALSE
+    }
+    if (!isTRUE(all.equal( dim, dim(multiData[[set]]$data)))) {
+        simplifiable = FALSE
+    }
   }
-  if (simplifiable)
-  {
+  if (simplifiable) {
     if (is.null(dim)) {
        innerDim = len
        innerNames = names(multiData[[1]]$data)
-       if (is.null(innerNames)) innerNames = paste0("X", c(1:len))
+       if (is.null(innerNames)) {
+           innerNames = paste0("X", c(1:len))
+       }
     } else {
        innerDim = dim
        innerNames = dimnames(multiData[[1]]$data)
-       if (is.null(innerNames))
+       if (is.null(innerNames)) {
          innerNames = lapply(innerDim, function(x) {paste0("X", 1:x)})
+       }
        nullIN = sapply(innerNames, is.null)
-       if (any(nullIN))
-         innerNames[nullIN] = lapply(innerDim[nullIN], function(x) {paste0("X", 1:x)})
+       if (any(nullIN)) {
+         innerNames[nullIN] = lapply(innerDim[nullIN], function(x) {
+             paste0("X", 1:x)
+         })
+       }
     }
     setNames = names(multiData)
-    if (is.null(setNames)) setNames = paste0("Set_", 1:nSets)
+    if (is.null(setNames)) {
+        setNames = paste0("Set_", 1:nSets)
+    }
     mtd.s = matrix(NA, prod(innerDim), nSets)
-    for (set in 1:nSets)
-      mtd.s[, set] = as.vector(multiData[[set]]$data)
+    for (set in 1:nSets) {
+      mtd.s[, set] = as.vector(multiData[[set]]$data)}
 
     dim(mtd.s) = c(innerDim, nSets)
     if (!is.null(innerNames))
-      dimnames(mtd.s) = c (if (is.list(innerNames)) innerNames else list(innerNames), list(setNames))
+      dimnames(mtd.s) = c(ifelse(is.list(innerNames), innerNames,
+                                 list(innerNames)),
+                          list(setNames))
     return(mtd.s)
   }
   return(multiData)
 }
 
 
-
+# isMultiData ####
 #' Determine whether the supplied object is a valid multiData structure
 #'
 #' Attempts to determine whether the supplied object is a valid multiData
@@ -447,8 +462,7 @@ mtd.simplify = function(multiData)
 #' @seealso Other multiData handling functions whose names start with
 #' \code{mtd.}
 #' @keywords misc
-isMultiData = function(x, strict = TRUE)
-{
+isMultiData = function(x, strict = TRUE) {
   if (strict) {
      !inherits(try(checkSets(x), silent = TRUE), 'try-error')
   } else {
@@ -458,7 +472,7 @@ isMultiData = function(x, strict = TRUE)
 }
 
 
-
+# mtd.mapply ####
 #' Apply a function to elements of given multiData structures.
 #'
 #' Inspired by \code{\link{mapply}}, this function applies a given function to
@@ -543,9 +557,7 @@ mtd.mapply = function(
 
   # Options controlling internal behaviour
   mdma.doCollectGarbage = FALSE,
-  mdmaVerbose = 0, mdmaIndent = 0)
-
-{
+  mdmaVerbose = 0, mdmaIndent = 0) {
   printSpaces = indentSpaces(mdmaIndent)
   dots = list(...)
   if (length(dots)==0)
@@ -597,7 +609,7 @@ mtd.mapply = function(
 
 
 
-
+# mtd.rbindSelf ####
 #' Turn a multiData structure into a single matrix or data frame.
 #'
 #' This function "rbinds" the \code{data} components of all sets in the input
@@ -622,8 +634,7 @@ mtd.mapply = function(
 #'
 #' \code{\link{rbind}} for various subtleties of the row binding operation.
 #' @keywords misc
-mtd.rbindSelf = function(multiData)
-{
+mtd.rbindSelf = function(multiData){
   size = checkSets(multiData)
   out = NULL
   colnames = mtd.colnames(multiData)
@@ -638,7 +649,7 @@ mtd.rbindSelf = function(multiData)
 }
 
 
-
+# mtd.setAttr ####
 #' Set attributes on each component of a multiData structure
 #'
 #' Set attributes on each \code{data} component of a multiData structure
@@ -655,12 +666,10 @@ mtd.rbindSelf = function(multiData)
 #'
 #' \code{isMultiData} for a description of the multiData structure.
 #' @keywords misc
-mtd.setAttr = function(multiData, attribute, valueList)
-{
+mtd.setAttr = function(multiData, attribute, valueList) {
   size = checkSets(multiData)
   ind = 1
-  for (set in 1:size$nSets)
-  {
+  for (set in 1:size$nSets){
     attr(multiData[[set]]$data, attribute) = valueList[[ind]]
     ind = ind + 1
     if (ind > length(valueList)) ind = 1
@@ -669,7 +678,7 @@ mtd.setAttr = function(multiData, attribute, valueList)
 }
 
 
-
+# mtd.setColnames ####
 #' Get and set column names in a multiData structure.
 #'
 #' Get and set column names on each \code{data} component in a multiData
@@ -700,17 +709,20 @@ mtd.setAttr = function(multiData, attribute, valueList)
 #' @author Peter Langfelder
 #' @seealso \code{\link{multiData}} to create a multiData structure.
 #' @keywords misc
-mtd.setColnames = function(multiData, colnames)
-{
+mtd.setColnames = function(multiData, colnames) {
   size = checkSets(multiData)
   for (set in 1:size$nSets)
     colnames(multiData[[set]]$data) = colnames
   multiData
 }
 
+#' @rdname mtd.setColnames
+#' @export
+mtd.colnames = function(multiData) {
+    colnames(multiData[[1]]$data)
+}
 
-
-
+# multiData ####
 #' Create a multiData structure.
 #'
 #' This function creates a multiData structure by storing its input arguments
@@ -749,3 +761,46 @@ multiData = function(...) {
 }
 
 
+
+
+# KeepCommonProbes ####
+#' Keep probes that are shared among given data sets
+#'
+#' This function strips out probes that are not shared by all given data sets,
+#' and orders the remaining common probes using the same order in all sets.
+#'
+#'
+#' @param multiExpr expression data in the multi-set format (see
+#' \code{\link{checkSets}}). A vector of lists, one per set. Each set must
+#' contain a component \code{data} that contains the expression data, with rows
+#' corresponding to samples and columns to genes or probes.
+#' @param orderBy index of the set by which probes are to be ordered.
+#' @return Expression data in the same format as the input data, containing
+#' only common probes.
+#' @author Peter Langfelder
+#' @seealso \code{\link{checkSets}}
+#' @keywords misc
+keepCommonProbes <- function(multiExpr, orderBy = 1) {
+    size = checkSets(multiExpr)
+    nSets = size$nSets
+    if (nSets <= 0) {
+        stop("No expression data given!")
+    }
+
+    Names = data.frame(Names = names(multiExpr[[orderBy]]$data))
+
+    if (nSets > 1) {
+        for (set in (1:nSets)) {
+            SetNames = data.frame(Names = names(multiExpr[[set]]$data),
+                                  index = c(1:dim(multiExpr[[set]]$data)[2]))
+            Names = merge(Names, SetNames, by.x = "Names", by.y = "Names",
+                          all = FALSE, sort = FALSE)
+        }
+    }
+
+    for (set in 1:nSets) {
+        multiExpr[[set]]$data = multiExpr[[set]]$data[, Names[, set + 1]]
+    }
+
+    multiExpr
+}

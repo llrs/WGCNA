@@ -8,6 +8,11 @@
 mtd.apply(multiData, FUN, ..., mdaExistingResults = NULL,
   mdaUpdateIndex = NULL, mdaCopyNonData = FALSE, mdaSimplify = FALSE,
   returnList = FALSE, mdaVerbose = 0, mdaIndent = 0)
+
+mtd.applyToSubset(multiData, FUN, ..., mdaRowIndex = NULL,
+  mdaColIndex = NULL, mdaExistingResults = NULL, mdaUpdateIndex = NULL,
+  mdaCopyNonData = FALSE, mdaSimplify = FALSE, returnList = FALSE,
+  mdaVerbose = 0, mdaIndent = 0)
 }
 \arguments{
 \item{multiData}{A multiData structure to apply the function over}
@@ -50,6 +55,10 @@ diagnostic messages.}
 
 \item{mdaIndent}{Integer specifying the indentation of the printed progress
 messages. Each unit equals two spaces.}
+
+\item{mdaRowIndex}{Index of rows to keep}
+
+\item{mdaColIndex}{Index of columns to keep}
 
 \item{\dots}{Other arguments to the function \code{FUN}.}
 }

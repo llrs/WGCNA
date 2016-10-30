@@ -4,9 +4,8 @@
 \alias{orderMEs}
 \title{Put close eigenvectors next to each other}
 \usage{
-orderMEs(MEs, greyLast = TRUE, greyName = paste0(moduleColor.getMEprefix(),
-  "grey"), orderBy = 1, order = NULL, useSets = NULL, verbose = 0,
-  indent = 0)
+orderMEs(MEs, greyLast = TRUE, greyName = paste0(getMEprefix(), "grey"),
+  orderBy = 1, order = NULL, useSets = NULL, verbose = 0, indent = 0)
 }
 \arguments{
 \item{MEs}{Module eigengenes in a multi-set format (see

@@ -6,6 +6,8 @@
 \title{Get and set column names in a multiData structure.}
 \usage{
 mtd.setColnames(multiData, colnames)
+
+mtd.colnames(multiData)
 }
 \arguments{
 \item{multiData}{A multiData structure}
