@@ -8,7 +8,7 @@ selectFewestConsensusMissing(mdx, colID, group, minProportionPresent = 1,
   consensusQuantile = 0, verbose = 0, ...)
 }
 \arguments{
-\item{mdx}{A \code{\link{multiData}} structure. All sets must have the same
+\item{mdx}{A \code{\link{multiSet}} structure. All sets must have the same
 columns.}
 
 \item{colID}{Character vector of column identifiers.  This must include all
@@ -39,7 +39,7 @@ A logical vector with one element per variable in \code{mdx}, giving
 \code{TRUE} for the retained variables.
 }
 \description{
-Given a \code{\link{multiData}} structure, this function calculates the
+Given a \code{\link{multiSet}} structure, this function calculates the
 consensus number of present (non-missing) data for each variable (column)
 across the data sets, forms the consensus and for each group selects
 variables whose consensus proportion of present data is at least
@@ -57,7 +57,7 @@ present data is at least \code{selectFewestMissing} are retained.
 Jeremy Miller and Peter Langfelder
 }
 \seealso{
-\code{\link{multiData}}
+\code{\link{multiSet}}
 }
 \keyword{misc}
 

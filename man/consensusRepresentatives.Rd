@@ -12,7 +12,7 @@ consensusRepresentatives(mdx, group, colID, consensusQuantile = 0,
   verbose = 2, indent = 0)
 }
 \arguments{
-\item{mdx}{A \code{\link{multiData}} structure. All sets must have the same
+\item{mdx}{A \code{\link{multiSet}} structure. All sets must have the same
 columns.}
 
 \item{group}{Character vector whose components contain the group label (e.g.
@@ -167,7 +167,7 @@ chosen as the representative.
 Peter Langfelder, based on code by Jeremy Miller
 }
 \seealso{
-\code{\link{multiData}} for a description of the \code{multiData}
+\code{\link{multiSet}} for a description of the \code{multiSet}
 structures; \code{\link{collapseRows}} that solves a related but different
 problem. Please note the differences in input and output!
 }

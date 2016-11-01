@@ -84,12 +84,12 @@ multiIntersect <- function(setList) {
 #' @examples
 #'
 #'
-#' singleSetData = matrix(rnorm(100), 10,10);
-#' encapsData = fixDataStructure(singleSetData);
+#' singleSetData <- matrix(rnorm(100), 10,10)
+#' encapsData <- fixDataStructure(singleSetData)
 #' length(encapsData)
 #' names(encapsData[[1]])
 #' dim(encapsData[[1]]$data)
-#' all.equal(encapsData[[1]]$data, singleSetData);
+#' all.equal(encapsData[[1]]$data, singleSetData)
 #'
 #' @export
 fixDataStructure <- function(data, verbose = 0, indent = 0) {
@@ -128,15 +128,22 @@ fixDataStructure <- function(data, verbose = 0, indent = 0) {
 #' @param useSets Optional specification of entries of the vector \code{data}
 #' that are to be checked. Defaults to all components. This may be useful when
 #' \code{data} only contains information for some of the sets.
-#' @return A list with components \item{nSets}{Number of sets (length of the
-#' vector \code{data}).} \item{nGenes}{Number of columns in the \code{data}
-#' components in the lists. This number must be the same for all sets.}
+#' @return A list with components
+#' \item{nSets}{Number of sets (length of the vector \code{data}).}
+#' \item{nGenes}{Number of columns in the \code{data} components in the lists.
+#' This number must be the same for all sets.}
 #' \item{nSamples}{A vector of length \code{nSets} giving the number of rows in
-#' the \code{data} components.} \item{structureOK}{Only set if the argument
-#' \code{checkStructure} equals \code{TRUE}.  The value is \code{TRUE} if the
-#' paramter \code{data} passes a few tests of its structure, and \code{FALSE}
-#' otherwise. The tests are not exhaustive and are meant to catch obvious user
-#' errors rather than be bulletproof.}
+#' the \code{data} components.}
+#' \item{structureOK}{Only set if the argument \code{checkStructure} equals
+#' \code{TRUE}.  The value is \code{TRUE} if the paramter \code{data} passes a
+#' few tests of its structure, and \code{FALSE} otherwise. The tests are not
+#' exhaustive and are meant to catch obvious user errors rather than be
+#' bulletproof.}
+#' @examples
+#' data1 <- matrix(rnorm(100L), 20L, 5L)
+#' data2 <- matrix(rnorm(50L), 10L, 5L)
+#' md <- multiSet(Set1 = data1, Set2 = data2)
+#' checkSets(md)
 #' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
 #' @keywords misc
 checkSets <- function(data, checkStructure = FALSE, useSets = NULL) {
@@ -282,8 +289,9 @@ multiSet.subset <- function(multiSet, rowIndex = NULL, colIndex = NULL,
 #' @keywords misc
 list2multiSet <- function(data) {
   out = list()
-  for (set in 1:length(data))
+  for (set in 1:length(data)) {
     out[[set]] = list(data = data[[set]])
+  }
   names(out) = names(data)
   class(out) <- "multiSet"
   out

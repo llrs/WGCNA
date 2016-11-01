@@ -2,7 +2,7 @@
 % Please edit documentation in R/branchSplit.R
 \name{branchEigengeneDissim}
 \alias{branchEigengeneDissim}
-\alias{mtd.branchEigengeneDissim}
+\alias{multiSet.branchEigengeneDissim}
 \title{Branch dissimilarity based on eigennodes (eigengenes).}
 \usage{
 branchEigengeneDissim(expr, branch1, branch2, corFnc = cor,

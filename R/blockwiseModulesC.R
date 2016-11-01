@@ -2826,10 +2826,10 @@ blockwiseConsensusModules <- function(multiExpr,
                       "block-wise from all genes"));
 
   # prepare scaled and imputed multiExpr.
-  multiExpr.scaled = mtd.apply(multiExpr, scale);
-  hasMissing = unlist(multiData2list(mtd.apply(multiExpr, function(x) { any(is.na(x)) })));
+  multiExpr.scaled = multiSet.apply(multiExpr, scale)
+  hasMissing = unlist(multiData2list(multiSet.apply(multiExpr, function(x) { any(is.na(x)) })));
   # Impute those that have missing data
-  multiExpr.scaled.imputed = mtd.mapply(function(x, doImpute)
+  multiExpr.scaled.imputed = multiSet.mapply(function(x, doImpute)
                          { if (doImpute) t(impute.knn(t(x))$data) else x },
                                    multiExpr.scaled, hasMissing);
   branchSplitFnc = NULL;
@@ -2837,7 +2837,7 @@ blockwiseConsensusModules <- function(multiExpr,
   externalSplitFncNeedsDistance = logical(0);
   if (useBranchEigennodeDissim)
   {
-    branchSplitFnc = "mtd.branchEigengeneDissim";
+    branchSplitFnc = "multiSet.branchEigengeneDissim";
     minBranchDissimilarities = minBranchEigennodeDissim;
     externalSplitFncNeedsDistance = FALSE;
   }
@@ -2951,7 +2951,7 @@ blockwiseConsensusModules <- function(multiExpr,
 
   gsg$goodSamples = gsg$goodSamples[useIndivTOMSubset];
   if (!gsg$allOK)
-    multiExpr = mtd.subset(multiExpr, gsg$goodSamples, gsg$goodGenes);
+    multiExpr = multiSet.subset(multiExpr, gsg$goodSamples, gsg$goodGenes);
 
   nGGenes = sum(gsg$goodGenes);
   nGSamples = rep(0, nSets);
@@ -3017,7 +3017,7 @@ blockwiseConsensusModules <- function(multiExpr,
     block = c(1:nGGenes)[gBlocks==blockLevels[blockNo]];
     nBlockGenes = length(block);
 
-    selExpr = mtd.subset(multiExpr, , block);
+    selExpr = multiSet.subset(multiExpr, , block);
     errorOccurred = FALSE;
 
     if (blockwiseConsensusCalculation)
@@ -3083,7 +3083,7 @@ blockwiseConsensusModules <- function(multiExpr,
     e.index = 1;
     if (useBranchEigennodeDissim)
     {
-      externalSplitOptions[[e.index]] = list(multiExpr = mtd.subset(multiExpr.scaled.imputed,, block),
+      externalSplitOptions[[e.index]] = list(multiExpr = multiSet.subset(multiExpr.scaled.imputed,, block),
                                       corFnc = corFnc, corOptions = corOptions,
                                       consensusQuantile = consensusQuantile,
                                       signed = networkType %in% c("signed", "signed hybrid"),
@@ -3680,13 +3680,13 @@ recutConsensusTrees = function(multiExpr,
 
   if (useBranchEigennodeDissim)
   {
-    multiExpr.scaled = mtd.apply(multiExpr, scale);
-    hasMissing = unlist(multiData2list(mtd.apply(multiExpr, function(x) { any(is.na(x)) })));
+    multiExpr.scaled = multiSet.apply(multiExpr, scale);
+    hasMissing = unlist(multiData2list(multiSet.apply(multiExpr, function(x) { any(is.na(x)) })));
     # Impute those that have missing data
-    multiExpr.scaled.imputed = mtd.mapply(function(x, doImpute)
+    multiExpr.scaled.imputed = multiSet.mapply(function(x, doImpute)
                            { if (doImpute) t(impute.knn(t(x))$data) else x },
                                      multiExpr.scaled, hasMissing);
-    branchSplitFnc = "mtd.branchEigengeneDissim";
+    branchSplitFnc = "multiSet.branchEigengeneDissim";
   }
 
 
@@ -3733,15 +3733,15 @@ recutConsensusTrees = function(multiExpr,
   reassignThreshold = reassignThresholdPS^nSets;
 
   # prepare scaled and imputed multiExpr.
-  multiExpr.scaled = mtd.apply(multiExpr, scale);
-  hasMissing = unlist(multiData2list(mtd.apply(multiExpr, function(x) { any(is.na(x)) })));
+  multiExpr.scaled = multiSet.apply(multiExpr, scale);
+  hasMissing = unlist(multiData2list(multiSet.apply(multiExpr, function(x) { any(is.na(x)) })));
   # Impute those that have missing data
-  multiExpr.scaled.imputed = mtd.mapply(function(x, doImpute)
+  multiExpr.scaled.imputed = multiSet.mapply(function(x, doImpute)
                          { if (doImpute) t(impute.knn(t(x))$data) else x },
                                    multiExpr.scaled, hasMissing);
   if (useBranchEigennodeDissim)
   {
-    branchSplitFnc = "mtd.branchEigengeneDissim";
+    branchSplitFnc = "multiSet.branchEigengeneDissim";
   } else
     branchSplitFnc = NULL;
 
@@ -3804,7 +3804,7 @@ recutConsensusTrees = function(multiExpr,
                     externalBranchSplitFnc = if (useBranchEigennodeDissim)
                                                 branchSplitFnc else NULL,
                     minExternalSplit = minBranchEigennodeDissim,
-                    externalSplitOptions = list(multiExpr = mtd.subset(multiExpr.scaled.imputed, , block),
+                    externalSplitOptions = list(multiExpr = multiSet.subset(multiExpr.scaled.imputed, , block),
                                                 corFnc = corFnc, corOptions = corOptions,
                                                 consensusQuantile = mergeConsensusQuantile,
                                                 signed = networkType %in% c("signed", "signed hybrid")),
@@ -4713,12 +4713,12 @@ consensusProjectiveKMeans = function (
     }
   }
 
-  anyNA = mtd.apply(multiExpr, function(x) any(is.na(x)), mdaSimplify = TRUE);
+  anyNA = multiSet.apply(multiExpr, function(x) any(is.na(x)), mdaSimplify = TRUE);
   if (imputeMissing && any(anyNA))
   {
     if (verbose > 0)
       printFlush(paste(spaces, "..imputing missing data.."));
-    multiExpr[anyNA] = mtd.apply(multiExpr[anyNA], function(x) t(impute.knn(t(x))$data), mdaVerbose = verbose>1)
+    multiExpr[anyNA] = multiSet.apply(multiExpr[anyNA], function(x) t(impute.knn(t(x))$data), mdaVerbose = verbose>1)
   } else if (any(anyNA))
   {
     printFlush(paste(spaces, "Found missing data. These will be replaced by zeros;\n",

@@ -8,7 +8,8 @@ Depends: R (>= 3.0), dynamicTreeCut (>= 1.62), fastcluster
 Imports: stats, grDevices, utils, matrixStats (>= 0.8.1), Hmisc,
         impute, splines, foreach, doParallel, preprocessCore, survival,
         parallel, GO.db, AnnotationDbi
-Suggests: org.Hs.eg.db, org.Mm.eg.db, infotheo, entropy, minet
+Suggests: org.Hs.eg.db, org.Mm.eg.db, infotheo, entropy, minet,
+    testthat
 Encoding: UTF-8
 ZipData: no
 License: GPL (>= 2)

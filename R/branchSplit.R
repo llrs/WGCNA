@@ -56,7 +56,7 @@
 #' directly. This function is experimental and subject to change.
 #'
 #'
-#' @aliases branchEigengeneDissim mtd.branchEigengeneDissim
+#' @aliases branchEigengeneDissim multiSet.branchEigengeneDissim
 #' @param expr Expression data.
 #' @param branch1 Branch 1.
 #' @param branch2 Branch 2.
@@ -83,11 +83,11 @@ branchEigengeneDissim = function(expr, branch1, branch2,
   if (signed)  1-cor0 else 1-abs(cor0);
 }
 
-mtd.branchEigengeneDissim = function(multiExpr, branch1, branch2,
+multiSet.branchEigengeneDissim = function(multiExpr, branch1, branch2,
                             corFnc = cor, corOptions = list(use = 'p'),
                             consensusQuantile = 0, signed = TRUE, reproduceQuantileError = FALSE, ...)
 {
-  setSplits.list = mtd.apply(multiExpr, branchEigengeneDissim,
+  setSplits.list = multiSet.apply(multiExpr, branchEigengeneDissim,
                         branch1 = branch1, branch2 = branch2,
                         corFnc = corFnc, corOptions = corOptions,
                         signed = signed);
@@ -351,12 +351,12 @@ branchSplit.dissim = function(dissimMat, branch1, branch2, upperP,
   outDissim = list(list(data = dissimMat[branch2, branch1]),
                      list(data = dissimMat[branch1, branch2]));
 
-  quantiles = mtd.mapply(colQuantiles, outDissim, probs = multiP, MoreArgs = list(drop = FALSE));
-  averages = mtd.mapply(.meanInRange, outDissim, quantiles);
+  quantiles = multiSet.mapply(colQuantiles, outDissim, probs = multiP, MoreArgs = list(drop = FALSE));
+  averages = multiSet.mapply(.meanInRange, outDissim, quantiles);
 
-  averageQuantiles = mtd.mapply(quantile, averages, prob = multiP, MoreArgs = list(drop = FALSE));
+  averageQuantiles = multiSet.mapply(quantile, averages, prob = multiP, MoreArgs = list(drop = FALSE));
 
-  betweenQuantiles = mtd.mapply(function(x, quantiles) { x>=quantiles[1] & x <=quantiles[2]},
+  betweenQuantiles = multiSet.mapply(function(x, quantiles) { x>=quantiles[1] & x <=quantiles[2]},
                                 averages, averageQuantiles);
 
   selectedDissim = list(list(data = dissimMat[branch1, branch1[betweenQuantiles[[1]]$data] ]),
@@ -379,10 +379,10 @@ branchSplit.dissim = function(dissimMat, branch1, branch2, upperP,
 
   multiP.ext = cbind(multiP, multiP[, c(2,1)]);
 
-  selectedDissimQuantiles = mtd.mapply(colQuantiles, selectedDissim, probs = multiP.ext,
+  selectedDissimQuantiles = multiSet.mapply(colQuantiles, selectedDissim, probs = multiP.ext,
                                       MoreArgs = list( drop = FALSE, na.rm = TRUE));
 
-  selectedAverages = mtd.mapply(.meanInRange, selectedDissim, selectedDissimQuantiles);
+  selectedAverages = multiSet.mapply(.meanInRange, selectedDissim, selectedDissimQuantiles);
 
   if (FALSE)
   {
@@ -414,8 +414,7 @@ branchSplit.dissim = function(dissimMat, branch1, branch2, upperP,
     if (is.na(varx)) varx = 0;
     if (is.na(vary)) vary = 0;
 
-    if (varx + vary == 0)
-    {
+    if (varx + vary == 0) {
       if (my==mx) return(0) else return(Inf);
     }
     out = abs(my-mx)/(sqrt(varx) + sqrt(vary));
@@ -423,14 +422,19 @@ branchSplit.dissim = function(dissimMat, branch1, branch2, upperP,
     out
   }
 
-  separations = c(separation(selectedAverages[[1]]$data, selectedAverages[[2]]$data),
-                  separation(selectedAverages[[3]]$data, selectedAverages[[4]]$data));
+  separations = c(separation(selectedAverages[[1]]$data,
+                             selectedAverages[[2]]$data),
+                  separation(selectedAverages[[3]]$data,
+                             selectedAverages[[4]]$data))
 
-  out = max(separations, na.rm = TRUE);
-  if (is.na(out)) out = 0;
-  if (out < 0) out = 0;
-  if (getDetails)
-  {
+  out = max(separations, na.rm = TRUE)
+  if (is.na(out)) {
+      out = 0
+  }
+  if (out < 0) {
+      out = 0
+  }
+  if (getDetails) {
     return(list(split = out,
                 distances = list(within1 = selectedAverages[[1]]$data,
                                  from1to2 = selectedAverages[[2]]$data,
@@ -507,35 +511,27 @@ branchSplit.dissim = function(dissimMat, branch1, branch2, upperP,
 #' @seealso This function is utilized in \code{\link{blockwiseModules}} and
 #' \code{\link{blockwiseConsensusModules}}.
 #' @keywords misc
-branchSplitFromStabilityLabels = function(
-            branch1, branch2,
-            stabilityLabels, ignoreLabels = 0, ...)
-{
-  nLabels = ncol(stabilityLabels);
-  n1 = length(branch1);
-  n2 = length(branch2);
+branchSplitFromStabilityLabels <- function( branch1, branch2, stabilityLabels,
+                                           ignoreLabels = 0, ...) {
+  nLabels = ncol(stabilityLabels)
+  n1 = length(branch1)
+  n2 = length(branch2)
 
-  sim = 0;
-  for (l in 1:nLabels)
-  {
-    lab1 = stabilityLabels[branch1, l];
-    lab2 = stabilityLabels[branch2, l];
-    commonLevels = intersect(unique(lab1), unique(lab2));
-    commonLevels = setdiff(commonLevels, ignoreLabels);
-    if (length(commonLevels) > 0) for (cl in commonLevels)
-    {
-      #printFlush(paste0("Common level ", cl, " in clustering ", l))
-      r1 = sum(lab1==cl)/n1;
-      r2 = sum(lab2==cl)/n2;
-      sim = sim + min(r1, r2)
-    }
+  sim = 0
+  for (l in 1:nLabels) {
+      lab1 = stabilityLabels[branch1, l]
+      lab2 = stabilityLabels[branch2, l]
+      commonLevels = intersect(unique(lab1), unique(lab2))
+      commonLevels = setdiff(commonLevels, ignoreLabels)
+      if (length(commonLevels) > 0) {
+          for (cl in commonLevels) {
+              #printFlush(paste0("Common level ", cl, " in clustering ", l))
+              r1 = sum(lab1==cl)/n1
+              r2 = sum(lab2==cl)/n2
+              sim = sim + min(r1, r2)
+          }
+      }
   }
 
   1-sim/nLabels
 }
-
-
-
-
-
-
