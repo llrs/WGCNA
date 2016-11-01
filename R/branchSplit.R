@@ -91,7 +91,7 @@ multiSet.branchEigengeneDissim = function(multiExpr, branch1, branch2,
                         branch1 = branch1, branch2 = branch2,
                         corFnc = corFnc, corOptions = corOptions,
                         signed = signed);
-  setSplits = unlist(multiData2list(setSplits.list));
+  setSplits = unlist(multiSet2list(setSplits.list));
   quantile(setSplits, prob = if (reproduceQuantileError) consensusQuantile else 1-consensusQuantile,
            na.rm = TRUE, names = FALSE);
 }

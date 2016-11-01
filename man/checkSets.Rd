@@ -19,15 +19,17 @@ that are to be checked. Defaults to all components. This may be useful when
 \code{data} only contains information for some of the sets.}
 }
 \value{
-A list with components \item{nSets}{Number of sets (length of the
-vector \code{data}).} \item{nGenes}{Number of columns in the \code{data}
-components in the lists. This number must be the same for all sets.}
+A list with components
+\item{nSets}{Number of sets (length of the vector \code{data}).}
+\item{nGenes}{Number of columns in the \code{data} components in the lists.
+This number must be the same for all sets.}
 \item{nSamples}{A vector of length \code{nSets} giving the number of rows in
-the \code{data} components.} \item{structureOK}{Only set if the argument
-\code{checkStructure} equals \code{TRUE}.  The value is \code{TRUE} if the
-paramter \code{data} passes a few tests of its structure, and \code{FALSE}
-otherwise. The tests are not exhaustive and are meant to catch obvious user
-errors rather than be bulletproof.}
+the \code{data} components.}
+\item{structureOK}{Only set if the argument \code{checkStructure} equals
+\code{TRUE}.  The value is \code{TRUE} if the paramter \code{data} passes a
+few tests of its structure, and \code{FALSE} otherwise. The tests are not
+exhaustive and are meant to catch obvious user errors rather than be
+bulletproof.}
 }
 \description{
 Checks whether given sets have the correct format and retrieves dimensions.
@@ -40,6 +42,12 @@ that contains the actual (expression, trait, eigengene) data for the
 corresponding set in the form of a dataframe. This funtion checks whether
 \code{data} conforms to this convention and retrieves some basic dimension
 information (see output).
+}
+\examples{
+data1 <- matrix(rnorm(100L), 20L, 5L)
+data2 <- matrix(rnorm(50L), 10L, 5L)
+md <- multiSet(Set1 = data1, Set2 = data2)
+checkSets(md)
 }
 \author{
 Peter Langfelder, \email{Peter.Langfelder@gmail.com}

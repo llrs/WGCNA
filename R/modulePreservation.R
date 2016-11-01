@@ -209,7 +209,7 @@ dynamicMergeCut <- function(n, mergeCor = .9, Zquantile = 2.35) {
 #'
 #' Missing data are removed (but see \code{quickCor} above).
 #'
-#' @param multiData expression data or adjacency data in the multi-set format
+#' @param multiSet expression data or adjacency data in the multi-set format
 #' (see \code{\link{checkSets}}). A vector of lists, one per set. Each set must
 #' contain a component \code{data} that contains the expression or adjacency
 #' data. If expression data are used, rows correspond to samples and columns to
@@ -220,8 +220,8 @@ dynamicMergeCut <- function(n, mergeCor = .9, Zquantile = 2.35) {
 #' module labels of genes in \code{multiExpr}. The components must be named
 #' using the same names that are used in \code{multiExpr}; these names are used
 #' top match labels to expression data sets. See details.
-#' @param dataIsExpr logical: if \code{TRUE}, \code{multiData} will be
-#' interpreted as expression data; if \code{FALSE}, \code{multiData} will be
+#' @param dataIsExpr logical: if \code{TRUE}, \code{multiSet} will be
+#' interpreted as expression data; if \code{FALSE}, \code{multiSet} will be
 #' interpreted as adjacencies.
 #' @param networkType network type. Allowed values are (unique abbreviations
 #' of) \code{"unsigned"}, \code{"signed"}, \code{"signed hybrid"}. See
@@ -370,7 +370,7 @@ dynamicMergeCut <- function(n, mergeCor = .9, Zquantile = 2.35) {
 #' to appear
 #' @keywords misc
 modulePreservation = function(
-   multiData,
+   multiSet,
    multiColor,
    dataIsExpr = TRUE,
    networkType = "unsigned",
@@ -422,22 +422,22 @@ modulePreservation = function(
       stop(paste("Unrecognized networkType argument.",
            "Recognized values are (unique abbreviations of)", paste(.networkTypes, collapse = ", ")))
 
-   # Check that the multiData/multiAdj has correct structure
+   # Check that the multiSet/multiAdj has correct structure
 
-   nNets = length(multiData)
-   nGenes = sapply(multiData, sapply, ncol)
+   nNets = length(multiSet)
+   nGenes = sapply(multiSet, sapply, ncol)
    if (checkData)
    {
      if (dataIsExpr)
      {
-       .checkExpr(multiData, verbose, indent)
+       .checkExpr(multiSet, verbose, indent)
      } else {
-       .checkAdj(multiData, verbose, indent)
+       .checkAdj(multiSet, verbose, indent)
      }
    }
 
    # Check for names; if there are none, create artificial labels.
-   setNames = names(multiData)
+   setNames = names(multiSet)
    if (is.null(setNames))
    {
      setNames = paste("Set", c(1:nNets), sep="")
@@ -492,10 +492,10 @@ modulePreservation = function(
        stop("Each entry of 'multiColor' must have a name.")
      color2expr = match(names(multiColor), setNames)
      if (any(is.na(color2expr)))
-       stop("Entries of 'multiColor' must name-match entries in 'multiData'.")
+       stop("Entries of 'multiColor' must name-match entries in 'multiSet'.")
      for(s in 1:nNets)
      {
-        #multiData[[s]]$data = as.matrix(multiData[[s]]$data)
+        #multiSet[[s]]$data = as.matrix(multiSet[[s]]$data)
         loc = which(names(multiColor) %in% setNames[s])
         if (length(loc)==0)
         {
@@ -549,27 +549,27 @@ modulePreservation = function(
           keepGenes[[s]] = !is.na(multiColor[[s]])
           if (dataIsExpr)
           {
-             multiData[[s]]$data = multiData[[s]]$data[, keepGenes[[s]]]
+             multiSet[[s]]$data = multiSet[[s]]$data[, keepGenes[[s]]]
           } else
-             multiData[[s]]$data = multiData[[s]]$data[keepGenes[[s]], keepGenes[[s]]]
+             multiSet[[s]]$data = multiSet[[s]]$data[keepGenes[[s]], keepGenes[[s]]]
           multiColor[[s]] = multiColor[[s]][keepGenes[[s]]]
        }
    }
 
    # Check for set names; if there are none, create artificial labels.
 
-   if (is.null(names(multiData)))
+   if (is.null(names(multiSet)))
    {
      setNames = paste("Set_", c(1:nNets), sep="")
    } else {
-     setNames = names(multiData)
+     setNames = names(multiSet)
    }
 
-   # Check that multiData has valid colnames
+   # Check that multiSet has valid colnames
 
    for (s in 1:nNets)
-      if (is.null(colnames(multiData[[s]]$data)))
-         stop(paste("Matrix of data in set", names(multiData)[s],
+      if (is.null(colnames(multiSet[[s]]$data)))
+         stop(paste("Matrix of data in set", names(multiSet)[s],
                     "has no colnames. Colnames are needed to match variables."))
 
    # For now we use numeric labels for permutations.
@@ -579,7 +579,7 @@ modulePreservation = function(
    collectGarbage()
 
    if (verbose > 0) printFlush(paste(spaces, " ..calculating observed preservation values"))
-   observed = .modulePreservationInternal(multiData, multiColor, dataIsExpr = dataIsExpr,
+   observed = .modulePreservationInternal(multiSet, multiColor, dataIsExpr = dataIsExpr,
                      calculatePermutation = FALSE, networkType = networkType,
                      referenceNetworks = referenceNetworks,
                      testNetworks = testNetworks,
@@ -659,18 +659,18 @@ modulePreservation = function(
          {
             # Retain only genes that are shared between the reference and test networks
             if (verbose > 1) printFlush(paste(spaces, "....working with set", tnet, "as test set"))
-            overlap=intersect(colnames(multiData[[ref]]$data),colnames(multiData[[tnet]]$data))
-            loc1=match(overlap, colnames(multiData[[ref]]$data))
-            loc2=match(overlap, colnames(multiData[[tnet]]$data))
+            overlap=intersect(colnames(multiSet[[ref]]$data),colnames(multiSet[[tnet]]$data))
+            loc1=match(overlap, colnames(multiSet[[ref]]$data))
+            loc2=match(overlap, colnames(multiSet[[tnet]]$data))
             refName = paste("ref_", setNames[ref],sep="")
             colorRef = multiColor[[ref]][loc1]
             if (dataIsExpr)
             {
-              datRef=multiData[[ref]]$data[ , loc1]
-              datTest=multiData[[tnet]]$data[ , loc2]
+              datRef=multiSet[[ref]]$data[ , loc1]
+              datTest=multiSet[[tnet]]$data[ , loc2]
             } else {
-              datRef=multiData[[ref]]$data[loc1, loc1]
-              datTest=multiData[[tnet]]$data[loc2, loc2]
+              datRef=multiSet[[ref]]$data[loc1, loc1]
+              datTest=multiSet[[tnet]]$data[loc2, loc2]
             }
             testName=setNames[tnet]
             nRefGenes = ncol(datRef)
@@ -1399,9 +1399,9 @@ modulePreservation = function(
 #
 #=================================================================================================
 
-# multiData contains either expression data or adjacencies; which one is indicated in dataIsExpr
+# multiSet contains either expression data or adjacencies; which one is indicated in dataIsExpr
 
-.modulePreservationInternal = function(multiData, multiColor, dataIsExpr,
+.modulePreservationInternal = function(multiSet, multiColor, dataIsExpr,
                               calculatePermutation,
                               multiColorForAccuracy = NULL,
                               networkType = "signed",
@@ -1424,17 +1424,17 @@ modulePreservation = function(
 
    spaces = indentSpaces(indent)
 
-   #size = checkSets(multiData)
+   #size = checkSets(multiSet)
 
-   nNets = length(multiData)
-   nGenes = sapply(multiData, sapply, ncol)
+   nNets = length(multiSet)
+   nGenes = sapply(multiSet, sapply, ncol)
 
    nType = charmatch(networkType, .networkTypes)
    if (is.na(networkType))
       stop(paste("Unrecognized networkType argument.",
            "Recognized values are (unique abbreviations of)", paste(.networkTypes, collapse = ", ")))
 
-   setNames = names(multiData)
+   setNames = names(multiSet)
    # Check multiColor.
 
    if (length(multiColor)!=nNets)
@@ -1442,13 +1442,13 @@ modulePreservation = function(
      multiColor2=list()
      if (length(names(multiColor))!=length(multiColor))
        stop("Each entry of 'multiColor' must have a name.")
-     color2expr = match(names(multiColor), names(multiData))
+     color2expr = match(names(multiColor), names(multiSet))
      if (any(is.na(color2expr)))
-       stop("Entries of 'multiColor' must name-match entries in 'multiData'.")
+       stop("Entries of 'multiColor' must name-match entries in 'multiSet'.")
      for(s in 1:nNets)
      {
-        multiData[[s]]$data = as.matrix(multiData[[s]]$data)
-        loc = which(names(multiColor) %in% names(multiData)[s])
+        multiSet[[s]]$data = as.matrix(multiSet[[s]]$data)
+        loc = which(names(multiColor) %in% names(multiSet)[s])
         if (length(loc)==0)
         {
           multiColor2[[s]] = NA
@@ -1486,9 +1486,9 @@ modulePreservation = function(
           keepGenes[[s]] = !is.na(multiColor[[s]])
           if (dataIsExpr)
           {
-             multiData[[s]]$data = multiData[[s]]$data[, keepGenes[[s]]]
+             multiSet[[s]]$data = multiSet[[s]]$data[, keepGenes[[s]]]
           } else {
-             multiData[[s]]$data = multiData[[s]]$data[keepGenes[[s]], keepGenes[[s]]]
+             multiSet[[s]]$data = multiSet[[s]]$data[keepGenes[[s]], keepGenes[[s]]]
           }
           multiColor[[s]] = multiColor[[s]][keepGenes[[s]]]
        }
@@ -1519,7 +1519,7 @@ modulePreservation = function(
        for (tnet in testNetworks[[iref]])
        {
           if (verbose > 1) printFlush(paste(spaces, "  ..working on test network",setNames[tnet]))
-          overlap=intersect(colnames(multiData[[ref]]$data),colnames(multiData[[tnet]]$data))
+          overlap=intersect(colnames(multiSet[[ref]]$data),colnames(multiSet[[tnet]]$data))
           if (length(overlap)==0)
           {
             printFlush(paste(spaces, "WARNING: sets", ref, "and", tnet,
@@ -1527,8 +1527,8 @@ modulePreservation = function(
                              spaces, "No preservation measures can be calculated."))
             next
           }
-          loc1=match(overlap, colnames(multiData[[ref]]$data))
-          loc2=match(overlap, colnames(multiData[[tnet]]$data))
+          loc1=match(overlap, colnames(multiSet[[ref]]$data))
+          loc2=match(overlap, colnames(multiSet[[tnet]]$data))
           if(length(multiColor[[tnet]])>1)
           {
              colorTest=multiColor[[tnet]][loc2]
@@ -1537,11 +1537,11 @@ modulePreservation = function(
           }
           if (dataIsExpr)
           {
-            datTest=multiData[[tnet]]$data[,loc2]
-            datRef=multiData[[ref]]$data[,loc1]
+            datTest=multiSet[[tnet]]$data[,loc2]
+            datRef=multiSet[[ref]]$data[,loc1]
           } else {
-            datTest=multiData[[tnet]]$data[loc2, loc2]
-            datRef=multiData[[ref]]$data[loc1, loc1]
+            datTest=multiSet[[tnet]]$data[loc2, loc2]
+            datRef=multiSet[[ref]]$data[loc1, loc1]
           }
           colorRef=multiColor[[ref]][loc1]
 

@@ -23,6 +23,13 @@
 #' @seealso
 #' The "standard" functions \code{\link{union}} and \code{\link{intersect}}.
 #' @keywords misc
+#' @examples
+#' data1 <- matrix(rnorm(100L), 20L, 5L)
+#' data2 <- matrix(rnorm(50L), 10L, 5L)
+#' colnames(data1) <- LETTERS[1:5]
+#' colnames(data2) <- LETTERS[2:6]
+#' multiUnion(list(data1, data2))
+#' multiIntersect(list(data1, data2))
 multiUnion <- function(setList) {
     len = length(setList)
     if (len == 0) {
@@ -262,6 +269,12 @@ multiSet.subset <- function(multiSet, rowIndex = NULL, colIndex = NULL,
 }
 
 # Method to allow subseting the data of a multiSet
+#' @export
+#' @rdname multiSet.subset
+#' @alias multiSet.subset
+#' @param i Columns to subset of the object
+#' @param j Rows to subset of the object
+#' @param x MultiSet Object to subset
 "[.multiSet" <- function(x, i, j, drop = TRUE) {
     y <- list(names(x))
     for (set in 1:length(x)){
@@ -737,65 +750,64 @@ is.multiSet <- function(x, strict = TRUE) {
 #' \code{multiSet.apply} for application of a function to a single multiSet
 #' structure.
 #' @keywords misc
-multiSet.mapply <- function(
-  # What to do
-  FUN, ..., MoreArgs = NULL,
+#' @examples
+#' data1 <- matrix(rnorm(100L), 20L, 5L)
+#' data2 <- matrix(rnorm(50L), 10L, 5L)
+#' colnames(data1) <- LETTERS[1:5]
+#' colnames(data2) <- LETTERS[2:6]
+#' md <- list2multiSet(list(Set1 = data1, Set2 = data2))
+#' multiSet.mapply(md, )
+multiSet.mapply <- function(FUN, ..., MoreArgs = NULL,
+                            # How to interpret the input
+                            mdma.argIsMultiData = NULL,
+                            # Copy previously known results?
+                            mdmaExistingResults = NULL, mdmaUpdateIndex = NULL,
+                            # How to format output
+                            mdmaSimplify = FALSE, returnList = FALSE,
+                            # Options controlling internal behaviour
+                            mdma.doCollectGarbage = FALSE, mdmaVerbose = 0,
+                            mdmaIndent = 0) {
+    printSpaces = indentSpaces(mdmaIndent)
+    dots = list(...)
+    if (length(dots)==0)
+        stop("No arguments were specified. Please type ?multiSet.mapply to see the help page.")
+    dotLengths = sapply(dots, length)
+    if (any(dotLengths!=dotLengths[1]))
+        stop(paste0("All arguments to vectorize over must have the same length.\n",
+                    "Scalar arguments should be put into the 'MoreArgs' argument.\n",
+                    "Note: lengths of '...' arguments are: ", paste(dotLengths, collapse = ", ")))
+    nArgs = length(dots)
+    res = list()
+    if (is.null(mdma.argIsMultiData)) mdma.argIsMultiData = sapply(dots, is.multiSet, strict = FALSE)
 
-  # How to interpret the input
-  mdma.argIsMultiData = NULL,
+    nSets = dotLengths[1]
 
-  # Copy previously known results?
-  mdmaExistingResults = NULL, mdmaUpdateIndex = NULL,
+    calculate = .calculateIndicator(nSets, mdmaExistingResults, mdmaUpdateIndex)
 
-  # How to format output
-  mdmaSimplify = FALSE,
-  returnList = FALSE,
+    FUN = match.fun(FUN)
+    for (set in 1:nSets) {
+        if (calculate[set]) {
+            if (mdmaVerbose > 0) {
+                printFlush(paste0(printSpaces, "multiSet.mapply: working on set ", set))
+            }
+            localArgs = list()
+            for (arg in 1:nArgs)
+                localArgs[[arg]] = if (mdma.argIsMultiData[arg]) dots[[arg]] [[set]] $ data else dots[[arg]] [[set]]
+            names(localArgs) = names(dots)
+            res[[set]] = list(data = do.call(FUN, c(localArgs, MoreArgs)))
+            if (mdma.doCollectGarbage) {
+                collectGarbage()
+            }
+        } else
+            res[set] = mdmaExistingResults[set]
+    }
 
-  # Options controlling internal behaviour
-  mdma.doCollectGarbage = FALSE,
-  mdmaVerbose = 0, mdmaIndent = 0) {
-  printSpaces = indentSpaces(mdmaIndent)
-  dots = list(...)
-  if (length(dots)==0)
-    stop("No arguments were specified. Please type ?multiSet.mapply to see the help page.")
-  dotLengths = sapply(dots, length)
-  if (any(dotLengths!=dotLengths[1]))
-    stop(paste0("All arguments to vectorize over must have the same length.\n",
-                "Scalar arguments should be put into the 'MoreArgs' argument.\n",
-                "Note: lengths of '...' arguments are: ", paste(dotLengths, collapse = ", ")))
-  nArgs = length(dots)
-  res = list()
-  if (is.null(mdma.argIsMultiData)) mdma.argIsMultiData = sapply(dots, is.multiSet, strict = FALSE)
+    names(res) = names(dots[[1]])
 
-  nSets = dotLengths[1]
-
-  calculate = .calculateIndicator(nSets, mdmaExistingResults, mdmaUpdateIndex)
-
-  FUN = match.fun(FUN)
-  for (set in 1:nSets)
-  {
-    if (calculate[set])
-    {
-      if (mdmaVerbose > 0)
-        printFlush(paste0(printSpaces, "multiSet.mapply: working on set ", set))
-
-      localArgs = list()
-      for (arg in 1:nArgs)
-        localArgs[[arg]] = if (mdma.argIsMultiData[arg]) dots[[arg]] [[set]] $ data else dots[[arg]] [[set]]
-      names(localArgs) = names(dots)
-      res[[set]] = list(data = do.call(FUN, c(localArgs, MoreArgs)))
-      if (mdma.doCollectGarbage) collectGarbage()
-    } else
-      res[set] = mdmaExistingResults[set]
-  }
-
-  names(res) = names(dots[[1]])
-
-  if (mdmaSimplify)
-  {
-    if (mdmaVerbose > 0)
-      printFlush(paste0(printSpaces, "multiSet.mapply: attempting to simplify..."))
-    return (multiSet.simplify(res))
+    if (mdmaSimplify) {
+        if (mdmaVerbose > 0)
+            printFlush(paste0(printSpaces, "multiSet.mapply: attempting to simplify..."))
+    return(multiSet.simplify(res))
   } else if (returnList) {
     return (multiSet2list(res))
   }
@@ -995,10 +1007,13 @@ keepCommonProbes <- function(multiExpr, orderBy = 1) {
     multiExpr
 }
 
-"colnames,multiSet<-" <- function(x, value){
-    for (set in x){
-        warning(dim(set$data))
-        colnames(set$data) <- value
-    }
-    x
-}
+# #'
+# #' @export
+# #'
+# "colnames,multiSet<-" <- function(x, value){
+#     for (set in x){
+#         warning(dim(set$data))
+#         colnames(set$data) <- value
+#     }
+#     x
+# }

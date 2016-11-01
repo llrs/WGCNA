@@ -1973,7 +1973,7 @@ blockwiseIndividualTOMs = function(multiExpr,
     nGenes = dataSize$nGenes;
     multiFormat = TRUE;
   } else {
-    multiExpr = multiData(multiExpr);
+    multiExpr = multiSet(multiExpr);
     nSets = dataSize$nSets;
     nGenes = dataSize$nGenes;
     multiFormat = FALSE;
@@ -2827,12 +2827,12 @@ blockwiseConsensusModules <- function(multiExpr,
 
   # prepare scaled and imputed multiExpr.
   multiExpr.scaled = multiSet.apply(multiExpr, scale)
-  hasMissing = unlist(multiData2list(multiSet.apply(multiExpr, function(x) { any(is.na(x)) })));
+  hasMissing = unlist(multiSet2list(multiSet.apply(multiExpr, function(x) { any(is.na(x)) })));
   # Impute those that have missing data
-  multiExpr.scaled.imputed = multiSet.mapply(function(x, doImpute)
-                         { if (doImpute) t(impute.knn(t(x))$data) else x },
-                                   multiExpr.scaled, hasMissing);
-  branchSplitFnc = NULL;
+  multiExpr.scaled.imputed = multiSet.mapply(function(x, doImpute){
+      if (doImpute) t(impute.knn(t(x))$data) else x },
+                                   multiExpr.scaled, hasMissing)
+  branchSplitFnc = NULL
   minBranchDissimilarities = numeric(0);
   externalSplitFncNeedsDistance = logical(0);
   if (useBranchEigennodeDissim)
@@ -3681,7 +3681,7 @@ recutConsensusTrees = function(multiExpr,
   if (useBranchEigennodeDissim)
   {
     multiExpr.scaled = multiSet.apply(multiExpr, scale);
-    hasMissing = unlist(multiData2list(multiSet.apply(multiExpr, function(x) { any(is.na(x)) })));
+    hasMissing = unlist(multiSet2list(multiSet.apply(multiExpr, function(x) { any(is.na(x)) })));
     # Impute those that have missing data
     multiExpr.scaled.imputed = multiSet.mapply(function(x, doImpute)
                            { if (doImpute) t(impute.knn(t(x))$data) else x },
@@ -3734,7 +3734,7 @@ recutConsensusTrees = function(multiExpr,
 
   # prepare scaled and imputed multiExpr.
   multiExpr.scaled = multiSet.apply(multiExpr, scale);
-  hasMissing = unlist(multiData2list(multiSet.apply(multiExpr, function(x) { any(is.na(x)) })));
+  hasMissing = unlist(multiSet2list(multiSet.apply(multiExpr, function(x) { any(is.na(x)) })));
   # Impute those that have missing data
   multiExpr.scaled.imputed = multiSet.mapply(function(x, doImpute)
                          { if (doImpute) t(impute.knn(t(x))$data) else x },
