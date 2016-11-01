@@ -112,7 +112,7 @@ NULL
 #'
 #' A progress indicator is a simple inline display of progress intended to
 #' satisfy impatient users during lengthy operations. The function
-#' \code{initProgInd} initializes a progress indicator (at zero);
+#' \code{initProgInd} initializes a progress indicator (at zero)
 #' \code{updateProgInd} updates it to a specified fraction.
 #'
 #' Note that excessive use of \code{updateProgInd} may lead to a performance
@@ -135,23 +135,23 @@ NULL
 #' @keywords misc
 #' @examples
 #'
-#' max = 10;
-#' prog = initProgInd("Counting: ", "done");
+#' max = 10
+#' prog = initProgInd("Counting: ", "done")
 #' for (c in 1:max)
 #' {
-#'   Sys.sleep(0.10);
-#'   prog = updateProgInd(c/max, prog);
+#'   Sys.sleep(0.10)
+#'   prog = updateProgInd(c/max, prog)
 #' }
-#' printFlush("");
+#' printFlush("")
 #'
-#' printFlush("Example 2:");
-#' prog = initProgInd();
+#' printFlush("Example 2:")
+#' prog = initProgInd()
 #' for (c in 1:max)
 #' {
-#'   Sys.sleep(0.10);
-#'   prog = updateProgInd(c/max, prog);
+#'   Sys.sleep(0.10)
+#'   prog = updateProgInd(c/max, prog)
 #' }
-#' printFlush("");
+#' printFlush("")
 #'
 #' ## Example of a significant slowdown:
 #'
@@ -163,12 +163,12 @@ NULL
 #'
 #' system.time(
 #'   {
-#'     prog = initProgInd("Counting: ", "done");
-#'     a = 0;
+#'     prog = initProgInd("Counting: ", "done")
+#'     a = 0
 #'     for (i in 1:10000)
 #'     {
-#'       a = a+i;
-#'       prog = updateProgInd(i/10000, prog);
+#'       a = a+i
+#'       prog = updateProgInd(i/10000, prog)
 #'     }
 #'   }
 #' )
@@ -531,15 +531,15 @@ NULL
 #' # Generate a random matrix with 200 rows and 1000 columns
 #'
 #' set.seed(10)
-#' nrow = 100;
-#' ncol = 500;
-#' data = matrix(rnorm(nrow*ncol), nrow, ncol);
+#' nrow = 100
+#' ncol = 500
+#' data = matrix(rnorm(nrow*ncol), nrow, ncol)
 #'
 #' ## First test: no missing data
 #'
-#' system.time( {corStd = stats::cor(data)} );
+#' system.time( {corStd = stats::cor(data)} )
 #'
-#' system.time( {corFast = cor(data)} );
+#' system.time( {corFast = cor(data)} )
 #'
 #' all.equal(corStd, corFast)
 #'
@@ -547,13 +547,13 @@ NULL
 #'
 #' # We now add a few missing entries.
 #'
-#' data[sample(nrow, 10), 1] = NA;
+#' data[sample(nrow, 10), 1] = NA
 #'
 #' # And test the correlations again...
 #'
-#' system.time( {corStd = stats::cor(data, use ='p')} );
+#' system.time( {corStd = stats::cor(data, use ='p')} )
 #'
-#' system.time( {corFast = cor(data, use = 'p')} );
+#' system.time( {corFast = cor(data, use = 'p')} )
 #'
 #' all.equal(corStd, corFast)
 #'

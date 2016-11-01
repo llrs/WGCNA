@@ -145,7 +145,7 @@ adj=NULL, iter=NULL, useReflections=FALSE, allowNonoptimalSwaps=FALSE){
 #  random variable says to swap (which gets less likely each iteration)
 	changes=NULL
 	for (i in 1:iter){
-		swap = 1;
+		swap = 1
 		if (useReflections) swap = sample(0:1,1)
 		gInd = sample(1:length(genes),2)
 		g    = genes[gInd]
@@ -225,9 +225,9 @@ reflectBranch <- function (hierTOM, g1, g2, both=FALSE){
 # Now reorder the hierTOM correctly
 	ord = hierTOM$order
 	i1 = which(ord%in%b1)
-	b=1:(min(i1)-1);
+	b=1:(min(i1)-1)
 	if(b[length(b)]<b[1]) b = NULL
-	e=(max(i1)+1):length(ord);
+	e=(max(i1)+1):length(ord)
 	if((max(i1)+1)>length(ord)) e = NULL
 	ord = ord[c(b,i1[order(i1,decreasing=T)],e)]
 	hierTOM$order = ord
@@ -305,11 +305,11 @@ reflectBranch <- function (hierTOM, g1, g2, both=FALSE){
 #'
 #' # Open a suitably sized graphics window
 #'
-#' sizeGrWindow(12,9);
+#' sizeGrWindow(12,9)
 #'
 #' # partition the screen for 3 dendrogram + module color plots
 #'
-#' layout(matrix(c(1:6), 6, 1), heights = c(0.8, 0.2, 0.8, 0.2, 0.8, 0.2));
+#' layout(matrix(c(1:6), 6, 1), heights = c(0.8, 0.2, 0.8, 0.2, 0.8, 0.2))
 #'
 #' plotDendroAndColors(tree1,colorh2,dendroLabels=FALSE,main="Starting Dendrogram",
 #'                     setLayout = FALSE)
@@ -356,9 +356,9 @@ swapTwoBranches <- function (hierTOM, g1, g2){
 	i1 = which(ord%in%b1)
 	i2 = which(ord%in%b2)
 	if(min(i1)>min(i2)) {tmp = i1; i1=i2; i2=tmp; rm(tmp)}
-	b=1:(min(i1)-1);
+	b=1:(min(i1)-1)
 	if(b[length(b)]<b[1]) b = NULL
-	e=(max(i2)+1):length(ord);
+	e=(max(i2)+1):length(ord)
 	if((max(i2)+1)>length(ord)) e = NULL
 	ord = ord[c(b,i2,i1,e)]
 	hierTOM$order = ord

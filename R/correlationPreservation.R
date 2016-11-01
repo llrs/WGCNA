@@ -100,7 +100,7 @@ correlationPreservation <- function(multiME, setLabels, excludeGrey = TRUE,
 #' @author Peter Langfelder
 #' @seealso
 #'
-#' \code{\link{multiSetMEs}} for module eigengene calculation;
+#' \code{\link{multiSetMEs}} for module eigengene calculation
 #'
 #' \code{\link{plotEigengeneNetworks}} for eigengene network visualization.
 #' @references
@@ -238,7 +238,7 @@ setCorrelationPreservation <- function(multiME, setLabels, excludeGrey = TRUE,
 #' gene containing the complete weighted hyperbolic mean preservation of the
 #' adjacencies connecting the gene to all other genes.}
 #' @author Peter Langfelder
-#' @seealso \code{\link{adjacency}} for calculation of adjacency;
+#' @seealso \code{\link{adjacency}} for calculation of adjacency
 #' @references
 #' Langfelder P, Horvath S (2007) Eigengene networks for studying
 #' the relationships between co-expression modules. BMC Systems Biology 2007,

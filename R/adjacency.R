@@ -92,7 +92,7 @@ unsignedAdjacency <- function(datExpr, datExpr2 = NULL, power = 6,
 #' \code{distFnc} (for distance networks), transforms the similarity according
 #' to \code{type} and raises it to \code{power}, resulting in a weighted
 #' network adjacency matrix. If \code{selectCols} is given, the \code{corFnc}
-#' function will be given arguments \code{(datExpr, datExpr[selectCols], ...)};
+#' function will be given arguments \code{(datExpr, datExpr[selectCols], ...)}
 #' hence the returned adjacency will have rows corresponding to all genes and
 #' columns corresponding to genes selected by \code{selectCols}.
 #'
@@ -340,7 +340,7 @@ adjacency.polyReg = function(datExpr, degree=3, symmetrizationMethod = "mean") {
             if (sum(del)>=(n-1) | var(datExpr[, i], na.rm=T)==0 | var(datExpr[, j], na.rm=T)==0) {
                 polyRsquare[i, j] = polyRsquare[j, i]=NA
             } else {
-                dati = datExpr[!del, i]; datj = datExpr[!del, j];
+                dati = datExpr[!del, i]; datj = datExpr[!del, j]
                 lmPij=glm( dati ~ poly( datj, degree))
                 polyRsquare[i, j] = cor( dati, predict(lmPij))^2
                 lmPji=glm( datj ~ poly( dati, degree))
@@ -454,7 +454,7 @@ adjacency.splineReg = function(datExpr,
             if (sum(del)>=(n-1) | var(datExpr[, i], na.rm=T)==0 | var(datExpr[, j], na.rm=T)==0) {
                 splineRsquare[i, j] = splineRsquare[j, i]=NA
             } else {
-                dati = datExpr[!del, i]; datj = datExpr[!del, j];
+                dati = datExpr[!del, i]; datj = datExpr[!del, j]
                 lmSij=glm( dati ~ ns( datj, df = df, ...))
                 splineRsquare[i, j] = cor( dati, predict(lmSij))^2
                 lmSji=glm( datj ~ ns( dati, df = df, ...))

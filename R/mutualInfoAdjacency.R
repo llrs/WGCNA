@@ -132,7 +132,7 @@
 #'   MIadj=mutualInfoAdjacency(datE=datE)
 #' } else 
 #'   printFlush(paste("Please install packages infotheo, minet and entropy",
-#'                    "before running this example."));
+#'                    "before running this example."))
 #' 
 #' 
 mutualInfoAdjacency <- function(  datE, discretizeColumns=TRUE,
@@ -143,7 +143,7 @@ mutualInfoAdjacency <- function(  datE, discretizeColumns=TRUE,
     nReq = length(reqPackages)
 
     for (r in 1:nReq){
-        expression = paste0('require("', reqPackages[r], '", quietly = TRUE)');
+        expression = paste0('require("', reqPackages[r], '", quietly = TRUE)')
         ok = eval(parse(text = expression))
         if (!ok) stop("The function requires R package infotheo, minet and entropy. Please install these packages first.")
     }

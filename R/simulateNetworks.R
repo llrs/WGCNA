@@ -150,7 +150,7 @@ simulateEigengeneNetwork <- function(causeMat,
 # The resulting data is normalized.
 # Attributes contain the component trueKME giving simulated correlation with
 # module eigengene for both module genes and near - module genes.
-# corPower controls how fast the correlation drops with index i in the module;
+# corPower controls how fast the correlation drops with index i in the module
 # the curve is roughly x^{1/corPower} with x<1 and x~0 near the "center", so the
 #  higher the power, the faster the curve rises.
 #' Simulate a gene co-expression module
@@ -206,13 +206,13 @@ simulateEigengeneNetwork <- function(causeMat,
 #' @seealso
 #'
 #' \code{\link{simulateEigengeneNetwork}} for a simulation of eigengenes with a
-#' given causal structure;
+#' given causal structure
 #'
 #' \code{\link{simulateDatExpr}} for simulations of whole datasets consisting
-#' of multiple modules;
+#' of multiple modules
 #'
 #' \code{\link{simulateDatExpr5Modules}} for a simplified interface to
-#' expression simulations;
+#' expression simulations
 #'
 #' \code{\link{simulateMultiExpr}} for a simulation of several related data
 #' sets.
@@ -342,7 +342,7 @@ simulateModule <- function(ME, nGenes, nNearGenes = 0, minCor = 0.3, maxCor = 1,
 #' @author Peter Langfelder
 #' @seealso
 #'
-#' \code{\link{simulateModule}} for simulation of individual modules;
+#' \code{\link{simulateModule}} for simulation of individual modules
 #'
 #' \code{\link{simulateDatExpr}} for the main gene expression simulation
 #' function.
@@ -543,12 +543,12 @@ simulateSmallLayer <- function(order,
 #' @seealso
 #'
 #' \code{\link{simulateEigengeneNetwork}} for a simulation of eigengenes with a
-#' given causal structure;
+#' given causal structure
 #'
-#' \code{\link{simulateModule}} for simulations of individual modules;
+#' \code{\link{simulateModule}} for simulations of individual modules
 #'
 #' \code{\link{simulateDatExpr5Modules}} for a simplified interface to
-#' expression simulations;
+#' expression simulations
 #'
 #' \code{\link{simulateMultiExpr}} for a simulation of several related data
 #' sets.
@@ -898,14 +898,14 @@ simulateDatExpr <- function(eigengenes,
 #' @seealso
 #'
 #' \code{\link{simulateEigengeneNetwork}} for a simulation of eigengenes with a
-#' given causal structure;
+#' given causal structure
 #'
-#' \code{\link{simulateDatExpr}} for simulation of individual data sets;
+#' \code{\link{simulateDatExpr}} for simulation of individual data sets
 #'
 #' \code{\link{simulateDatExpr5Modules}} for a simple simulation of a data set
-#' consisting of 5 modules;
+#' consisting of 5 modules
 #'
-#' \code{\link{simulateModule}} for simulations of individual modules;
+#' \code{\link{simulateModule}} for simulations of individual modules
 #' @references A short description of the simulation method can also be found
 #' in the Supplementary Material to the article
 #'
@@ -1057,7 +1057,7 @@ simulateMultiExpr <- function(eigengenes,
 #' @author Steve Horvath and Peter Langfelder
 #' @seealso
 #'
-#' \code{\link{simulateModule}} for simulation of individual modules;
+#' \code{\link{simulateModule}} for simulation of individual modules
 #'
 #' \code{\link{simulateDatExpr}} for a more comprehensive data simulation
 #' interface.

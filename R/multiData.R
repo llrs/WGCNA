@@ -288,7 +288,7 @@ multiSet.subset <- function(multiSet, rowIndex = NULL, colIndex = NULL,
 # list2multiSet ####
 #' Convert a list to a multiSet structure and vice-versa.
 #'
-#' \code{list2multiSet} converts a list to a multiSet structure;
+#' \code{list2multiSet} converts a list to a multiSet structure
 #' \code{multiSet2list} does the inverse.
 #'
 #' A multiSet structure is a vector of lists (one list for each set) where
@@ -371,7 +371,7 @@ multiSet2list <- function(multiSet) {
 #' columns. In a "loose" multiSet structure, the \code{data} components can be
 #' anything (but for most purposes should be of comparable type and content).
 #'
-#' \code{multiSet.apply} works on any "loose" multiSet structure;
+#' \code{multiSet.apply} works on any "loose" multiSet structure
 #' \code{multiSet.applyToSubset} assumes (and checks for) a "strict" multiSet
 #' structure.
 #'
@@ -413,7 +413,7 @@ multiSet2list <- function(multiSet) {
 #' function on each \code{data} component in the input multiSet structure.
 #' Other components are simply copied.
 #' @author Peter Langfelder
-#' @seealso \code{\link{multiSet}} to create a multiSet structure;
+#' @seealso \code{\link{multiSet}} to create a multiSet structure
 #' \code{\link{multiSet.applyToSubset}} for applying a function to a subset of a
 #' multiSet structure; \code{\link{multiSet.mapply}} for vectorizing over several
 #' arguments.
@@ -584,7 +584,7 @@ multiSet.applyToSubset <- function(
 #' @return A 3-dimensional array collecting all \code{data} components.
 #' @note The function is relatively fragile and may fail. Use at your own risk.
 #' @author Peter Langfelder
-#' @seealso \code{\link{multiSet}} to create a multiSet structure;
+#' @seealso \code{\link{multiSet}} to create a multiSet structure
 #'
 #' \code{\link{multiSet2list}} for converting multiSet structures to plain
 #' lists.
@@ -745,7 +745,7 @@ is.multiSet <- function(x, strict = TRUE) {
 #' @return A multiSet structure containing (as the \code{data} components) the
 #' results of \code{FUN}. If simplification is successful, an array instead.
 #' @author Peter Langfelder
-#' @seealso \code{\link{multiSet}} to create a multiSet structure;
+#' @seealso \code{\link{multiSet}} to create a multiSet structure
 #'
 #' \code{multiSet.apply} for application of a function to a single multiSet
 #' structure.
@@ -836,7 +836,7 @@ multiSet.mapply <- function(FUN, ..., MoreArgs = NULL,
 #' @param multiSet A multiSet structure.
 #' @return A single matrix or data frame containing the "rbinded" result.
 #' @author Peter Langfelder
-#' @seealso \code{\link{multiSet}} to create a multiSet structure;
+#' @seealso \code{\link{multiSet}} to create a multiSet structure
 #'
 #' \code{\link{rbind}} for various subtleties of the row binding operation.
 #' @keywords misc
@@ -867,7 +867,7 @@ multiSet.rbindSelf <- function(multiSet){
 #' @return The input multiSet with the attribute set on each \code{data}
 #' component.
 #' @author Peter Langfelder
-#' @seealso \code{\link{multiSet}} to create a multiSet structure;
+#' @seealso \code{\link{multiSet}} to create a multiSet structure
 #'
 #' \code{is.multiSet} for a description of the multiSet structure.
 #' @keywords misc

@@ -365,7 +365,7 @@
 #' @examples
 #' 
 #' # Example: first, read in some gene names and split them into categories
-#' data(BrainLists);
+#' data(BrainLists)
 #' listGenes = unique(as.character(BrainLists[,1]))
 #' set.seed(100)
 #' geneR = sort(sample(listGenes,2000))

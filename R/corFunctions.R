@@ -281,7 +281,7 @@ cor = function(x, y = NULL, use = "all.obs", method = c("pearson", "kendall", "s
       if (nThreads < 0) stop("nThreads must be non-negative.")
       if (is.null(nThreads) || (nThreads==0)) nThreads = .useNThreads()
 
-      if (prod(dim(x))==0) stop("'x' has a zero dimension.");
+      if (prod(dim(x))==0) stop("'x' has a zero dimension.")
       nNA = as.integer(0)
       err = as.integer(0)
       cosine = as.integer(cosine)
@@ -296,7 +296,7 @@ cor = function(x, y = NULL, use = "all.obs", method = c("pearson", "kendall", "s
          if (!is.null(dimnames(x)[[2]])) dimnames(res) = list(dimnames(x)[[2]],  dimnames(x)[[2]] )
       } else {
          y = as.matrix(y)
-         if (prod(dim(y))==0) stop("'y' has a zero dimension.");
+         if (prod(dim(y))==0) stop("'y' has a zero dimension.")
          if (nrow(x)!=nrow(y))
             stop("'x' and 'y' have incompatible dimensions (unequal numbers of rows).")
          bi = matrix(0, ncol(x), ncol(y))

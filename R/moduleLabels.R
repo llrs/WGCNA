@@ -34,7 +34,7 @@ normalizeLabels <- function(labels, keepZero = TRUE) {
 #' cut.
 #'
 #' All contiguous branches below the height \code{cutHeight} that contain at
-#' least \code{minSize} objects are assigned unique positive numerical labels;
+#' least \code{minSize} objects are assigned unique positive numerical labels
 #' all unassigned objects are assigned label 0.
 #'
 #' @param dendro a hierarchical clustering dendorgram such as one returned by

@@ -171,7 +171,7 @@ networkScreeningGS <- function(datExpr,
 #' @param addMEy logical: should the trait be used as an additional "module
 #' eigengene"?
 #' @param removeDiag logical: remove the diagonal?
-#' @param weightESy weight to use for the trait as an additional eigengene;
+#' @param weightESy weight to use for the trait as an additional eigengene
 #' should be between 0 and 1
 #' @param getQValues logical: should q-values be calculated?
 #' @return datout = data.frame(p.Weighted, q.Weighted, Cor.Weighted,

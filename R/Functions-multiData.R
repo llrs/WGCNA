@@ -106,7 +106,7 @@ multiData.eigengeneSignificance = function(multiData, multiTrait, moduleLabels,
     if (any( ! (useModules %in% substring(colnames(multiEigengenes[[1]]$data), 3))))
       stop("Some entries in 'useModules' do not exist in the module labels or eigengenes.")
     for (set in 1:nSets)
-      multiEigengenes[[set]]$data = multiEigengenes[[set]]$data[, keep, drop = FALSE];
+      multiEigengenes[[set]]$data = multiEigengenes[[set]]$data[, keep, drop = FALSE]
   }
 
   modLevels = substring(colnames(multiEigengenes[[1]]$data), 3)

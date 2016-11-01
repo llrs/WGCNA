@@ -29,7 +29,7 @@
 #' correlations} \item{t}{Student t statistics of the calculated correlations}
 #' \item{nObs}{Numbers of observations for the correlation, p-values etc.}
 #' @author Peter Langfelder and Steve Horvath
-#' @seealso \code{\link{cor}} for calculation of correlations only;
+#' @seealso \code{\link{cor}} for calculation of correlations only
 #'
 #' \code{\link{cor.test}} for another function for significance test of
 #' correlations
@@ -40,10 +40,10 @@
 #' @examples
 #'
 #' # generate random data with non-zero correlation
-#' set.seed(1);
-#' a = rnorm(100);
-#' b = rnorm(100) + a;
-#' x = cbind(a, b);
+#' set.seed(1)
+#' a = rnorm(100)
+#' b = rnorm(100) + a
+#' x = cbind(a, b)
 #' # Call the function and display all results
 #' corAndPvalue(x)
 #' # Set some components to NA
@@ -114,7 +114,7 @@ corAndPvalue = function(x, y = NULL,
 #' correlations} \item{t}{Student t statistics of the calculated correlations}
 #' \item{nObs}{Numbers of observations for the correlation, p-values etc.}
 #' @author Peter Langfelder and Steve Horvath
-#' @seealso \code{\link{bicor}} for calculation of correlations only;
+#' @seealso \code{\link{bicor}} for calculation of correlations only
 #'
 #' \code{\link{cor.test}} for another function for significance test of
 #' correlations
@@ -125,10 +125,10 @@ corAndPvalue = function(x, y = NULL,
 #' @examples
 #'
 #' # generate random data with non-zero correlation
-#' set.seed(1);
-#' a = rnorm(100);
-#' b = rnorm(100) + a;
-#' x = cbind(a, b);
+#' set.seed(1)
+#' a = rnorm(100)
+#' b = rnorm(100) + a
+#' x = cbind(a, b)
 #' # Call the function and display all results
 #' bicorAndPvalue(x)
 #' # Set some components to NA

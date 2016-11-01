@@ -19,9 +19,9 @@
 #' @examples
 #'
 #'   par(mfrow = c(3, 1))
-#'   displayColors(greenBlackRed(50));
-#'   displayColors(greenBlackRed(50, 2));
-#'   displayColors(greenBlackRed(50, 0.5));
+#'   displayColors(greenBlackRed(50))
+#'   displayColors(greenBlackRed(50, 2))
+#'   displayColors(greenBlackRed(50, 0.5))
 #'
 greenBlackRed <- function(n, gamma = 1) {
     half = as.integer(n / 2)
@@ -69,7 +69,7 @@ greenBlackRed <- function(n, gamma = 1) {
 #' @return A vector of colors of length \code{n}.
 #' @author Peter Langfelder
 #' @seealso \code{\link{blueWhiteRed}} for a color sequence more friendly to
-#' people with the most common type of color blindness;
+#' people with the most common type of color blindness
 #'
 #' \code{\link{numbers2colors}} for a function that produces a color
 #' representation for continuous numbers.
@@ -77,11 +77,11 @@ greenBlackRed <- function(n, gamma = 1) {
 #' @examples
 #' \dontrun{
 #'   par(mfrow = c(3, 1))
-#'   displayColors(greenWhiteRed(50));
+#'   displayColors(greenWhiteRed(50))
 #'   title("gamma = 1")
-#'   displayColors(greenWhiteRed(50, 3));
+#'   displayColors(greenWhiteRed(50, 3))
 #'   title("gamma = 3")
-#'   displayColors(greenWhiteRed(50, 0.5));
+#'   displayColors(greenWhiteRed(50, 0.5))
 #'   title("gamma = 0.5")
 #' }
 greenWhiteRed <- function(n, gamma = 1, warn = TRUE) {
@@ -121,9 +121,9 @@ greenWhiteRed <- function(n, gamma = 1, warn = TRUE) {
 #' @examples
 #'
 #'   par(mfrow = c(3, 1))
-#'   displayColors(redWhiteGreen(50));
-#'   displayColors(redWhiteGreen(50, 3));
-#'   displayColors(redWhiteGreen(50, 0.5));
+#'   displayColors(redWhiteGreen(50))
+#'   displayColors(redWhiteGreen(50, 3))
+#'   displayColors(redWhiteGreen(50, 0.5))
 #'
 redWhiteGreen <- function(n, gamma = 1) {
     half = as.integer(n / 2)
@@ -181,11 +181,11 @@ redWhiteGreen <- function(n, gamma = 1) {
 #' @examples
 #'
 #'   par(mfrow = c(3, 1))
-#'   displayColors(blueWhiteRed(50));
+#'   displayColors(blueWhiteRed(50))
 #'   title("gamma = 1")
-#'   displayColors(blueWhiteRed(50, 3));
+#'   displayColors(blueWhiteRed(50, 3))
 #'   title("gamma = 3")
-#'   displayColors(blueWhiteRed(50, 0.5));
+#'   displayColors(blueWhiteRed(50, 0.5))
 #'   title("gamma = 0.5")
 #'
 blueWhiteRed <- function(n, gamma = 1, endSaturation = 1) {

@@ -1136,7 +1136,7 @@ plotModuleSignificance <- function(geneSignificance, colors, boxplot = FALSE,
 #' @seealso
 #'
 #' \code{\link{labeledHeatmap}}, \code{\link{labeledBarplot}} for annotated
-#' heatmaps and barplots;
+#' heatmaps and barplots
 #'
 #' \code{\link[stats]{hclust}} for hierarchical clustering and dendrogram plots
 #' @references
@@ -1468,7 +1468,7 @@ plotEigengeneNetworks <- function(multiME,
 #' @examples
 #'
 #'   plot(c(1:10), c(1:10))
-#'   addGrid();
+#'   addGrid()
 #'
 addGrid <- function(linesPerTick = NULL, horiz = TRUE, vert = FALSE,
                     col = "grey30", lty = 3) {

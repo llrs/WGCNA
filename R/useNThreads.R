@@ -58,7 +58,7 @@
 #' WGCNAnThreads
 #' @param nThreads Number of threads to allow. If not given, the number of
 #' processors online (as reported by system configuration) will be used. There
-#' appear to be some cases where the automatically-determined number is wrong;
+#' appear to be some cases where the automatically-determined number is wrong
 #' please check the output to see that the number of threads makes sense.
 #' Except for testing and/or torturing your system, the number of threads
 #' should be no more than the number of actual processors/cores.
@@ -186,8 +186,8 @@ WGCNAnThreads = function() {
 #' @keywords misc
 #' @examples
 #'
-#' allocateJobs(10, 3);
-#' allocateJobs(2,4);
+#' allocateJobs(10, 3)
+#' allocateJobs(2,4)
 #'
 #' @export allocateJobs
 allocateJobs = function(nTasks, nWorkers) {

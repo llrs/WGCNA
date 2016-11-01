@@ -434,7 +434,7 @@ moduleEigengenes <- function(datExpr, colors, impute = TRUE, nPC = 1,
 #' module \code{module} in sample \code{sample} in dataset \code{set}. The
 #' number of samples can be different between the sets, but the modules must be
 #' the same.
-#' @param greyLast Normally the color grey is reserved for unassigned genes;
+#' @param greyLast Normally the color grey is reserved for unassigned genes
 #' hence the grey module is not a proper module and it is conventional to put
 #' it last. If this is not desired, set the parameter to \code{FALSE}.
 #' @param greyName Name of the grey module eigengene.

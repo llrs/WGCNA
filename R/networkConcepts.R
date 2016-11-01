@@ -237,7 +237,7 @@ networkConcepts <- function(datExpr, power = 1, trait = NULL,
   ### Eigengene-based Network Concepts
   m1=moduleEigengenes(datExpr, colors = rep(1, Size))
   # Weighted Expression Conformity
-  ConformityE=cor(datExpr,m1[[1]][,1],use="pairwise.complete.obs"); ConformityE=abs(ConformityE)^power;
+  ConformityE=cor(datExpr,m1[[1]][,1],use="pairwise.complete.obs"); ConformityE=abs(ConformityE)^power
   ConnectivityE=sum(ConformityE)*ConformityE; #Expression Connectivity
   DensityE=sum(ConnectivityE)/(Size*(Size-1)); #Expression Density
   CentralizationE=Size*(max(ConnectivityE)-mean(ConnectivityE))/((Size-1)*(Size-2)); #Expression Centralization
@@ -376,7 +376,7 @@ MAR=MAR, ConformityE=ConformityE)
   computeSqDiagSum = function(x, vec) { sum(x^2 * vec) }
   nolinksNeighbors <- c(rep(-666,no.nodes))
   total.edge <- c(rep(-666,no.nodes))
-  maxh1=max(as.dist(adjmat1) ); minh1=min(as.dist(adjmat1) );
+  maxh1=max(as.dist(adjmat1) ); minh1=min(as.dist(adjmat1) )
   if (maxh1>1 | minh1 < 0 )
   {
      stop(paste("ERROR: the adjacency matrix contains entries that are larger",
@@ -500,7 +500,7 @@ MAR=MAR, ConformityE=ConformityE)
 #' analogs of the above network concepts. }
 #' @author Steve Horvath
 #' @seealso \code{\link{networkConcepts}} for calculation of eigennode based
-#' network concepts for a correlation network;
+#' network concepts for a correlation network
 #'
 #' \code{\link{fundamentalNetworkConcepts}} for calculation of fundamental
 #' network concepts only.
@@ -646,7 +646,7 @@ conformityBasedNetworkConcepts <- function(adj, GS=NULL) {
 #' \item{Heterogeneity}{the heterogeneity of the network. }
 #' @author Steve Horvath
 #' @seealso \code{\link{conformityBasedNetworkConcepts}} for calculation of
-#' conformity based network concepts for a network adjacency matrix;
+#' conformity based network concepts for a network adjacency matrix
 #'
 #' \code{\link{networkConcepts}}, for calculation of conformity based and
 #' eigennode based network concepts for a correlation network.

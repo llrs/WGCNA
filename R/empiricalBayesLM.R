@@ -652,9 +652,9 @@ empiricalBayesLM = function(
 #' @keywords misc
 #' @examples
 #' 
-#' x = rnorm(100);
-#' x[1] = 10;
-#' plot(x, bicovWeights(x));
+#' x = rnorm(100)
+#' x[1] = 10
+#' plot(x, bicovWeights(x))
 #' 
 bicovWeights = function(x, pearsonFallback = TRUE, maxPOutliers = 1,
                         outlierReferenceWeight = 0.5625,

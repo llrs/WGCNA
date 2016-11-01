@@ -63,7 +63,7 @@
 #' value of correlation or plain correlation.
 #' @param useSets Allows the user to specify for which sets the eigengene
 #' ordering is to be performed.
-#' @param greyLast Normally the color grey is reserved for unassigned genes;
+#' @param greyLast Normally the color grey is reserved for unassigned genes
 #' hence the grey module is not a proper module and it is conventional to put
 #' it last. If this is not desired, set the parameter to \code{FALSE}.
 #' @param greyName Name of the grey module eigengene.

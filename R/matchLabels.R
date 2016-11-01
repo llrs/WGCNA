@@ -117,7 +117,7 @@ overlapTable <- function(labels1, labels2, na.rm = TRUE, ignore = NULL,
 #' @author Peter Langfelder
 #' @seealso
 #'
-#' \code{\link{overlapTable}} for calculation of overlap counts and p-values;
+#' \code{\link{overlapTable}} for calculation of overlap counts and p-values
 #'
 #' \code{\link{standardColors}} for standard non-numeric WGCNA labels.
 #' @keywords misc
@@ -181,7 +181,7 @@ matchLabels <- function(source, reference, pThreshold = 5e-2, na.rm = TRUE,
 
       nExtra = sum(is.na(newLabels))
       newLabels[is.na(newLabels)] = extraLabels[ !extraLabels %in%
-                                       c(refMods, ignoreLabels, names(newLabels))] [1:nExtra];
+                                       c(refMods, ignoreLabels, names(newLabels))] [1:nExtra]
     }
 
     result[, col] = newLabels[match(src, names(newLabels))]

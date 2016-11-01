@@ -170,7 +170,7 @@ selectFewestConsensusMissing <- function(mdx, colID, group,
 #' include selecting a representative probe for each gene in microarray data.
 #'
 #' This function was inspired by \code{\link{collapseRows}}, but there are also
-#' important differences. This function focuses on selecting representatives;
+#' important differences. This function focuses on selecting representatives
 #' when summarization is more important, \code{collapseRows} provides more
 #' flexibility since it does not require that a single representative be
 #' selected.
@@ -424,7 +424,7 @@ consensusRepresentatives <- function(mdx,
    }
 
    representatives = rep("", length(colnames.out))
-   names(representatives) = colnames.out;
+   names(representatives) = colnames.out
 
 ##  If !is.null(connectivityPower), default to the connectivity method with power=method
 #      Collapse genes with multiple probe sets together using the following algorthim:
@@ -545,7 +545,7 @@ consensusRepresentatives <- function(mdx,
      repres = which(genes %in% more)[repres.inMore]
      if (verbose > 1) printFlush("")
      if (getRepresentativeData) for (set in 1:nSets)
-       mdxOut[[set]]$data[, more] = as.numeric(mdx[[set]]$data[, repres]);
+       mdxOut[[set]]$data[, more] = as.numeric(mdx[[set]]$data[, repres])
      representatives[more] = probes[repres]
    }
 

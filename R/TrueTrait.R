@@ -157,7 +157,7 @@
 #' for (i in 1:dim(datTrue)[[2]] ){
 #'   meanAbsDev= mean(abs(yTRUE-datTrue[,i]))
 #'   verboseScatterplot(datTrue[,i],yTRUE,xlab=names(datTrue)[i],
-#'                      main=paste(i, "MeanAbsDev=", signif(meanAbsDev,3)));
+#'                      main=paste(i, "MeanAbsDev=", signif(meanAbsDev,3)))
 #'   abline(0,1)
 #' }
 #' #compare the estimated standard deviation of y.true2

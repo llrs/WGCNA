@@ -5,18 +5,18 @@
 
 .table2.allLevels = function(x, y, levels.x = sort(unique(x)), levels.y = sort(unique(y)), setNames = FALSE)
 {
-  nx = length(levels.x);
-  ny = length(levels.y);
-  t = table(x, y);
+  nx = length(levels.x)
+  ny = length(levels.y)
+  t = table(x, y)
 
-  out = matrix(0, nx, ny);
+  out = matrix(0, nx, ny)
   if (setNames)
   {
-    rownames(out) = levels.x;
-    colnames(out) = levels.y;
+    rownames(out) = levels.x
+    colnames(out) = levels.y
   }
-  out[ match(rownames(t), levels.x), match(colnames(t), levels.y) ] = t;
-  out;
+  out[ match(rownames(t), levels.x), match(colnames(t), levels.y) ] = t
+  out
 }
 
 # accuracy measures
@@ -124,7 +124,7 @@ accuracyMeasures = function(predicted, observed = NULL,
                      else sort(unique(c(observed, predicted))),
           negativeLevel = levels[2], positiveLevel = levels[1] )
 {
-  type = match.arg(type);
+  type = match.arg(type)
   if (type=="auto")
   {
     if (!is.null(dim(predicted)))
@@ -133,10 +133,10 @@ accuracyMeasures = function(predicted, observed = NULL,
       {
         type = "binary"
       } else
-        stop("If supplying a matrix in 'predicted', it must be a 2x2 contingency table.");
+        stop("If supplying a matrix in 'predicted', it must be a 2x2 contingency table.")
     } else {
       if (is.null(observed)) 
-        stop("When 'predicted' is a vector, 'observed' must be given and have the same length as 'predicted'.");
+        stop("When 'predicted' is a vector, 'observed' must be given and have the same length as 'predicted'.")
 
       if (length(levels)==2) 
       {
@@ -151,18 +151,18 @@ accuracyMeasures = function(predicted, observed = NULL,
     if (is.null(dim(predicted)))
     {
       if (is.null(observed)) 
-        stop("When 'predicted' is a vector, 'observed' must be given and have the same length as 'predicted'.");
+        stop("When 'predicted' is a vector, 'observed' must be given and have the same length as 'predicted'.")
       if ( length(predicted)!=length(observed) )
-        stop("When both 'predicted' and 'observed' are given, they must be vectors of the same length.");
+        stop("When both 'predicted' and 'observed' are given, they must be vectors of the same length.")
       if (length(levels)!=2) 
         stop("'levels' must contain 2 entries (the possible values of the binary variables\n", 
-             "   'predicted' and 'observed').");
+             "   'predicted' and 'observed').")
 
-      tab = .table2.allLevels(predicted, observed, levels.x = levels, levels.y = levels, setNames = TRUE);
+      tab = .table2.allLevels(predicted, observed, levels.x = levels, levels.y = levels, setNames = TRUE)
     } else {
-      tab = predicted;
+      tab = predicted
       if (is.null(colnames(tab)) | is.null(rownames(tab)))
-        stop("When 'predicted' is a contingency table, it must have valid colnames and rownames.");
+        stop("When 'predicted' is a contingency table, it must have valid colnames and rownames.")
 
     }
 
@@ -170,13 +170,13 @@ accuracyMeasures = function(predicted, observed = NULL,
       stop("The input table must be a 2x2 table. ")
 
     if (negativeLevel==positiveLevel) 
-      stop("'negativeLevel' and 'positiveLevel' cannot be the same.");
+      stop("'negativeLevel' and 'positiveLevel' cannot be the same.")
 
-    neg = match(negativeLevel, colnames(tab));
+    neg = match(negativeLevel, colnames(tab))
     if (is.na(neg))
       stop(paste0("Cannot find the negative level ", negativeLevel, 
                   " among the colnames of the contingency table.\n   Please check the input and try again."))
-    pos = match(positiveLevel, colnames(tab));
+    pos = match(positiveLevel, colnames(tab))
     if (is.na(pos))
       stop(paste0("Cannot find the positive level ", positiveLevel, 
                   " among the colnames of the contingency table.\n   Please check the input and try again."))
@@ -191,7 +191,7 @@ accuracyMeasures = function(predicted, observed = NULL,
       warning("STRONG WARNING: The input table contains non-integers, which does not make sense.")
 
     if (  sum( tab<0, na.rm=T  ) >0) 
-      stop("The input table cannot contain negative numbers.");
+      stop("The input table cannot contain negative numbers.")
 
     num1=sum(diag(tab),na.rm=T)
     denom1=sum(tab,na.rm=T)
@@ -224,23 +224,23 @@ accuracyMeasures = function(predicted, observed = NULL,
           Value=c(error.rate,Accuracy, Specificity,Sensitivity,NegativePredictiveValue,
                   PositivePredictiveValue,FalsePositiveRate,FalseNegativeRate,Power,
                   LikelihoodRatioPositive,LikelihoodRatioNegative,NaiveErrorRate, negativeLevel,
-                  positiveLevel));
+                  positiveLevel))
   } else if (type=="quantitative") 
   {
      if (!is.null(dim(predicted))) 
-       stop("When 'type' is \"quantitative\", 'predicted' cannot be a 2-dimensional matrix.");
+       stop("When 'type' is \"quantitative\", 'predicted' cannot be a 2-dimensional matrix.")
      if (length(predicted)!=length(observed))
-       stop("'predicted' and 'observed' must be vectors of the same length.");
+       stop("'predicted' and 'observed' must be vectors of the same length.")
 
-     cr = cor(predicted, observed, use = 'p');
+     cr = cor(predicted, observed, use = 'p')
      out = data.frame(
           Measure = c("Cor", "R.squared", "MeanSquareError", "MedianAbsoluteError", "Cindex"),
           Value = c(cr, 
                     cr^2, 
                     mean( (predicted-observed)^2,na.rm=TRUE), 
                     median((predicted-observed)^2,na.rm=TRUE),
-                    rcorr.cens(predicted,observed,outx=TRUE)[[1]]));
+                    rcorr.cens(predicted,observed,outx=TRUE)[[1]]))
   }
 
-  out;
+  out
 }

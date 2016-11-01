@@ -10,7 +10,7 @@
 # thresh is the Pearson correlation threshold to combine probes of similar expression.
 
 	names(rowGroup) = rowID
-	ids    = rownames(datOut);
+	ids    = rownames(datOut)
 	idsIn  = ids;   # For later
 	group  = rowGroup[ids]
 	tGroup = table(group)
@@ -38,7 +38,7 @@
 			ids = rownames(datOut)
 			group  = rowGroup[ids]
 			datTmp = datOut[ids[group==g],]
-			corDat = cor(t(datTmp));
+			corDat = cor(t(datTmp))
 			if(length(datTmp)==len) { go=FALSE
 			} else {
 				diag(corDat)=-2

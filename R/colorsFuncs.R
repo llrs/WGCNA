@@ -37,9 +37,9 @@
 #' @keywords color
 #' @examples
 #'
-#' labels = c(0:20);
-#' labels2colors(labels);
-#' labels = matrix(letters[1:9], 3,3);
+#' labels = c(0:20)
+#' labels2colors(labels)
+#' labels = matrix(letters[1:9], 3,3)
 #' labels2colors(labels)
 #' # Note the difference when commonColorCode = FALSE
 #' labels2colors(labels, commonColorCode = FALSE)
@@ -104,7 +104,7 @@ labels2colors <- function(labels, zeroIsGrey = TRUE, colorSeq = NULL,
 #' @keywords color misc
 #' @examples
 #'
-#' standardColors(10);
+#' standardColors(10)
 #'
 standardColors <- function(n = NULL){
     if (is.null(n)) {

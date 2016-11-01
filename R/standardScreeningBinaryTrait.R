@@ -117,7 +117,7 @@ standardScreeningBinaryTrait <- function(datExpr, y,
      stop("The sample trait y contains more than 2 levels. Please input a binary variable y")
    if (length(levelsy)==1 )
      stop("The sample trait y is constant. Please input a binary sample trait with some variation.")
-   yNumeric=as.numeric(factor(y));
+   yNumeric=as.numeric(factor(y))
    if (length(yNumeric) !=dim(datExpr)[[1]] )
      stop("the length of the sample trait y does not equal the number of rows of datExpr")
    pvalueStudent = t.Student = Z.Student = rep(NA, dim(datExpr)[[2]] )
@@ -127,21 +127,21 @@ standardScreeningBinaryTrait <- function(datExpr, y,
 
   if (var.equal)
      printFlush(paste("Warning: T-test that assumes equal variances in each group is requested.\n",
-                      "This is not the default option for t.test. We recommend to use var.equal=FALSE."));
+                      "This is not the default option for t.test. We recommend to use var.equal=FALSE."))
 
-  corFnc = match.fun(corFnc);
-  corOptions$y = yNumeric;
-  corOptions$x = datExpr;
-  corPearson=as.numeric(do.call(corFnc, corOptions));
-  nGenes = dim(datExpr)[[2]];
-  nPresent1 = as.numeric( t(as.matrix(!is.na(yNumeric) & yNumeric==1)) %*% ! is.na(datExpr) );
-  nPresent2 = as.numeric( t(as.matrix(!is.na(yNumeric) & yNumeric==2)) %*% ! is.na(datExpr) );
-  nPresent = nPresent1 + nPresent2;
+  corFnc = match.fun(corFnc)
+  corOptions$y = yNumeric
+  corOptions$x = datExpr
+  corPearson=as.numeric(do.call(corFnc, corOptions))
+  nGenes = dim(datExpr)[[2]]
+  nPresent1 = as.numeric( t(as.matrix(!is.na(yNumeric) & yNumeric==1)) %*% ! is.na(datExpr) )
+  nPresent2 = as.numeric( t(as.matrix(!is.na(yNumeric) & yNumeric==2)) %*% ! is.na(datExpr) )
+  nPresent = nPresent1 + nPresent2
 
   for (i in 1:nGenes) {
-        no.present1 = nPresent1[i];
-        no.present2 = nPresent2[i];
-        no.present = nPresent[i];
+        no.present1 = nPresent1[i]
+        no.present2 = nPresent2[i]
+        no.present = nPresent[i]
         if (no.present1<2 | no.present2<2 )
         {
            pvalueStudent[i]= t.Student[i] = NA
@@ -150,13 +150,13 @@ standardScreeningBinaryTrait <- function(datExpr, y,
                     silent = TRUE)
           if (!inherits(tst, "try-error"))
           {
-            pvalueStudent[i] = tst$p.value;
+            pvalueStudent[i] = tst$p.value
             t.Student[i] = -tst$statistic
             # The - sign above is intentional to make the sign of t consistent with correlation
           } else {
             printFlush(paste("standardScreeningBinaryTrait: An error ocurred in t.test for variable",
-                             i, ":\n", tst));
-            printFlush(paste("Will return missing value(s) for this variable.\n\n"));
+                             i, ":\n", tst))
+            printFlush(paste("Will return missing value(s) for this variable.\n\n"))
           }
 
         }
@@ -169,17 +169,17 @@ standardScreeningBinaryTrait <- function(datExpr, y,
                kt = try(kruskal.test(datExpr[, i] ~ factor(yNumeric),  na.action="na.exclude"), silent = TRUE)
                if (!inherits(kt, "try-error"))
                {
-                 pvaluekruskal[i] = kt$p.value;
-                 stat.Kruskal[i] = kt$statistic;
+                 pvaluekruskal[i] = kt$p.value
+                 stat.Kruskal[i] = kt$statistic
                  # Find which side is higher
-                 r = rank(datExpr[, i]);
-                 means = tapply(r, factor(yNumeric), mean, na.rm = TRUE);
-                 sign.Kruskal[i] = 2 * ( (means[1] < means[2]) - 0.5);
+                 r = rank(datExpr[, i])
+                 means = tapply(r, factor(yNumeric), mean, na.rm = TRUE)
+                 sign.Kruskal[i] = 2 * ( (means[1] < means[2]) - 0.5)
                  # sign.Kruskal is 1 if the ranks in group 1 are smaller than in group 2
                } else {
                  printFlush(paste("standardScreeningBinaryTrait: An error ocurred in kruskal.test for variable",
-                                  i, ":\n", kt));
-                 printFlush(paste("Will return missing value(s) for this variable.\n\n"));
+                                  i, ":\n", kt))
+                 printFlush(paste("Will return missing value(s) for this variable.\n\n"))
                }
 
            }
@@ -189,28 +189,28 @@ standardScreeningBinaryTrait <- function(datExpr, y,
     rest1= ! is.na(pvalueStudent)
     if (qValues)
     {
-      x = try({ q.Student[rest1] = qvalue(pvalueStudent[rest1])$qvalues }, silent = TRUE);
+      x = try({ q.Student[rest1] = qvalue(pvalueStudent[rest1])$qvalues }, silent = TRUE)
       if (inherits(x, "try-error"))
         printFlush(paste("Warning in standardScreeningBinaryTrait: function qvalue returned an error.\n",
                          "calculated q-values will be invalid. qvalue error:\n\n", x, "\n"))
       if (kruskalTest) {
          q.kruskal=rep(NA, length(pvaluekruskal) )
          rest1= ! is.na(pvaluekruskal)
-         xx = try( { q.kruskal[rest1] = qvalue(pvaluekruskal[rest1])$qvalues} , silent = TRUE);
+         xx = try( { q.kruskal[rest1] = qvalue(pvaluekruskal[rest1])$qvalues} , silent = TRUE)
          if (inherits(xx, "try-error"))
            printFlush(paste("Warning in standardScreeningBinaryTrait: function qvalue returned an error.\n",
                             "calculated q-values will be invalid. qvalue error:\n\n", xx, "\n"))
       }
     }
-    meanLevel1 = as.numeric(apply(datExpr[!is.na(y) & y == levelsy[[1]], ], 2, mean, na.rm = TRUE));
-    meanLevel2 = as.numeric(apply(datExpr[!is.na(y) & y == levelsy[[2]], ], 2, mean, na.rm = TRUE));
+    meanLevel1 = as.numeric(apply(datExpr[!is.na(y) & y == levelsy[[1]], ], 2, mean, na.rm = TRUE))
+    meanLevel2 = as.numeric(apply(datExpr[!is.na(y) & y == levelsy[[2]], ], 2, mean, na.rm = TRUE))
 
-    Z.Student = qnorm(pvalueStudent/2, lower.tail = FALSE) * sign(t.Student);
+    Z.Student = qnorm(pvalueStudent/2, lower.tail = FALSE) * sign(t.Student)
     if (kruskalTest)
-      Z.Kruskal = qnorm(pvaluekruskal/2, lower.tail = FALSE) * sign(stat.Kruskal);
+      Z.Kruskal = qnorm(pvaluekruskal/2, lower.tail = FALSE) * sign(stat.Kruskal)
 
 
-    stderr1=function(x) {no.present=sum(!is.na(x));
+    stderr1=function(x) {no.present=sum(!is.na(x))
     if (no.present<2) out=NA else {out=sqrt(var(x,na.rm=TRUE)/no.present) }
     out } # end of function stderr1
 
@@ -226,15 +226,15 @@ standardScreeningBinaryTrait <- function(datExpr, y,
          meanFirstGroup = meanLevel1,
         meanSecondGroup = meanLevel2,
          SE.FirstGroup = SE.Level1,
-      SE.SecondGroup = SE.Level2);
+      SE.SecondGroup = SE.Level2)
 
     if (getAreaUnderROC)
-       output$AreaUnderROC = AreaUnderROC;
+       output$AreaUnderROC = AreaUnderROC
 
     if (kruskalTest) {
         output = data.frame(output, stat.Kruskal = stat.Kruskal,
                             stat.Kruskal.signed = sign.Kruskal * stat.Kruskal,
-                            pvaluekruskal = pvaluekruskal);
+                            pvaluekruskal = pvaluekruskal)
     }
 
    if (qValues && !inherits(x, "try-error")) output=data.frame(output, q.Student)
@@ -242,7 +242,7 @@ standardScreeningBinaryTrait <- function(datExpr, y,
       if ( !inherits(xx, "try-error")) output=data.frame(output, q.kruskal)
    }
    names(output)[3:5] = paste(names(output)[3:5], levelsy[[1]], "vs", levelsy[[2]], sep = ".")
-   output = data.frame(output, nPresentSamples = nPresent);
+   output = data.frame(output, nPresentSamples = nPresent)
    output
 }
 

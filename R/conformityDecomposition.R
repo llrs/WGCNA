@@ -174,19 +174,19 @@ conformityDecomposition = function (adj, Cl = NULL) {
         numeratorFactorizability=0
         for (i in 1:length(Cl.level) ) {
             restclass= Cl== Cl.level[i]
-            if (sum(restclass)==1) { A.help=0; CF.help =0;   Conformity[restclass]=CF.help;
+            if (sum(restclass)==1) { A.help=0; CF.help =0;   Conformity[restclass]=CF.help
             A.CF[restclass,restclass]=CF.help*CF.help - CF.help^2
             }
             if (sum(restclass)==2) {
                 A.help=adj[restclass,restclass];diag(A.help)=0
-                CFvalue=sqrt(adj[restclass,restclass][1,2]);
+                CFvalue=sqrt(adj[restclass,restclass][1,2])
                 CF.help= c(CFvalue , CFvalue )
                 Conformity[restclass]=CF.help
                 A.CF[restclass,restclass]=outer(CF.help, CF.help) - diag(CF.help^2)
             }
 
             if (sum(restclass)>2) {
-                A.help=adj[restclass,restclass];diag(A.help)=0 ;
+                A.help=adj[restclass,restclass];diag(A.help)=0 
                 CF.help = .NPC.iterate(A.help )$v1
                 Conformity[restclass]=CF.help
                 A.CF[restclass,restclass]=outer(CF.help, CF.help) - diag(CF.help^2)

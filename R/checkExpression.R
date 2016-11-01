@@ -231,7 +231,7 @@ goodSamples <- function(datExpr,
 #' excluded by \code{useGenes} are automatically assigned \code{FALSE}.
 #' @author Peter Langfelder
 #' @seealso \code{\link{goodGenes}}, \code{\link{goodSamples}},
-#' \code{\link{goodSamplesGenes}} for cleaning individual sets separately;
+#' \code{\link{goodSamplesGenes}} for cleaning individual sets separately
 #'
 #' \code{\link{goodSamplesMS}}, \code{\link{goodSamplesGenesMS}} for additional
 #' cleaning of multiple data sets together.
@@ -360,7 +360,7 @@ goodGenesMS <- function(multiExpr,
 #' whether the sample passed the missing value criteria.
 #' @author Peter Langfelder and Steve Horvath
 #' @seealso \code{\link{goodGenes}}, \code{\link{goodSamples}},
-#' \code{\link{goodSamplesGenes}} for cleaning individual sets separately;
+#' \code{\link{goodSamplesGenes}} for cleaning individual sets separately
 #'
 #' \code{\link{goodGenesMS}}, \code{\link{goodSamplesGenesMS}} for additional
 #' cleaning of multiple data sets together.
@@ -586,7 +586,7 @@ goodSamplesGenes <- function(datExpr,
 #' \code{TRUE} if the gene is considered good and \code{FALSE} otherwise.  }
 #' @author Peter Langfelder
 #' @seealso \code{\link{goodGenes}}, \code{\link{goodSamples}},
-#' \code{\link{goodSamplesGenes}} for cleaning individual sets separately;
+#' \code{\link{goodSamplesGenes}} for cleaning individual sets separately
 #'
 #' \code{\link{goodSamplesMS}}, \code{\link{goodGenesMS}} for additional
 #' cleaning of multiple data sets together.

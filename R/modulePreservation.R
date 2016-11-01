@@ -362,7 +362,7 @@ dynamicMergeCut <- function(n, mergeCor = .9, Zquantile = 2.35) {
 #' report as the calculations advance.
 #' @author Rui Luo and Peter Langfelder
 #' @seealso Network construction and module detection functions in the WGCNA
-#' package such as \code{\link{adjacency}}, \code{\link{blockwiseModules}};
+#' package such as \code{\link{adjacency}}, \code{\link{blockwiseModules}}
 #' rudimentary cleaning in \code{\link{goodSamplesGenesMS}}; the WGCNA
 #' implementation of correlation in \code{\link{cor}}.
 #'
@@ -801,7 +801,7 @@ modulePreservation = function(
                datout = foreach(perm = 1:nPermutations, .combine = combineCalculations,
                                 .multicombine = TRUE, .maxcombine = nPermutations+10)%dopar%
                {
-                      set.seed(seed + perm + perm^2);
+                      set.seed(seed + perm + perm^2)
                       collectGarbage()
                       .modulePreservationInternal(permExpr, permColors, dataIsExpr = dataIsExpr,
                                                   calculatePermutation = TRUE,
@@ -1121,7 +1121,7 @@ modulePreservation = function(
                  if (LogIndex[regInd]==1)
                     predictedMean = exp(predictedMean)
                  predictedSD = exp(as.numeric(predict(seLM[[iref]][[tnet]][[regInd]],
-                                                   newdata = data.frame(xx2 = logModSizes))));
+                                                   newdata = data.frame(xx2 = logModSizes))))
                  zAll[, stat] = (allObsStats[, stat] - predictedMean)/predictedSD
                  # For the gold module : take the direct observations.
                  goldMean = mean(permOut[[iref]][[tnet]]$regStats[goldRowPerm, regInd, ], na.rm = TRUE)
@@ -1165,7 +1165,7 @@ modulePreservation = function(
        sepCol = match("Z.separability.qual", colnames(zAll)[1:nQualiStats])
        zQual = zAll[, c(1:nQualiStats)][ , -sepCol]
        summaryColsQuality = rankColsQuality -1 # quality also contains module sizes, Z does not
-       summZ = apply(zQual[, summaryColsQuality, drop = FALSE], 1, median, na.rm = TRUE);
+       summZ = apply(zQual[, summaryColsQuality, drop = FALSE], 1, median, na.rm = TRUE)
        Z.quality[[iref]][[tnet]] = data.frame(cbind(moduleSize = modSizes, Zsummary.qual = summZ,
                                                     zQual))
        Z.referenceSeparability[[iref]][[tnet]] =
@@ -2173,8 +2173,8 @@ TRUE))
   for (m in 1:nMods)
   {
     modGenes[[m]] = c(1:nGenes)[colors==colorLevels[m]]
-    proVar[m, 1] = svds[[2]][[m]]$d[1]/sum(svds[[2]][[m]]$d);
-    proVar[m, 2] = svds[[3]][[m]]$d[1]/sum(svds[[3]][[m]]$d);
+    proVar[m, 1] = svds[[2]][[m]]$d[1]/sum(svds[[2]][[m]]$d)
+    proVar[m, 2] = svds[[3]][[m]]$d[1]/sum(svds[[3]][[m]]$d)
   }
 
   #printFlush(".coreCalcForAdj:getting corkME and ICOR")
