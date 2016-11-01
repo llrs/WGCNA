@@ -38,7 +38,7 @@ The function is relatively fragile and may fail. Use at your own risk.
 Peter Langfelder
 }
 \seealso{
-\code{\link{multiSet}} to create a multiSet structure;
+\code{\link{multiSet}} to create a multiSet structure
 
 \code{\link{multiSet2list}} for converting multiSet structures to plain
 lists.

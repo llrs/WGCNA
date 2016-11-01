@@ -77,11 +77,11 @@ plotDendroAndColors(tree1,cbind(colorh,colorh2),c("Old","New"),dendroLabels=FALS
 
 # Open a suitably sized graphics window
 
-sizeGrWindow(12,9);
+sizeGrWindow(12,9)
 
 # partition the screen for 3 dendrogram + module color plots
 
-layout(matrix(c(1:6), 6, 1), heights = c(0.8, 0.2, 0.8, 0.2, 0.8, 0.2));
+layout(matrix(c(1:6), 6, 1), heights = c(0.8, 0.2, 0.8, 0.2, 0.8, 0.2))
 
 plotDendroAndColors(tree1,colorh2,dendroLabels=FALSE,main="Starting Dendrogram",
                     setLayout = FALSE)

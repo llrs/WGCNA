@@ -58,27 +58,27 @@ test clustering is repeatedly randomly permuted.
 }
 \examples{
 
-  set.seed(1);
-  nModules = 5;
-  nGenes = 100;
-  cl1 = sample(c(1:nModules), nGenes, replace = TRUE);
-  cl2 = sample(c(1:nModules), nGenes, replace = TRUE);
+  set.seed(1)
+  nModules = 5
+  nGenes = 100
+  cl1 = sample(c(1:nModules), nGenes, replace = TRUE)
+  cl2 = sample(c(1:nModules), nGenes, replace = TRUE)
   
   cc = coClustering(cl1, cl2)
 
   # Choose a low number of permutations to make the example fast
-  ccPerm = coClustering.permutationTest(cl1, cl2, nPermutations = 20, verbose = 1);
+  ccPerm = coClustering.permutationTest(cl1, cl2, nPermutations = 20, verbose = 1)
 
   ccPerm$observed
   ccPerm$Z
 
   # Combine cl1 and cl2 to obtain clustering that is somewhat similar to cl1:
 
-  cl3 = cl2;
-  from1 = sample(c(TRUE, FALSE), nGenes, replace = TRUE);
-  cl3[from1] = cl1[from1];
+  cl3 = cl2
+  from1 = sample(c(TRUE, FALSE), nGenes, replace = TRUE)
+  cl3[from1] = cl1[from1]
 
-  ccPerm = coClustering.permutationTest(cl1, cl3, nPermutations = 20, verbose = 1);
+  ccPerm = coClustering.permutationTest(cl1, cl3, nPermutations = 20, verbose = 1)
 
   # observed co-clustering is higher than before:
   ccPerm$observed

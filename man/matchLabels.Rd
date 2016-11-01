@@ -63,7 +63,7 @@ occur in either of \code{source}, \code{reference} or \code{ignoreLabels}.
 Peter Langfelder
 }
 \seealso{
-\code{\link{overlapTable}} for calculation of overlap counts and p-values;
+\code{\link{overlapTable}} for calculation of overlap counts and p-values
 
 \code{\link{standardColors}} for standard non-numeric WGCNA labels.
 }

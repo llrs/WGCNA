@@ -526,15 +526,15 @@ the relationships between co-expression modules. BMC Systems Biology 2007,
 1:54
 }
 \seealso{
-\code{\link{goodSamplesGenesMS}} for basic quality control and filtering;
+\code{\link{goodSamplesGenesMS}} for basic quality control and filtering
 
 \code{\link{adjacency}}, \code{\link{TOMsimilarity}} for network
-construction;
+construction
 
-\code{\link{hclust}} for hierarchical clustering;
+\code{\link{hclust}} for hierarchical clustering
 
 \code{\link[dynamicTreeCut]{cutreeDynamic}} for adaptive branch cutting in
-hierarchical clustering dendrograms;
+hierarchical clustering dendrograms
 
 \code{\link{mergeCloseModules}} for merging of close modules.
 }

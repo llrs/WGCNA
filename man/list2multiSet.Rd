@@ -19,7 +19,7 @@ For \code{list2multiSet}, a multiSet structure; for
 \code{multiSet2list}, the corresponding list.
 }
 \description{
-\code{list2multiSet} converts a list to a multiSet structure;
+\code{list2multiSet} converts a list to a multiSet structure
 \code{multiSet2list} does the inverse.
 }
 \details{

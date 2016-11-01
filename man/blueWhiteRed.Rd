@@ -32,11 +32,11 @@ saturated, respectively.
 \examples{
 
   par(mfrow = c(3, 1))
-  displayColors(blueWhiteRed(50));
+  displayColors(blueWhiteRed(50))
   title("gamma = 1")
-  displayColors(blueWhiteRed(50, 3));
+  displayColors(blueWhiteRed(50, 3))
   title("gamma = 3")
-  displayColors(blueWhiteRed(50, 0.5));
+  displayColors(blueWhiteRed(50, 0.5))
   title("gamma = 0.5")
 
 }

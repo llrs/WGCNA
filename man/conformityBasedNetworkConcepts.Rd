@@ -97,7 +97,7 @@ e1000117
 }
 \seealso{
 \code{\link{networkConcepts}} for calculation of eigennode based
-network concepts for a correlation network;
+network concepts for a correlation network
 
 \code{\link{fundamentalNetworkConcepts}} for calculation of fundamental
 network concepts only.

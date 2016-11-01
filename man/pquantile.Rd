@@ -36,18 +36,18 @@ calculate the median and mean, respectively.
 
 
 # Generate 2 simple matrices
-a = matrix(c(1:12), 3, 4);
-b = a+ 1;
-c = a + 2;
+a = matrix(c(1:12), 3, 4)
+b = a+ 1
+c = a + 2
 
 # Set the colnames on matrix a
 
-colnames(a) = paste0("col_", c(1:4));
+colnames(a) = paste0("col_", c(1:4))
 
 # Example use
 
 pquantile(prob = 0.5, a, b, c)
-pquantile(prob = c(0, 0.5, 1), a,b, c);
+pquantile(prob = c(0, 0.5, 1), a,b, c)
 
 pmean(a,b,c)
 pmedian(a,b,c)

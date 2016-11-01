@@ -271,7 +271,7 @@ multiSet.subset <- function(multiSet, rowIndex = NULL, colIndex = NULL,
 # Method to allow subseting the data of a multiSet
 #' @export
 #' @rdname multiSet.subset
-#' @alias multiSet.subset
+#' @aliases  multiSet.subset
 #' @param i Columns to subset of the object
 #' @param j Rows to subset of the object
 #' @param x MultiSet Object to subset

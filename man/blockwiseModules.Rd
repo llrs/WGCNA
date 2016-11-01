@@ -355,15 +355,15 @@ Weighted Gene Co-Expression Network Analysis", Statistical Applications in
 Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 }
 \seealso{
-\code{\link{goodSamplesGenes}} for basic quality control and filtering;
+\code{\link{goodSamplesGenes}} for basic quality control and filtering
 
 \code{\link{adjacency}}, \code{\link{TOMsimilarity}} for network
-construction;
+construction
 
-\code{\link[stats]{hclust}} for hierarchical clustering;
+\code{\link[stats]{hclust}} for hierarchical clustering
 
 \code{\link[dynamicTreeCut]{cutreeDynamic}} for adaptive branch cutting in
-hierarchical clustering dendrograms;
+hierarchical clustering dendrograms
 
 \code{\link{mergeCloseModules}} for merging of close modules.
 }

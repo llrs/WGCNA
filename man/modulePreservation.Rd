@@ -4,7 +4,7 @@
 \alias{modulePreservation}
 \title{Calculation of module preservation statistics}
 \usage{
-modulePreservation(multiData, multiColor, dataIsExpr = TRUE,
+modulePreservation(multiSet, multiColor, dataIsExpr = TRUE,
   networkType = "unsigned", corFnc = "cor", corOptions = "use = 'p'",
   referenceNetworks = 1, testNetworks = NULL, nPermutations = 100,
   includekMEallInSummary = FALSE, restrictSummaryForGeneralNetworks = TRUE,
@@ -13,15 +13,15 @@ modulePreservation(multiData, multiColor, dataIsExpr = TRUE,
   calculateCor.kIMall = FALSE, calculateClusterCoeff = FALSE,
   useInterpolation = FALSE, checkData = TRUE, greyName = NULL,
   savePermutedStatistics = TRUE, loadPermutedStatistics = FALSE,
-  permutedStatisticsFile = if (useInterpolation)
-  "permutedStats-intrModules.RData" else "permutedStats-actualModules.RData",
+  permutedStatisticsFile = ifelse(useInterpolation,
+  "permutedStats-intrModules.RData", "permutedStats-actualModules.RData"),
   plotInterpolation = TRUE,
   interpolationPlotFile = "modulePreservationInterpolationPlots.pdf",
   discardInvalidOutput = TRUE, parallelCalculation = FALSE, verbose = 1,
   indent = 0)
 }
 \arguments{
-\item{multiData}{expression data or adjacency data in the multi-set format
+\item{multiSet}{expression data or adjacency data in the multi-set format
 (see \code{\link{checkSets}}). A vector of lists, one per set. Each set must
 contain a component \code{data} that contains the expression or adjacency
 data. If expression data are used, rows correspond to samples and columns to
@@ -34,8 +34,8 @@ module labels of genes in \code{multiExpr}. The components must be named
 using the same names that are used in \code{multiExpr}; these names are used
 top match labels to expression data sets. See details.}
 
-\item{dataIsExpr}{logical: if \code{TRUE}, \code{multiData} will be
-interpreted as expression data; if \code{FALSE}, \code{multiData} will be
+\item{dataIsExpr}{logical: if \code{TRUE}, \code{multiSet} will be
+interpreted as expression data; if \code{FALSE}, \code{multiSet} will be
 interpreted as adjacencies.}
 
 \item{networkType}{network type. Allowed values are (unique abbreviations
@@ -255,7 +255,7 @@ to appear
 }
 \seealso{
 Network construction and module detection functions in the WGCNA
-package such as \code{\link{adjacency}}, \code{\link{blockwiseModules}};
+package such as \code{\link{adjacency}}, \code{\link{blockwiseModules}}
 rudimentary cleaning in \code{\link{goodSamplesGenesMS}}; the WGCNA
 implementation of correlation in \code{\link{cor}}.
 }

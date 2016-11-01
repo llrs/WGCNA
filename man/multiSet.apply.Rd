@@ -83,7 +83,7 @@ required to each be a matrix or a data frame and have the same number of
 columns. In a "loose" multiSet structure, the \code{data} components can be
 anything (but for most purposes should be of comparable type and content).
 
-\code{multiSet.apply} works on any "loose" multiSet structure;
+\code{multiSet.apply} works on any "loose" multiSet structure
 \code{multiSet.applyToSubset} assumes (and checks for) a "strict" multiSet
 structure.
 }
@@ -91,7 +91,7 @@ structure.
 Peter Langfelder
 }
 \seealso{
-\code{\link{multiSet}} to create a multiSet structure;
+\code{\link{multiSet}} to create a multiSet structure
 \code{\link{multiSet.applyToSubset}} for applying a function to a subset of a
 multiSet structure; \code{\link{multiSet.mapply}} for vectorizing over several
 arguments.

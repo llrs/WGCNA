@@ -60,7 +60,7 @@ Peter Langfelder and Steve Horvath
 }
 \seealso{
 \code{\link{goodGenes}}, \code{\link{goodSamples}},
-\code{\link{goodSamplesGenes}} for cleaning individual sets separately;
+\code{\link{goodSamplesGenes}} for cleaning individual sets separately
 
 \code{\link{goodGenesMS}}, \code{\link{goodSamplesGenesMS}} for additional
 cleaning of multiple data sets together.

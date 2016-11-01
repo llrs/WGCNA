@@ -30,6 +30,12 @@ given name cannot be matched to a column, an error will be thrown. If
 if the input \code{multiSet} does not follow the "strict" format.}
 
 \item{drop}{logical: should dimensions with extent 1 be dropped?}
+
+\item{x}{MultiSet Object to subset}
+
+\item{i}{Columns to subset of the object}
+
+\item{j}{Rows to subset of the object}
 }
 \value{
 A multiSet structure containing the selected rows and columns. Note

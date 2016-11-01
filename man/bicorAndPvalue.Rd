@@ -44,10 +44,10 @@ input.
 \examples{
 
 # generate random data with non-zero correlation
-set.seed(1);
-a = rnorm(100);
-b = rnorm(100) + a;
-x = cbind(a, b);
+set.seed(1)
+a = rnorm(100)
+b = rnorm(100) + a
+x = cbind(a, b)
 # Call the function and display all results
 bicorAndPvalue(x)
 # Set some components to NA
@@ -65,7 +65,7 @@ Robust Correlations and Hierarchical Clustering.  Journal of Statistical
 Software, 46(11), 1-17.  \url{http://www.jstatsoft.org/v46/i11/}
 }
 \seealso{
-\code{\link{bicor}} for calculation of correlations only;
+\code{\link{bicor}} for calculation of correlations only
 
 \code{\link{cor.test}} for another function for significance test of
 correlations

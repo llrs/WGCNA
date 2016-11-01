@@ -132,7 +132,7 @@ if (require(infotheo, quietly = TRUE) &&
   MIadj=mutualInfoAdjacency(datE=datE)
 } else 
   printFlush(paste("Please install packages infotheo, minet and entropy",
-                   "before running this example."));
+                   "before running this example."))
 
 
 }

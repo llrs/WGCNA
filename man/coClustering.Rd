@@ -44,11 +44,11 @@ indicates a low preservation.
 
   # An example with random (unrelated) clusters:
 
-  set.seed(1);
-  nModules = 10;
-  nGenes = 1000;
-  cl1 = sample(c(1:nModules), nGenes, replace = TRUE);
-  cl2 = sample(c(1:nModules), nGenes, replace = TRUE);
+  set.seed(1)
+  nModules = 10
+  nGenes = 1000
+  cl1 = sample(c(1:nModules), nGenes, replace = TRUE)
+  cl2 = sample(c(1:nModules), nGenes, replace = TRUE)
   coClustering(cl1, cl2)
 
   # For the same reference and test clustering:

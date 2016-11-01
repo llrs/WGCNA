@@ -226,7 +226,7 @@ the relationships between co-expression modules. BMC Systems Biology 2007,
 calculation. Parts of its output are natural input for this function.
 
 \code{\link[dynamicTreeCut]{cutreeDynamic}} for adaptive branch cutting in
-hierarchical clustering dendrograms;
+hierarchical clustering dendrograms
 
 \code{\link{mergeCloseModules}} for merging of close modules.
 }

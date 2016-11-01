@@ -37,9 +37,9 @@ than 9 median absolute deviations from the median.
 }
 \examples{
 
-x = rnorm(100);
-x[1] = 10;
-plot(x, bicovWeights(x));
+x = rnorm(100)
+x[1] = 10
+plot(x, bicovWeights(x))
 
 }
 \author{

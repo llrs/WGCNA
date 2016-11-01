@@ -393,8 +393,9 @@ modulePreservation = function(
    greyName = NULL,
    savePermutedStatistics = TRUE,
    loadPermutedStatistics = FALSE,
-   permutedStatisticsFile =
-      if (useInterpolation) "permutedStats-intrModules.RData" else "permutedStats-actualModules.RData",
+   permutedStatisticsFile = ifelse(useInterpolation,
+                                   "permutedStats-intrModules.RData",
+                                   "permutedStats-actualModules.RData"),
    plotInterpolation = TRUE,
    interpolationPlotFile = "modulePreservationInterpolationPlots.pdf",
    discardInvalidOutput = TRUE,

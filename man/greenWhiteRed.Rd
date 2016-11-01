@@ -38,11 +38,11 @@ returned by the function \code{\link{blueWhiteRed}}.
 \examples{
 \dontrun{
   par(mfrow = c(3, 1))
-  displayColors(greenWhiteRed(50));
+  displayColors(greenWhiteRed(50))
   title("gamma = 1")
-  displayColors(greenWhiteRed(50, 3));
+  displayColors(greenWhiteRed(50, 3))
   title("gamma = 3")
-  displayColors(greenWhiteRed(50, 0.5));
+  displayColors(greenWhiteRed(50, 0.5))
   title("gamma = 0.5")
 }
 }
@@ -51,7 +51,7 @@ Peter Langfelder
 }
 \seealso{
 \code{\link{blueWhiteRed}} for a color sequence more friendly to
-people with the most common type of color blindness;
+people with the most common type of color blindness
 
 \code{\link{numbers2colors}} for a function that produces a color
 representation for continuous numbers.

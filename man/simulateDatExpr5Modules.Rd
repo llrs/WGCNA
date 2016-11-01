@@ -59,7 +59,7 @@ their seed eigengene. See the functions \code{\link{simulateModule}} and
 Steve Horvath and Peter Langfelder
 }
 \seealso{
-\code{\link{simulateModule}} for simulation of individual modules;
+\code{\link{simulateModule}} for simulation of individual modules
 
 \code{\link{simulateDatExpr}} for a more comprehensive data simulation
 interface.

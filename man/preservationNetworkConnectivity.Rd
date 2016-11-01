@@ -123,7 +123,7 @@ the relationships between co-expression modules. BMC Systems Biology 2007,
 1:54
 }
 \seealso{
-\code{\link{adjacency}} for calculation of adjacency;
+\code{\link{adjacency}} for calculation of adjacency
 }
 \keyword{misc}
 

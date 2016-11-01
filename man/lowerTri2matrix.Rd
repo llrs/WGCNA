@@ -31,8 +31,8 @@ result of the function is then an n times n matrix.
 
   # Create a symmetric matrix
   m = matrix(c(1:16), 4,4)
-  mat = (m + t(m));
-  diag(mat) = 0;
+  mat = (m + t(m))
+  diag(mat) = 0
 
   # Print the matrix
   mat
@@ -44,7 +44,7 @@ result of the function is then an n times n matrix.
   all.equal(x1, x2) # The vectors are equal
 
   # Turn the vectors back into matrices
-  new.mat = lowerTri2matrix(x1, diag = 0);
+  new.mat = lowerTri2matrix(x1, diag = 0)
 
   # Did we get back the same matrix?
 

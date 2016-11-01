@@ -132,14 +132,14 @@ http://www.genetics.ucla.edu/labs/horvath/CoexpressionNetwork/EigengeneNetwork/S
 }
 \seealso{
 \code{\link{simulateEigengeneNetwork}} for a simulation of eigengenes with a
-given causal structure;
+given causal structure
 
-\code{\link{simulateDatExpr}} for simulation of individual data sets;
+\code{\link{simulateDatExpr}} for simulation of individual data sets
 
 \code{\link{simulateDatExpr5Modules}} for a simple simulation of a data set
-consisting of 5 modules;
+consisting of 5 modules
 
-\code{\link{simulateModule}} for simulations of individual modules;
+\code{\link{simulateModule}} for simulations of individual modules
 }
 \keyword{misc}
 

@@ -19,6 +19,14 @@ The union or intersection of the given sets.
 Union and intersection of multiple sets. These function generalize the
 standard functions \code{\link{union}} and \code{\link{intersect}}.
 }
+\examples{
+data1 <- matrix(rnorm(100L), 20L, 5L)
+data2 <- matrix(rnorm(50L), 10L, 5L)
+colnames(data1) <- LETTERS[1:5]
+colnames(data2) <- LETTERS[2:6]
+multiUnion(list(data1, data2))
+multiIntersect(list(data1, data2))
+}
 \author{
 Peter Langfelder
 }

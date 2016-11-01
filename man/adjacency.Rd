@@ -82,7 +82,7 @@ by calling the function given in \code{corFnc} (for correlation networks) or
 \code{distFnc} (for distance networks), transforms the similarity according
 to \code{type} and raises it to \code{power}, resulting in a weighted
 network adjacency matrix. If \code{selectCols} is given, the \code{corFnc}
-function will be given arguments \code{(datExpr, datExpr[selectCols], ...)};
+function will be given arguments \code{(datExpr, datExpr[selectCols], ...)}
 hence the returned adjacency will have rows corresponding to all genes and
 columns corresponding to genes selected by \code{selectCols}.
 

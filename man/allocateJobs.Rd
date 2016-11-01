@@ -26,8 +26,8 @@ in contiguous blocks as evenly as possible.
 }
 \examples{
 
-allocateJobs(10, 3);
-allocateJobs(2,4);
+allocateJobs(10, 3)
+allocateJobs(2,4)
 
 }
 \author{

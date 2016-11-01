@@ -162,7 +162,7 @@ strings or color squares, or both.
 To get simple text labels, use \code{colorLabels=FALSE} and pass the desired
 row and column labels in \code{yLabels} and \code{xLabels}, respectively.
 
-To label rows and columns by color squares, use \code{colorLabels=TRUE};
+To label rows and columns by color squares, use \code{colorLabels=TRUE}
 \code{yLabels} and \code{xLabels} are then expected to represent valid
 colors. For reasons of compatibility with other functions, each entry in
 \code{yLabels} and \code{xLabels} is expected to consist of a color
@@ -181,24 +181,24 @@ color labels and, additionally, pass the desired text annotation in the
 
 
 # This example illustrates 4 main ways of annotating columns and rows of a heatmap.
-# Copy and paste the whole example into an R session with an interactive plot window;
+# Copy and paste the whole example into an R session with an interactive plot window
 # alternatively, you may replace the command sizeGrWindow below by opening
 # another graphical device such as pdf.
 
 # Generate a matrix to be plotted
 
-nCol = 8; nRow = 7;
-mat = matrix(runif(nCol*nRow, min = -1, max = 1), nRow, nCol);
+nCol = 8; nRow = 7
+mat = matrix(runif(nCol*nRow, min = -1, max = 1), nRow, nCol)
 
-rowColors = standardColors(nRow);
-colColors = standardColors(nRow + nCol)[(nRow+1):(nRow + nCol)];
+rowColors = standardColors(nRow)
+colColors = standardColors(nRow + nCol)[(nRow+1):(nRow + nCol)]
 
-rowColors;
-colColors;
+rowColors
+colColors
 
 sizeGrWindow(9,7)
 par(mfrow = c(2,2))
-par(mar = c(4, 5, 4, 6));
+par(mar = c(4, 5, 4, 6))
 
 # Label rows and columns by text:
 
@@ -206,42 +206,42 @@ labeledHeatmap(mat, xLabels = colColors, yLabels = rowColors,
                colors = greenWhiteRed(50),
                setStdMargins = FALSE,
                textMatrix = signif(mat, 2),
-               main = "Text-labeled heatmap");
+               main = "Text-labeled heatmap")
 
 # Label rows and columns by colors:
 
-rowLabels = paste("ME", rowColors, sep="");
-colLabels = paste("ME", colColors, sep="");
+rowLabels = paste("ME", rowColors, sep="")
+colLabels = paste("ME", colColors, sep="")
 
 labeledHeatmap(mat, xLabels = colLabels, yLabels = rowLabels,
                colorLabels = TRUE,
                colors = greenWhiteRed(50),
                setStdMargins = FALSE,
                textMatrix = signif(mat, 2),
-               main = "Color-labeled heatmap");
+               main = "Color-labeled heatmap")
 
 # Mix text and color labels:
 
-rowLabels[3] = "Row 3";
-colLabels[1] = "Column 1";
+rowLabels[3] = "Row 3"
+colLabels[1] = "Column 1"
 
 labeledHeatmap(mat, xLabels = colLabels, yLabels = rowLabels,
                colorLabels = TRUE,
                colors = greenWhiteRed(50),
                setStdMargins = FALSE,
                textMatrix = signif(mat, 2),
-               main = "Mix-labeled heatmap");
+               main = "Mix-labeled heatmap")
 
 # Color labels and additional text labels
 
-rowLabels = paste("ME", rowColors, sep="");
-colLabels = paste("ME", colColors, sep="");
+rowLabels = paste("ME", rowColors, sep="")
+colLabels = paste("ME", colColors, sep="")
 
-extraRowLabels = paste("Row", c(1:nRow));
-extraColLabels = paste("Column", c(1:nCol));
+extraRowLabels = paste("Row", c(1:nRow))
+extraColLabels = paste("Column", c(1:nCol))
 
 # Extend margins to fit all labels
-par(mar = c(6, 6, 4, 6));
+par(mar = c(6, 6, 4, 6))
 labeledHeatmap(mat, xLabels = colLabels, yLabels = rowLabels,
                xSymbols = extraColLabels,
                ySymbols = extraRowLabels,
@@ -249,7 +249,7 @@ labeledHeatmap(mat, xLabels = colLabels, yLabels = rowLabels,
                colors = greenWhiteRed(50),
                setStdMargins = FALSE,
                textMatrix = signif(mat, 2),
-               main = "Text- + color-labeled heatmap");
+               main = "Text- + color-labeled heatmap")
 
 
 }

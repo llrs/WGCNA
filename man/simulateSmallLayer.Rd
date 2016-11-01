@@ -68,7 +68,7 @@ The simulated genes will be returned in the order given in \code{order}.
 Peter Langfelder
 }
 \seealso{
-\code{\link{simulateModule}} for simulation of individual modules;
+\code{\link{simulateModule}} for simulation of individual modules
 
 \code{\link{simulateDatExpr}} for the main gene expression simulation
 function.

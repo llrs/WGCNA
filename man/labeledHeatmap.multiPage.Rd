@@ -104,7 +104,7 @@ useful for large heatmaps where labels on individual columns and rows may
 become unreadably small (or overlap).
 }
 \details{
-The function \code{\link{labeledHeatmap}} is used to produce each plot/page;
+The function \code{\link{labeledHeatmap}} is used to produce each plot/page
 most arguments are described in more detail in the help file for that
 function.
 
@@ -116,7 +116,7 @@ column labels can be either character strings or color squares, or both.
 To get simple text labels, use \code{colorLabels=FALSE} and pass the desired
 row and column labels in \code{yLabels} and \code{xLabels}, respectively.
 
-To label rows and columns by color squares, use \code{colorLabels=TRUE};
+To label rows and columns by color squares, use \code{colorLabels=TRUE}
 \code{yLabels} and \code{xLabels} are then expected to represent valid
 colors. For reasons of compatibility with other functions, each entry in
 \code{yLabels} and \code{xLabels} is expected to consist of a color
@@ -141,7 +141,7 @@ Peter Langfelder
 }
 \seealso{
 The workhorse function \code{\link{labeledHeatmap}} for the actual
-heatmap plot;
+heatmap plot
 
 function \code{\link{allocateJobs}} for the allocation of rows/columns to
 each plot.

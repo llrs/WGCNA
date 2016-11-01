@@ -25,7 +25,7 @@ Set attributes on each \code{data} component of a multiSet structure
 Peter Langfelder
 }
 \seealso{
-\code{\link{multiSet}} to create a multiSet structure;
+\code{\link{multiSet}} to create a multiSet structure
 
 \code{is.multiSet} for a description of the multiSet structure.
 }

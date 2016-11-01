@@ -85,11 +85,19 @@ of those arguments in \code{...} that are multiSet structures in the
 "loose" sense, and to each component of those arguments in \code{...} that
 are not multiSet structures.
 }
+\examples{
+data1 <- matrix(rnorm(100L), 20L, 5L)
+data2 <- matrix(rnorm(50L), 10L, 5L)
+colnames(data1) <- LETTERS[1:5]
+colnames(data2) <- LETTERS[2:6]
+md <- list2multiSet(list(Set1 = data1, Set2 = data2))
+multiSet.mapply(md, )
+}
 \author{
 Peter Langfelder
 }
 \seealso{
-\code{\link{multiSet}} to create a multiSet structure;
+\code{\link{multiSet}} to create a multiSet structure
 
 \code{multiSet.apply} for application of a function to a single multiSet
 structure.

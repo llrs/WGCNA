@@ -116,7 +116,7 @@ include selecting a representative probe for each gene in microarray data.
 }
 \details{
 This function was inspired by \code{\link{collapseRows}}, but there are also
-important differences. This function focuses on selecting representatives;
+important differences. This function focuses on selecting representatives
 when summarization is more important, \code{collapseRows} provides more
 flexibility since it does not require that a single representative be
 selected.

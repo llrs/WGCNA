@@ -33,7 +33,7 @@ This function requires a "strict" multiSet structure.
 Peter Langfelder
 }
 \seealso{
-\code{\link{multiSet}} to create a multiSet structure;
+\code{\link{multiSet}} to create a multiSet structure
 
 \code{\link{rbind}} for various subtleties of the row binding operation.
 }

@@ -20,7 +20,7 @@ functions in this library.
 }
 \examples{
 
-standardColors(10);
+standardColors(10)
 
 }
 \author{

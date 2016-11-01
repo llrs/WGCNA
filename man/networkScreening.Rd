@@ -38,7 +38,7 @@ eigengene"?}
 
 \item{removeDiag}{logical: remove the diagonal?}
 
-\item{weightESy}{weight to use for the trait as an additional eigengene;
+\item{weightESy}{weight to use for the trait as an additional eigengene
 should be between 0 and 1}
 
 \item{getQValues}{logical: should q-values be calculated?}

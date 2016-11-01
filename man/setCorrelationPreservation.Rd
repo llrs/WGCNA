@@ -52,7 +52,7 @@ the relationships between co-expression modules. BMC Systems Biology 2007,
 1:54
 }
 \seealso{
-\code{\link{multiSetMEs}} for module eigengene calculation;
+\code{\link{multiSetMEs}} for module eigengene calculation
 
 \code{\link{plotEigengeneNetworks}} for eigengene network visualization.
 }

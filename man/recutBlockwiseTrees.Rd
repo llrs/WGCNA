@@ -163,7 +163,7 @@ substantial time by re-using already calculated networks and dendrograms.
 \details{
 For details on blockwise module detection, see
 \code{\link{blockwiseModules}}. This function implements the module
-detection subset of the functionality of \code{\link{blockwiseModules}};
+detection subset of the functionality of \code{\link{blockwiseModules}}
 network construction and clustering must be performed in advance. The
 primary use of this function is to experiment with module detection settings
 without having to re-execute long network and clustering calculations whose
@@ -199,10 +199,10 @@ Weighted Gene Co-Expression Network Analysis", Statistical Applications in
 Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 }
 \seealso{
-\code{\link{blockwiseModules}} for full module calculation;
+\code{\link{blockwiseModules}} for full module calculation
 
 \code{\link[dynamicTreeCut]{cutreeDynamic}} for adaptive branch cutting in
-hierarchical clustering dendrograms;
+hierarchical clustering dendrograms
 
 \code{\link{mergeCloseModules}} for merging of close modules.
 }

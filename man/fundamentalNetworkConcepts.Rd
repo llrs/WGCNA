@@ -65,7 +65,7 @@ Network Analysis. PLoS Comput Biol 4(8): e1000117
 }
 \seealso{
 \code{\link{conformityBasedNetworkConcepts}} for calculation of
-conformity based network concepts for a network adjacency matrix;
+conformity based network concepts for a network adjacency matrix
 
 \code{\link{networkConcepts}}, for calculation of conformity based and
 eigennode based network concepts for a correlation network.
