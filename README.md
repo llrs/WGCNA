@@ -1,7 +1,7 @@
 
 [![Build Status](https://travis-ci.org/llrs/WGCNA.svg?branch=master)](https://travis-ci.org/llrs/WGCNA)   
 
-[![codecov](https://codecov.io/gh/llrs/WGCNA/branch/master/graph/badge.svg)](https://codecov.io/gh/llrs/WGCNA)  
+[![Code coverage](https://codecov.io/gh/llrs/WGCNA/branch/master/graph/badge.svg)](https://codecov.io/gh/llrs/WGCNA)  
 
 [![HitCount](https://hitt.herokuapp.com/llrs/WGCNA.svg)](https://github.com/llrs/WGCNA)  
 
@@ -15,4 +15,5 @@ WGCNA — Weighted Correlation Network Analysis. [Homepage](http://www.gen
 - [x] Learn how to make packages (`roxygen`)
 - [ ] Learn how WGCNA works
 - [x] Improve coherence of the code
-- [x] Simplify code
+- [ ] Simplify code
+- [x] Learn how to do test, start TDD
