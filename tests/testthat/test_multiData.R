@@ -79,6 +79,18 @@ test_that("checkSets works properly", {
     expect_equal(testing$nGenes, 5L)
     expect_equal(testing$nSamples, c(20L, 10L))
     expect_true(testing$structureOK)
+
+    datat3 <- matrix(rnorm(25L), 5L, 5L)
+    md2 <- multiSet(Set1 = data1, Set2 = data3)
+    ch2 <- checkSets(md2, checkStructure = TRUE)
+    expect_false(ch2$structureOK)
+    expect_error(checkSets(md2))
+    expect_error(checkSets())
+
+    ch4 <- checkSets(list(data1, data2), checkStructure = T)
+    expect_false(ch4$structureOK)
+    expect_equal(ch4$nGenes, 0L)
+    expect_equal(ch4$nSamples, 0L)
 })
 
 test_that("union and intersect work", {
@@ -86,9 +98,25 @@ test_that("union and intersect work", {
     data2 <- matrix(rnorm(50L), 10L, 5L)
     colnames(data1) <- LETTERS[1:5]
     colnames(data2) <- LETTERS[2:6]
+
+    expect_true(multiUnion(list(data1)) == 1)
+    expect_true(multiIntersect(list(data1)) == 1)
+    expect_true(is.null(multiUnion()))
+    expect_true(is.null(multiIntersect()))
+
     uni <- multiUnion(list(data1, data2))
     int <- multiIntersect(list(data1, data2))
 
     expect_equal(length(uni), 150L)
     expect_equal(length(int), 0L)
 })
+
+# test multiSet.subset or replace it
+# .calculateIndicator
+# multiSet.applyToSubset not needed if subseting works properly
+# multiSet.mapply Used in blockwiseModulesC and branchSplit
+# multiSet.rbindSelf
+# multiSet.setAttr delete if
+# multiSet.setColnames Used in consensusRepresentatives
+# multiSet.colnames test it and replace the above function
+# keepCommonProbes

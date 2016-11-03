@@ -178,7 +178,7 @@ checkSets <- function(data, checkStructure = FALSE, useSets = NULL) {
         for (set in useSets) {
             if (nGenes != dim(data[[set]]$data)[2]) {
                 if (checkStructure) {
-                    structureOK = FALSE
+                    structureOK <- FALSE
                 } else {
                     stop("Incompatible number of genes in set 1 and ", set)
                 }
@@ -413,10 +413,9 @@ multiSet2list <- function(multiSet) {
 #' function on each \code{data} component in the input multiSet structure.
 #' Other components are simply copied.
 #' @author Peter Langfelder
-#' @seealso \code{\link{multiSet}} to create a multiSet structure
-#' \code{\link{multiSet.applyToSubset}} for applying a function to a subset of a
-#' multiSet structure; \code{\link{multiSet.mapply}} for vectorizing over several
-#' arguments.
+#' @seealso
+#' \code{\link{multiSet}} to create a multiSet structure
+#' \code{\link{multiSet.mapply}} for vectorizing over several arguments.
 #' @keywords misc
 multiSet.apply <- function(
     # What to do
@@ -449,7 +448,7 @@ multiSet.apply <- function(
 
   calculate = .calculateIndicator(nSets, mdaExistingResults, mdaUpdateIndex)
 
-  FUN = match.fun(FUN)
+  FUN <- match.fun(FUN)
   for (set in 1:nSets) {
     if (calculate[set]) {
       if (mdaVerbose > 0) {
@@ -784,7 +783,7 @@ multiSet.mapply <- function(FUN, ..., MoreArgs = NULL,
 
     calculate = .calculateIndicator(nSets, mdmaExistingResults, mdmaUpdateIndex)
 
-    FUN = match.fun(FUN)
+    FUN <- match.fun(FUN)
     for (set in 1:nSets) {
         if (calculate[set]) {
             if (mdmaVerbose > 0) {
