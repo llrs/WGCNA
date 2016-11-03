@@ -91,7 +91,7 @@ data2 <- matrix(rnorm(50L), 10L, 5L)
 colnames(data1) <- LETTERS[1:5]
 colnames(data2) <- LETTERS[2:6]
 md <- list2multiSet(list(Set1 = data1, Set2 = data2))
-multiSet.mapply(md, )
+multiSet.mapply(md, FUN = sum)
 }
 \author{
 Peter Langfelder
