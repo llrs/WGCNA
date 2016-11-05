@@ -80,11 +80,10 @@ test_that("checkSets works properly", {
     expect_equal(testing$nSamples, c(20L, 10L))
     expect_true(testing$structureOK)
 
-    datat3 <- matrix(rnorm(25L), 5L, 5L)
+    data3 <- matrix(rnorm(10L), 5L, 2L)
     md2 <- multiSet(Set1 = data1, Set2 = data3)
     ch2 <- checkSets(md2, checkStructure = TRUE)
     expect_false(ch2$structureOK)
-    expect_error(checkSets(md2))
     expect_error(checkSets())
 
     ch4 <- checkSets(list(data1, data2), checkStructure = T)
@@ -99,10 +98,8 @@ test_that("union and intersect work", {
     colnames(data1) <- LETTERS[1:5]
     colnames(data2) <- LETTERS[2:6]
 
-    expect_true(multiUnion(list(data1)) == 1)
-    expect_true(multiIntersect(list(data1)) == 1)
-    expect_true(is.null(multiUnion()))
-    expect_true(is.null(multiIntersect()))
+    expect_true(is.null(multiUnion(NULL)))
+    expect_true(is.null(multiIntersect(NULL)))
 
     uni <- multiUnion(list(data1, data2))
     int <- multiIntersect(list(data1, data2))
