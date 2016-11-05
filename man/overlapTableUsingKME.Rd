@@ -71,30 +71,30 @@ defined in several ways (generally involving kME) based on user input.
 
 set.seed(100)
 ME.A = sample(1:100,50);  ME.B = sample(1:100,50)
-ME.C = sample(1:100,50);  ME.D = sample(1:100,50) 
-ME.E = sample(1:100,50);  ME.F = sample(1:100,50) 
-ME.G = sample(1:100,50);  ME.H = sample(1:100,50) 
+ME.C = sample(1:100,50);  ME.D = sample(1:100,50)
+ME.E = sample(1:100,50);  ME.F = sample(1:100,50)
+ME.G = sample(1:100,50);  ME.H = sample(1:100,50)
 ME1     = data.frame(ME.A, ME.B, ME.C, ME.D, ME.E)
 ME2     = data.frame(ME.A, ME.C, ME.D, ME.E, ME.F, ME.G, ME.H)
 simDat1 = simulateDatExpr(ME1,1000,c(0.2,0.1,0.08,0.05,0.04,0.3), signed=TRUE)
-simDat2 = simulateDatExpr(ME2,1000,c(0.2,0.1,0.08,0.05,0.04,0.03,0.02,0.3), 
+simDat2 = simulateDatExpr(ME2,1000,c(0.2,0.1,0.08,0.05,0.04,0.03,0.02,0.3),
                           signed=TRUE)
 
 # Now run the function using assigned genes
-results = overlapTableUsingKME(simDat1$datExpr, simDat2$datExpr, 
-                   labels2colors(simDat1$allLabels), labels2colors(simDat2$allLabels), 
+results = overlapTableUsingKME(simDat1$datExpr, simDat2$datExpr,
+                   labels2colors(simDat1$allLabels), labels2colors(simDat2$allLabels),
                    cutoffMethod="assigned")
 results$PvaluesHypergeo
 
 # Now run the function using a p-value cutoff, and inputting the original MEs
 colnames(ME1) = standardColors(5);  colnames(ME2) = standardColors(7)
-results = overlapTableUsingKME(simDat1$datExpr, simDat2$datExpr, 
-                      labels2colors(simDat1$allLabels), 
-                      labels2colors(simDat2$allLabels), 
+results = overlapTableUsingKME(simDat1$datExpr, simDat2$datExpr,
+                      labels2colors(simDat1$allLabels),
+                      labels2colors(simDat2$allLabels),
                       ME1, ME2, cutoffMethod="pvalue", cutoff=0.05)
 results$PvaluesHypergeo
 
-# Check which genes are in common between the black modules from set 1 and 
+# Check which genes are in common between the black modules from set 1 and
 # the green module from set 2
 results$OverlappingGenes$MM1_green_MM2_black
 

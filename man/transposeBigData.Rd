@@ -37,7 +37,7 @@ This function can be considered a wrapper of \code{\link{t}()}
 \examples{
 
 x=data.frame(matrix(1:10000,nrow=4,ncol=2500))
-dimnames(x)[[2]]=paste("Y",1:2500,sep="")
+dimnames(x)[[2]]=paste0("Y",1:2500)
 xTranspose=transposeBigData(x)
 x[1:4,1:4]
 xTranspose[1:4,1:4]

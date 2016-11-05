@@ -210,8 +210,8 @@ labeledHeatmap(mat, xLabels = colColors, yLabels = rowColors,
 
 # Label rows and columns by colors:
 
-rowLabels = paste("ME", rowColors, sep="")
-colLabels = paste("ME", colColors, sep="")
+rowLabels = paste0("ME", rowColors)
+colLabels = paste0("ME", colColors)
 
 labeledHeatmap(mat, xLabels = colLabels, yLabels = rowLabels,
                colorLabels = TRUE,
@@ -234,8 +234,8 @@ labeledHeatmap(mat, xLabels = colLabels, yLabels = rowLabels,
 
 # Color labels and additional text labels
 
-rowLabels = paste("ME", rowColors, sep="")
-colLabels = paste("ME", colColors, sep="")
+rowLabels = paste0("ME", rowColors)
+colLabels = paste0("ME", colColors)
 
 extraRowLabels = paste("Row", c(1:nRow))
 extraColLabels = paste("Column", c(1:nCol))

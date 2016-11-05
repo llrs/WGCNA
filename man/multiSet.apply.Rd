@@ -92,9 +92,7 @@ Peter Langfelder
 }
 \seealso{
 \code{\link{multiSet}} to create a multiSet structure
-\code{\link{multiSet.applyToSubset}} for applying a function to a subset of a
-multiSet structure; \code{\link{multiSet.mapply}} for vectorizing over several
-arguments.
+\code{\link{multiSet.mapply}} for vectorizing over several arguments.
 }
 \keyword{misc}
 

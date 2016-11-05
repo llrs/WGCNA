@@ -79,7 +79,7 @@ set.seed(100)
 MEturquoise = sample(1:100,50)
 MEblue      = sample(1:100,50)
 MEbrown     = sample(1:100,50)
-MEyellow    = sample(1:100,50) 
+MEyellow    = sample(1:100,50)
 MEgreen     = c(MEyellow[1:30], sample(1:100,20))
 MEred	    = c(MEbrown [1:20], sample(1:100,30))
 #MEblack	    = c(MEblue  [1:25], sample(1:100,25))
@@ -88,12 +88,12 @@ dat1 = simulateDatExpr(ME, 400, c(0.15,0.13,0.12,0.10,0.09,0.09,0.1), signed=TRU
 TOM1  = TOMsimilarityFromExpr(dat1$datExpr, networkType="signed")
 tree1 = fastcluster::hclust(as.dist(1-TOM1),method="average")
 
-## Here is an example using different mergePercentages, 
+## Here is an example using different mergePercentages,
 # setting an inclusive threshPercent (91)
 colorh1  <- colorPlot <- labels2colors(dat1$allLabels)
 merges = c(65,40,20,5)
-for (m in merges)  
-   colorPlot = cbind(colorPlot, 
+for (m in merges)
+   colorPlot = cbind(colorPlot,
                      moduleMergeUsingKME(dat1$datExpr,colorh1,
                         threshPercent=91, mergePercent=m)$moduleColors)
 plotDendroAndColors(tree1, colorPlot, c("ORIG",merges), dendroLabels=FALSE)
@@ -101,21 +101,21 @@ plotDendroAndColors(tree1, colorPlot, c("ORIG",merges), dendroLabels=FALSE)
 ## Here is an example using a lower reassignScale (so that more genes get reassigned)
 colorh1  <- colorPlot <- labels2colors(dat1$allLabels)
 merges = c(65,40,20,5)
-for (m in merges)  colorPlot = cbind(colorPlot, 
-  moduleMergeUsingKME(dat1$datExpr,colorh1,threshPercent=91, 
+for (m in merges)  colorPlot = cbind(colorPlot,
+  moduleMergeUsingKME(dat1$datExpr,colorh1,threshPercent=91,
                       reassignScale=0.7, mergePercent=m)$moduleColors)
 plotDendroAndColors(tree1, colorPlot, c("ORIG",merges), dendroLabels=FALSE)
 
-## Here is an example using a less-inclusive threshPercent (75), 
+## Here is an example using a less-inclusive threshPercent (75),
 # little if anything is merged.
 
 colorh1  <- colorPlot <- labels2colors(dat1$allLabels)
 merges = c(65,40,20,5)
-for (m in merges)  colorPlot = cbind(colorPlot, 
+for (m in merges)  colorPlot = cbind(colorPlot,
   moduleMergeUsingKME(dat1$datExpr,colorh1,
                       threshPercent=75, mergePercent=m)$moduleColors)
 plotDendroAndColors(tree1, colorPlot, c("ORIG",merges), dendroLabels=FALSE)
-# (Note that with real data, the default threshPercent=50 usually results 
+# (Note that with real data, the default threshPercent=50 usually results
 # in some modules being merged)
 
 

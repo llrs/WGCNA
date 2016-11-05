@@ -175,13 +175,13 @@ a given gene symbol into one representative.
     MEtrue=rnorm(m)
     # numeric data frame of n rows and m columns
     datNumeric=data.frame(t(simulateModule(MEtrue,n)))
-    RowIdentifier=paste("Probe", 1:n, sep="")
-    ColumnName=paste("Sample",1:m, sep="")
+    RowIdentifier=paste0("Probe", 1:n)
+    ColumnName=paste0("Sample",1:m)
     dimnames(datNumeric)[[2]]=ColumnName
     # Let us now generate a data frame whose first column contains the rowID
     dat1=data.frame(RowIdentifier, datNumeric)
     #we simulate a vector with n/5 group labels, i.e. each row group corresponds to 5 rows
-    rowGroup=rep(  paste("Group",1:(n/5),  sep=""), 5 )
+    rowGroup=rep(paste0("Group",1:(n/5)), 5 )
 
     # Typical Input Data
     # Since the first column of dat1 contains the RowIdentifier, we use the following code

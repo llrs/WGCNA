@@ -73,13 +73,13 @@ cause some overlapping with other points or labels; use with care.
 
 # Create a basic scatterplot
    col = standardColors(n)
-   plot(x,y, pch = 21, col =1, bg = col, cex = 2.6, 
+   plot(x,y, pch = 21, col =1, bg = col, cex = 2.6,
         xlim = c(-0.1, 1.1), ylim = c(-0.1, 1.0))
-   labelPoints(x, y, paste("Pt", c(1:n), sep=""), offs = 0.10, cex = 1)
+   labelPoints(x, y, paste0("Pt", c(1:n)), offs = 0.10, cex = 1)
 
 # label points using longer text labels. Note the positioning is not perfect, but close enough.
 
-   plot(x,y, pch = 21, col =1, bg = col, cex = 2.6, 
+   plot(x,y, pch = 21, col =1, bg = col, cex = 2.6,
         xlim = c(-0.1, 1.1), ylim = c(-0.1, 1.0))
    labelPoints(x, y, col, offs = 0.10, cex = 0.8)
 

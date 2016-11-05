@@ -6,10 +6,10 @@
 \usage{
 kMEcomparisonScatterplot(datExpr1, datExpr2, colorh, inA = NULL, inB = NULL,
   MEsA = NULL, MEsB = NULL, nameA = "A", nameB = "B", plotAll = FALSE,
-  noGrey = TRUE, maxPlot = 1000, pch = 19, fileName = if (plotAll)
-  paste("kME_correlations_between_", nameA, "_and_", nameB, "_all.pdf", sep =
-  "") else paste("kME_correlations_between_", nameA, "_and_", nameB,
-  "_inMod.pdf", sep = ""), ...)
+  noGrey = TRUE, maxPlot = 1000, pch = 19, fileName = ifelse(plotAll,
+  paste0("kME_correlations_between_", nameA, "_and_", nameB, "_all.pdf"),
+  paste0("kME_correlations_between_", nameA, "_and_", nameB, "_inMod.pdf")),
+  ...)
 }
 \arguments{
 \item{datExpr1}{The first expression matrix (samples=rows, genes=columns).
