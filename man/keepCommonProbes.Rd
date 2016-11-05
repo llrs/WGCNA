@@ -22,6 +22,14 @@ only common probes.
 This function strips out probes that are not shared by all given data sets,
 and orders the remaining common probes using the same order in all sets.
 }
+\examples{
+data1 <- matrix(rnorm(100L), 20L, 5L)
+data2 <- matrix(rnorm(50L), 10L, 5L)
+colnames(data1) <- LETTERS[1:5]
+colnames(data2) <- LETTERS[2:6]
+md <- multiSet(Set1 = data1, Set2 = data2)
+keepCommonProbes(md)
+}
 \author{
 Peter Langfelder
 }

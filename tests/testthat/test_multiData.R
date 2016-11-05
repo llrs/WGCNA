@@ -112,8 +112,42 @@ test_that("union and intersect work", {
 # .calculateIndicator
 # multiSet.applyToSubset not needed if subseting works properly
 # multiSet.mapply Used in blockwiseModulesC and branchSplit
+test_that("multiSet.mapply works", {
+    data1 <- matrix(rnorm(100L), 20L, 5L)
+    data2 <- matrix(rnorm(50L), 10L, 5L)
+    colnames(data1) <- LETTERS[1:5]
+    colnames(data2) <- LETTERS[2:6]
+    md <- list2multiSet(list(Set1 = data1, Set2 = data2))
+    testing <- multiSet.mapply(md, FUN = sum)
+
+    expect_equal(length(testing$Set1$data), 1L)
+    expect_equal(length(testing$Set2$data), 1L)
+})
 # multiSet.rbindSelf
 # multiSet.setAttr delete if
 # multiSet.setColnames Used in consensusRepresentatives
 # multiSet.colnames test it and replace the above function
-# keepCommonProbes
+test_that("multiSet.colnames method works", {
+    data1 <- matrix(rnorm(100L), 20L, 5L)
+    data2 <- matrix(rnorm(50L), 10L, 5L)
+    colnames(data1) <- LETTERS[1:5]
+    colnames(data2) <- LETTERS[2:6]
+    md <- multiSet(Set1 = data1, Set2 = data2)
+    colnames(md)
+})
+
+test_that("keepCommonProbes works properly", {
+    data1 <- matrix(rnorm(100L), 20L, 5L)
+    data2 <- matrix(rnorm(50L), 10L, 5L)
+    colnames(data1) <- LETTERS[1:5]
+    colnames(data2) <- LETTERS[2:6]
+    md <- multiSet(Set1 = data1, Set2 = data2)
+    testing <- keepCommonProbes(md)
+
+    expect_equal(colnames(testing$Set1$data), LETTERS[2:5])
+    expect_equal(colnames(testing$Set1$data), colnames(testing$Set2$data))
+
+    md <- multiSet(Set1 = data1)
+    expect_warning(keepCommonProbes(md))
+    expect_error(keepCommonProbes())
+})
