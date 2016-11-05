@@ -2,11 +2,11 @@
 
 
 #' Function to plot kME values between two comparable data sets.
-#' 
+#'
 #' Plots the kME values of genes in two groups of expression data for each
 #' module in an inputted color vector.
-#' 
-#' 
+#'
+#'
 #' @param datExpr1 The first expression matrix (samples=rows, genes=columns).
 #' This can either include only the data for group A (in which case dataExpr2
 #' must be entered), or can contain all of the data for groups A and B (in
@@ -56,9 +56,9 @@
 #' @author Jeremy Miller
 #' @keywords misc
 #' @examples
-#' 
+#'
 #' # Example output file ("kME_correlations_between_A_and_B_inMod.pdf") using simulated data.
-#' 
+#'
 #' set.seed = 100
 #' ME=matrix(0,50,5)
 #' for (i in 1:5) ME[,i]=sample(1:100,50)
@@ -67,27 +67,34 @@
 #' simData2 = simulateDatExpr5Modules(MEturquoise=ME[,1],MEblue=ME[,2],
 #'                           MEbrown=ME[,3],MEyellow=ME[,4], MEgreen=ME[,5])
 #' kMEcomparisonScatterplot(simData1$datExpr,simData2$datExpr,simData1$truemodule)
-#' 
-#' 
-kMEcomparisonScatterplot <- function (datExpr1, datExpr2, colorh, inA=NULL, inB=NULL, 
-MEsA=NULL, MEsB=NULL, nameA="A", nameB="B", plotAll=FALSE, noGrey=TRUE, maxPlot=1000,
-pch=19, 
-fileName = if (plotAll) paste("kME_correlations_between_",nameA,"_and_",nameB,"_all.pdf",sep="") else
-  paste("kME_correlations_between_",nameA,"_and_",nameB,"_inMod.pdf",sep=""),
-...){
+#'
+#'
+kMEcomparisonScatterplot <- function (datExpr1, datExpr2, colorh, inA=NULL,
+                                      inB=NULL,
+                                      MEsA=NULL, MEsB=NULL, nameA="A",
+                                      nameB="B", plotAll=FALSE, noGrey=TRUE,
+                                      maxPlot=1000,
+                                      pch=19,
+                                      fileName = ifelse(plotAll, paste0(
+                                          "kME_correlations_between_",
+                                          nameA,"_and_", nameB, "_all.pdf"),
+                                          paste0("kME_correlations_between_",
+                                                 nameA, "_and_", nameB,
+                                                 "_inMod.pdf")),
+                                      ...) {
 
 # First, get the data
-	if (is.null(dim(datExpr1))) { 
+	if (is.null(dim(datExpr1))) {
 		write ("Error: datExpr1 must be a matrix",""); return(0)
 	}
 	if (is.null(datExpr2)){
 		datA = datExpr1[inA,]
 		datB = datExpr1[inB,]
-		if ((is.null(dim(datA)))|(is.null(dim(datB)))) { 
+		if ((is.null(dim(datA)))|(is.null(dim(datB)))) {
 			 write ("Error: Check input for inA and inB.",""); return(0)
 		}
 	} else {
-		if (is.null(dim(datExpr2))) { 
+		if (is.null(dim(datExpr2))) {
 			write ("Error: datExpr2 must be a matrix",""); return(0)
 		}
 		datA = datExpr1
@@ -96,7 +103,7 @@ fileName = if (plotAll) paste("kME_correlations_between_",nameA,"_and_",nameB,"_
 	if ((dim(datA)[2]!=length(colorh))|(dim(datB)[2]!=length(colorh))){
 		write ("Error: Both sets of input data and color vector must all have same length.",""); return(0)
 	}
-	
+
 	if(is.null(MEsA))
 		MEsA = (moduleEigengenes(datA, colors=as.character(colorh), excludeGrey=noGrey))$eigengenes
 	if(is.null(MEsB))
@@ -104,7 +111,7 @@ fileName = if (plotAll) paste("kME_correlations_between_",nameA,"_and_",nameB,"_
 	mods  = substring(names(MEsA),3)
 	kMEsA = as.data.frame(cor(datA,MEsA,use="p"))
 	kMEsB = as.data.frame(cor(datB,MEsB,use="p"))
-	
+
 # Second, make the plots
 	xlab  = paste("kME values in",nameA)
 	ylab  = paste("kME values in",nameB)

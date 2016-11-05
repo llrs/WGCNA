@@ -830,7 +830,7 @@ blockwiseModules <- function(
       if (saveTOMs)
       {
         TOM = as.dist(tom)
-        TOMFiles[blockNo] = paste(saveTOMFileBase, "-block.", blockNo, ".RData", sep="")
+        TOMFiles[blockNo] = paste0(saveTOMFileBase, "-block.", blockNo, ".RData")
         if (verbose > 2)
           printFlush(paste(spaces, "  ..saving TOM for block", blockNo, "into file", TOMFiles[blockNo]))
         save(TOM, file =TOMFiles[blockNo])
@@ -968,9 +968,10 @@ blockwiseModules <- function(
         blockLabels[modGenes] = 0
         deleteModules = c(deleteModules, mod)
         if (verbose>3)
-          printFlush(paste(spaces, "    ..deleting module ", mod, ": of ", sum(modGenes),
+          printFlush(paste0(spaces, "    ..deleting module ", mod, ": of ",
+                            sum(modGenes),
                      " total genes in the module\n       only ",  sum(KME>minCoreKME),
-                     " have the requisite high correlation with the eigengene.", sep=""))
+                     " have the requisite high correlation with the eigengene."))
       } else if (sum(KME<minKMEtoStay)>0)
       {
         # Remove genes whose KME is too low:
@@ -983,8 +984,8 @@ blockwiseModules <- function(
           deleteModules = c(deleteModules, mod)
           blockLabels[modGenes] = 0
           if (verbose>3)
-            printFlush(paste(spaces, "    ..deleting module ",blockLabelIndex[mod],
-                     ": not enough genes in the module after removal of low KME genes.", sep=""))
+            printFlush(paste0(spaces, "    ..deleting module ",blockLabelIndex[mod],
+                     ": not enough genes in the module after removal of low KME genes."))
         } else {
           changedModules = union(changedModules, blockLabelIndex[mod])
         }
@@ -1597,9 +1598,9 @@ recutBlockwiseTrees = function(datExpr,
         blockLabels[modGenes] = 0
         deleteModules = c(deleteModules, mod)
         if (verbose>3)
-          printFlush(paste(spaces, "    ..deleting module ", mod, ": of ", sum(modGenes),
+          printFlush(paste0(spaces, "    ..deleting module ", mod, ": of ", sum(modGenes),
                      " total genes in the module\n       only ",  sum(KME>minCoreKME),
-                     " have the requisite high correlation with the eigengene.", sep=""))
+                     " have the requisite high correlation with the eigengene."))
       } else if (sum(KME<minKMEtoStay)>0) {
         # Remove genes whose KME is too low:
         if (verbose > 2)
@@ -1610,9 +1611,9 @@ recutBlockwiseTrees = function(datExpr,
           deleteModules = c(deleteModules, mod)
           blockLabels[modGenes] = 0
           if (verbose>3)
-            printFlush(paste(spaces,
+            printFlush(paste0(spaces,
                              "    ..deleting module ",blockLabelIndex[mod],
-                     ": not enough genes in the module after removal of low KME genes.", sep=""))
+                     ": not enough genes in the module after removal of low KME genes."))
         } else {
           changedModules = union(changedModules, blockLabelIndex[mod])
         }
@@ -3214,10 +3215,10 @@ blockwiseConsensusModules <- function(multiExpr,
         blockLabels[modGenes] = 0
         deleteModules = union(deleteModules, mod)
         if (verbose>3)
-          printFlush(paste(spaces, "    ..deleting module ",blockLabelIndex[mod],
+          printFlush(paste0(spaces, "    ..deleting module ",blockLabelIndex[mod],
                            ": of ", sum(modGenes),
                      " total genes in the module only ",  sum(consKME>minCoreKME),
-                     " have the requisite high correlation with the eigengene in all sets.", sep=""))
+                     " have the requisite high correlation with the eigengene in all sets."))
       } else if (sum(consKME<minKMEtoStay)>0)
       {
         if (verbose > 3)
@@ -3229,8 +3230,8 @@ blockwiseConsensusModules <- function(multiExpr,
           deleteModules = union(deleteModules, mod)
           blockLabels[modGenes] = 0
           if (verbose>3)
-            printFlush(paste(spaces, "    ..deleting module ",blockLabelIndex[mod],
-                     ": not enough genes in the module after removal of low KME genes.", sep=""))
+            printFlush(paste0(spaces, "    ..deleting module ",blockLabelIndex[mod],
+                     ": not enough genes in the module after removal of low KME genes."))
         } else {
           changedModules = union(changedModules, blockLabelIndex[mod])
         }
@@ -3904,10 +3905,10 @@ recutConsensusTrees = function(multiExpr,
         blockLabels[modGenes] = 0
         deleteModules = union(deleteModules, mod)
         if (verbose>3)
-          printFlush(paste(spaces, "    ..deleting module ",blockLabelIndex[mod],
+          printFlush(paste0(spaces, "    ..deleting module ",blockLabelIndex[mod],
                            ": of ", sum(modGenes),
                      " total genes in the module only ",  sum(consKME>minCoreKME),
-                     " have the requisite high correlation with the eigengene in all sets.", sep=""))
+                     " have the requisite high correlation with the eigengene in all sets."))
       } else if (sum(consKME<minKMEtoStay)>0)
       {
         if (verbose > 3)
@@ -3919,8 +3920,8 @@ recutConsensusTrees = function(multiExpr,
           deleteModules = union(deleteModules, mod)
           blockLabels[modGenes] = 0
           if (verbose>3)
-            printFlush(paste(spaces, "    ..deleting module ",blockLabelIndex[mod],
-                     ": not enough genes in the module after removal of low KME genes.", sep=""))
+            printFlush(paste0(spaces, "    ..deleting module ",blockLabelIndex[mod],
+                     ": not enough genes in the module after removal of low KME genes."))
         } else {
           changedModules = union(changedModules, blockLabelIndex[mod])
         }

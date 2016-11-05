@@ -3,13 +3,13 @@
 
 #' Determines significant overlap between modules in two networks based on kME
 #' tables.
-#' 
+#'
 #' Takes two sets of expression data (or kME tables) as input and returns a
 #' table listing the significant overlap between each module in each data set,
 #' as well as the actual genes in common for every module pair.  Modules can be
 #' defined in several ways (generally involving kME) based on user input.
-#' 
-#' 
+#'
+#'
 #' @param dat1,dat2 Either expression data sets (with samples as rows and genes
 #' as columns) or module membership (kME) tables (with genes as rows and
 #' modules as columns).  Function reads these inputs based on whether
@@ -53,44 +53,44 @@
 #' @seealso \code{\link{overlapTable}}
 #' @keywords misc
 #' @examples
-#' 
+#'
 #' # Example: first generate simulated data.
-#' 
+#'
 #' set.seed(100)
 #' ME.A = sample(1:100,50);  ME.B = sample(1:100,50)
-#' ME.C = sample(1:100,50);  ME.D = sample(1:100,50) 
-#' ME.E = sample(1:100,50);  ME.F = sample(1:100,50) 
-#' ME.G = sample(1:100,50);  ME.H = sample(1:100,50) 
+#' ME.C = sample(1:100,50);  ME.D = sample(1:100,50)
+#' ME.E = sample(1:100,50);  ME.F = sample(1:100,50)
+#' ME.G = sample(1:100,50);  ME.H = sample(1:100,50)
 #' ME1     = data.frame(ME.A, ME.B, ME.C, ME.D, ME.E)
 #' ME2     = data.frame(ME.A, ME.C, ME.D, ME.E, ME.F, ME.G, ME.H)
 #' simDat1 = simulateDatExpr(ME1,1000,c(0.2,0.1,0.08,0.05,0.04,0.3), signed=TRUE)
-#' simDat2 = simulateDatExpr(ME2,1000,c(0.2,0.1,0.08,0.05,0.04,0.03,0.02,0.3), 
+#' simDat2 = simulateDatExpr(ME2,1000,c(0.2,0.1,0.08,0.05,0.04,0.03,0.02,0.3),
 #'                           signed=TRUE)
-#' 
+#'
 #' # Now run the function using assigned genes
-#' results = overlapTableUsingKME(simDat1$datExpr, simDat2$datExpr, 
-#'                    labels2colors(simDat1$allLabels), labels2colors(simDat2$allLabels), 
+#' results = overlapTableUsingKME(simDat1$datExpr, simDat2$datExpr,
+#'                    labels2colors(simDat1$allLabels), labels2colors(simDat2$allLabels),
 #'                    cutoffMethod="assigned")
 #' results$PvaluesHypergeo
-#' 
+#'
 #' # Now run the function using a p-value cutoff, and inputting the original MEs
 #' colnames(ME1) = standardColors(5);  colnames(ME2) = standardColors(7)
-#' results = overlapTableUsingKME(simDat1$datExpr, simDat2$datExpr, 
-#'                       labels2colors(simDat1$allLabels), 
-#'                       labels2colors(simDat2$allLabels), 
+#' results = overlapTableUsingKME(simDat1$datExpr, simDat2$datExpr,
+#'                       labels2colors(simDat1$allLabels),
+#'                       labels2colors(simDat2$allLabels),
 #'                       ME1, ME2, cutoffMethod="pvalue", cutoff=0.05)
 #' results$PvaluesHypergeo
-#' 
-#' # Check which genes are in common between the black modules from set 1 and 
+#'
+#' # Check which genes are in common between the black modules from set 1 and
 #' # the green module from set 2
 #' results$OverlappingGenes$MM1_green_MM2_black
-#' 
-overlapTableUsingKME <- function(dat1, dat2, colorh1, colorh2, MEs1=NULL, MEs2=NULL, 
-name1="MM1", name2="MM2", cutoffMethod="assigned", cutoff=0.5, omitGrey=TRUE, 
+#'
+overlapTableUsingKME <- function(dat1, dat2, colorh1, colorh2, MEs1=NULL, MEs2=NULL,
+name1="MM1", name2="MM2", cutoffMethod="assigned", cutoff=0.5, omitGrey=TRUE,
 datIsExpression=TRUE){
-	
+
 # Run a few tests on the imput data formatting
-	if (is.null(dim(dat1))|is.null(dim(dat2))) { 
+	if (is.null(dim(dat1))|is.null(dim(dat2))) {
 		write("Error: dat1 and dat2 must be matrices.",""); return(0)
 	}
 	if ((dim(dat1)[datIsExpression+1]!=length(colorh1))|
@@ -101,7 +101,7 @@ datIsExpression=TRUE){
 		write("Error: Pvalues are not calculated if datIsExpression=TRUE.  Choose other cutoffMethod.",
 			  ""); return(0)
 	}
-	
+
 # Find and format the kME values and other variables for both inputs
 	G1 = dimnames(dat1)[[datIsExpression+1]];  G2 = dimnames(dat2)[[datIsExpression+1]]
 	if(datIsExpression){
@@ -112,7 +112,7 @@ datIsExpression=TRUE){
 		mods1 = colnames(MEs1);  mods2 = colnames(MEs2)
 		if (length(grep("ME",mods1))==length(mods1)) mods1 = substr(mods1,3,nchar(mods1))
 		if (length(grep("PC",mods1))==length(mods1)) mods1 = substr(mods1,3,nchar(mods1))
-		if (length(grep("ME",mods2))==length(mods2)) mods2 = substr(mods2,3,nchar(mods2))	
+		if (length(grep("ME",mods2))==length(mods2)) mods2 = substr(mods2,3,nchar(mods2))
 		if (length(grep("PC",mods2))==length(mods2)) mods2 = substr(mods2,3,nchar(mods2))
 		out = corAndPvalue(dat1,MEs1);  MM1 = out$cor;  PV1 = out$p;  rm(out)
 		out = corAndPvalue(dat2,MEs2);  MM2 = out$cor;  PV2 = out$p;  rm(out)
@@ -138,7 +138,7 @@ datIsExpression=TRUE){
 		(length(setdiff(mods2,as.character(colorh2)))>omitGrey)){
 		write("MEs cannot include colors with no genes assigned.",""); return(0)
 	}
-	l1 = length(mods1);	 l2 = length(mods2)			
+	l1 = length(mods1);	 l2 = length(mods2)
 	cutoffMethod = substr(cutoffMethod,1,1)
 	names=c(name1,name2)
 	comGenes = sort(unique(intersect(G1,G2)));  total   = length(comGenes)
@@ -148,7 +148,7 @@ datIsExpression=TRUE){
 	}
 	names(colorh1) = G1;  colorh1 = colorh1[comGenes]
 	names(colorh2) = G2;  colorh2 = colorh2[comGenes]
-	
+
 # Assign each gene in each module to a vector corresponding to the modules
 	genes1 <- genes2 <- list()
 	if (cutoffMethod=="a"){
@@ -168,7 +168,7 @@ datIsExpression=TRUE){
 	}
 	names(genes1) = paste(names[1],mods1,sep="_")
 	names(genes2) = paste(names[2],mods2,sep="_")
-	
+
 # Determine signficance of each comparison and write out all of the gene lists
 	ovGenes = list()
 	ovNames = rep("",l1*l2)
@@ -180,13 +180,14 @@ datIsExpression=TRUE){
 		i = i+1
 		ovGenes[[i]] = sort(unique(intersect(genes1[[m1]],genes2[[m2]])))
 		pVals[m1,m2] = .phyper2(total,length(genes1[[m1]]), length(genes2[[m2]]),length(ovGenes[[i]]))
-		if (pVals[m1,m2]>10^(-10))   pVals[m1,m2] = 
+		if (pVals[m1,m2]>10^(-10))   pVals[m1,m2] =
 		.phyper2(total,length(genes1[[m1]]), length(genes2[[m2]]),length(ovGenes[[i]]),FALSE)
 		ovNames[i] = paste(names[1],mods1[m1],names[2],mods2[m2],sep="_")
 	}
 	names(ovGenes) = ovNames
 	out = list(pVals,comGenes,genes1,genes2,ovGenes)
-	names(out) = c("PvaluesHypergeo","AllCommonGenes",paste("Genes",names,sep=""),"OverlappingGenes")
+	names(out) = c("PvaluesHypergeo", "AllCommonGenes", paste0("Genes", names,),
+	               "OverlappingGenes")
 	return(out)
 }
 

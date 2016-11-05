@@ -5,16 +5,16 @@
 
 
 #' Calculation of GO enrichment (experimental)
-#' 
+#'
 #' WARNING: This function should be considered experimental. The arguments and
 #' resulting values (in particular, the enrichment p-values) are not yet
 #' finalized and may change in the future. The function should only be used to
 #' get a quick and rough overview of GO enrichment in the modules in a data
 #' set; for a publication-quality analysis, please use an established tool.
-#' 
+#'
 #' Using Bioconductor's annotation packages, this function calculates
 #' enrichments and returns terms with best enrichment values.
-#' 
+#'
 #' This function is basically a wrapper for the annotation packages available
 #' from Bioconductor. It requires the packages GO.db, AnnotationDbi, and
 #' org.xx.eg.db, where xx is the code corresponding to the organism that the
@@ -25,17 +25,17 @@
 #' is calculated using Fisher exact test. As background we use all of the
 #' supplied genes that are present in at least one term in GO (in any of the
 #' ontologies).
-#' 
+#'
 #' For best results, the newest annotation libraries should be used. Because of
 #' the way Bioconductor is set up, to get the newest annotation libraries you
 #' may have to use the current version of R.
-#' 
+#'
 #' According to http://www.geneontology.org/GO.evidence.shtml, the following
 #' codes are used by GO: \preformatted{ Experimental Evidence Codes EXP:
 #' Inferred from Experiment IDA: Inferred from Direct Assay IPI: Inferred from
 #' Physical Interaction IMP: Inferred from Mutant Phenotype IGI: Inferred from
 #' Genetic Interaction IEP: Inferred from Expression Pattern
-#' 
+#'
 #' Computational Analysis Evidence Codes ISS: Inferred from Sequence or
 #' Structural Similarity ISO: Inferred from Sequence Orthology ISA: Inferred
 #' from Sequence Alignment ISM: Inferred from Sequence Model IGC: Inferred from
@@ -43,18 +43,18 @@
 #' Inferred from Biological aspect of Descendant IKR: Inferred from Key
 #' Residues IRD: Inferred from Rapid Divergence RCA: inferred from Reviewed
 #' Computational Analysis
-#' 
+#'
 #' Author Statement Evidence Codes TAS: Traceable Author Statement NAS:
 #' Non-traceable Author Statement
-#' 
+#'
 #' Curator Statement Evidence Codes IC: Inferred by Curator ND: No biological
 #' Data available
-#' 
+#'
 #' Automatically-assigned Evidence Codes IEA: Inferred from Electronic
 #' Annotation
-#' 
+#'
 #' Obsolete Evidence Codes NR: Not Recorded }
-#' 
+#'
 #' @param labels cluster (module, group) labels of genes to be analyzed. Either
 #' a single vector, or a matrix. In the matrix case, each column will be
 #' analyzed separately; analyzing a collection of module assignments in one
@@ -122,23 +122,23 @@
 #' logical vector with one entry per given gene. \code{TRUE} if the entry was
 #' used for enrichment analysis. Depending on the setting of
 #' \code{removeDuplicates} above, only a single entry per gene may be used. }
-#' 
+#'
 #' \item{inGO }{ logical vector with one entry per given gene. \code{TRUE} if
 #' the gene belongs to any GO term, \code{FALSE} otherwise. Also \code{FALSE}
 #' for genes not used for the analysis because of duplication. }
-#' 
+#'
 #' If input \code{labels} contained only one vector of labels, the following
 #' components:
-#' 
+#'
 #' \item{countsInTerms }{ a matrix whose rows correspond to given cluster, and
 #' whose columns correspond to GO terms, contaning number of genes in the
 #' intersection of the corresponding module and GO term. Row and column names
 #' are set appropriately.}
-#' 
+#'
 #' \item{enrichmentP}{a matrix whose rows correspond to given cluster, and
 #' whose columns correspond to GO terms, contaning enrichment p-values of each
 #' term in each cluster. Row and column names are set appropriately.}
-#' 
+#'
 #' \item{bestPTerms}{a list of lists with each inner list corresponding to an
 #' ontology given in \code{ontologies} in input, plus one component
 #' corresponding to all given ontologies combined.  The name of each component
@@ -157,11 +157,11 @@
 #' \code{bestPTerms$BP$enrichment}, or one can reference
 #' \code{bestPTerms$BP$forModule[[5]][[2]]}. The author of the function
 #' apologizes for any confusion this structure of the output may cause. }
-#' 
+#'
 #' \item{biggestTerms}{a list of the same format as \code{bestPTerms},
 #' containing information about the terms with most genes in the module for
 #' each supplied ontology. }
-#' 
+#'
 #' If input \code{labels} contained more than one vector, instead of the above
 #' components the return value contains a list named \code{setResults} that has
 #' one component per given set; each component is a list containing the above
@@ -170,7 +170,7 @@
 #' @seealso Bioconductor's annotation packages such as GO.db and
 #' organism-specific annotation packages such as org.Hs.eg.db.
 #' @keywords misc
-GOenrichmentAnalysis = function(labels, entrezCodes, 
+GOenrichmentAnalysis = function(labels, entrezCodes,
                yeastORFs = NULL,
                organism = "human",
                ontologies = c("BP", "CC", "MF"),
@@ -181,18 +181,17 @@ GOenrichmentAnalysis = function(labels, entrezCodes,
                leaveOutLabel = NULL,
                nBestP = 10, pCut = NULL, nBiggest = 0,
                getTermDetails = TRUE,
-               verbose = 2, indent = 0 )
-{
+               verbose = 2, indent = 0 ) {
 
    sAF = options("stringsAsFactors")
    options(stringsAsFactors = FALSE)
    on.exit(options(stringsAsFactors = sAF[[1]]), TRUE)
 
-   organisms = c("human", "mouse", "rat", "malaria", "yeast", "fly", "bovine", "worm", "canine",
-                 "zebrafish", "chicken")
-   allEvidence =  c("EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "ISS", "ISO", "ISA",
-                    "ISM", "IGC", "IBA", "IBD", "IKR", "IRD", "RCA", "TAS", "NAS", "IC", "ND", "IEA",
-                    "NR")
+   organisms = c("human", "mouse", "rat", "malaria", "yeast", "fly", "bovine",
+                 "worm", "canine", "zebrafish", "chicken")
+   allEvidence =  c("EXP", "IDA", "IPI", "IMP", "IGI", "IEP", "ISS", "ISO",
+                    "ISA", "ISM", "IGC", "IBA", "IBD", "IKR", "IRD", "RCA",
+                    "TAS", "NAS", "IC", "ND", "IEA", "NR")
    allOntologies = c("BP", "CC", "MF")
 
    backgroundTypes = c("allGiven", "allInGO", "givenInGO")
@@ -200,46 +199,49 @@ GOenrichmentAnalysis = function(labels, entrezCodes,
    spaces = indentSpaces(indent)
    orgInd = pmatch(organism, organisms)
    if (is.na(orgInd))
-     stop(paste("Unrecognized 'organism' given. Recognized values are ", 
+     stop(paste("Unrecognized 'organism' given. Recognized values are ",
                 paste(organisms, collapse = ", ")))
 
-   if (length(evidence)==0)
+   if (length(evidence)==0) {
      stop("At least one valid evidence code must be given in 'evidence'.")
-   if (length(ontologies)==0)
+   }
+   if (length(ontologies)==0) {
      stop("At least one valid ontology code must be given in 'ontology'.")
-
-   if (evidence=="all")
+   }
+   if (evidence=="all") {
       evidence = allEvidence
-
+   }
    evidInd = pmatch(evidence, allEvidence)
-   if (sum(is.na(evidInd))!=0)
-     stop(paste("Unrecognized 'evidence' given. Recognized values are ", 
+   if (sum(is.na(evidInd))!=0) {
+     stop(paste("Unrecognized 'evidence' given. Recognized values are ",
                 paste(allEvidence, collapse = ", ")))
-
+   }
    ontoInd = pmatch(ontologies, allOntologies)
-   if (sum(is.na(ontoInd))!=0)
-     stop(paste("Unrecognized 'ontologies' given. Recognized values are ", 
+   if (sum(is.na(ontoInd))!=0) {
+     stop(paste("Unrecognized 'ontologies' given. Recognized values are ",
                 paste(allEvidence, collapse = ", ")))
+   }
 
    backT = pmatch(backgroundType, backgroundTypes)
-   if (is.na(backT))
-     stop(paste("Unrecognized 'backgroundType' given. Recognized values are ", 
+   if (is.na(backT)) {
+     stop(paste("Unrecognized 'backgroundType' given. Recognized values are ",
            paste(backgroundTypes,  collapse = ", ")))
-
-   orgCodes = c("Hs", "Mm", "Rn", "Pf", "Sc", "Dm", "Bt", "Ce", "Cf", "Dr", "Gg")
+   }
+   orgCodes = c("Hs", "Mm", "Rn", "Pf", "Sc", "Dm", "Bt", "Ce", "Cf", "Dr",
+                "Gg")
    orgExtensions = c(rep(".eg", 4), ".sgd", rep(".eg", 6))
    reverseMap = c(rep(".egGO2EG", 4), ".sgdGO2ORF", rep(".egGO2EG", 6))
 
    missingPacks = NULL
-   packageName = paste("org.", orgCodes[orgInd], orgExtensions[orgInd], ".db", sep="")
+   packageName = paste0("org.", orgCodes[orgInd], orgExtensions[orgInd], ".db")
    if (!eval(parse(text = "require(packageName, character.only = TRUE)")))
      missingPacks = c(missingPacks, packageName)
 
    if (!eval(parse(text="require(GO.db)")))
      missingPacks = c(missingPacks, "GO.db")
 
-   if (!is.null(missingPacks)) 
-     stop(paste("Could not load the requisite package(s)", 
+   if (!is.null(missingPacks))
+     stop(paste("Could not load the requisite package(s)",
            paste(missingPacks, collapse = ", "), ". Please install the package(s)."))
 
    if (verbose > 0)
@@ -266,7 +268,7 @@ GOenrichmentAnalysis = function(labels, entrezCodes,
         newCodes[fin] = allORFs[entrez2orf[fin]]
         entrezCodes = newCodes
      }
-   } 
+   }
 
    labels = as.matrix(labels)
 
@@ -284,7 +286,7 @@ GOenrichmentAnalysis = function(labels, entrezCodes,
    } else
      keepEC = c(1:nGivenRaw)
 
-   egGO = eval(parse(text = paste(packageName, ":::org.", orgCodes[orgInd], orgExtensions[orgInd], 
+   egGO = eval(parse(text = paste(packageName, ":::org.", orgCodes[orgInd], orgExtensions[orgInd],
                                   "GO", sep = "")))
 
    if (orgInd==5)
@@ -306,7 +308,7 @@ GOenrichmentAnalysis = function(labels, entrezCodes,
      stop(paste("None of the supplied gene identifiers map to the GO database.\n",
                 "Please make sure you have specified the correct organism (default is human)."))
 
-   Go2eg = eval(parse(text = paste("AnnotationDbi::as.list(", packageName, ":::org.", orgCodes[orgInd], 
+   Go2eg = eval(parse(text = paste("AnnotationDbi::as.list(", packageName, ":::org.", orgCodes[orgInd],
                                            reverseMap[orgInd],")", sep = "")))
    nTerms = length(Go2eg)
 
@@ -348,10 +350,10 @@ GOenrichmentAnalysis = function(labels, entrezCodes,
    nAllInTerm = rep(0, nTerms)
    if (verbose > 0)
    {
-      printFlush(paste(spaces, " ..of the", length(entrezCodes), 
-                      " Entrez identifiers submitted,", sum(encMapped), 
+      printFlush(paste(spaces, " ..of the", length(entrezCodes),
+                      " Entrez identifiers submitted,", sum(encMapped),
                       "are mapped in current GO categories."))
-      printFlush(paste(spaces, " ..will use", nBackgroundGenes, 
+      printFlush(paste(spaces, " ..will use", nBackgroundGenes,
                        "background genes for enrichment calculations."))
       cat(paste(spaces, " ..preparing term lists (this may take a while).."))
       pind = initProgInd()
@@ -361,7 +363,7 @@ GOenrichmentAnalysis = function(labels, entrezCodes,
    {
       te = as.character(names(Go2eg[[c]])); # Term evidence codes
       tc = Go2eg[[c]]
-      if (includeOffspring) 
+      if (includeOffspring)
       {
         termOffspring = NULL
         for (ont in 1:length(goOffSpr))
@@ -370,7 +372,7 @@ GOenrichmentAnalysis = function(labels, entrezCodes,
           if (!is.na(term2off))
             termOffspring = c(termOffspring, goOffSpr[[ont]][[term2off]])
         }
-        if (length(termOffspring)>0) 
+        if (length(termOffspring)>0)
         {
            maxLen = blockSize
            tex = rep("", maxLen)
@@ -384,7 +386,7 @@ GOenrichmentAnalysis = function(labels, entrezCodes,
            o2go = o2go[is.finite(o2go)]
            if (length(o2go)>0) for (o in 1:length(o2go)) if (!is.na(Go2eg[[o2go[o]]][[1]]))
            {
-             #printFlush(paste("Have offspring for term", c, ": ", names(Go2eg)[c], 
+             #printFlush(paste("Have offspring for term", c, ": ", names(Go2eg)[c],
              #           Term(goInfo[[term2info[c]]])))
              newc = Go2eg[[o2go[o]]]
              newe = names(newc)
@@ -421,10 +423,10 @@ GOenrichmentAnalysis = function(labels, entrezCodes,
          } else
             termCodes[[c]] = as.numeric(as.character(intersect(tc[use], mapECodes)))
       }
-      nAllInTerm[c] = length(termCodes[[c]]); 
+      nAllInTerm[c] = length(termCodes[[c]]);
       if ( (c %%50 ==0) & (verbose > 0)) pind = updateProgInd(c/nTerms, pind)
    }
-   if (verbose > 0) 
+   if (verbose > 0)
    {
       pind = updateProgInd(1, pind)
       printFlush("")
@@ -460,7 +462,7 @@ GOenrichmentAnalysis = function(labels, entrezCodes,
            modCodes[[ll]] = entrezCodes[labels[, set]==labelLevels[ll]]
            nModCodes[ll] = length(modCodes[[ll]])
         }
-      } else 
+      } else
       {
         for (ll in 1:nLabelLevels)
         {
@@ -477,7 +479,7 @@ GOenrichmentAnalysis = function(labels, entrezCodes,
 
       nAllInTermMat = matrix(nAllInTerm, nLabelLevels, nTerms, byrow = TRUE)
       nModCodesMat = matrix(nModCodes, nLabelLevels, nTerms)
-      tabArr = array(c(countsInTerm, nAllInTermMat - countsInTerm, 
+      tabArr = array(c(countsInTerm, nAllInTermMat - countsInTerm,
                        nModCodesMat - countsInTerm,
                        nBackgroundGenes - nModCodesMat - nAllInTermMat + countsInTerm),
                      dim = c(nLabelLevels * nTerms, 2, 2))
@@ -486,21 +488,18 @@ GOenrichmentAnalysis = function(labels, entrezCodes,
          printFlush(paste(spaces, "   ..calculating enrichments (this may also take a while).."))
       calculate = c(countsInTerm) > 0
       enrichment[calculate] = apply(tabArr[calculate, , ], 1, ftp, alternative = "g")
-    
+
       dimnames(enrichment) = list (labelLevels, names(Go2eg))
       dimnames(countsInTerm) = list (labelLevels, names(Go2eg))
 
       bestPTerms = list()
       modSizes = table(labels[ !(labels[, set] %in% leaveOutLabel), set])
 
-      if (!is.null(pCut) || nBestP > 0)
-      {
+      if (!is.null(pCut) || nBestP > 0) {
          printFlush(paste(spaces, "   ..putting together terms with highest enrichment significance.."))
-         nConsideredOntologies = length(ontologies)+1
-         for (ont in 1:nConsideredOntologies)
-         {
-            if (ont==nConsideredOntologies)
-            {
+         nConsideredOntologies = length(ontologies) + 1
+         for (ont in 1:nConsideredOntologies) {
+            if (ont==nConsideredOntologies) {
                ontTerms = is.finite(match(termOntologies, ontologies))
                bestPTerms[[ont]] = list(ontology = ontologies)
                names(bestPTerms)[ont] = paste(ontologies, collapse = ", ")
@@ -514,25 +513,23 @@ GOenrichmentAnalysis = function(labels, entrezCodes,
             nOntTerms = sum(ontTerms)
             ontEnr = enrichment[, ontTerms, drop = FALSE]
             order = apply(ontEnr, 1, order)
-            for (ll in 1:nLabelLevels)
-            {
-              if (!is.null(pCut))
-              {
+            for (ll in 1:nLabelLevels) {
+              if (!is.null(pCut)) {
                  reportTerms = c(1:nTerms)[ontTerms][ontEnr[ll, ] < pCut]
                  reportTerms = reportTerms[order(ontEnr[ll, ][reportTerms])]
               } else
                  reportTerms =  c(1:nTerms)[ontTerms][order[1:nBestP, ll]]
               nRepTerms = length(reportTerms)
-              enrTab = data.frame(module = rep(labelLevels[ll], nRepTerms), 
+              enrTab = data.frame(module = rep(labelLevels[ll], nRepTerms),
                                   modSize = rep(modSizes[ll], nRepTerms),
-                                  bkgrModSize = rep(nModCodes[ll], nRepTerms), 
+                                  bkgrModSize = rep(nModCodes[ll], nRepTerms),
                                   rank = c(1:nRepTerms),
                                   enrichmentP = enrichment[ll, reportTerms],
-                                  BonferoniP = pmin(rep(1, nRepTerms), 
+                                  BonferoniP = pmin(rep(1, nRepTerms),
                                                     enrichment[ll, reportTerms] * nOntTerms),
                                   nModGenesInTerm = countsInTerm[ll, reportTerms],
                                   fracOfBkgrModSize = countsInTerm[ll, reportTerms]/nModCodes[ll],
-                                  fracOfBkgrTermSize = 
+                                  fracOfBkgrTermSize =
                                        countsInTerm[ll, reportTerms]/nAllInTerm[reportTerms],
                                   bkgrTermSize = nAllInTerm[reportTerms],
                                   termID = names(Go2eg)[reportTerms],
@@ -540,21 +537,18 @@ GOenrichmentAnalysis = function(labels, entrezCodes,
                                   termName = rep("NA", nRepTerms),
                                   termDefinition =  rep("NA", nRepTerms))
               bestPTerms[[ont]]$forModule[[ll]] = list()
-              for (rci in 1:length(reportTerms))
-              {
+              for (rci in 1:length(reportTerms)) {
                  term = reportTerms[rci]
                  termID = names(Go2eg)[term]
                  dbind = match(termID, dbGoNames)
-                 if (is.finite(dbind))
-                 {
+                 if (is.finite(dbind)) {
                    enrTab$termName[rci] = eval(parse(text = "AnnotationDbi:::Term(goInfo[[dbind]])"))
-                   enrTab$termDefinition[rci] = 
+                   enrTab$termDefinition[rci] =
                          eval(parse(text = "AnnotationDbi:::Definition(goInfo[[dbind]])"))
-                   enrTab$termOntology[rci] = 
+                   enrTab$termOntology[rci] =
                          eval(parse(text = "AnnotationDbi:::Ontology(goInfo[[dbind]])"))
-                 } 
-                 if (getTermDetails)
-                 {
+                 }
+                 if (getTermDetails) {
                    geneCodes = intersect(modCodes[[ll]], termCodes[[term]])
                    bestPTerms[[ont]]$forModule[[ll]][[rci]] = list(termID = termID,
                            termName = enrTab$termName[rci],
@@ -565,25 +559,22 @@ GOenrichmentAnalysis = function(labels, entrezCodes,
                            genePositions = keepEC[match(geneCodes, entrezCodes)])
                 }
               }
-              if (ll==1) 
-              {
+              if (ll==1) {
                  bestPTerms[[ont]]$enrichment = enrTab
-              } else 
+              } else {
                  bestPTerms[[ont]]$enrichment = rbind(bestPTerms[[ont]]$enrichment, enrTab)
-           }
+              }
+            }
          }
       }
-           
+
       biggestTerms = list()
-   
-      if (nBiggest > 0)
-      {
+
+      if (nBiggest > 0) {
          printFlush(paste(spaces, "   ..putting together terms with largest number of genes in modules.."))
-         nConsideredOntologies = length(ontologies)+1
-         for (ont in 1:nConsideredOntologies)
-         {
-            if (ont==nConsideredOntologies)
-            {
+         nConsideredOntologies = length(ontologies) + 1
+         for (ont in 1:nConsideredOntologies) {
+            if (ont==nConsideredOntologies) {
                ontTerms = is.finite(match(termOntologies, ontologies))
                biggestTerms[[ont]] = list(ontology = ontologies)
                names(biggestTerms)[ont] = paste(ontologies, collapse = ", ")
@@ -597,20 +588,19 @@ GOenrichmentAnalysis = function(labels, entrezCodes,
             nOntTerms = sum(ontTerms)
             ontNGenes = countsInTerm[, ontTerms, drop = FALSE]
             order = apply(-ontNGenes, 1, order)
-            for (ll in 1:nLabelLevels)
-            {
+            for (ll in 1:nLabelLevels) {
               reportTerms = c(1:nTerms)[ontTerms][order[1:nBiggest, ll]]
               nRepTerms = length(reportTerms)
               enrTab = data.frame(module = rep(labelLevels[ll], nRepTerms),
                                   modSize = rep(modSizes[ll], nRepTerms),
-                                  bkgrModSize = rep(nModCodes[ll], nRepTerms), 
+                                  bkgrModSize = rep(nModCodes[ll], nRepTerms),
                                   rank = c(1:nRepTerms),
                                   enrichmentP = enrichment[ll, reportTerms],
-                                  BonferoniP = pmin(rep(1, nRepTerms), 
+                                  BonferoniP = pmin(rep(1, nRepTerms),
                                                     enrichment[ll, reportTerms] * nOntTerms),
                                   nModGenesInTerm = countsInTerm[ll, reportTerms],
                                   fracOfModSize = countsInTerm[ll, reportTerms]/nModCodes[ll],
-                                  fracOfBkgrTermSize = 
+                                  fracOfBkgrTermSize =
                                        countsInTerm[ll, reportTerms]/nAllInTerm[reportTerms],
                                   bkgrTermSize = nAllInTerm[reportTerms],
                                   termID = names(Go2eg)[reportTerms],
@@ -618,20 +608,17 @@ GOenrichmentAnalysis = function(labels, entrezCodes,
                                   termName = rep("NA", nRepTerms),
                                   termDefinition =  rep("NA", nRepTerms))
               biggestTerms[[ont]]$forModule[[ll]] = list()
-              for (rci in 1:length(reportTerms))
-              {
+              for (rci in 1:length(reportTerms)) {
                  term = reportTerms[rci]
                  termID = names(Go2eg)[term]
                  dbind = match(termID, dbGoNames)
-                 if (is.finite(dbind))
-                 {
+                 if (is.finite(dbind)) {
                    enrTab$termName[rci] = eval(parse(text="AnnotationDbi:::Term(goInfo[[dbind]])"))
                    enrTab$termDefinition[rci] =
                        eval(parse(text="AnnotationDbi:::Definition(goInfo[[dbind]])"))
                    enrTab$termOntology[rci] = eval(parse(text="AnnotationDbi:::Ontology(goInfo[[dbind]])"))
                  }
-                 if (getTermDetails)
-                 {
+                 if (getTermDetails) {
                    geneCodes = intersect(modCodes[[ll]], termCodes[[term]])
                    biggestTerms[[ont]]$forModule[[ll]][[rci]] = list(termID = termID,
                            termName = enrTab$termName[rci],
@@ -642,26 +629,26 @@ GOenrichmentAnalysis = function(labels, entrezCodes,
                            genePositions = keepEC[match(geneCodes, entrezCodes)])
                 }
               }
-              if (ll==1)
-              {
+              if (ll==1) {
                  biggestTerms[[ont]]$enrichment = enrTab
-              } else
-                 biggestTerms[[ont]]$enrichment = rbind(biggestTerms[[ont]]$enrichment, enrTab)
+              } else {
+                 biggestTerms[[ont]]$enrichment = rbind(
+                     biggestTerms[[ont]]$enrichment, enrTab)
+              }
            }
          }
       }
-      setResults[[set]] = list(countsInTerm = countsInTerm, 
+      setResults[[set]] = list(countsInTerm = countsInTerm,
                                enrichmentP = enrichment,
                                bestPTerms = bestPTerms,
                                biggestTerms = biggestTerms)
    }
-   
+
    inGO = rep(FALSE, nGivenRaw)
    inGO[keepEC] = encMapped
    kept = rep(FALSE, nGivenRaw)
    kept[keepEC] = TRUE
-   if (nSets==1)
-   {
+   if (nSets==1) {
       list(keptForAnalysis = kept,
            inGO = inGO,
            countsInTerms = setResults[[1]]$countsInTerm,
@@ -674,4 +661,3 @@ GOenrichmentAnalysis = function(labels, entrezCodes,
            setResults = setResults)
    }
 }
-

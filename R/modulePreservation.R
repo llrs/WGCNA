@@ -441,7 +441,7 @@ modulePreservation = function(
    setNames = names(multiSet)
    if (is.null(setNames))
    {
-     setNames = paste("Set", c(1:nNets), sep="")
+     setNames = paste0("Set", c(1:nNets))
    }
 
    # Check that referenceNetworks is valid
@@ -529,8 +529,8 @@ modulePreservation = function(
    if (verbose > 2) printFlush(paste("  ..unassigned 'module' name:", greyName,
                                      "\n  ..all network sample 'module' name:", goldName))
 
-   MEgrey = paste("ME", greyName, sep="")
-   MEgold = paste("ME", goldName, sep="")
+   MEgrey = paste0("ME", greyName)
+   MEgold = paste0("ME", goldName)
 
    for (s in 1:nNets)
    {
@@ -561,7 +561,7 @@ modulePreservation = function(
 
    if (is.null(names(multiSet)))
    {
-     setNames = paste("Set_", c(1:nNets), sep="")
+     setNames = paste0("Set_", c(1:nNets))
    } else {
      setNames = names(multiSet)
    }
@@ -663,7 +663,7 @@ modulePreservation = function(
             overlap=intersect(colnames(multiSet[[ref]]$data),colnames(multiSet[[tnet]]$data))
             loc1=match(overlap, colnames(multiSet[[ref]]$data))
             loc2=match(overlap, colnames(multiSet[[tnet]]$data))
-            refName = paste("ref_", setNames[ref],sep="")
+            refName = paste0("ref_", setNames[ref])
             colorRef = multiColor[[ref]][loc1]
             if (dataIsExpr)
             {
@@ -683,7 +683,7 @@ modulePreservation = function(
             } else  {
                colorTest=NA
             }
-            name=paste(refName,"vs",testName,sep="")
+            name=paste0(refName,"vs",testName)
             obsModSizes=list()
             nObsMods = rep(0, 2)
             tab = table(colorRef)
@@ -953,7 +953,7 @@ modulePreservation = function(
                name1=regStatNames[stat]
                name2 = paste(setNames[ref], "vs", setNames[tnet])
                meanLM[[iref]][[tnet]][[stat]]=lm(yy~ ns(xx, df=dfMean[stat] ))
-               names( meanLM[[iref]][[tnet]])[stat]=paste(name1,"_meanInterpolation",sep="")
+               names(meanLM[[iref]][[tnet]])[stat]=paste0(name1,"_meanInterpolation")
                PredictedMedian=as.numeric( predict(meanLM[[iref]][[tnet]][[stat]]))
                if(all(!is.na(means))&&length(table(means))>1)
                {
@@ -981,7 +981,7 @@ modulePreservation = function(
                yy2=log(SD)
                xx2=log(modSizes)
                seLM[[iref]][[tnet]][[stat]]=lm(yy2~ ns(xx2, df=dfSD[stat] ) )
-               names(seLM[[iref]][[tnet]])[stat]=paste(name1,"_SDInterpolation",sep="")
+               names(seLM[[iref]][[tnet]])[stat]=paste0(name1,"_SDInterpolation")
                PredictedSD=as.numeric( predict(seLM[[iref]][[tnet]][[stat]]))
                if(all(!is.na(SD))&&length(table(SD))>1)
                {
@@ -1102,7 +1102,7 @@ modulePreservation = function(
        nAllStats = ncol(allObsStats)
        zAll = matrix(NA, nModules, nAllStats)
        rownames(zAll) = rownames(observed[[iref]]$intra[[tnet]])
-       colnames(zAll) = paste("Z.", colnames(allObsStats), sep="")
+       colnames(zAll) = paste0("Z.", colnames(allObsStats))
        logModSizes = log(modSizes)
        goldRowPerm = match(goldName, regModuleNames[[iref]][[tnet]])
        goldRowObs = match(goldName, rownames(inter))
@@ -1462,8 +1462,8 @@ modulePreservation = function(
 
    if (is.numeric(greyName)) goldName = 0.1 else goldName = "gold"
 
-   MEgrey = paste("ME", greyName, sep="")
-   MEgold = paste("ME", goldName, sep="")
+   MEgrey = paste0("ME", greyName,)
+   MEgold = paste0("ME", goldName)
 
    collectGarbage()
 
@@ -1708,7 +1708,7 @@ modulePreservation = function(
                              "meanSignAwareCorDat", "meanAdj", "meanClusterCoeff", "meanMAR")
           }
 
-          name1=paste(setNames[[ref]],"_vs_",setNames[[tnet]],sep="")
+          name1=paste0(setNames[[ref]],"_vs_",setNames[[tnet]])
           quality[[tnet]] = cbind(stats$modSizes,
                                   stats$proVar[, 1],
                                   if (dataIsExpr) stats$meanSignAwareKME[, 1] else stats$meankIM[, 1],
@@ -1726,14 +1726,14 @@ modulePreservation = function(
           rownames(quality[[tnet]]) = colorLevels
           colnames(intraPres[[tnet]]) = paste(measureNames, "pres", sep=".")
           rownames(intraPres[[tnet]]) = colorLevels
-          names(intraPres)[tnet]=paste(name1,sep="")
+          names(intraPres)[tnet]=paste0(name1)
           quality[[tnet]] = as.data.frame(quality[[tnet]])
           intraPres[[tnet]] = as.data.frame(intraPres[[tnet]])
           interPres[[tnet]]= as.data.frame(cbind(stats$corkIM, stats$corkME, stats$corkMEall, stats$ICORdat,
                                                  stats$corCC, stats$corMAR))
           colnames(interPres[[tnet]])=interPresNames
           rownames(interPres[[tnet]])=colorLevels
-          names(interPres)[[tnet]]=paste(name1,sep="")
+          names(interPres)[[tnet]]=paste0(name1)
           netPresent[tnet] = TRUE
       } # of for (test in testNetworks[[iref]])
 

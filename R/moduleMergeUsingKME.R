@@ -2,13 +2,13 @@
 
 
 #' Merge modules and reassign genes using kME.
-#' 
+#'
 #' This function takes an expression data matrix (and other user-defined
 #' parameters), calculates the module membership (kME) values, and adjusts the
 #' module assignments, merging modules that are not sufficiently distinct and
 #' reassigning modules that were originally assigned suboptimally.
-#' 
-#' 
+#'
+#'
 #' @param datExpr An expression data matrix, with samples as rows, genes (or
 #' probes) as column.
 #' @param colorh The color vector (module assignments) corresponding to the
@@ -54,14 +54,14 @@
 #' @author Jeremy Miller
 #' @keywords misc
 #' @examples
-#' 
-#' 
+#'
+#'
 #' ## First simulate some data and the resulting network dendrogram
 #' set.seed(100)
 #' MEturquoise = sample(1:100,50)
 #' MEblue      = sample(1:100,50)
 #' MEbrown     = sample(1:100,50)
-#' MEyellow    = sample(1:100,50) 
+#' MEyellow    = sample(1:100,50)
 #' MEgreen     = c(MEyellow[1:30], sample(1:100,20))
 #' MEred	    = c(MEbrown [1:20], sample(1:100,30))
 #' #MEblack	    = c(MEblue  [1:25], sample(1:100,25))
@@ -69,46 +69,46 @@
 #' dat1 = simulateDatExpr(ME, 400, c(0.15,0.13,0.12,0.10,0.09,0.09,0.1), signed=TRUE)
 #' TOM1  = TOMsimilarityFromExpr(dat1$datExpr, networkType="signed")
 #' tree1 = fastcluster::hclust(as.dist(1-TOM1),method="average")
-#' 
-#' ## Here is an example using different mergePercentages, 
+#'
+#' ## Here is an example using different mergePercentages,
 #' # setting an inclusive threshPercent (91)
 #' colorh1  <- colorPlot <- labels2colors(dat1$allLabels)
 #' merges = c(65,40,20,5)
-#' for (m in merges)  
-#'    colorPlot = cbind(colorPlot, 
+#' for (m in merges)
+#'    colorPlot = cbind(colorPlot,
 #'                      moduleMergeUsingKME(dat1$datExpr,colorh1,
 #'                         threshPercent=91, mergePercent=m)$moduleColors)
 #' plotDendroAndColors(tree1, colorPlot, c("ORIG",merges), dendroLabels=FALSE)
-#' 
+#'
 #' ## Here is an example using a lower reassignScale (so that more genes get reassigned)
 #' colorh1  <- colorPlot <- labels2colors(dat1$allLabels)
 #' merges = c(65,40,20,5)
-#' for (m in merges)  colorPlot = cbind(colorPlot, 
-#'   moduleMergeUsingKME(dat1$datExpr,colorh1,threshPercent=91, 
+#' for (m in merges)  colorPlot = cbind(colorPlot,
+#'   moduleMergeUsingKME(dat1$datExpr,colorh1,threshPercent=91,
 #'                       reassignScale=0.7, mergePercent=m)$moduleColors)
 #' plotDendroAndColors(tree1, colorPlot, c("ORIG",merges), dendroLabels=FALSE)
-#' 
-#' ## Here is an example using a less-inclusive threshPercent (75), 
+#'
+#' ## Here is an example using a less-inclusive threshPercent (75),
 #' # little if anything is merged.
-#' 
+#'
 #' colorh1  <- colorPlot <- labels2colors(dat1$allLabels)
 #' merges = c(65,40,20,5)
-#' for (m in merges)  colorPlot = cbind(colorPlot, 
+#' for (m in merges)  colorPlot = cbind(colorPlot,
 #'   moduleMergeUsingKME(dat1$datExpr,colorh1,
 #'                       threshPercent=75, mergePercent=m)$moduleColors)
 #' plotDendroAndColors(tree1, colorPlot, c("ORIG",merges), dendroLabels=FALSE)
-#' # (Note that with real data, the default threshPercent=50 usually results 
+#' # (Note that with real data, the default threshPercent=50 usually results
 #' # in some modules being merged)
-#' 
-#' 
-moduleMergeUsingKME <- function (datExpr, colorh, ME=NULL, threshPercent=50, mergePercent = 25, reassignModules=TRUE, 
+#'
+#'
+moduleMergeUsingKME <- function (datExpr, colorh, ME=NULL, threshPercent=50, mergePercent = 25, reassignModules=TRUE,
 convertGrey=TRUE, omitColors="grey", reassignScale=1, threshNumber=NULL) {
 
 ## First assign all of the variables and put everything in the correct format.
 	if (length(colorh)!=dim(datExpr)[2]){
 		write("Error: color vector much match inputted datExpr columns.",""); return(0)
 	}
-	if (is.null(ME))  
+	if (is.null(ME))
 		ME = (moduleEigengenes(datExpr, colors=as.character(colorh), excludeGrey=TRUE))$eigengenes
 	if (dim(ME)[1]!=dim(datExpr)[1]){
 		write("Error: ME rows much match inputted datExpr rows (samples).",""); return(0)
@@ -120,7 +120,7 @@ convertGrey=TRUE, omitColors="grey", reassignScale=1, threshNumber=NULL) {
 		write("ME cannot include colors with no genes assigned.",""); return(0)
 	}
 	names(ME) = modules
-	
+
 	datCorrs = as.data.frame(cor(datExpr,ME,use="p"))
 	colnames(datCorrs) = modules
 	modules  = sort(modules[!is.element(modules,omitColors)])
@@ -137,28 +137,29 @@ convertGrey=TRUE, omitColors="grey", reassignScale=1, threshNumber=NULL) {
 ## Iteratively run this function until no further changes need to be made
 	while (!is.na(iteration)){
 		write("",""); write("__________________________________________________","")
-		write(paste("This is iteration #",iteration,". There are ",length(modules)," modules.",sep=""),"")
+		write(paste0("This is iteration #", iteration, ". There are ",
+		             length(modules), " modules."), "")
 		iteration = iteration+1
-		
+
 	## Reassign modules if requested by reassignModules and convertGrey
 		colorMax  = NULL
 		whichMod  = apply(datCorrs,1,which.max)
 		cutNumber = round(table(colorOut)*threshPercent/100)
-		cutNumber = cutNumber[names(cutNumber)!="grey"] 
+		cutNumber = cutNumber[names(cutNumber)!="grey"]
 		if(!is.null(threshNumber)) cutNumber = rep(threshNumber,length(cutNumber))
 		cutNumber = apply(cbind(cutNumber,10),1,max)
-		for (i in 1:length(whichMod)) 
+		for (i in 1:length(whichMod))
 			colorMax = c(colorMax,modules[whichMod[i]])
 		for (i in 1:length(modules)){
 			corrs    = as.numeric(datCorrs[,i])
 			cutValue = sort(corrs[colorOut==modules[i]],decreasing=TRUE)[cutNumber[i]]
-			inModule = corrs>(cutValue*reassignScale)		
+			inModule = corrs>(cutValue*reassignScale)
 			if(convertGrey)
 				colorOut[inModule&(colorOut=="grey")&(colorMax==modules[i])]=modules[i]
 			if(reassignModules)
 				colorOut[inModule&(colorOut!="grey")&(colorMax==modules[i])]=modules[i]
 		}
-		
+
 	## Merge all modules meeting the mergePercent and threshPercent criteria
 		for (i in 1:length(modules)){
 			cutNumber  = round(table(colorOut)*threshPercent/100)
@@ -180,13 +181,13 @@ convertGrey=TRUE, omitColors="grey", reassignScale=1, threshNumber=NULL) {
 				mergeLog = rbind(mergeLog,c(modules[i],whichModuleMerge))
 			}
 		}
-		
-	## If no modules were merged, then set iteration to NA 
-		modules  = sort(unique(colorOut))		
+
+	## If no modules were merged, then set iteration to NA
+		modules  = sort(unique(colorOut))
 		modules  = modules[modules!="grey"]
 		if (length(modules)==length(modulesI)) iteration=NA
 		modulesI = modules
-		
+
 	## Recalculate the new module membership values
 		MEs      = (moduleEigengenes(t(datExpr), colors=as.character(colorOut)))$eigengenes
 		MEs      = MEs[,colnames(MEs)!="MEgrey"]
@@ -195,7 +196,7 @@ convertGrey=TRUE, omitColors="grey", reassignScale=1, threshNumber=NULL) {
 	}
 	if(!is.null(dim(mergeLog))){
 		colnames(mergeLog) = c("Old Module","Merged into New Module")
-		rownames(mergeLog) = paste("Merge #",1:dim(mergeLog)[1],sep="")
+		rownames(mergeLog) = paste0("Merge #",1:dim(mergeLog)[1])
 	}
 	return(list(moduleColors=colorOut,mergeLog=mergeLog))
 }
