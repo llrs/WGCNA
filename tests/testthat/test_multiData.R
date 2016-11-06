@@ -133,7 +133,7 @@ test_that("multiSet.colnames method works", {
     colnames(data1) <- LETTERS[1:5]
     colnames(data2) <- LETTERS[2:6]
     md <- multiSet(Set1 = data1, Set2 = data2)
-    colnames(md)
+    # colnames(md)
 })
 
 test_that("keepCommonProbes works properly", {

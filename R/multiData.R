@@ -191,7 +191,7 @@ checkSets <- function(data, checkStructure = FALSE, useSets = NULL) {
          structureOK = structureOK)
 }
 
-# multiSet.subset ####
+# subset.multiSet ####
 #' Subset rows and columns in a multiSet structure
 #'
 #' The function restricts each \code{data} component to the given columns and
@@ -242,7 +242,7 @@ subset.multiSet <- function(multiSet, rowIndex = NULL, colIndex = NULL,
   size = checkSets(multiSet, checkStructure = permissive)
   if (!size$structureOK && !is.null(colIndex))
     warning(immediate. = TRUE,
-            paste("multiSet.subset: applying column selection on data sets that do not have\n",
+            paste("subset.multiSet: applying column selection on data sets that do not have\n",
                   " the same number of columns. This is treacherous territory; proceed with caution."))
   if (is.null(colIndex)) {
       colIndex.1 = c(1:size$nGenes)
@@ -283,8 +283,8 @@ subset.multiSet <- function(multiSet, rowIndex = NULL, colIndex = NULL,
 
 # Method to allow subseting the data of a multiSet
 #' @export
-#' @rdname multiSet.subset
-#' @aliases  multiSet.subset
+#' @rdname subset.multiSet
+#' @aliases  subset.multiSet
 #' @param i Columns to subset of the object
 #' @param j Rows to subset of the object
 #' @param x MultiSet Object to subset
@@ -323,9 +323,14 @@ list2multiSet <- function(data) {
   out
 }
 
+list.as.multiSet <- function(x, ...){
+    list2multiSet(x, ...)
+}
+
 as.list.multiSet <- function(...) {
     multiSet2list(...)
 }
+
 #' @rdname list2multiSet
 #' @aliases multiSet2list
 #' @param multiSet A multiSet structure to be converted to a list.
@@ -392,11 +397,11 @@ multiSet2list <- function(multiSet) {
 #' columns. In a "loose" multiSet structure, the \code{data} components can be
 #' anything (but for most purposes should be of comparable type and content).
 #'
-#' \code{multiSet.apply} works on any "loose" multiSet structure
-#' \code{multiSet.applyToSubset} assumes (and checks for) a "strict" multiSet
+#' \code{apply.multiSet} works on any "loose" multiSet structure
+#' \code{apply.multiSetToSubset} assumes (and checks for) a "strict" multiSet
 #' structure.
 #'
-#' @aliases multiSet.apply multiSet.applyToSubset
+#' @aliases apply.multiSet apply.multiSetToSubset
 #' @param multiSet A multiSet structure to apply the function over
 #' @param FUN Function to be applied.
 #' @param \dots Other arguments to the function \code{FUN}.
@@ -473,7 +478,7 @@ apply.multiSet <- function(
   for (set in 1:nSets) {
     if (calculate[set]) {
       if (mdaVerbose > 0) {
-        printFlush(paste0(printSpaces, "multiSet.apply: working on set ", set))
+        printFlush(paste0(printSpaces, "apply.multiSet: working on set ", set))
       }
       out[[set]] = list(data = FUN(multiSet[[set]]$data, ...))
     } else {
@@ -485,7 +490,7 @@ apply.multiSet <- function(
 
   if (mdaSimplify) {
     if (mdaVerbose > 0) {
-      printFlush(paste0(printSpaces, "multiSet.apply: attempting to simplify..."))
+      printFlush(paste0(printSpaces, "apply.multiSet: attempting to simplify..."))
     }
     return (multiSet.simplify(out))
   } else if (returnList) {
@@ -495,11 +500,11 @@ apply.multiSet <- function(
   out
 }
 
-#' @rdname multiSet.apply
+#' @rdname apply.multiSet
 #' @param mdaRowIndex Index of rows to keep
 #' @param mdaColIndex Index of columns to keep
 #' @export
-multiSet.applyToSubset <- function(
+apply.multiSetToSubset <- function(
     # What to do
     multiSet, FUN, ...,
 
@@ -551,7 +556,7 @@ multiSet.applyToSubset <- function(
   for (set in 1:size$nSets) {
     if (calculate[set]) {
        if (mdaVerbose > 0) {
-         printFlush(paste0(printSpaces, "multiSet.applyToSubset: working on set ",
+         printFlush(paste0(printSpaces, "apply.multiSetToSubset: working on set ",
                            set))
        }
        res[[set]] = list(data = fun(
@@ -569,7 +574,7 @@ multiSet.applyToSubset <- function(
   if (mdaSimplify) {
     if (mdaVerbose > 0) {
       printFlush(paste0(printSpaces,
-                        "multiSet.applyToSubset: attempting to simplify..."))
+                        "apply.multiSetToSubset: attempting to simplify..."))
         }
     return (multiSet.simplify(res))
   } else if (returnList) {
@@ -766,7 +771,7 @@ is.multiSet <- function(x, strict = TRUE) {
 #' @author Peter Langfelder
 #' @seealso \code{\link{multiSet}} to create a multiSet structure
 #'
-#' \code{multiSet.apply} for application of a function to a single multiSet
+#' \code{apply.multiSet} for application of a function to a single multiSet
 #' structure.
 #' @keywords misc
 #' @examples
@@ -872,7 +877,7 @@ multiSet.mapply <- function(FUN, ..., MoreArgs = NULL,
 multiSet.rbindSelf <- function(multiSet){
   size = checkSets(multiSet)
   out = NULL
-  colnames = multiSet.colnames(multiSet)
+  colnames = colnames.multiSet(multiSet)
   for (set in 1:size$nSets)
   {
     if (!is.null(colnames(multiSet[[set]]$data)) &&
@@ -927,10 +932,10 @@ multiSet.setAttr <- function(multiSet, attribute, valueList) {
 #' columns. In a "loose" multiSet structure, the \code{data} components can be
 #' anything (but for most purposes should be of comparable type and content).
 #'
-#' The \code{multiSet.colnames} and \code{multiSet.setColnames} assume (and checks for) a
+#' The \code{colnames.multiSet} and \code{multiSet.setColnames} assume (and checks for) a
 #' "strict" multiSet structure.
 #'
-#' @aliases multiSet.setColnames multiSet.colnames
+#' @aliases multiSet.setColnames colnames.multiSet
 #' @param multiSet A multiSet structure
 #' @param colnames A vector (coercible to character) of column names.
 #' \code{multiSet.setColnames} returns the multiSet structure with the column names
@@ -948,16 +953,13 @@ multiSet.setColnames <- function(multiSet, colnames) {
 
 #' @rdname multiSet.setColnames
 #' @export
-#' @return \code{multiSet.colnames} returns the vector of column names of the
+#' @return \code{colnames.multiSet} returns the vector of column names of the
 #' \code{data} component. The function assumes the column names in all sets are
 #' the same.
-colnames.multiSet <- function(multiSet) {
+multiSet.colnames <- function(multiSet) {
     colnames(multiSet[[1]]$data)
 }
 
-colnames <- function(x, ...) {
-    UseMethod("colnames", x)
-}
 
 # multiSet ####
 #' Create a multiSet structure.
@@ -980,7 +982,7 @@ colnames <- function(x, ...) {
 #' @author Peter Langfelder
 #' @seealso \code{\link{multiSet2list}} for converting a multiSet structure
 #' to a list; \code{\link{list2multiSet}} for an alternative way of creating a
-#' multiSet structure; \code{\link{multiSet.apply}, \link{multiSet.applyToSubset},
+#' multiSet structure; \code{\link{apply.multiSet}, \link{apply.multiSetToSubset},
 #' \link{multiSet.mapply}} for ways of applying a function to each component of a
 #' multiSet structure.
 #' @keywords misc
@@ -1071,6 +1073,3 @@ lapply.multiSet <- function(x, ...){
     lapply(x, ...)
 }
 
-list.as.multiSet <- function(x, ...){
-    list2multiSet(x, ...)
-}

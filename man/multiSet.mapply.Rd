@@ -99,7 +99,7 @@ Peter Langfelder
 \seealso{
 \code{\link{multiSet}} to create a multiSet structure
 
-\code{multiSet.apply} for application of a function to a single multiSet
+\code{apply.multiSet} for application of a function to a single multiSet
 structure.
 }
 \keyword{misc}
