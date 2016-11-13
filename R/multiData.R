@@ -956,8 +956,13 @@ multiSet.setColnames <- function(multiSet, colnames) {
 #' @return \code{colnames.multiSet} returns the vector of column names of the
 #' \code{data} component. The function assumes the column names in all sets are
 #' the same.
-multiSet.colnames <- function(multiSet) {
-    colnames(multiSet[[1]]$data)
+colnames <- function(x, ...) {
+    UseMethod("colnames")
+}
+colnames.default <- base::colnames
+
+colnames.multiSet <- function(multiSet, ...) {
+    base::colnames(multiSet[[1]]$data)
 }
 
 
