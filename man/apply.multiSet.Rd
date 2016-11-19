@@ -5,9 +5,7 @@
 \alias{apply.multiSetToSubset}
 \title{Apply a function to each set in a multiSet structure.}
 \usage{
-\method{apply}{multiSet}(multiSet, FUN, ..., mdaExistingResults = NULL,
-  mdaUpdateIndex = NULL, mdaCopyNonData = FALSE, mdaSimplify = FALSE,
-  returnList = FALSE, mdaVerbose = 0, mdaIndent = 0)
+\method{apply}{multiSet}(multiSet, MARGIN, FUN, ...)
 
 \method{apply}{multiSetToSubset}(multiSet, FUN, ..., mdaRowIndex = NULL,
   mdaColIndex = NULL, mdaExistingResults = NULL, mdaUpdateIndex = NULL,
@@ -18,6 +16,10 @@
 \item{multiSet}{A multiSet structure to apply the function over}
 
 \item{FUN}{Function to be applied.}
+
+\item{mdaRowIndex}{Index of rows to keep}
+
+\item{mdaColIndex}{Index of columns to keep}
 
 \item{mdaExistingResults}{Optional list that contains previously calculated
 results. This can be useful if only a few sets in \code{multiSet} have
@@ -56,10 +58,6 @@ diagnostic messages.}
 \item{mdaIndent}{Integer specifying the indentation of the printed progress
 messages. Each unit equals two spaces.}
 
-\item{mdaRowIndex}{Index of rows to keep}
-
-\item{mdaColIndex}{Index of columns to keep}
-
 \item{\dots}{Other arguments to the function \code{FUN}.}
 }
 \value{
@@ -88,7 +86,7 @@ anything (but for most purposes should be of comparable type and content).
 structure.
 }
 \author{
-Peter Langfelder
+Lluís Revilla
 }
 \seealso{
 \code{\link{multiSet}} to create a multiSet structure

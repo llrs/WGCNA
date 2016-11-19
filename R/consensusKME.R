@@ -533,22 +533,22 @@ consensusKME <-function(multiExpr,
     varNames = c("kME", "p.kME", "q.kME", "Z.kME")[keep]
     nVars = sum(keep)
 
-    dimnames(kME) = list(multiSet.colnames(multiExpr),
-                         paste0("k", multiSet.colnames(multiEigengenes)),
+    dimnames(kME) = list(colnames(multiExpr),
+                         paste0("k", colnames(multiEigengenes)),
                          setNames)
 
-    dimnames(p) = list(multiSet.colnames(multiExpr),
-                       paste0("p.k", multiSet.colnames(multiEigengenes)),
+    dimnames(p) = list(colnames(multiExpr),
+                       paste0("p.k", colnames(multiEigengenes)),
                        setNames)
 
     if (getQvalues)
-        dimnames(q) = list(multiSet.colnames(multiExpr),
-                           paste0("q.k", multiSet.colnames(multiEigengenes)),
+        dimnames(q) = list(colnames(multiExpr),
+                           paste0("q.k", colnames(multiEigengenes)),
                            setNames)
 
     if (haveZs)
-        dimnames(Z) = list(multiSet.colnames(multiExpr),
-                           paste0("Z.k", multiSet.colnames(multiEigengenes)),
+        dimnames(Z) = list(colnames(multiExpr),
+                           paste0("Z.k", colnames(multiEigengenes)),
                            setNames)
 
 

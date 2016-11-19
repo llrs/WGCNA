@@ -60,6 +60,7 @@ This function assumes a "strict" multiSet structure unless
 \code{permissive} is \code{TRUE}.
 }
 \examples{
+
 data1 <- matrix(rnorm(100), 20, 5)
 data2 <- matrix(rnorm(50), 10, 5)
 

@@ -9,7 +9,7 @@
      stop("'colID' contains duplicate entries.")
   }
 
-  rnDat = multiSet.colnames(mdx)
+  rnDat = colnames(mdx)
 
   if ( sum(is.na(colID))>0 )
       warning("The argument colID contains missing data. It is recommend you ",
@@ -46,14 +46,14 @@
               "... Attempting to proceed anyway. Check results carefully.")
       keepProbes = is.element(colID, rnDat)
       colID = colID[keepProbes]
-      mdx = multiSet.subset(mdx, , colID)
+      mdx = subset(mdx, , colID)
       group = group[colID]
   }
 
   restCols = (group!="" & !is.na(group))
   if (any(!restCols)) {
     keepProbes[keepProbes] = restCols
-    mdx = multiSet.subset(mdx, , restCols)
+    mdx = subset(mdx, , restCols)
     group = group[restCols]
     colID = colID[restCols]
     rnDat = rnDat[restCols]
@@ -123,17 +123,17 @@ selectFewestConsensusMissing <- function(mdx, colID, group,
       keep = rep(TRUE, nVars)
 
    # First, return datET if there is no missing data, otherwise run the function
-   if (sum(multiSet.apply(mdx, function(x) sum(is.na(x)), mdaSimplify = TRUE))==0)
+   if (sum(apply(mdx, function(x) sum(is.na(x)))) == 0)
      return(rep(TRUE, nVars))
 
    # Set up the variables.
    names(group)     = colID
-   probes              = multiSet.colnames(mdx)
+   probes              = colnames(mdx)
    genes               = group[probes]
    keepGenes           = rep(TRUE, nVars)
    tGenes              = table(genes)
    checkGenes          = sort(names(tGenes)[tGenes>1])
-   presentData         = as.matrix(multiSet.apply(mdx, function(x) colSums(is.finite(x)), mdaSimplify = TRUE))
+   presentData         = as.matrix(apply(mdx, function(x) colSums(is.finite(x))))
 
    presentFrac = presentData/matrix(nSamples, nVars, nSets, byrow = TRUE)
    consensusPresentFrac = .consensusCalculation(setTomMat = presentFrac, useMean = FALSE,
@@ -335,7 +335,7 @@ consensusRepresentatives <- function(mdx,
    nSamples= checkSets(mdx)$nSamples
    nSets = length(mdx)
 
-   colnames.in = multiSet.colnames(mdx)
+   colnames.in = colnames(mdx)
 
    calibration = match.arg(calibration)
 
@@ -348,7 +348,7 @@ consensusRepresentatives <- function(mdx,
    mdx = cd$mdx
    keepVars = cd$keepProbes
 
-   rnDat = multiSet.colnames(mdx)
+   rnDat = colnames(mdx)
 
 
 ## For each gene, select the gene with the fewest missing probes (if minProportionPresent==TRUE)
@@ -358,13 +358,13 @@ consensusRepresentatives <- function(mdx,
      printFlush(paste0(spaces, "..selecting variables with lowest numbers of missing data.."))
    keep = selectFewestConsensusMissing(mdx, colID, group, minProportionPresent,
                                  consensusQuantile = consensusQuantile, verbose = verbose -1)
-   mdx = multiSet.subset(mdx, , keep)
+   mdx = subset(mdx, , keep)
    keepVars[keepVars] = keep
 
    group = group[keep]
    colID = colID[keep]
 
-   rnDat = multiSet.colnames(mdx)
+   rnDat = colnames(mdx)
 
 ##   If method="function", use the function "methodFunction" as a way of combining genes
 #    Alternatively, use one of the built-in functions
@@ -402,19 +402,18 @@ consensusRepresentatives <- function(mdx,
       stop("None of the variable names in 'mdx' are in 'colID'.")
 
    group = group[colID]
-   mdx  = multiSet.apply(mdx, as.matrix)
-   keepVars[keepVars] =  multiSet.colnames(mdx) %in% colID
-   mdx = multiSet.subset(mdx, , colID)
+   mdx  = apply(mdx, as.matrix)
+   keepVars[keepVars] =  colnames(mdx) %in% colID
+   mdx = subset(mdx, , colID)
 
-   probes = multiSet.colnames(mdx)
+   probes = colnames(mdx)
    genes  = group[probes]
    tGenes = table(genes)
    colnames.out = sort(names(tGenes))
 
    if (getRepresentativeData)
    {
-     mdxOut = multiSet.apply(mdx, function(x)
-     {
+     mdxOut = apply(mdx, function(x) {
        out = matrix(0, nrow(x), length(tGenes))
        rownames(out) = rownames(x)
        colnames(out) = colnames.out
@@ -448,9 +447,8 @@ consensusRepresentatives <- function(mdx,
    # Run selectionStatisticFnc on all data; if quantile normalization is requested, normalize the selection
    # statistics across data sets.
 
-   selectionStatistics = multiSet.apply(mdx, function(x)
-             do.call(selStatFnc, c(list(x), statisticFncArguments)),
-              mdaSimplify = TRUE)
+   selectionStatistics = apply(mdx, function(x)
+             do.call(selStatFnc, c(list(x), statisticFncArguments)))
 
    #if (FALSE) xxx = selectionStatistics
 
@@ -516,15 +514,14 @@ consensusRepresentatives <- function(mdx,
      genes.more = genes[genes %in% more]
      nAll = length(genes.more)
      connectivities = matrix(NA, nAll, nSets)
-     for (ig in 1:length(more))
-     {
+     for (ig in 1:length(more)) {
         g = more[ig]
         keepProbes1 = which(genes==g)
         keep.inMore = which(genes.more==g)
-        mdxTmp = multiSet.subset(mdx, , keepProbes1)
-        adj = multiSet.apply(mdxTmp, function(x) do.call(adjacency,
+        mdxTmp = subset(mdx, , keepProbes1)
+        adj = apply(mdxTmp, function(x) do.call(adjacency,
                 c(list(x, type = "signed", power = connectivityPower), adjacencyArguments)))
-        connectivities[keep.inMore, ] = multiSet.apply(adj, colSums, mdaSimplify = TRUE)
+        connectivities[keep.inMore, ] = apply(adj, colSums)
         count = count + 1
         if (count %% 50000 == 0) collectGarbage()
         if (verbose > 1) pind = updateProgInd(ig/(2*length(more)), pind)
@@ -556,7 +553,7 @@ consensusRepresentatives <- function(mdx,
    colnames(out2) = c("group","selectedColID")
 
    reprIndicator = keepVars
-   reprIndicator[keepVars] [match(representatives, multiSet.colnames(mdx))] = TRUE
+   reprIndicator[keepVars] [match(representatives, colnames(mdx))] = TRUE
    reprIndicator = colnames.in
    out = list(representatives = out2,
               varSelected = reprIndicator,

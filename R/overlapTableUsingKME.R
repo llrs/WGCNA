@@ -186,7 +186,7 @@ datIsExpression=TRUE){
 	}
 	names(ovGenes) = ovNames
 	out = list(pVals,comGenes,genes1,genes2,ovGenes)
-	names(out) = c("PvaluesHypergeo", "AllCommonGenes", paste0("Genes", names,),
+	names(out) = c("PvaluesHypergeo", "AllCommonGenes", paste0("Genes", names),
 	               "OverlappingGenes")
 	return(out)
 }

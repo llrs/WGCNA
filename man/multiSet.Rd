@@ -35,7 +35,6 @@ data2 <- matrix(rnorm(50), 10, 5)
 md <- multiSet(Set1 = data1, Set2 = data2)
 
 checkSets(md)
-
 }
 \author{
 Peter Langfelder

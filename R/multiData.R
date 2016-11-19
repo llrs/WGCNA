@@ -230,6 +230,7 @@ checkSets <- function(data, checkStructure = FALSE, useSets = NULL) {
 #' @author Peter Langfelder
 #' @seealso \code{\link{multiSet}} to create a multiSet structure.
 #' @examples
+#'
 #' data1 <- matrix(rnorm(100), 20, 5)
 #' data2 <- matrix(rnorm(50), 10, 5)
 #'
@@ -237,6 +238,7 @@ checkSets <- function(data, checkStructure = FALSE, useSets = NULL) {
 #' md[, c(1,3)]
 #' md[c(1,3), ]
 #' @keywords misc
+#' @export
 subset.multiSet <- function(multiSet, rowIndex = NULL, colIndex = NULL,
                       permissive = FALSE, drop = FALSE) {
   size = checkSets(multiSet, checkStructure = permissive)
@@ -313,6 +315,7 @@ subset.multiSet <- function(multiSet, rowIndex = NULL, colIndex = NULL,
 #' \code{multiSet2list}, the corresponding list.
 #' @author Peter Langfelder
 #' @keywords misc
+#' @export
 list2multiSet <- function(data) {
   out = list()
   for (set in 1:length(data)) {
@@ -323,10 +326,15 @@ list2multiSet <- function(data) {
   out
 }
 
+#' Convert a list to a multiSet
+#' @export
 list.as.multiSet <- function(x, ...){
     list2multiSet(x, ...)
 }
 
+#' Convert to a list the multiSet
+#'
+#' @export
 as.list.multiSet <- function(...) {
     multiSet2list(...)
 }
@@ -401,7 +409,7 @@ multiSet2list <- function(multiSet) {
 #' \code{apply.multiSetToSubset} assumes (and checks for) a "strict" multiSet
 #' structure.
 #'
-#' @aliases apply.multiSet apply.multiSetToSubset
+#' @alias apply
 #' @param multiSet A multiSet structure to apply the function over
 #' @param FUN Function to be applied.
 #' @param \dots Other arguments to the function \code{FUN}.
@@ -435,72 +443,51 @@ multiSet2list <- function(multiSet) {
 #' diagnostic messages.
 #' @param mdaIndent Integer specifying the indentation of the printed progress
 #' messages. Each unit equals two spaces.
+#' @param MARGIN Column or row you want to use
 #' @return A multiSet structure containing the results of the supplied
 #' function on each \code{data} component in the input multiSet structure.
 #' Other components are simply copied.
-#' @author Peter Langfelder
+#' @author Lluís Revilla
 #' @seealso
 #' \code{\link{multiSet}} to create a multiSet structure
 #' \code{\link{multiSet.mapply}} for vectorizing over several arguments.
 #' @keywords misc
-apply.multiSet <- function(
-    # What to do
-    multiSet, FUN, ...,
+#' @export
+apply.multiSet <- function(multiSet, MARGIN, FUN, ...) {
 
-    # Pre-existing results and update options
-    mdaExistingResults = NULL, mdaUpdateIndex = NULL,
-    mdaCopyNonData = FALSE,
-
-    # Output formatting options
-    mdaSimplify = FALSE,
-    returnList = FALSE,
-
-    # Internal behaviour options
-    mdaVerbose = 0, mdaIndent = 0) {
-  printSpaces = indentSpaces(mdaIndent)
-
-  if (!is.multiSet(multiSet, strict = FALSE))
+  if (!is.multiSet(multiSet, strict = FALSE)) {
     stop("Supplied 'multiSet' is not a valid multiSet structure.")
-
-  if (mdaSimplify && mdaCopyNonData)
-    stop("Non-data copying is not compatible with simplification.")
-
-  nSets = length(multiSet)
-  if (mdaCopyNonData) {
-      out = multiSet
-  } else {
-      out = vector(mode = "list", length = nSets)
   }
 
-  calculate = .calculateIndicator(nSets, mdaExistingResults, mdaUpdateIndex)
+  nSets = length(multiSet)
+  out = vector(mode = "list", length = nSets)
 
   FUN <- match.fun(FUN)
   for (set in 1:nSets) {
-    if (calculate[set]) {
-      if (mdaVerbose > 0) {
-        printFlush(paste0(printSpaces, "apply.multiSet: working on set ", set))
-      }
-      out[[set]] = list(data = FUN(multiSet[[set]]$data, ...))
-    } else {
-      out[set] = mdaExistingResults[set]
-    }
+      data <- base::apply(multiSet[[set]]$data, MARGIN = MARGIN,
+                    FUN = FUN, ...)
+      out[[set]] = list(data = data)
   }
 
   names(out) = names(multiSet)
 
-  if (mdaSimplify) {
-    if (mdaVerbose > 0) {
-      printFlush(paste0(printSpaces, "apply.multiSet: attempting to simplify..."))
-    }
-    return (multiSet.simplify(out))
-  } else if (returnList) {
-    return(multiSet2list(out))
-  }
-
   out
 }
 
-#' @rdname apply.multiSet
+#' @alias apply
+#' @export
+apply <- function(x, ...) {
+    UseMethod("apply")
+}
+
+#' @alias apply
+#' @export
+apply.default <- function(X, MARGIN, FUN, ...) {
+    base::apply(X = X, MARGIN = MARGIN, FUN = FUN, ...)
+}
+#' Subset and apply at the same time
+#'
+#' This method combines the apply and the subset methods.
 #' @param mdaRowIndex Index of rows to keep
 #' @param mdaColIndex Index of columns to keep
 #' @export
@@ -576,7 +563,7 @@ apply.multiSetToSubset <- function(
       printFlush(paste0(printSpaces,
                         "apply.multiSetToSubset: attempting to simplify..."))
         }
-    return (multiSet.simplify(res))
+    return (simplify(res))
   } else if (returnList) {
     return (multiSet2list(res))
   }
@@ -613,6 +600,7 @@ apply.multiSetToSubset <- function(
 #' \code{\link{multiSet2list}} for converting multiSet structures to plain
 #' lists.
 #' @keywords misc
+#' @export
 simplify.multiSet <- function(multiSet) {
   len = length(multiSet[[1]]$data)
   dim = dim(multiSet[[1]]$data)
@@ -693,6 +681,7 @@ simplify.multiSet <- function(multiSet) {
 #' @seealso Other multiSet handling functions whose names start with
 #' \code{multiSet.}
 #' @keywords misc
+#' @export
 is.multiSet <- function(x, strict = TRUE) {
     if (class(x) == "multiSet") {
         return(TRUE)
@@ -781,6 +770,7 @@ is.multiSet <- function(x, strict = TRUE) {
 #' colnames(data2) <- LETTERS[2:6]
 #' md <- list2multiSet(list(Set1 = data1, Set2 = data2))
 #' multiSet.mapply(md, FUN = sum)
+#' @export
 multiSet.mapply <- function(FUN, ..., MoreArgs = NULL,
                             # How to interpret the input
                             mdma.argIsMultiData = NULL,
@@ -841,7 +831,7 @@ multiSet.mapply <- function(FUN, ..., MoreArgs = NULL,
         if (mdmaVerbose > 0)
             printFlush(paste0(printSpaces,
                               "multiSet.mapply: attempting to simplify..."))
-    return(multiSet.simplify(res))
+    return(simplify(res))
   } else if (returnList) {
     return (multiSet2list(res))
   }
@@ -874,6 +864,7 @@ multiSet.mapply <- function(FUN, ..., MoreArgs = NULL,
 #'
 #' \code{\link{rbind}} for various subtleties of the row binding operation.
 #' @keywords misc
+#' @export
 multiSet.rbindSelf <- function(multiSet){
   size = checkSets(multiSet)
   out = NULL
@@ -905,6 +896,7 @@ multiSet.rbindSelf <- function(multiSet){
 #'
 #' \code{is.multiSet} for a description of the multiSet structure.
 #' @keywords misc
+#' @export
 multiSet.setAttr <- function(multiSet, attribute, valueList) {
   size = checkSets(multiSet)
   ind = 1
@@ -943,6 +935,7 @@ multiSet.setAttr <- function(multiSet, attribute, valueList) {
 #' @author Peter Langfelder
 #' @seealso \code{\link{multiSet}} to create a multiSet structure.
 #' @keywords misc
+#' @export
 multiSet.setColnames <- function(multiSet, colnames) {
   size = checkSets(multiSet)
   for (set in 1:size$nSets) {
@@ -959,8 +952,11 @@ multiSet.setColnames <- function(multiSet, colnames) {
 colnames <- function(x, ...) {
     UseMethod("colnames")
 }
+#' @export
 colnames.default <- base::colnames
 
+#' Extract the colnames of the multiSet
+#' @export
 colnames.multiSet <- function(multiSet, ...) {
     base::colnames(multiSet[[1]]$data)
 }
@@ -999,7 +995,7 @@ colnames.multiSet <- function(multiSet, ...) {
 #' md <- multiSet(Set1 = data1, Set2 = data2)
 #'
 #' checkSets(md)
-#'
+#' @export
 multiSet <- function(...) {
   list2multiSet(list(...))
 }
@@ -1028,6 +1024,7 @@ multiSet <- function(...) {
 #' @author Peter Langfelder
 #' @seealso \code{\link{checkSets}}
 #' @keywords misc
+#' @export
 keepCommonProbes <- function(multiExpr, orderBy = 1) {
     size = checkSets(multiExpr)
     nSets = size$nSets
@@ -1062,19 +1059,20 @@ keepCommonProbes <- function(multiExpr, orderBy = 1) {
 #     }
 #     x
 # }
-
-apply <- function(x, ...) {
-    UseMethod("apply")
-}
-
+#' Method to simplify the multiSet.
+#' @export
 simplify <- function(x, ...) {
     UseMethod("simplify")
 }
+
+#' @rdname lapply
+#' @export
 lapply <- function(x, ...) {
     UseMethod("lapply")
 }
 
+#' @rdname lapply
+#' @export
 lapply.multiSet <- function(x, ...){
     lapply(x, ...)
 }
-
