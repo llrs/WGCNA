@@ -3,26 +3,82 @@
 \name{initProgInd}
 \alias{initProgInd}
 \alias{updateProgInd}
-\title{Progress indicators}
+\title{Inline display of progress}
 \usage{
 initProgInd(leadStr = "..", trailStr = "", quiet = !interactive())
 
 updateProgInd(newFrac, progInd, quiet = !interactive())
 }
 \arguments{
-\item{leadStr}{Leading characters.}
+\item{leadStr}{character string that will be printed before the actual
+progress number.}
 
-\item{trailStr}{Last characters.}
+\item{trailStr}{character string that will be printed after the actual
+progress number.}
 
-\item{quiet}{Logical: Run it in interactive mode or not?.}
+\item{quiet}{can be used to silence the indicator for non-interactive
+sessions whose output is typically redirected to a file.}
 
-\item{newFrac}{Unkown parameter.}
+\item{newFrac}{new fraction of progress to be displayed.}
 
-\item{progInd}{Object of class progressIndicator obtained with initProgInd.}
+\item{progInd}{an object of class \code{progressIndicator} that encodes
+previously printed message.}
+}
+\value{
+Both functions return an object of class \code{progressIndicator}
+that holds information on the last printed value and should be used for
+subsequent updates of the indicator.
 }
 \description{
-Describes how much/how long does it takes
-
-Should work on all OS to indicate the evolution of indicator
+These functions provide an inline display of pregress.
 }
+\details{
+A progress indicator is a simple inline display of progress intended to
+satisfy impatient users during lengthy operations. The function
+\code{initProgInd} initializes a progress indicator (at zero)
+\code{updateProgInd} updates it to a specified fraction.
+
+Note that excessive use of \code{updateProgInd} may lead to a performance
+penalty (see examples).
+}
+\examples{
+
+max = 10
+prog = initProgInd("Counting: ", "done")
+for (c in 1:max) {
+  Sys.sleep(0.10)
+  prog = updateProgInd(c/max, prog)
+}
+printFlush("")
+
+printFlush("Example 2:")
+prog = initProgInd()
+for (c in 1:max) {
+  Sys.sleep(0.10)
+  prog = updateProgInd(c/max, prog)
+}
+printFlush("")
+
+## Example of a significant slowdown:
+
+## Without progress indicator:
+
+system.time( {a = 0; for (i in 1:10000) a = a+i; } )
+
+## With progress indicator, some 50 times slower:
+
+system.time({
+    prog = initProgInd("Counting: ", "done")
+    a = 0
+    for (i in 1:10000) {
+      a = a+i
+      prog = updateProgInd(i/10000, prog)
+    }
+  }
+)
+}
+\author{
+Peter Langfelder
+}
+\keyword{misc}
 

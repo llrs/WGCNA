@@ -2,11 +2,17 @@
 % Please edit documentation in R/multiData.R
 \name{subset.multiSet}
 \alias{[.multiSet}
+\alias{subset}
+\alias{subset.default}
 \alias{subset.multiSet}
 \title{Subset rows and columns in a multiSet structure}
 \usage{
-subset.multiSet(multiSet, rowIndex = NULL, colIndex = NULL,
+\method{subset}{multiSet}(multiSet, rowIndex = NULL, colIndex = NULL,
   permissive = FALSE, drop = FALSE)
+
+subset(x, ...)
+
+\method{subset}{default}(x, ...)
 
 \method{[}{multiSet}(x, i, j, drop = TRUE)
 }

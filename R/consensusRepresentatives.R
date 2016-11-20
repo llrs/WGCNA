@@ -33,7 +33,7 @@
   if ((is.null(rnDat))&(checkSets(mdx)$nGenes==length(colID))) {
     warning(" mdx does not have column names. Using 'colID' as column names.","")
     rnDat = colID
-    mdx = multiSet.setColnames(mdx, colID)
+    mdx = colnames(mdx) <- colID
   }
   if (is.null(rnDat))
      stop("'mdx' does not have row names and \n",
@@ -391,7 +391,7 @@ consensusRepresentatives <- function(mdx,
 ## Format the variables for use by this function
    colID[is.na(colID)] = group[is.na(colID)]    # Use group if row is missing
    rnDat[is.na(rnDat)]   = group[is.na(rnDat)]
-   mdx = multiSet.setColnames(mdx, rnDat)
+   mdx = colnames(mdx) <- rnDat
 
    remove       = (is.na(colID))|(is.na(group)) # Omit if both gene and probe are missing
    colID  = colID[!remove]
@@ -404,7 +404,7 @@ consensusRepresentatives <- function(mdx,
    group = group[colID]
    mdx  = apply(mdx, as.matrix)
    keepVars[keepVars] =  colnames(mdx) %in% colID
-   mdx = subset(mdx, , colID)
+   mdx = mdx[ , colID]
 
    probes = colnames(mdx)
    genes  = group[probes]

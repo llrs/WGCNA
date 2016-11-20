@@ -109,8 +109,7 @@ test_that("union and intersect work", {
 })
 
 # test multiSet.subset or replace it
-# .calculateIndicator
-# multiSet.applyToSubset not needed if subseting works properly
+.calculateIndicator
 # multiSet.mapply Used in blockwiseModulesC and branchSplit
 test_that("multiSet.mapply works", {
     data1 <- matrix(rnorm(100L), 20L, 5L)

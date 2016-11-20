@@ -2,11 +2,16 @@
 % Please edit documentation in R/multiData.R
 \name{as.list.multiSet}
 \alias{as.list.multiSet}
-\title{Convert to a list the multiSet}
+\title{Convert a multiSet object to a list}
 \usage{
-as.list.multiSet(...)
+\method{as.list}{multiSet}(multiSet, ...)
+}
+\arguments{
+\item{multiSet}{muiltiSet object to be converted to list}
+
+\item{\dots}{other arguments passed to multiSet2list}
 }
 \description{
-Convert to a list the multiSet
+Each dataset is a list with a data element with the expression.
 }
 

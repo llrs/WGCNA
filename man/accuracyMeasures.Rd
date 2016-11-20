@@ -97,17 +97,16 @@ naive predictor has an error rate of 30 percent (since it only misclassifies
 }
 \examples{
 
-m=100
-trueOutcome=sample( c(1,2),m,replace=TRUE)
-predictedOutcome=trueOutcome
+m <- 100
+trueOutcome <- sample( c(1,2),m,replace=TRUE)
+predictedOutcome <- trueOutcome
 # now we noise half of the entries of the predicted outcome
-predictedOutcome[ 1:(m/2)] =sample(predictedOutcome[ 1:(m/2)] )
-tab=table(predictedOutcome, trueOutcome) 
+predictedOutcome[ 1:(m/2)] <- sample(predictedOutcome[ 1:(m/2)] )
+tab <- table(predictedOutcome, trueOutcome)
 accuracyMeasures(tab)
 
 # Same result:
 accuracyMeasures(predictedOutcome, trueOutcome)
-
 
 }
 \author{

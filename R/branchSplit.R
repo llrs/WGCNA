@@ -69,8 +69,7 @@
 #' @keywords misc
 branchEigengeneDissim = function(expr, branch1, branch2,
                             corFnc = cor, corOptions = list(use = 'p'),
-                            signed = TRUE, ...)
-{
+                            signed = TRUE, ...) {
   expr.branch1 = expr[ , branch1]
   expr.branch2 = expr[ , branch2]
 
@@ -79,20 +78,29 @@ branchEigengeneDissim = function(expr, branch1, branch2,
 
   corFnc = match.fun(corFnc)
   cor0 = as.numeric(do.call(corFnc, corOptions))
-  if (length(cor0) != 1) stop ("Internal error in branchEigengeneDissim: cor has length ", length(cor0))
-  if (signed)  1-cor0 else 1-abs(cor0)
+  if (length(cor0) != 1) {
+      stop("Internal error in branchEigengeneDissim: cor has length ",
+           length(cor0))
+  }
+  if (signed) {
+      1-cor0
+  } else {
+      1-abs(cor0)
+  }
 }
 
-multiSet.branchEigengeneDissim = function(multiExpr, branch1, branch2,
+multiSet.branchEigengeneDissim <- function(multiExpr, branch1, branch2,
                             corFnc = cor, corOptions = list(use = 'p'),
-                            consensusQuantile = 0, signed = TRUE, reproduceQuantileError = FALSE, ...)
-{
-  setSplits.list = multiSet.apply(multiExpr, branchEigengeneDissim,
+                            consensusQuantile = 0, signed = TRUE,
+                            reproduceQuantileError = FALSE, ...) {
+  setSplits.list = apply(multiExpr, branchEigengeneDissim,
                         branch1 = branch1, branch2 = branch2,
                         corFnc = corFnc, corOptions = corOptions,
                         signed = signed)
   setSplits = unlist(multiSet2list(setSplits.list))
-  quantile(setSplits, prob = if (reproduceQuantileError) consensusQuantile else 1-consensusQuantile,
+  quantile(setSplits,
+           prob = ifelse(reproduceQuantileError, consensusQuantile,
+                         1-consensusQuantile),
            na.rm = TRUE, names = FALSE)
 }
 
