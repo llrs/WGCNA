@@ -225,6 +225,7 @@ checkSets <- function(data, checkStructure = FALSE, useSets = NULL) {
 #' \code{multiSet} input? Note that the subsetting may lead to cryptic errors
 #' if the input \code{multiSet} does not follow the "strict" format.
 #' @param drop logical: should dimensions with extent 1 be dropped?
+#' @param \dots Other arguments
 #' @return A multiSet structure containing the selected rows and columns. Note
 #' that result always retaines it dimension and other attributes.
 #' @author Peter Langfelder
@@ -240,7 +241,7 @@ checkSets <- function(data, checkStructure = FALSE, useSets = NULL) {
 #' @keywords misc
 #' @export
 subset.multiSet <- function(multiSet, rowIndex = NULL, colIndex = NULL,
-                      permissive = FALSE, drop = FALSE) {
+                      permissive = FALSE, drop = FALSE, ...) {
   size = checkSets(multiSet, checkStructure = permissive)
   if (!size$structureOK && !is.null(colIndex)) {
     warning(immediate. = TRUE,
@@ -287,14 +288,14 @@ subset.multiSet <- function(multiSet, rowIndex = NULL, colIndex = NULL,
 
 #' @export
 #' @rdname subset.multiSet
-subset <- function(x, ...) {
-    UseMethod("subset", x)
+subset <- function(multiSet, ...) {
+    UseMethod("subset", multiSet)
 }
 
 #' @export
 #' @rdname subset.multiSet
-subset.default <- function(x, ...) {
-    subset(x, ...)
+subset.default <- function(multiSet, ...) {
+    subset(multiSet, ...)
 }
 
 # Method to allow subseting the data of a multiSet
@@ -325,6 +326,8 @@ subset.default <- function(x, ...) {
 #'
 #' @aliases list2multiSet multiSet2list
 #' @param data A list to be converted to a multiSet structure.
+#' @param x Object to convert to multiSet or to list
+#' @param \dots Other arguments
 #' @return For \code{list2multiSet}, a multiSet structure; for
 #' \code{multiSet2list}, the corresponding list.
 #' @author Peter Langfelder
@@ -343,14 +346,14 @@ list2multiSet <- function(data) {
 #' Convert a list to a multiSet
 #' @export
 #' @method as.multiSet list
-#' @param x list to be converted to a multiSet object, or a multiSet to be
+#' @param multiSet list to be converted to a multiSet object, or a multiSet to be
 #' converted to a list
 #' @param \dots other arguments to be passed to \code{list2multiSet} or
 #' \code{list2multiset}
 #' @return An object of class multiSet or a list.
 #' @seealso \code{\link{list2multiSet}}, \code{\link{multiSet2list}}
-as.multiSet.list <- function(x, ...) {
-    list2multiSet(x, ...)
+as.multiSet.list <- function(multiSet) {
+    list2multiSet(multiSet)
 }
 
 #' @export
@@ -360,8 +363,8 @@ as.multiSet <- list2multiSet
 #' @export
 #' @method as.multiSet.default list
 #' @rdname list2multiSet
-as.multiSet.default.list <- function(x, ...) {
-    list2multiSet(x, ...)
+as.multiSet.default.list <- function(x) {
+    list2multiSet(x)
 }
 
 #' @export
@@ -373,11 +376,11 @@ as.multiSet.default <- function(x, ...) {
 #'
 #' Each dataset is a list with a data element with the expression.
 #' @export
-#' @param multiSet muiltiSet object to be converted to list
+#' @param x muiltiSet object to be converted to list
 #' @param \dots other arguments passed to multiSet2list
 #' @method as.list multiSet
-as.list.multiSet <- function(multiSet, ...) {
-    multiSet2list(multiSet, ...)
+as.list.multiSet <- function(x, ...) {
+    multiSet2list(x, ...)
 }
 
 #' @rdname list2multiSet
@@ -880,9 +883,10 @@ multiSet.setAttr <- function(multiSet, attribute, valueList) {
 #'
 #' @param multiSet A multiSet structure
 #' @param value A vector (coercible to character) of column names.
-# #' @param \dots Other arguments passed
+#' @param \dots Other arguments passed
 #' @return The multiSet structure with the column names
 #' set in all \code{data} components.
+#' @rdname setColnames
 #' @author Peter Langfelder
 #' @seealso \code{\link{multiSet}} to create a multiSet structure.
 #' @keywords misc
@@ -897,29 +901,28 @@ multiSet.setAttr <- function(multiSet, attribute, valueList) {
 }
 
 #' @export
-#' @rdname colnames<-.multiSet
-`colnames<-` <- function(x, value) {
-    UseMethod("colnames<-", x)
+#' @rdname setColnames
+`colnames<-` <- function(multiSet, value) {
+    UseMethod("colnames<-", multiSet)
 }
 
 #' @export
-#' @rdname colnames<-.multiSet
-`colnames<-.default` <- function(x, value) {
-    base::`colnames<-`(x, value)
-}
-
-#' @export
-#' @rdname colnames.multiSet
-colnames <- function(x) {
-    UseMethod("colnames", x)
+#' @rdname setColnames
+`colnames<-.default` <- function(multiSet, value) {
+    base::`colnames<-`(multiSet, value)
 }
 
 #' @export
 #' @rdname colnames.multiSet
-#' @param obj object to extract the colnames
+colnames <- function(multiSet) {
+    UseMethod("colnames", multiSet)
+}
+
+#' @export
+#' @rdname colnames.multiSet
 #' @param \dots other arguments passed
-colnames.default <- function(obj, ...) {
-    base::colnames(obj, ...)
+colnames.default <- function(multiSet) {
+    base::colnames(multiSet)
 }
 
 #' Extract the colnames of the multiSet

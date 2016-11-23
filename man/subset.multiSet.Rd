@@ -8,11 +8,11 @@
 \title{Subset rows and columns in a multiSet structure}
 \usage{
 \method{subset}{multiSet}(multiSet, rowIndex = NULL, colIndex = NULL,
-  permissive = FALSE, drop = FALSE)
+  permissive = FALSE, drop = FALSE, ...)
 
-subset(x, ...)
+subset(multiSet, ...)
 
-\method{subset}{default}(x, ...)
+\method{subset}{default}(multiSet, ...)
 
 \method{[}{multiSet}(x, i, j, drop = TRUE)
 }
@@ -42,6 +42,8 @@ if the input \code{multiSet} does not follow the "strict" format.}
 \item{i}{Columns to subset of the object}
 
 \item{j}{Rows to subset of the object}
+
+\item{\dots}{Other arguments}
 }
 \value{
 A multiSet structure containing the selected rows and columns. Note

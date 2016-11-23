@@ -12,7 +12,7 @@ list2multiSet(data)
 
 as.multiSet(data)
 
-\method{as.multiSet.default}{list}(x, ...)
+\method{as.multiSet.default}{list}(x)
 
 as.multiSet.default(x, ...)
 
@@ -21,7 +21,11 @@ multiSet2list(multiSet)
 \arguments{
 \item{data}{A list to be converted to a multiSet structure.}
 
+\item{x}{Object to convert to multiSet or to list}
+
 \item{multiSet}{A multiSet structure to be converted to a list.}
+
+\item{\dots}{Other arguments}
 }
 \value{
 For \code{list2multiSet}, a multiSet structure; for

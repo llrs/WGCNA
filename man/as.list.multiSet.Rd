@@ -4,10 +4,10 @@
 \alias{as.list.multiSet}
 \title{Convert a multiSet object to a list}
 \usage{
-\method{as.list}{multiSet}(multiSet, ...)
+\method{as.list}{multiSet}(x, ...)
 }
 \arguments{
-\item{multiSet}{muiltiSet object to be converted to list}
+\item{x}{muiltiSet object to be converted to list}
 
 \item{\dots}{other arguments passed to multiSet2list}
 }
