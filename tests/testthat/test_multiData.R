@@ -77,7 +77,7 @@ test_that("checkSets works properly", {
 
     expect_equal(testing$nSets, 2L)
     expect_equal(testing$nGenes, 5L)
-    expect_equal(testing$nSamples, c(20L, 10L))
+    expect_true(all.equal(testing$nSamples, c(20L, 10L)))
     expect_true(testing$structureOK)
 
     data3 <- matrix(rnorm(10L), 5L, 2L)
@@ -132,7 +132,7 @@ test_that("multiSet.rbindSelf joins the data", {
 
     expect_equal(class(test), "matrix")
     expect_equal(length(test), 150L)
-    expect_equal(dim(test), c(30L, 5L))
+    expect_true(all.equal(dim(test), c(30L, 5L)))
 })
 
 # multiSet.setAttr delete if

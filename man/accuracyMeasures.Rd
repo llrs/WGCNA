@@ -6,10 +6,10 @@
 observed values.}
 \usage{
 accuracyMeasures(predicted, observed = NULL, type = c("auto", "binary",
-  "quantitative"), levels = if (isTRUE(all.equal(dim(predicted), c(2, 2))))
-  colnames(predicted) else if (is.factor(predicted))
-  sort(unique(c(as.character(predicted), as.character(observed)))) else
-  sort(unique(c(observed, predicted))), negativeLevel = levels[2],
+  "quantitative"), levels = if (all.equal(dim(predicted), c(2, 2))) {    
+  colnames(predicted) } else if (is.factor(predicted)) {    
+  sort(unique(c(as.character(predicted), as.character(observed)))) } else {    
+  sort(unique(c(observed, predicted))) }, negativeLevel = levels[2],
   positiveLevel = levels[1])
 }
 \arguments{
@@ -98,22 +98,21 @@ naive predictor has an error rate of 30 percent (since it only misclassifies
 \examples{
 
 m <- 100
-trueOutcome <- sample( c(1,2),m,replace=TRUE)
+trueOutcome <- sample( c(1,2), m, replace=TRUE)
 predictedOutcome <- trueOutcome
 # now we noise half of the entries of the predicted outcome
-predictedOutcome[ 1:(m/2)] <- sample(predictedOutcome[ 1:(m/2)] )
+predictedOutcome[ 1:(m/2)] <- sample(predictedOutcome[ 1:(m/2)])
 tab <- table(predictedOutcome, trueOutcome)
 accuracyMeasures(tab)
 
-# Same result:
+# Should get the same result:
 accuracyMeasures(predictedOutcome, trueOutcome)
-
 }
 \author{
 Steve Horvath and Peter Langfelder
 }
 \references{
-http://en.wikipedia.org/wiki/Sensitivity_and_specificity
+See wikipedia \url{http://en.wikipedia.org/wiki/Sensitivity_and_specificity}
 }
 \keyword{misc}
 
