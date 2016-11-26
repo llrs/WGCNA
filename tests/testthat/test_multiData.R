@@ -108,8 +108,7 @@ test_that("union and intersect work", {
     expect_equal(length(int), 0L)
 })
 
-# test multiSet.subset or replace it
-.calculateIndicator
+# test .subset.multiSet or replace it
 # multiSet.mapply Used in blockwiseModulesC and branchSplit
 test_that("multiSet.mapply works", {
     data1 <- matrix(rnorm(100L), 20L, 5L)
@@ -123,9 +122,20 @@ test_that("multiSet.mapply works", {
     expect_equal(length(testing$Set2$data), 1L)
 })
 # multiSet.rbindSelf
+test_that("multiSet.rbindSelf joins the data", {
+    data1 <- matrix(rnorm(100L), 20L, 5L)
+    data2 <- matrix(rnorm(50L), 10L, 5L)
+    colnames(data1) <- LETTERS[1:5]
+    colnames(data2) <- LETTERS[2:6]
+    md <- list2multiSet(list(Set1 = data1, Set2 = data2))
+    test <- multiSet.rbindSelf(md)
+
+    expect_equal(class(test), "matrix")
+    expect_equal(length(test), 150L)
+    expect_equal(dim(test), c(30L, 5L))
+})
+
 # multiSet.setAttr delete if
-# multiSet.setColnames Used in consensusRepresentatives
-# multiSet.colnames test it and replace the above function
 test_that("multiSet.colnames method works", {
     data1 <- matrix(rnorm(100L), 20L, 5L)
     data2 <- matrix(rnorm(50L), 10L, 5L)

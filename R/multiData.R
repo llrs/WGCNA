@@ -39,7 +39,7 @@ multiUnion <- function(setList) {
         return(setList[[1]])
     }
 
-    out = setList[[1]]
+    out <- setList[[1]]
     for (elem in 2:len) {
         out <- union(out, setList[[elem]])
     }
@@ -49,7 +49,7 @@ multiUnion <- function(setList) {
 #' @export
 #' @rdname multiUnion
 multiIntersect <- function(setList) {
-    len = length(setList)
+    len <- length(setList)
     if (len == 0) {
         return(NULL)
     }
@@ -57,7 +57,7 @@ multiIntersect <- function(setList) {
         return(setList[[1]])
     }
 
-    out = setList[[1]]
+    out <- setList[[1]]
     for (elem in 2:len) {
         out <- intersect(out, setList[[elem]])
     }
@@ -102,13 +102,14 @@ multiIntersect <- function(setList) {
 fixDataStructure <- function(data, verbose = 0, indent = 0) {
     spaces = indentSpaces(indent)
     if ((class(data) != "list") || (class(data[[1]]) != "list")) {
-        if (verbose > 0)
+        if (verbose > 0) {
             printFlush(paste(spaces,
                              "fixDataStructure: data is not a vector of lists:",
                              "converting it into one."))
-        x = data
-        data = vector(mode = "list", length = 1)
-        data[[1]] = list(data = x)
+        }
+        x <- data
+        data <- vector(mode = "list", length = 1)
+        data[[1]] <- list(data = x)
         rm(x)
     }
     data
@@ -156,25 +157,25 @@ fixDataStructure <- function(data, verbose = 0, indent = 0) {
 checkSets <- function(data, checkStructure = FALSE, useSets = NULL) {
     nSets = length(data)
     if (is.null(useSets)) {
-        useSets = c(1:nSets)
+        useSets <- c(1:nSets)
     }
     if (nSets <= 0) {
         stop("No data given.")
     }
-    structureOK = TRUE
+    structureOK <- TRUE
     if (class(data) != "multiSet") {
         if (checkStructure) {
-            structureOK = FALSE
-            nGenes = 0
-            nSamples = 0
+            structureOK <- FALSE
+            nGenes <- 0
+            nSamples <- 0
         } else {
             stop("data does not appear to have the correct format. ",
                  "Consider using fixDataStructure or setting ",
                  "checkStructure = TRUE when calling this function.")
         }
     } else {
-        nSamples = vector(length = nSets)
-        nGenes = dim(data[[useSets[1]]]$data)[2]
+        nSamples <- vector(length = nSets)
+        nGenes <- dim(data[[useSets[1]]]$data)[2]
         for (set in useSets) {
             if (nGenes != dim(data[[set]]$data)[2]) {
                 if (checkStructure) {
@@ -183,7 +184,7 @@ checkSets <- function(data, checkStructure = FALSE, useSets = NULL) {
                     stop("Incompatible number of genes in set 1 and ", set)
                 }
             }
-            nSamples[set] = dim(data[[set]]$data)[1]
+            nSamples[set] <- dim(data[[set]]$data)[1]
         }
     }
 
@@ -242,7 +243,7 @@ checkSets <- function(data, checkStructure = FALSE, useSets = NULL) {
 #' @export
 subset.multiSet <- function(multiSet, rowIndex = NULL, colIndex = NULL,
                       permissive = FALSE, drop = FALSE, ...) {
-  size = checkSets(multiSet, checkStructure = permissive)
+  size <- checkSets(multiSet, checkStructure = permissive)
   if (!size$structureOK && !is.null(colIndex)) {
     warning(immediate. = TRUE,
             "subset.multiSet: applying column selection on data sets that do ",
@@ -250,27 +251,27 @@ subset.multiSet <- function(multiSet, rowIndex = NULL, colIndex = NULL,
             "territory; proceed with caution.")
   }
   if (is.null(colIndex)) {
-      colIndex.1 = c(1:size$nGenes)
+      colIndex.1 <- c(1:size$nGenes)
   } else {
-      colIndex.1 = colIndex
+      colIndex.1 <- colIndex
   }
   if (is.null(rowIndex)) {
-      rowIndex = lapply(size$nSamples, function(n) {c(1:n)})
+      rowIndex <- lapply(size$nSamples, function(n) {c(1:n)})
   }
   if (length(rowIndex)!=size$nSets) {
     stop("If given, 'rowIndex' must be a list of the same length as 'multiSet'")
   }
-  out = list()
+  out <- list()
   for (set in 1:size$nSets) {
     if (permissive)
       if (is.null(colIndex)) {
-          colIndex.1 = c(1:ncol(multiSet[[set]]$data))
+          colIndex.1 <- c(1:ncol(multiSet[[set]]$data))
       } else {
-          colIndex.1 = colIndex
+          colIndex.1 <- colIndex
       }
     if (is.character(colIndex.1)) {
-      colIndex.1 = match(colIndex.1, colnames(multiSet[[set]]$data))
-      n1 = length(colIndex.1)
+      colIndex.1 <- match(colIndex.1, colnames(multiSet[[set]]$data))
+      n1 <- length(colIndex.1)
       if (any(is.na(colIndex.1))) {
         stop("Cannot match the following entries in 'colIndex' to column ",
              "names in set ", set, ":\n",
@@ -279,10 +280,10 @@ subset.multiSet <- function(multiSet, rowIndex = NULL, colIndex = NULL,
              ifelse(n1 > 5, ", ... [output truncated]", ""))
           }
     }
-    out[[set]] = list(data = multiSet[[set]]$data[rowIndex[[set]],
+    out[[set]] <- list(data = multiSet[[set]]$data[rowIndex[[set]],
                                                   colIndex.1, drop = drop])
   }
-  names(out) = names(multiSet)
+  names(out) <- names(multiSet)
   out
 }
 
@@ -336,9 +337,9 @@ subset.default <- function(multiSet, ...) {
 list2multiSet <- function(data) {
   out = list()
   for (set in 1:length(data)) {
-    out[[set]] = list(data = data[[set]])
+    out[[set]] <- list(data = data[[set]])
   }
-  names(out) = names(data)
+  names(out) <- names(data)
   class(out) <- c("multiSet", "list")
   out
 }
@@ -399,7 +400,7 @@ multiSet2list <- function(multiSet) {
 # apply.multiSet ####
 .calculateIndicator <- function(nSets, mdaExistingResults, mdaUpdateIndex) {
   if (length(mdaUpdateIndex) == 0) {
-      mdaUpdateIndex = NULL
+      mdaUpdateIndex <- NULL
   }
   calculate = rep(TRUE, nSets)
   if (!is.null(mdaExistingResults)) {
@@ -421,7 +422,7 @@ multiSet2list <- function(multiSet) {
         stop("All entries in 'mdaUpdateIndex' must be between 1 and the number",
              " of sets in 'multiSet'.")
       }
-      calculateIndex = sort(unique(c(mdaUpdateIndex,
+      calculateIndex <- sort(unique(c(mdaUpdateIndex,
                                       ifelse(nSets.existing<nSets,
                                              c((nSets.existing+1):nSets),
                                              NULL))))
@@ -503,17 +504,17 @@ apply.multiSet <- function(multiSet, MARGIN, FUN, ...) {
     stop("Supplied 'multiSet' is not a valid multiSet structure.")
   }
 
-  nSets = length(multiSet)
-  out = vector(mode = "list", length = nSets)
+  nSets <- length(multiSet)
+  out <- vector(mode = "list", length = nSets)
 
   FUN <- match.fun(FUN)
   for (set in 1:nSets) {
       data <- base::apply(multiSet[[set]]$data, MARGIN = MARGIN,
                     FUN = FUN, ...)
-      out[[set]] = list(data = data)
+      out[[set]] <- list(data = data)
   }
 
-  names(out) = names(multiSet)
+  names(out) <- names(multiSet)
 
   out
 }
@@ -568,7 +569,7 @@ is.multiSet <- function(x, strict = TRUE) {
     if (strict) {
         !inherits(try(checkSets(x), silent = TRUE), 'try-error')
     } else {
-        hasData = sapply(x, function(l) { "data" %in% names(l) })
+        hasData <- sapply(x, function(l) { "data" %in% names(l) })
         all(hasData)
     }
 }
@@ -660,27 +661,27 @@ multiSet.mapply <- function(FUN, ..., MoreArgs = NULL,
                             # Options controlling internal behaviour
                             mdma.doCollectGarbage = FALSE, mdmaVerbose = 0,
                             mdmaIndent = 0) {
-    printSpaces = indentSpaces(mdmaIndent)
-    dots = list(...)
+    printSpaces <- indentSpaces(mdmaIndent)
+    dots <- list(...)
     if (length(dots) == 0) {
         stop("No arguments were specified. Please type ?multiSet.mapply to see",
              " the help page.")
     }
-    dotLengths = sapply(dots, length)
+    dotLengths <- sapply(dots, length)
     if (any(dotLengths!=dotLengths[1])) {
         stop("All arguments to vectorize over must have the same length.\n",
              "Scalar arguments should be put into the 'MoreArgs' argument.\n",
              "Note: lengths of '...' arguments are: ",
              paste(dotLengths, collapse = ", "))
     }
-    nArgs = length(dots)
-    res = list()
+    nArgs <- length(dots)
+    res <- list()
     if (is.null(mdma.argIsMultiData)) {
-        mdma.argIsMultiData = sapply(dots, is.multiSet, strict = FALSE)
+        mdma.argIsMultiData <- sapply(dots, is.multiSet, strict = FALSE)
     }
-    nSets = dotLengths[1]
+    nSets <- dotLengths[1]
 
-    calculate = .calculateIndicator(nSets, mdmaExistingResults, mdmaUpdateIndex)
+    calculate <- .calculateIndicator(nSets, mdmaExistingResults, mdmaUpdateIndex)
 
     FUN <- match.fun(FUN)
     for (set in 1:nSets) {
@@ -688,22 +689,22 @@ multiSet.mapply <- function(FUN, ..., MoreArgs = NULL,
             if (mdmaVerbose > 0) {
                 printFlush(paste0(printSpaces, "working on set ", set))
             }
-            localArgs = list()
+            localArgs <- list()
             for (arg in 1:nArgs) {
-                localArgs[[arg]] = ifelse(mdma.argIsMultiData[arg],
+                localArgs[[arg]] <- ifelse(mdma.argIsMultiData[arg],
                                           dots[[arg]][[set]]$data,
                                           dots[[arg]][[set]])
             }
-            names(localArgs) = names(dots)
-            res[[set]] = list(data = do.call(FUN, c(localArgs, MoreArgs)))
+            names(localArgs) <- names(dots)
+            res[[set]] <- list(data = do.call(FUN, c(localArgs, MoreArgs)))
             if (mdma.doCollectGarbage) {
                 collectGarbage()
             }
         } else
-            res[set] = mdmaExistingResults[set]
+            res[set] <- mdmaExistingResults[set]
     }
 
-    names(res) = names(dots[[1]])
+    names(res) <- names(dots[[1]])
 
     if (mdmaSimplify) {
         if (mdmaVerbose > 0)
@@ -713,9 +714,9 @@ multiSet.mapply <- function(FUN, ..., MoreArgs = NULL,
   } else if (returnList) {
     return (multiSet2list(res))
   }
-
   return(res)
 }
+
 #' If possible, simplify a multiData structure to a 3-dimensional array
 #'
 #' This function attempts to put all \code{data} components into a 3-dimensional
@@ -743,48 +744,52 @@ multiSet.mapply <- function(FUN, ..., MoreArgs = NULL,
 #' \code{\link{multiSet2list}} for converting multiData structures to plain
 #' lists.
 simplify <- function(multiSet) {
-        len = length(multiSet[[1]]$data)
-        dim = dim(multiSet[[1]]$data)
-        simplifiable = TRUE
-        nSets = length(multiSet)
+        len <- length(multiSet[[1]]$data)
+        dim <- dim(multiSet[[1]]$data)
+        simplifiable <- TRUE
+        nSets <- length(multiSet)
         for (set in 1:nSets) {
-            if (len!=length(multiSet[[set]]$data)) {
-                simplifiable = FALSE
+            if (len != length(multiSet[[set]]$data)) {
+                simplifiable <- FALSE
                 }
             if (!isTRUE(all.equal( dim, dim(multiSet[[set]]$data)))) {
-                simplifiable = FALSE
+                simplifiable <- FALSE
             }
         }
         if (simplifiable) {
             if (is.null(dim)) {
-                innerDim = len
-                innerNames = names(multiSet[[1]]$data)
-                if (is.null(innerNames)) innerNames = paste0("X", c(1:len))
-            } else {
-                innerDim = dim
-                innerNames = dimnames(multiSet[[1]]$data)
+                innerDim <- len
+                innerNames <- names(multiSet[[1]]$data)
                 if (is.null(innerNames)) {
-                    innerNames = lapply(innerDim, function(x) {
+                    innerNames <- paste0("X", c(1:len))
+                }
+            } else {
+                innerDim <- dim
+                innerNames <- dimnames(multiSet[[1]]$data)
+                if (is.null(innerNames)) {
+                    innerNames <- lapply(innerDim, function(x) {
                         paste0("X", 1:x)
                     })
                 }
-                nullIN = sapply(innerNames, is.null);
+                nullIN <- sapply(innerNames, is.null);
                 if (any(nullIN)) {
-                    innerNames[nullIN] = lapply(innerDim[nullIN], function(x) {
+                    innerNames[nullIN] <- lapply(innerDim[nullIN], function(x) {
                         paste0("X", 1:x)
                     })
                 }
             }
-            setNames = names(multiSet)
-            if (is.null(setNames)) setNames = paste0("Set_", 1:nSets)
-            mtd.s = matrix(NA, prod(innerDim), nSets)
+            setNames <- names(multiSet)
+            if (is.null(setNames)) {
+                setNames <- paste0("Set_", 1:nSets)
+            }
+            mtd.s <- matrix(NA, prod(innerDim), nSets)
             for (set in 1:nSets) {
-                mtd.s[, set] = as.vector(multiSet[[set]]$data)
+                mtd.s[, set] <- as.vector(multiSet[[set]]$data)
             }
 
-            dim(mtd.s) = c(innerDim, nSets);
+            dim(mtd.s) <- c(innerDim, nSets);
             if (!is.null(innerNames))
-                dimnames(mtd.s) = c(ifelse(is.list(innerNames),
+                dimnames(mtd.s) <- c(ifelse(is.list(innerNames),
                                            innerNames,
                                            list(innerNames)),
                                     list(setNames))
@@ -820,15 +825,15 @@ simplify <- function(multiSet) {
 #' @keywords misc
 #' @export
 multiSet.rbindSelf <- function(multiSet){
-  size = checkSets(multiSet)
-  out = NULL
-  colnames = colnames(multiSet)
+  size <- checkSets(multiSet)
+  out <- NULL
+  colnames <- colnames(multiSet)
   for (set in 1:size$nSets) {
     if (!is.null(colnames(multiSet[[set]]$data)) &&
         !isTRUE(all.equal(colnames, colnames(multiSet[[set]]$data))) ) {
           colnames(multiSet[[set]]$data) <- colnames
     }
-    out = rbind(out, multiSet[[set]]$data)
+    out <- rbind(out, multiSet[[set]]$data)
   }
   out
 }
@@ -853,11 +858,13 @@ multiSet.rbindSelf <- function(multiSet){
 #' @export
 multiSet.setAttr <- function(multiSet, attribute, valueList) {
   size = checkSets(multiSet)
-  ind = 1
+  ind <- 1
   for (set in 1:size$nSets){
-    attr(multiSet[[set]]$data, attribute) = valueList[[ind]]
-    ind = ind + 1
-    if (ind > length(valueList)) ind = 1
+    attr(multiSet[[set]]$data, attribute) <- valueList[[ind]]
+    ind <- ind + 1
+    if (ind > length(valueList)) {
+        ind <- 1
+    }
   }
   multiSet
 }
@@ -999,52 +1006,23 @@ multiSet <- function(...) {
 #' @keywords misc
 #' @export
 keepCommonProbes <- function(multiExpr, orderBy = 1) {
-    size = checkSets(multiExpr)
-    nSets = size$nSets
+    size <- checkSets(multiExpr)
+    nSets <- size$nSets
     if (nSets <= 0) {
         stop("No expression data given!")
     } else if (nSets == 1) {
         warning("A single data set was provided")
     } else if (nSets > 1) {
-
-        Names = data.frame(Names = colnames(multiExpr[[orderBy]]$data))
-
+        Names <- data.frame(Names = colnames(multiExpr[[orderBy]]$data))
         for (set in (1:nSets)) {
-            SetNames = data.frame(Names = colnames(multiExpr[[set]]$data),
+            SetNames <- data.frame(Names = colnames(multiExpr[[set]]$data),
                                   index = c(1:dim(multiExpr[[set]]$data)[2]))
-            Names = merge(Names, SetNames, by.x = "Names", by.y = "Names",
+            Names <- merge(Names, SetNames, by.x = "Names", by.y = "Names",
                           all = FALSE, sort = FALSE)
         }
         for (set in 1:nSets) {
-            multiExpr[[set]]$data = multiExpr[[set]]$data[, Names[, set + 1]]
+            multiExpr[[set]]$data <- multiExpr[[set]]$data[, Names[, set + 1]]
         }
     }
     multiExpr
 }
-
-
-# #' @export
-# #' @aliases base::lapply
-# lapply <- function(x, ...) {
-#     UseMethod("lapply", x)
-# }
-#
-# #' @export
-# #' @aliases base::lapply
-# lapply.default <- base::lapply
-#
-# #' @export
-# #' @aliases base::lapply
-# lapply.multiSet <- function(x, ...){
-#     base::lapply(x, ...)
-# }
-
-# Undocumented code objects:
-#
-# Undocumented arguments in documentation object 'colnames'
-# ‘x’
-#
-# Undocumented arguments in documentation object 'subset.multiSet'
-# ‘...’
-# checking replacement functions ... WARNING
-# ‘colnames<-.default’
