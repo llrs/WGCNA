@@ -1,7 +1,7 @@
 # Accuracy measures, modified from the WGCNA version.
 
-# Helper function: contingency table of 2 variables that will also include rows/columns for levels that do
-# not appear in x or y.
+# Helper function: contingency table of 2 variables that will also include
+# rows/columns for levels that do not appear in x or y.
 
 .table2.allLevels <- function(x, y, levels.x = sort(unique(x)),
                              levels.y = sort(unique(y)), setNames = FALSE) {
@@ -112,7 +112,8 @@
 #' accuracyMeasures(predictedOutcome, trueOutcome)
 accuracyMeasures <- function(predicted, observed = NULL,
                              type = c("auto", "binary", "quantitative"),
-                             levels = if (all.equal(dim(predicted), c(2,2))) {
+                             levels = if (isTRUE(all.equal(dim(predicted),
+                                                    c(2,2)))) {
                                  colnames(predicted)
                              } else if (is.factor(predicted)) {
                                  sort(unique(c(as.character(predicted),
@@ -156,8 +157,7 @@ accuracyMeasures <- function(predicted, observed = NULL,
                 stop("'levels' must contain 2 entries (the possible values of ",
                      "the binary variables\n   'predicted' and 'observed').")
             }
-            tab <- .table2.allLevels(predicted, observed, levels.x = levels,
-                                     levels.y = levels, setNames = TRUE)
+            tab <- table(predicted, observed)
         } else {
             tab <- predicted
             if (is.null(colnames(tab)) | is.null(rownames(tab))) {
@@ -187,7 +187,7 @@ accuracyMeasures <- function(predicted, observed = NULL,
 
         if (sum(is.na(tab))) {
             warning("Missing data should not be present in input.\n",
-                    "  Suggestion: check whether NA should be coded as 0.")
+                    "Suggestion: check whether NA should be coded as 0.")
         }
         is.wholenumber <- function(x, tol = .Machine$double.eps^0.5) {
             abs(x - round(x)) < tol
@@ -201,7 +201,7 @@ accuracyMeasures <- function(predicted, observed = NULL,
             stop("The input table cannot contain negative numbers.")
         }
         num1 <- sum(diag(tab), na.rm = T)
-        denom1 <- sum(tab,na.rm = T)
+        denom1 <- sum(tab, na.rm = T)
         if (denom1 == 0) {
             warning("The input table has zero observations (sum of all cells ",
                     "is zero).")

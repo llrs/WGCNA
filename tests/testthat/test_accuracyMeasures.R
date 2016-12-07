@@ -8,8 +8,13 @@ test_that("accuracyMeasures in table format", {
     # now we noise half of the entries of the predicted outcome
     predictedOutcome[ 1:(m/2)] <- sample(predictedOutcome[ 1:(m/2)] )
     tab <- table(predictedOutcome, trueOutcome)
-    test <- accuracyMeasures(tab)
-    expect_equal(nrow(test), 14L)
-    expect_equal(ncol(test), 2L)
+    test1 <- accuracyMeasures(tab)
+    test2 <- accuracyMeasures(predictedOutcome, trueOutcome)
+    expect_equal(nrow(test1), 14L)
+    expect_equal(ncol(test1), 2L)
     expect_true(all.equal(colnames(test), c("Measure", "Value")))
+
+    # Test if they are both the same matrix
+    expect_true(all.equal(dim(test1), dim(test2)))
+    expect_equal(sum(test1 == test2), 28)
 })
