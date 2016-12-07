@@ -82,7 +82,7 @@ Langfelder P, Horvath S (2007) Eigengene networks for studying the
 relationships between co-expression modules. BMC Systems Biology 2007, 1:54.
 
 The material is posted at
-http://www.genetics.ucla.edu/labs/horvath/CoexpressionNetwork/EigengeneNetwork/SupplementSimulations.pdf.
+\url{http://www.genetics.ucla.edu/labs/horvath/CoexpressionNetwork/EigengeneNetwork/SupplementSimulations.pdf}.
 }
 \seealso{
 \code{\link{simulateEigengeneNetwork}} for a simulation of eigengenes with a

@@ -156,29 +156,32 @@ time.
 \examples{
 
 # observed trait
-y=rnorm(1000,mean=50,sd=20)
+y <- rnorm(1000, mean = 50, sd = 20)
 # unobserved, true trait
-yTRUE =y +rnorm(100,sd=10)
+yTRUE <- y + rnorm(100, sd = 10)
 # now we simulate surrogate markers around the true trait
-datX=simulateModule(yTRUE,nGenes=20, minCor=.4,maxCor=.9,geneMeans=rnorm(20,50,30)  )
-True1=TrueTrait(datX=datX,y=y)
-datTrue=True1$datEstimates
-par(mfrow=c(2,2))
+datX <- simulateModule(yTRUE, nGenes = 20, minCor = 0.4, maxCor = 0.9,
+       geneMeans = rnorm(20, 50, 30))
+True1 <- TrueTrait(datX = datX, y = y)
+datTrue <- True1$datEstimates
+\dontrun{
+# Plot the values and the predicted results
+par(mfrow = c(2, 2))
 for (i in 1:dim(datTrue)[[2]] ){
-  meanAbsDev= mean(abs(yTRUE-datTrue[,i]))
-  verboseScatterplot(datTrue[,i],yTRUE,xlab=names(datTrue)[i],
-                     main=paste(i, "MeanAbsDev=", signif(meanAbsDev,3)))
-  abline(0,1)
+  meanAbsDev <- mean(abs(yTRUE - datTrue[, i]))
+  verboseScatterplot(datTrue[, i], yTRUE, xlab = names(datTrue)[i],
+                     main=paste(i, "MeanAbsDev=", signif(meanAbsDev, 3)))
+  abline(0, 1)
+}
 }
 #compare the estimated standard deviation of y.true2
 True1[[2]]
 # with the true SD
-sqrt(var(yTRUE-datTrue$y.true2))
+sqrt(var(yTRUE - datTrue$y.true2))
 #compare the estimated standard deviation of y.true3
 True1[[3]]
 # with the true SD
-sqrt(var(yTRUE-datTrue$y.true3))
-
+sqrt(var(yTRUE - datTrue$y.true3))
 }
 \author{
 Steve Horvath
