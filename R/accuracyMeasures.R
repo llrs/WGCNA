@@ -123,7 +123,7 @@ accuracyMeasures <- function(predicted, observed = NULL,
     type <- match.arg(type)
     if (type == "auto") {
         if (!is.null(dim(predicted))) {
-            if (isTRUE(all.equal(dim(predicted), c(2,2)))) {
+            if (all.equal(dim(predicted), c(2,2))) {
                 type <- "binary"
             } else {
                 stop("If supplying a matrix in 'predicted', it must be a 2x2 ",
