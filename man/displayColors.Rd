@@ -21,9 +21,8 @@ To see the first \code{n} colors, use argument \code{colors =
 standardColors(n)}.
 }
 \examples{
-
 displayColors(standardColors(10))
-
+displayColors()
 }
 \author{
 Peter Langfelder

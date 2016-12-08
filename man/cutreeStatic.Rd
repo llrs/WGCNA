@@ -39,8 +39,8 @@ cutreeStatic(hc, minSize = 2)
 Peter Langfelder
 }
 \seealso{
-\code{\link{stats::hclust}} for hierarchical clustering,
-\code{\link{stats::cutree}} for other constant-height branch cuts,
+\code{\link[stats]{hclust}} for hierarchical clustering,
+\code{\link[stats]{cutree}} for other constant-height branch cuts,
 \code{\link{standardColors}} to convert the
 retuned numerical lables into colors for easier visualization or
 \code{\link{cutreeStaticColor}}.

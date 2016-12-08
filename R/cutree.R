@@ -20,8 +20,8 @@
 #' largest 2, etc.
 #' @author Peter Langfelder
 #' @seealso
-#' \code{\link{stats::hclust}} for hierarchical clustering,
-#' \code{\link{stats::cutree}} for other constant-height branch cuts,
+#' \code{\link[stats]{hclust}} for hierarchical clustering,
+#' \code{\link[stats]{cutree}} for other constant-height branch cuts,
 #' \code{\link{standardColors}} to convert the
 #' retuned numerical lables into colors for easier visualization or
 #' \code{\link{cutreeStaticColor}}.
@@ -54,10 +54,9 @@ cutreeStatic <- function(dendro,
 #' sequence of standard color labels.
 #' @author Peter Langfelder
 #' @seealso
-#' \code{\link{stats::hclust}} for hierarchical clustering,
-#' \code{\link{stats::cutree}} and \code{\link{cutreeStatic}} for other
-#' constant-height branch cuts.
-#' @keywords misc
+#' for hierarchical clustering: \code{\link[stats]{hclust}} ,
+#' for for other constant-height branch cuts\code{\link[stats]{cutree}} and
+#' \code{\link{cutreeStatic}}.
 #' @examples
 #' datExpr <- matrix(rnorm(150), ncol = 5)
 #' hc <- hclust(dist(datExpr))

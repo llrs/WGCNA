@@ -41,9 +41,9 @@ cutreeStatic(hc, minSize = 2)
 Peter Langfelder
 }
 \seealso{
-\code{\link{stats::hclust}} for hierarchical clustering,
-\code{\link{stats::cutree}} and \code{\link{cutreeStatic}} for other
-constant-height branch cuts.
+for hierarchical clustering: \code{\link[stats]{hclust}} ,
+for for other constant-height branch cuts\code{\link[stats]{cutree}} and
+\code{\link{cutreeStatic}}.
 }
 \keyword{misc}
 
