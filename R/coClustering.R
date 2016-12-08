@@ -47,13 +47,13 @@
 #' coClustering(cl1, cl1)
 coClustering <- function(clusters.ref, clusters.test, tupletSize = 2,
                         unassignedLabel = 0) {
-  overlap <- overlapTable(clusters.test, clusters.ref)
-  greyRow <- rownames(overlap$countTable) == unassignedLabel
-  greyCol <- colnames(overlap$countTable) == unassignedLabel
+  overlap <- table(clusters.test, clusters.ref)
+  greyRow <- rownames(overlap) == as.character(unassignedLabel)
+  greyCol <- colnames(overlap) == as.character(unassignedLabel)
 
   refModSizes <- table(clusters.ref)
 
-  ccNumer <- apply(overlap$countTable[!greyRow, !greyCol, drop = FALSE], 2,
+  ccNumer <- apply(overlap[!greyRow, !greyCol, drop = FALSE], 2,
                    choose, tupletSize)
   ccDenom <- choose(refModSizes[!greyCol], tupletSize)
 
