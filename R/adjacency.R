@@ -19,7 +19,7 @@
 #' @seealso \code{\link{adjacency}}
 #' @keywords misc
 checkAdjMat <- function(adjMat, min = 0, max = 1) {
-    dim = dim(adjMat)
+    dim <- dim(adjMat)
     if (is.null(dim) || length(dim) != 2)
         stop("adjacency is not two - dimensional")
     if (!is.numeric(adjMat))
@@ -30,7 +30,7 @@ checkAdjMat <- function(adjMat, min = 0, max = 1) {
         stop("adjacency is not symmetric")
     if (min(adjMat, na.rm = TRUE) < min ||
         max(adjMat, na.rm = TRUE) > max)
-        stop("some entries are not between", min, "and", max)
+        stop("some entries are not between ", min, " and ", max)
 }
 
 # unsignedAdjacency ####
@@ -63,12 +63,17 @@ checkAdjMat <- function(adjMat, min = 0, max = 1) {
 #' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
 #' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 #' @keywords misc
+#' @examples
+#' datExpr <- matrix(rnorm(150), ncol = 5)
+#' unsignedAdjacency(datExpr)
 unsignedAdjacency <- function(datExpr, datExpr2 = NULL, power = 6,
                               corFnc = "cor", corOptions = "use = 'p'") {
-    corExpr = parse(text = paste(corFnc, "(datExpr, datExpr2 ",
+    corExpr <- parse(text = paste(corFnc, "(datExpr, datExpr2 ",
                                  prepComma(corOptions), ")"))
     # abs(cor(datExpr, datExpr2, use = "p"))^power
-    abs(eval(corExpr))^power
+    adj <- abs(eval(corExpr))^power
+    checkAdjMat(adj)
+    adj
 }
 
 # adjacnecy ####
@@ -172,40 +177,38 @@ adjacency <- function(datExpr, selectCols = NULL, type = "unsigned",
 
     if (intType < 4) {
         if (is.null(selectCols)) {
-            corExpr = parse(text = paste(corFnc,
-                                         "(datExpr ",
+            corExpr <- parse(text = paste(corFnc, "(datExpr ",
                                          prepComma(corOptions), ")"))
             # cor_mat = cor(datExpr, use = "p")
-            cor_mat = eval(corExpr)
+            cor_mat <- eval(corExpr)
         } else {
-            corExpr = parse(text = paste(
-                corFnc, "(datExpr, datExpr[, selectCols] ",
-                prepComma(corOptions), ")"))
+            corExpr <- parse(text = paste(corFnc,
+                                         "(datExpr, datExpr[, selectCols] ",
+                                         prepComma(corOptions), ")"))
             #cor_mat = cor(datExpr, datExpr[, selectCols], use = "p")
-            cor_mat = eval(corExpr)
+            cor_mat <- eval(corExpr)
         }
     } else {
         if (!is.null(selectCols)) {
-            stop("The argument 'selectCols' cannot
-                 be used for distance adjacency.")
+            stop("The argument 'selectCols' cannot be used for distance ",
+                 "adjacency.")
         }
-        corExpr = parse(text = paste(distFnc, "(t(datExpr) ",
+        corExpr <- parse(text = paste(distFnc, "(t(datExpr) ",
                                      prepComma(distOptions), ")"))
         # cor_mat = cor(datExpr, use = "p")
-        d = eval(corExpr)
+        d <- eval(corExpr)
         if (any(d < 0)) {
-            warning("Function WGCNA::adjacency: Distance function
-                    returned (some) negative values.")
+            warning("Distance function returned (some) negative values.")
         }
-        cor_mat = 1 - as.matrix((d/max(d, na.rm = TRUE))^2)
+        cor_mat <- 1 - as.matrix((d/max(d, na.rm = TRUE))^2)
     }
 
     if (intType == 1) {
-        cor_mat = abs(cor_mat)
+        cor_mat <- abs(cor_mat)
     } else if (intType == 2) {
-        cor_mat = (1 + cor_mat)/2
+        cor_mat <- (1 + cor_mat)/2
     } else if (intType == 3) {
-        cor_mat[cor_mat < 0] = 0
+        cor_mat[cor_mat < 0] <- 0
     }
     cor_mat^power
 }
@@ -225,30 +228,30 @@ similarity <- function(datExpr, selectCols = NULL, corFnc = "cor",
                                          "(datExpr ",
                                          prepComma(corOptions), ")"))
             # cor_mat = cor(datExpr, use = "p")
-            cor_mat = eval(corExpr)
+            cor_mat <- eval(corExpr)
         } else {
-            corExpr = parse(text = paste(
+            corExpr <- parse(text = paste(
                 corFnc, "(datExpr, datExpr[, selectCols] ",
                 prepComma(corOptions), ")"))
             #cor_mat = cor(datExpr, datExpr[, selectCols], use = "p")
-            cor_mat = eval(corExpr)
+            cor_mat <- eval(corExpr)
         }
     } else {
         if (!is.null(selectCols)) {
-            stop("The argument 'selectCols' cannot
-                 be used for distance adjacency.")
+            stop("The argument 'selectCols' cannot be used for distance ",
+                 "adjacency.")
         }
-        corExpr = parse(text = paste(distFnc, "(t(datExpr) ",
+        corExpr <- parse(text = paste(distFnc, "(t(datExpr) ",
                                      prepComma(distOptions), ")"))
         # cor_mat = cor(datExpr, use = "p")
-        d = eval(corExpr)
+        d <- eval(corExpr)
         if (any(d < 0)) {
-            warning("Function WGCNA::adjacency: Distance function
-                    returned (some) negative values.")
+            warning("Distance function returned (some) negative values.")
         }
-        cor_mat = 1 - as.matrix((d/max(d, na.rm = TRUE))^2)
+        cor_mat <- 1 - as.matrix((d/max(d, na.rm = TRUE))^2)
     }
 
+    checkAdjMat(cor_mat, min = -1)
     cor_mat
 }
 
@@ -302,49 +305,54 @@ similarity <- function(datExpr, selectCols = NULL, corFnc = "cor",
 #' Systems Biology. Springer Book. ISBN: 978-1-4419-8818-8
 #' @keywords misc
 #' @examples
-#'
 #' #Simulate a data frame datE which contains 5 columns and 50 observations
-#' m=50
-#' x1=rnorm(m)
-#' r=.5
-#' x2=r*x1+sqrt(1-r^2)*rnorm(m)
-#' r=.3
-#' x3=r*(x1-.5)^2+sqrt(1-r^2)*rnorm(m)
-#' x4=rnorm(m)
-#' r=.3
-#' x5=r*x4+sqrt(1-r^2)*rnorm(m)
-#' datE=data.frame(x1,x2,x3,x4,x5)
+#' m <- 50
+#' x1 <- rnorm(m)
+#' r <- 0.5
+#' x2 <- r * x1 + sqrt(1 - r^2) * rnorm(m)
+#' r <- 0.3
+#' x3 <- r * (x1 - 0.5) ^ 2 + sqrt(1 - r ^ 2) * rnorm(m)
+#' x4 <- rnorm(m)
+#' r <- 0.3
+#' x5 <- r * x4 + sqrt(1 - r ^ 2) * rnorm(m)
+#' datE <- data.frame(x1, x2, x3, x4, x5)
 #' #calculate adjacency by symmetrizing using max
-#' A.max=adjacency.polyReg(datE, symmetrizationMethod="max")
+#' A.max <- adjacency.polyReg(datE, symmetrizationMethod = "max")
 #' A.max
-#' #calculate adjacency by symmetrizing using max
-#' A.mean=adjacency.polyReg(datE, symmetrizationMethod="mean")
+#' #calculate adjacency by symmetrizing using mean
+#' A.mean <- adjacency.polyReg(datE, symmetrizationMethod = "mean")
 #' A.mean
+#' #calculate adjacency by symmetrizing using min
+#' A.min <- adjacency.polyReg(datE, symmetrizationMethod = "min")
+#' A.min
 #' # output the unsymmetrized pairwise model fitting indices R.squared
-#' R.squared=adjacency.polyReg(datE, symmetrizationMethod="none")
+#' R.squared <- adjacency.polyReg(datE, symmetrizationMethod = "none")
 #' R.squared
-#'
-adjacency.polyReg = function(datExpr, degree=3, symmetrizationMethod = "mean") {
+adjacency.polyReg <- function(datExpr, degree = 3,
+                              symmetrizationMethod = "mean") {
 
-    if (!is.element(symmetrizationMethod, c("none", "min" ,"max", "mean"))) {
+    if (!is.element(symmetrizationMethod, c("none", "min", "max", "mean"))) {
         stop("Unrecognized symmetrization method.")
     }
 
-    datExpr = matrix(as.numeric(as.matrix(datExpr)), nrow(datExpr), ncol(datExpr))
-    n = ncol(datExpr)
-    polyRsquare = matrix(NA, n,n)
+    datExpr <- matrix(as.numeric(as.matrix(datExpr)), nrow(datExpr),
+                      ncol(datExpr))
+    n <- ncol(datExpr)
+    polyRsquare <- matrix(NA, n,n)
 
     for (i in 2:n) {
         for (j in 1:(i-1)) {
-            del = is.na(datExpr[, i]+datExpr[,j])
-            if (sum(del)>=(n-1) | var(datExpr[, i], na.rm=T)==0 | var(datExpr[, j], na.rm=T)==0) {
-                polyRsquare[i, j] = polyRsquare[j, i]=NA
+            del <- is.na(datExpr[, i] + datExpr[,j])
+            if (sum(del) >= (n-1) | var(datExpr[, i], na.rm = T) == 0 |
+                var(datExpr[, j], na.rm = T) == 0) {
+                polyRsquare[i, j] = polyRsquare[j, i] = NA
             } else {
-                dati = datExpr[!del, i]; datj = datExpr[!del, j]
-                lmPij=glm( dati ~ poly( datj, degree))
-                polyRsquare[i, j] = cor( dati, predict(lmPij))^2
-                lmPji=glm( datj ~ poly( dati, degree))
-                polyRsquare[j, i] = cor( datj, predict(lmPji))^2
+                dati <- datExpr[!del, i]
+                datj <- datExpr[!del, j]
+                lmPij <- glm(dati ~ poly( datj, degree))
+                polyRsquare[i, j] <- cor(dati, predict(lmPij))^2
+                lmPji <- glm( datj ~ poly( dati, degree))
+                polyRsquare[j, i] <- cor( datj, predict(lmPji))^2
                 rm(dati, datj, lmPij, lmPji)
             }
         }
@@ -353,12 +361,13 @@ adjacency.polyReg = function(datExpr, degree=3, symmetrizationMethod = "mean") {
     diag(polyRsquare) = rep(1,n)
 
     if (symmetrizationMethod =="none") {
-        adj= polyRsquare
+        adj <- polyRsquare
     } else {
-        adj = switch(symmetrizationMethod,
+        adj <- switch(symmetrizationMethod,
                      min = pmin(polyRsquare, t(polyRsquare)),
                      max = pmax(polyRsquare, t(polyRsquare)),
                      mean = (polyRsquare + t(polyRsquare))/2)
+        checkAdjMat(adj)
     }
     adj
 
@@ -417,26 +426,29 @@ adjacency.polyReg = function(datExpr, degree=3, symmetrizationMethod = "mean") {
 #' @examples
 #'
 #' #Simulate a data frame datE which contains 5 columns and 50 observations
-#' m=50
-#' x1=rnorm(m)
-#' r=.5
-#' x2=r*x1+sqrt(1-r^2)*rnorm(m)
-#' r=.3
-#' x3=r*(x1-.5)^2+sqrt(1-r^2)*rnorm(m)
-#' x4=rnorm(m)
-#' r=.3; x5=r*x4+sqrt(1-r^2)*rnorm(m)
-#' datE=data.frame(x1,x2,x3,x4,x5)
+#' m <- 50
+#' x1 <- rnorm(m)
+#' r <- 0.5
+#' x2 <- r * x1 + sqrt(1 - r ^ 2) * rnorm(m)
+#' r <- 0.3
+#' x3 <- r *(x1 - .5) ^ 2 + sqrt(1 - r ^ 2) * rnorm(m)
+#' x4 <- rnorm(m)
+#' r <- 0.3
+#' x5 <- r * x4 + sqrt(1 - r ^ 2) * rnorm(m)
+#' datE <- data.frame(x1, x2, x3, x4, x5)
 #' #calculate adjacency by symmetrizing using max
-#' A.max=adjacency.splineReg(datE, symmetrizationMethod="max")
+#' A.max <- adjacency.splineReg(datE, symmetrizationMethod = "max")
 #' A.max
-#' #calculate adjacency by symmetrizing using max
-#' A.mean=adjacency.splineReg(datE, symmetrizationMethod="mean")
+#' #calculate adjacency by symmetrizing using mean
+#' A.mean <- adjacency.splineReg(datE, symmetrizationMethod = "mean")
 #' A.mean
+#' #calculate adjacency by symmetrizing using min
+#' A.min <- adjacency.splineReg(datE, symmetrizationMethod = "min")
+#' A.min
 #' # output the unsymmetrized pairwise model fitting indices R.squared
-#' R.squared=adjacency.splineReg(datE, symmetrizationMethod="none")
+#' R.squared <- adjacency.splineReg(datE, symmetrizationMethod = "none")
 #' R.squared
-#'
-adjacency.splineReg = function(datExpr,
+adjacency.splineReg <- function(datExpr,
                                df = 6-(nrow(datExpr)<100)-(nrow(datExpr)<30),
                                symmetrizationMethod = "mean", ...) {
 
@@ -444,34 +456,38 @@ adjacency.splineReg = function(datExpr,
         stop("Unrecognized symmetrization method.")
     }
 
-    datExpr = matrix(as.numeric(as.matrix(datExpr)), nrow(datExpr), ncol(datExpr))
-    n = ncol(datExpr)
-    splineRsquare = matrix(NA, n,n)
+    datExpr <- matrix(as.numeric(as.matrix(datExpr)),
+                     nrow(datExpr), ncol(datExpr))
+    n <- ncol(datExpr)
+    splineRsquare <- matrix(NA, n, n)
 
     for (i in 2:n) {
         for (j in 1:(i-1)) {
             del = is.na(datExpr[, i]+datExpr[,j])
-            if (sum(del)>=(n-1) | var(datExpr[, i], na.rm=T)==0 | var(datExpr[, j], na.rm=T)==0) {
-                splineRsquare[i, j] = splineRsquare[j, i]=NA
+            if (sum(del) >= (n-1) | var(datExpr[, i], na.rm=T) == 0 |
+                var(datExpr[, j], na.rm = T) == 0) {
+                splineRsquare[i, j] = splineRsquare[j, i] = NA
             } else {
-                dati = datExpr[!del, i]; datj = datExpr[!del, j]
-                lmSij=glm( dati ~ ns( datj, df = df, ...))
-                splineRsquare[i, j] = cor( dati, predict(lmSij))^2
-                lmSji=glm( datj ~ ns( dati, df = df, ...))
-                splineRsquare[j, i] = cor( datj, predict(lmSji))^2
+                dati <- datExpr[!del, i]
+                datj <- datExpr[!del, j]
+                lmSij <- glm( dati ~ ns( datj, df = df, ...))
+                splineRsquare[i, j] <- cor(dati, predict(lmSij))^2
+                lmSji <- glm( datj ~ ns(dati, df = df, ...))
+                splineRsquare[j, i] <- cor(datj, predict(lmSji))^2
                 rm(dati, datj, lmSij, lmSji)
             }
         }
     }
 
-    diag(splineRsquare) = rep(1,n)
-    if (symmetrizationMethod =="none") {
-        adj= splineRsquare
+    diag(splineRsquare) <- rep(1, n)
+    if (symmetrizationMethod == "none") {
+        adj <- splineRsquare
     } else {
-        adj = switch(symmetrizationMethod,
+        adj <- switch(symmetrizationMethod,
                      min = pmin(splineRsquare, t(splineRsquare)),
                      max = pmax(splineRsquare, t(splineRsquare)),
                      mean = (splineRsquare + t(splineRsquare))/2)
+        checkAdjMat(adj)
     }
     adj
 }
@@ -497,7 +513,12 @@ adjacency.splineReg = function(datExpr,
 #' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 #' @keywords misc
 sigmoidAdjacency <- function(ss, mu = 0.8, alpha = 20) {
-    1/(1 + exp(- alpha * (ss - mu)))
+    if (any(ss > 1 | ss < 0)) {
+        stop("ss should be a between 0 and 1")
+    }
+    adj <- 1/(1 + exp(- alpha * (ss - mu)))
+    checkAdjMat(adj)
+    adj
 }
 
 # SignumAdjacency ####
@@ -520,9 +541,14 @@ sigmoidAdjacency <- function(ss, mu = 0.8, alpha = 20) {
 #' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
 #' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 #' @keywords misc
+#' @examples
+#' datExpr <- matrix(rnorm(150), ncol = 5)
+#' corMat <- cor(datExpr)
+#' signumAdjacency(corMat, 0.1)
 signumAdjacency <- function(corMat, threshold) {
-    adjmat = as.matrix(abs(corMat) >= threshold)
+    adjmat <- as.matrix(abs(corMat) >= threshold)
     dimnames(adjmat) <- dimnames(corMat)
     diag(adjmat) <- 0
+    checkAdjMat(adjmat)
     adjmat
 }

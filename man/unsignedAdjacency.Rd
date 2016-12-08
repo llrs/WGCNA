@@ -38,6 +38,10 @@ datExpr2} plus any extra arguments given in \code{corOptions}. If
 \code{datExpr2} is \code{NULL}, the standard correlation functions will
 calculate the corelation of columns in \code{datExpr}.
 }
+\examples{
+datExpr <- matrix(rnorm(150), ncol = 5)
+unsignedAdjacency(datExpr)
+}
 \author{
 Steve Horvath and Peter Langfelder
 }

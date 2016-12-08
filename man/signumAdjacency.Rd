@@ -21,6 +21,11 @@ An unweighted adjacency matrix of the same dimensions as the input
 This function transforms correlations or other measures of similarity into
 an unweighted network adjacency.
 }
+\examples{
+datExpr <- matrix(rnorm(150), ncol = 5)
+corMat <- cor(datExpr)
+signumAdjacency(corMat, 0.1)
+}
 \author{
 Steve Horvath
 }
