@@ -108,33 +108,29 @@ number of rows of \code{datE} is smaller than say 200, it may be better to
 fit a correlation using the function \code{adjacency}.
 }
 \examples{
-
-
-# Load requisite packages. These packages are considered "optional", 
+# Load requisite packages. These packages are considered "optional",
 # so WGCNA does not load them automatically.
 
-if (require(infotheo, quietly = TRUE) && 
-    require(minet, quietly = TRUE) && 
+if (require(infotheo, quietly = TRUE) &&
+    require(minet, quietly = TRUE) &&
     require(entropy, quietly = TRUE))
 {
   # Example can be executed.
   #Simulate a data frame datE which contains 5 columns and 50 observations
-  m=50
-  x1=rnorm(m)
-  r=.5; x2=r*x1+sqrt(1-r^2)*rnorm(m)
-  r=.3; x3=r*(x1-.5)^2+sqrt(1-r^2)*rnorm(m)
-  x4=rnorm(m)
-  r=.3; x5=r*x4+sqrt(1-r^2)*rnorm(m)
-  datE=data.frame(x1,x2,x3,x4,x5)
-  
-  #calculate entropy, mutual information matrix and weighted adjacency 
+  m <- 50
+  x1 <- rnorm(m)
+  r <- 0.5
+  x2 <- r*x1+sqrt(1 - r ^ 2) * rnorm(m)
+  r <- 0.3
+  x3 <- r * (x1 - 0.5) ^ 2 + sqrt(1 - r ^ 2) * rnorm(m)
+  x4 <- rnorm(m)
+  r <- 0.3
+  x5 <- r * x4 + sqrt(1 - r ^ 2) * rnorm(m)
+  datE <- data.frame(x1, x2, x3, x4, x5)
+  #calculate entropy, mutual information matrix and weighted adjacency
   # matrices based on mutual information.
-  MIadj=mutualInfoAdjacency(datE=datE)
-} else 
-  printFlush(paste("Please install packages infotheo, minet and entropy",
-                   "before running this example."))
-
-
+  MIadj <- mutualInfoAdjacency(datE = datE)
+  }
 }
 \author{
 Steve Horvath, Lin Song, Peter Langfelder

@@ -65,24 +65,21 @@ regression tree or regression forest predictor.
 This function can be considered a wrapper of the coxph function.
 }
 \examples{
-
 library(survival)
 # simulate time and event data
-time1=sample(1:100)
-event1=sample(c(1,0), 100,replace=TRUE)
+time1 <- sample(1:100)
+event1 <- sample(c(1, 0), 100, replace=TRUE)
 
-event1[1:5]=NA
-time1[1:5]=NA
+event1[1:5] <- NA
+time1[1:5] <- NA
 # no covariates
-datResiduals= coxRegressionResiduals(time=time1,event=event1)
-
+datResiduals <- coxRegressionResiduals(time = time1, event = event1)
+cor(datResiduals, use="p")
 # now we simulate a covariate
-z= rnorm(100)
-cor(datResiduals,use="p")
-datResiduals=coxRegressionResiduals(time=time1,event=event1,datCovariates=data.frame(z))
-cor(datResiduals,use="p")
-
-
+z <- rnorm(100)
+datResiduals <- coxRegressionResiduals(time = time1, event = event1,
+datCovariates <- data.frame(z))
+cor(datResiduals, use="p")
 }
 \author{
 Steve Horvath

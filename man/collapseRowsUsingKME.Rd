@@ -20,7 +20,8 @@ for MM.}
 kME values.  The default is all of them.}
 }
 \value{
-\item{datETcollapsed}{ A numeric matrix with the same columns as the
+A list containing the following items:
+\item{MMcollapsed}{ A numeric matrix with the same columns as the
 input matrix MM, but with rows corresponding to the genes rather than the
 probes. } \item{group2row}{ A matrix whose rows correspond to the unique
 gene labels and whose 2 columns report which gene label (first column called
@@ -36,26 +37,27 @@ module in the module membership matrix.  This function is a special case of
 the function collapseRows.
 }
 \examples{
-
 # Example: first simulate some data
 set.seed(100)
-ME.A = sample(1:100,50);  ME.B = sample(1:100,50)
-ME.C = sample(1:100,50);  ME.D = sample(1:100,50)  
-ME1     = data.frame(ME.A, ME.B, ME.C, ME.D)
-simDatA = simulateDatExpr(ME1,1000,c(0.2,0.1,0.08,0.05,0.3), signed=TRUE)
-simDatB = simulateDatExpr(ME1,1000,c(0.2,0.1,0.08,0.05,0.3), signed=TRUE)
-Gin     = c(colnames(simDatA$datExpr),colnames(simDatB$datExpr))
-Pin     = paste("Probe",1:length(Gin),sep=".")
-datExpr = cbind(simDatA$datExpr, simDatB$datExpr)
-MM      = corAndPvalue(datExpr,ME1)$cor
+ME.A <- sample(1:100, 50)
+ME.B <- sample(1:100, 50)
+ME.C <- sample(1:100, 50)
+ME.D <- sample(1:100, 50)
+ME1 <- data.frame(ME.A, ME.B, ME.C, ME.D)
+simDatA <- simulateDatExpr(ME1, 1000, c(0.2, 0.1, 0.08, 0.05, 0.3),
+signed = TRUE, verbose = 0)
+simDatB <- simulateDatExpr(ME1, 1000, c(0.2, 0.1, 0.08, 0.05, 0.3),
+signed = TRUE, verbose = 0)
+Gin <- c(colnames(simDatA$datExpr), colnames(simDatB$datExpr))
+Pin <- paste("Probe", 1:length(Gin), sep=".")
+datExpr <- cbind(simDatA$datExpr, simDatB$datExpr)
+MM <- cor(datExpr, ME1)
 
 # Now run the function and see some example output
-results = collapseRowsUsingKME(MM, Gin, Pin)
+results <- collapseRowsUsingKME(MM, Gin, Pin)
 head(results$MMcollapsed)
 head(results$group2Row)
 head(results$selectedRow)
-
-
 }
 \author{
 Jeremy Miller
