@@ -36,57 +36,59 @@
 #' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
 #' @keywords color
 #' @examples
-#'
-#' labels = c(0:20)
+#' labels <- c(0:20)
 #' labels2colors(labels)
-#' labels = matrix(letters[1:9], 3,3)
+#' labels <- matrix(letters[1:9], 3, )
 #' labels2colors(labels)
 #' # Note the difference when commonColorCode = FALSE
 #' labels2colors(labels, commonColorCode = FALSE)
-#'
 labels2colors <- function(labels, zeroIsGrey = TRUE, colorSeq = NULL,
                           naColor = "grey",
                           commonColorCode = TRUE) {
 
-    if (is.null(colorSeq)) colorSeq = standardColors()
+    if (is.null(colorSeq)) {
+        colorSeq <- standardColors()
+    }
 
     if (is.numeric(labels)) {
-        if (zeroIsGrey) minLabel = 0 else minLabel = 1
-        if (any(labels<0, na.rm = TRUE)) minLabel = min(c(labels), na.rm = TRUE)
-        nLabels = labels
+        minLabel <- ifelse(zeroIsGrey, 0, 1)
+        if (any(labels < 0, na.rm = TRUE)) {
+            minLabel <- min(c(labels), na.rm = TRUE)
+        }
+        nLabels <- labels
     } else {
         if (commonColorCode) {
-            factors = factor(c(as.matrix(as.data.frame(labels))))
-            nLabels = as.numeric(factors)
-            dim(nLabels) = dim(labels)
+            factors <- factor(c(as.matrix(as.data.frame(labels))))
+            nLabels <- as.numeric(factors)
+            dim(nLabels) <- dim(labels)
         } else {
-            labels = as.matrix(as.data.frame(labels))
-            factors = list()
+            labels <- as.matrix(as.data.frame(labels))
+            factors <- list()
             for (c in 1:ncol(labels))
                 factors[[c]] = factor(labels[, c])
-            nLabels = sapply(factors, as.numeric)
+            nLabels <- sapply(factors, as.numeric)
         }
     }
 
     if (max(nLabels, na.rm = TRUE) > length(colorSeq)) {
-        nRepeats = as.integer((max(labels) - 1)/length(colorSeq)) + 1
-        warning(paste(
-            "labels2colors: Number of labels exceeds number of avilable colors.",
-            "Some colors will be repeated", nRepeats, "times."))
+        nRepeats <- as.integer((max(labels) - 1)/length(colorSeq)) + 1
+        warning("Number of labels exceeds number of avilable colors.\n",
+            "Some colors will be repeated ", nRepeats, " times.")
         extColorSeq = colorSeq
         for (rep in 1:nRepeats)
-            extColorSeq = c(extColorSeq, paste0(colorSeq, ".", rep))
+            extColorSeq <- c(extColorSeq, paste0(colorSeq, ".", rep))
     } else {
-        nRepeats = 1
-        extColorSeq = colorSeq
+        nRepeats <- 1
+        extColorSeq <- colorSeq
     }
-    colors = rep("grey", length(nLabels))
-    fin = !is.na(nLabels)
-    colors[!fin] = naColor
-    finLabels = nLabels[fin]
-    colors[fin][finLabels != 0] = extColorSeq[finLabels[finLabels != 0]]
-    if (!is.null(dim(labels)))
-        dim(colors) = dim(labels)
+    colors <- rep("grey", length(nLabels))
+    fin <- !is.na(nLabels)
+    colors[!fin] <- naColor
+    finLabels <- nLabels[fin]
+    colors[fin][finLabels != 0] <- extColorSeq[finLabels[finLabels != 0]]
+    if (!is.null(dim(labels))) {
+        dim(colors) <- dim(labels)
+    }
     colors
 }
 
@@ -103,9 +105,7 @@ labels2colors <- function(labels, zeroIsGrey = TRUE, colorSeq = NULL,
 #' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
 #' @keywords color misc
 #' @examples
-#'
 #' standardColors(10)
-#'
 standardColors <- function(n = NULL){
     if (is.null(n)) {
         return(.GlobalStandardColors)
@@ -131,11 +131,11 @@ standardColors <- function(n = NULL){
 #' @seealso \code{\link{standardColors}}
 #' @keywords misc
 #' @examples
-#'
 #' displayColors(standardColors(10))
-#'
+#' displayColors()
 displayColors <- function(colors = NULL) {
-    if (is.null(colors))
-        colors = standardColors()
+    if (is.null(colors)) {
+        colors <- standardColors()
+    }
     barplot(rep(1, length(colors)), col = colors, border = colors)
 }
