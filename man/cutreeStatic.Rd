@@ -30,14 +30,20 @@ by \code{\link{cutree}}, then calculates the number of objects on each
 branch and only keeps branches that have at least \code{minSize} objects on
 them.
 }
+\examples{
+datExpr <- matrix(rnorm(150), ncol = 5)
+hc <- hclust(dist(datExpr))
+cutreeStatic(hc, minSize = 2)
+}
 \author{
 Peter Langfelder
 }
 \seealso{
-\code{\link{hclust}} for hierarchical clustering,
-\code{\link{cutree}} and \code{\link{cutreeStatic}} for other
-constant-height branch cuts, \code{\link{standardColors}} to convert the
-retuned numerical lables into colors for easier visualization.
+\code{\link{stats::hclust}} for hierarchical clustering,
+\code{\link{stats::cutree}} for other constant-height branch cuts,
+\code{\link{standardColors}} to convert the
+retuned numerical lables into colors for easier visualization or
+\code{\link{cutreeStaticColor}}.
 }
 \keyword{misc}
 

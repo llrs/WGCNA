@@ -31,6 +31,13 @@ The numerical labels may not be sequential. See
 \code{\link{normalizeLabels}} for a way to put the labels into a standard
 order.
 }
+\examples{
+datExpr <- matrix(rnorm(150), ncol = 5)
+hc <- hclust(dist(datExpr))
+moduleNumber(hc)
+moduleNumber(hc, minSize = 2)
+moduleNumber(hc, cutHeight = 0.1, minSize = 2)
+}
 \author{
 Peter Langfelder, \email{Peter.Langfelder@gmail.com}
 }

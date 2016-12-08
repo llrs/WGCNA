@@ -19,6 +19,12 @@ labels.
 Transforms numerical labels into normal order, that is the largest group
 will be labeled 1, next largest 2 etc. Label 0 is optionally preserved.
 }
+\examples{
+labels <- c(0, 1, rep(2, 2))
+labels
+normalizeLabels(labels)
+normalizeLabels(labels, FALSE)
+}
 \author{
 Peter Langfelder, \email{Peter.Langfelder@gmail.com}
 }

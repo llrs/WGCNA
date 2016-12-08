@@ -51,6 +51,11 @@ The function creates a color represenation for the given numeric input.
 Each column of \code{x} is processed individually, meaning that the color
 palette is adjusted individually for each column of \code{x}.
 }
+\examples{
+num <- 0:30
+numbers2colors(num)
+numbers2colors(num, TRUE)
+}
 \author{
 Peter Langfelder
 }

@@ -49,14 +49,12 @@ output, meaning the dimensions of the returned value are the same as those
 of the input \code{labels}.
 }
 \examples{
-
-labels = c(0:20)
+labels <- c(0:20)
 labels2colors(labels)
-labels = matrix(letters[1:9], 3,3)
+labels <- matrix(letters[1:9], 3,3)
 labels2colors(labels)
 # Note the difference when commonColorCode = FALSE
 labels2colors(labels, commonColorCode = FALSE)
-
 }
 \author{
 Peter Langfelder, \email{Peter.Langfelder@gmail.com}
