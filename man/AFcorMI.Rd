@@ -29,18 +29,17 @@ generation and features of the predicted mutual information adjacency,
 please refer to the function \code{\link{mutualInfoAdjacency}}.
 }
 \examples{
-
 #Simulate a data frame datE which contains 5 columns and 50 observations
 m <- 50
 x1 <- rnorm(m)
-r <- .5
-x2 <- r*x1+sqrt(1-r^2)*rnorm(m)
-r <- .3
-x3 <- r*(x1-.5)^2+sqrt(1-r^2)*rnorm(m)
+r <- 0.5
+x2 <- r*x1+sqrt(1 - r ^ 2) * rnorm(m)
+r <- 0.3
+x3 <- r * (x1 - 0.5) ^ 2 + sqrt(1 - r ^ 2) * rnorm(m)
 x4 <- rnorm(m)
-r <- .3
-x5 <- r*x4+sqrt(1-r^2)*rnorm(m)
-datE <- data.frame(x1,x2,x3,x4,x5)
+r <- 0.3
+x5 <- r * x4 + sqrt(1 - r ^ 2) * rnorm(m)
+datE <- data.frame(x1, x2, x3, x4, x5)
 #calculate predicted AUV2
 cor.data <- cor(datE, use = "p")
 \dontrun{
