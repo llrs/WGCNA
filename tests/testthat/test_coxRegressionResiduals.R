@@ -16,5 +16,5 @@ test_that("coxRegressionResiduals", {
     datResiduals <- coxRegressionResiduals(time = time1, event = event1,
                                            datCovariates <- data.frame(z))
     cor.2 <- cor(datResiduals, use = "p")
-    expect_lt(cor.2[1, 2], cor.1[1, 2])
+    expect_gt(cor.2[1, 2], cor.1[1, 2])
 })
