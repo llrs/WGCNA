@@ -10,7 +10,7 @@ test_that("checkAdjMat functionallity", {
 
     adj <- matrix(c(1, 2, 2, 1), ncol = 2, nrow = 2)
     expect_error(checkAdjMat(adj))
-    expect_true(is.null(checkAdjMat(adj, max = 2)))
+    expect_true(checkAdjMat(adj, max = 2))
 
     adj <- matrix(c(1, 2, 2, 1), ncol = 1, nrow = 2)
     expect_error(checkAdjMat(adj, max = 2))
@@ -18,7 +18,7 @@ test_that("checkAdjMat functionallity", {
 
     adj <- matrix(c(-1, 1, 1, -1), ncol = 2, nrow = 2)
     expect_error(checkAdjMat(adj))
-    expect_true(is.null(checkAdjMat(adj, min = -2)))
+    expect_true(checkAdjMat(adj, min = -2))
 })
 
 test_that("unsignedAdjacency", {

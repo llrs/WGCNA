@@ -163,7 +163,7 @@ checkSets <- function(data, checkStructure = FALSE, useSets = NULL) {
         stop("No data given.")
     }
     structureOK <- TRUE
-    if (class(data) != "multiSet") {
+    if ("multiSet" %in% class(data)  ) {
         if (checkStructure) {
             structureOK <- FALSE
             nGenes <- 0
