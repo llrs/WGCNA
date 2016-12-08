@@ -20,9 +20,6 @@ bioc_packages:
   - GO.db
   - AnnotationDbi
 sudo: false
-before_script:
-  - Rscript -e 'library(tools); md5sum(list.files(recursive = TRUE))'
-#  - Rscript -e 'library(devtools); document()'
 after_success:
   - Rscript -e 'library(covr); codecov()'
 os:
