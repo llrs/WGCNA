@@ -131,8 +131,8 @@ standardColors <- function(n = NULL){
 #' @seealso \code{\link{standardColors}}
 #' @keywords misc
 #' @examples
-#' displayColors(standardColors(10))
-#' displayColors()
+#' \dontrun{
+#' displayColors(standardColors(10))}
 displayColors <- function(colors = NULL) {
     if (is.null(colors)) {
         colors <- standardColors()
