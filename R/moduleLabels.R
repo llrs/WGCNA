@@ -12,6 +12,11 @@
 #' labels.
 #' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
 #' @keywords misc
+#' @examples
+#' labels <- c(0, 1, rep(2, 2))
+#' labels
+#' normalizeLabels(labels)
+#' normalizeLabels(labels, FALSE)
 normalizeLabels <- function(labels, keepZero = TRUE) {
     if (keepZero) {
         NonZero = (labels != 0)
@@ -50,6 +55,12 @@ normalizeLabels <- function(labels, keepZero = TRUE) {
 #' \code{\link{hclust}}, \code{\link{cutree}},
 #' \code{\link{normalizeLabels}}
 #' @keywords cluster
+#' @examples
+#' datExpr <- matrix(rnorm(150), ncol = 5)
+#' hc <- hclust(dist(datExpr))
+#' moduleNumber(hc)
+#' moduleNumber(hc, minSize = 2)
+#' moduleNumber(hc, cutHeight = 0.1, minSize = 2)
 moduleNumber <- function(dendro,
                          cutHeight = 0.9,
                          minSize = 50) {
@@ -98,6 +109,10 @@ moduleNumber <- function(dendro,
 #' @author Peter Langfelder
 #' @seealso \code{\link{labels2colors}} for color coding of ordinal labels.
 #' @keywords misc
+#' @examples
+#' num <- 0:30
+#' numbers2colors(num)
+#' numbers2colors(num, TRUE)
 numbers2colors <- function(x,
                            signed = NULL,
                            centered = signed,
@@ -109,32 +124,30 @@ numbers2colors <- function(x,
                                blueWhiteRed(100)[51:100]
                            },
                            naColor = "grey") {
-    x = as.matrix(x)
+    x <- as.matrix(x)
     if (!is.numeric(x))
         stop("'x' must be numeric. For a factor, please use as.numeric(x) in
              the call.")
     if (is.null(signed)) {
-        if (any(x < 0, na.rm = TRUE) & any(x > 0, na.rm = TRUE))
-        {
-            signed = TRUE
+        if (any(x < 0, na.rm = TRUE) & any(x > 0, na.rm = TRUE)) {
+            signed <- TRUE
         } else
-            signed = FALSE
+            signed <- FALSE
     }
-    if (is.null(centered))
-        centered = signed
-
+    if (is.null(centered)) {
+        centered <- signed
+    }
     if (is.null(lim)) {
         if (signed & centered) {
-            max = apply(abs(x), 2, max, na.rm = TRUE)
-            lim = as.matrix(cbind(-max, max))
+            max <- apply(abs(x), 2, max, na.rm = TRUE)
+            lim <- as.matrix(cbind(-max, max))
         } else {
-            lim = as.matrix(cbind(
-                apply(x, 2, min, na.rm = TRUE),
-                apply(x, 2, max, na.rm = TRUE)
+            lim <- as.matrix(cbind(apply(x, 2, min, na.rm = TRUE),
+                                   apply(x, 2, max, na.rm = TRUE)
             ))
         }
         if (commonLim)
-            lim = c(min(lim[, 1], na.rm = TRUE), max(lim[, 2], na.rm = TRUE))
+            lim <- c(min(lim[, 1], na.rm = TRUE), max(lim[, 2], na.rm = TRUE))
     }
     if (is.null(dim(lim))) {
         if (length(lim) != 2)
@@ -143,7 +156,7 @@ numbers2colors <- function(x,
             stop("'lim' must be numeric")
         if (sum(is.finite(lim)) != 2)
             stop("'lim' must be finite.")
-        lim = t(as.matrix(lim))
+        lim <- t(as.matrix(lim))
     } else {
         if (ncol(x) != nrow(lim))
             stop("Incompatible numbers of columns in 'x' and rows in 'lim'.")
@@ -153,45 +166,41 @@ numbers2colors <- function(x,
             stop("'lim' must be finite.")
     }
 
-    xMin = matrix(lim[, 1],
+    xMin <- matrix(lim[, 1],
                   nrow = nrow(x),
                   ncol = ncol(x),
                   byrow = TRUE)
-    xMax = matrix(lim[, 2],
+    xMax <- matrix(lim[, 2],
                   nrow = nrow(x),
                   ncol = ncol(x),
                   byrow = TRUE)
 
-    if (sum(xMin == xMax) > 0)
-        warning("(some columns in) 'x' are constant. Their color will be the
-                color of NA.")
-
-    xx = x
-    xx[is.na(xx)] = ((xMin + xMax)[is.na(xx)]) / 2
-    if (sum(x < xMin, na.rm = TRUE) > 0)
-    {
-        warning("Some values of 'x' are below given minimum and will be
-                truncated to the minimum.")
-        x[xx < xMin] = xMin[xx < xMin]
+    if (sum(xMin == xMax) > 0) {
+        warning("(some columns in) 'x' are constant. Their color will be the ",
+                "color of NA.")
     }
 
-    if (sum(x > xMax, na.rm = TRUE) > 0)
-    {
-        warning("Some values of 'x' are above given maximum and will be
-                truncated to the maximum.")
-        x[xx > xMax] = xMax[xx > xMax]
+    xx <- x
+    xx[is.na(xx)] <- ((xMin + xMax)[is.na(xx)]) / 2
+    if (sum(x < xMin, na.rm = TRUE) > 0) {
+        warning("Some values of 'x' are below given minimum and will be ",
+                "truncated to the minimum.")
+        x[xx < xMin] <- xMin[xx < xMin]
     }
 
-    mmEq = xMin == xMax
+    if (sum(x > xMax, na.rm = TRUE) > 0) {
+        warning("Some values of 'x' are above given maximum and will be ",
+                "truncated to the maximum.")
+        x[xx > xMax] <- xMax[xx > xMax]
+    }
 
-    nColors = length(colors)
-
-    xCol = array(naColor, dim = dim(x))
-
-    xInd = (x - xMin) / (xMax - xMin)
-    xInd[xInd == 1] = 1 - 0.5 / nColors
-    xCol[!mmEq] = colors[as.integer(xInd[!mmEq] * nColors) + 1]
-    xCol[is.na(xCol)] = naColor
+    mmEq <- xMin == xMax
+    nColors <- length(colors)
+    xCol <- array(naColor, dim = dim(x))
+    xInd  <- (x - xMin) / (xMax - xMin)
+    xInd[xInd == 1] <- 1 - 0.5 / nColors
+    xCol[!mmEq] <- colors[as.integer(xInd[!mmEq] * nColors) + 1]
+    xCol[is.na(xCol)] <- naColor
 
     xCol
 }
