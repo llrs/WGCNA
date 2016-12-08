@@ -163,33 +163,31 @@ checkSets <- function(data, checkStructure = FALSE, useSets = NULL) {
         stop("No data given.")
     }
     structureOK <- TRUE
-    if ("multiSet" %in% class(data)  ) {
+    if ("multiSet" %in% class(data)) {
         if (checkStructure) {
             structureOK <- FALSE
             nGenes <- 0
             nSamples <- 0
         } else {
-            stop("data does not appear to have the correct format. ",
-                 "Consider using fixDataStructure or setting ",
-                 "checkStructure = TRUE when calling this function.")
-        }
-    } else {
-        nSamples <- vector(length = nSets)
-        nGenes <- dim(data[[useSets[1]]]$data)[2]
-        for (set in useSets) {
-            if (nGenes != dim(data[[set]]$data)[2]) {
-                if (checkStructure) {
-                    structureOK <- FALSE
-                } else {
-                    stop("Incompatible number of genes in set 1 and ", set)
-                }
-            }
-            nSamples[set] <- dim(data[[set]]$data)[1]
-        }
-    }
 
-    list(nSets = nSets, nGenes = nGenes, nSamples = nSamples,
-         structureOK = structureOK)
+            nSamples <- vector(length = nSets)
+            nGenes <- dim(data[[useSets[1]]]$data)[2]
+            for (set in useSets) {
+                if (nGenes != dim(data[[set]]$data)[2]) {
+                    if (checkStructure) {
+                        structureOK <- FALSE
+                    } else {
+                        stop("Incompatible number of genes in set 1 and ", set)
+                    }
+                }
+                nSamples[set] <- dim(data[[set]]$data)[1]
+            }
+        }
+        list(nSets = nSets, nGenes = nGenes, nSamples = nSamples,
+             structureOK = structureOK)
+    } else {
+        stop("Not in multiSet format")
+    }
 }
 
 # subset.multiSet ####
@@ -563,7 +561,7 @@ apply.default <- function(multiSet, MARGIN, FUN, ...) {
 #' @keywords misc
 #' @export
 is.multiSet <- function(x, strict = TRUE) {
-    if (class(x) == "multiSet") {
+    if ("multiSet" %in% class(x)) {
         return(TRUE)
     }
     if (strict) {
@@ -668,7 +666,7 @@ multiSet.mapply <- function(FUN, ..., MoreArgs = NULL,
              " the help page.")
     }
     dotLengths <- sapply(dots, length)
-    if (any(dotLengths!=dotLengths[1])) {
+    if (any(dotLengths != dotLengths[1])) {
         stop("All arguments to vectorize over must have the same length.\n",
              "Scalar arguments should be put into the 'MoreArgs' argument.\n",
              "Note: lengths of '...' arguments are: ",

@@ -86,7 +86,7 @@ test_that("checkSets works properly", {
     expect_false(ch2$structureOK)
     expect_error(checkSets())
 
-    ch4 <- checkSets(list(data1, data2), checkStructure = T)
+    ch4 <- checkSets(multiSet(list(data1, data2)), checkStructure = T)
     expect_false(ch4$structureOK)
     expect_equal(ch4$nGenes, 0L)
     expect_equal(ch4$nSamples, 0L)
