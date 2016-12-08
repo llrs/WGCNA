@@ -1,6 +1,5 @@
 # Functions to perform WGCNA from similarity input.
 
-
 #' Construct a network from a matrix
 #'
 #' Constructs a network
@@ -45,58 +44,59 @@
 #' symmetric similarity matrix.
 #' @keywords misc
 #' @export matrixToNetwork
-matrixToNetwork <- function(mat,
-                            symmetrizeMethod = c("average", "min", "max"),
-                            signed = TRUE,
-                            min = NULL,
-                            max = NULL,
-                            power = 12,
+#' @examples
+#' mat <- matrix(rnorm(25), ncol = 5)
+#' matrixToNetwork(mat, "max")
+matrixToNetwork <- function(mat, symmetrizeMethod = c("average", "min", "max"),
+                            signed = TRUE, min = NULL, max = NULL, power = 12,
                             diagEntry = 1) {
-    sm = match.arg(symmetrizeMethod)
+    sm <- match.arg(symmetrizeMethod, c("average", "min", "max"))
     if (is.na(sm)){
         stop("Unrecognized or non - unique 'symmetrizeMethod'.")
     }
-    mat = as.matrix(mat)
+    mat <- as.matrix(mat)
 
-    nd = 0
-    x = try({nd = dim(mat)})
-    if ((class(x) == 'try - error') | (nd != 2))
-        stop("'mat' appears to have incorrect type; must be a 2 - dimensional
-             square matrix.")
-
-    if (ncol(mat) != nrow(mat))
+    nd <- length(dim(mat))
+    if (nd != 2) {
+        stop("'mat' appears to have incorrect type; must be a 2 - dimensional",
+             "square matrix.")
+    }
+    if (ncol(mat) != nrow(mat)) {
         stop("'mat' must be a square matrix.")
-
-    if (!signed) mat = abs(mat)
-
+    }
+    if (!signed) {
+        mat <- abs(mat)
+    }
     if (sm == 1) {
-        mat = (mat + t(mat))/2
+        mat <- (mat + t(mat))/2
     } else if (sm == 2) {
-        mat = pmin(mat, t(mat), na.rm = TRUE)
-    } else
-        mat = pmax(mat, t(mat), na.rm = TRUE)
+        mat <- pmin(mat, t(mat), na.rm = TRUE)
+    } else {
+        mat <- pmax(mat, t(mat), na.rm = TRUE)
+    }
+    if (is.null(min)) {
+        min <- min(mat, na.rm = TRUE)
+    } else {
+        mat[mat < min] <- min
+    }
 
-  if (is.null(min)) {
-    min = min(mat, na.rm = TRUE)
-  } else
-    mat[mat < min] = min
+    if (is.null(max)) {
+        max <- max(mat, na.rm = TRUE)
+    } else {
+        mat[mat > max] <- max
+    }
 
-  if (is.null(max)) {
-    max = max(mat, na.rm = TRUE)
-  } else
-    mat[mat > max] = max
-
-adj = ((mat - min)/(max - min))^power
-
-  diag(adj) = diagEntry
-
-  adj
+    adj <- ((mat - min)/(max - min)) ^ power
+    diag(adj) = diagEntry
+    checkAdjMat(adj, max = max(diagEntry, adj, 1, na.rm = TRUE))
+    adj
 }
+
 #' @name checkAdjMat
 #' @rdname checkAdjMat
 #' @export
 checkSimilarity <- function(similarity, min =  - 1, max = 1) {
-  checkAdjMat(similarity, min, max)
+    checkAdjMat(similarity, min, max)
 }
 
 #' @name adjacency
@@ -107,12 +107,17 @@ checkSimilarity <- function(similarity, min =  - 1, max = 1) {
 #' adj <-  adjacency.fromSimilarity(similarity)
 #' @export
 adjacency.fromSimilarity <- function(similarity, type = "unsigned",
-                                     power = if (type == "distance") 1 else 6) {
-  checkSimilarity(similarity)
-  adjacency(similarity, type = type, power = power, corFnc = "I",
-            corOptions = "", distFnc = "I",
-            distOptions = "") }
+                                     power = 6) {
+    power <- ifelse(type == "distance", 1 , power)
+    checkSimilarity(similarity)
+    adjacency(similarity, type = type, power = power, corFnc = "I",
+              corOptions = "", distFnc = "I", distOptions = "")
+}
 
+#' @name pickHardThreshold.fromSimilarity
+#' @rdname pickHardThreshold
+#' @param similarity Matrix whose values are between -1 and 1
+#' @export
 pickHardThreshold.fromSimilarity <- function(similarity,
                                              RsquaredCut = 0.85,
                                              cutVector = seq(0.1, 0.9,
@@ -128,21 +133,26 @@ pickHardThreshold.fromSimilarity <- function(similarity,
                       nBreaks = nBreaks, corFnc = "I", corOptions = "")
 }
 
+#' @name pickSoftThreshold.fromSimilarity
+#' @rdname pickSoftThreshold
+#' @param similarity Matrix whose values are between -1 and 1
+#' @export
 pickSoftThreshold.fromSimilarity <- function(similarity,
-                                     RsquaredCut = 0.85,
-                                     powerVector = c(seq(1, 10, by = 1),
-                                                     seq(12, 20, by = 2)),
-                                     removeFirst = FALSE, nBreaks = 10,
-                                     blockSize = 1000,
-                                     networkType = "unsigned",
-                                     moreNetworkConcepts = FALSE,
-                                     verbose = 0, indent = 0) {
-  checkSimilarity(similarity)
-  pickSoftThreshold(similarity, dataIsExpr = FALSE,
-                    RsquaredCut =  RsquaredCut, powerVector = powerVector,
-                    removeFirst = removeFirst, nBreaks = nBreaks,
-                    blockSize = blockSize, networkType = networkType,
-                    moreNetworkConcepts = moreNetworkConcepts,
-                    verbose = verbose, indent = indent)
+                                             RsquaredCut = 0.85,
+                                             powerVector = c(seq(1, 10, by = 1),
+                                                             seq(12, 20, by = 2)
+                                             ),
+                                             removeFirst = FALSE, nBreaks = 10,
+                                             blockSize = 1000,
+                                             networkType = "unsigned",
+                                             moreNetworkConcepts = FALSE,
+                                             verbose = 0, indent = 0) {
+    checkSimilarity(similarity)
+    pickSoftThreshold(similarity, dataIsExpr = FALSE,
+                      RsquaredCut =  RsquaredCut, powerVector = powerVector,
+                      removeFirst = removeFirst, nBreaks = nBreaks,
+                      blockSize = blockSize, networkType = networkType,
+                      moreNetworkConcepts = moreNetworkConcepts,
+                      verbose = verbose, indent = indent)
 
 }
