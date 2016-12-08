@@ -14,7 +14,7 @@
     rownames(out) <- levels.x
     colnames(out) <- levels.y
   }
-  out[match(rownames(t), levels.x), match(colnames(t), levels.y)] <- tab
+  out[match(rownames(tab), levels.x), match(colnames(tab), levels.y)] <- tab
   out
 }
 
