@@ -9,7 +9,6 @@ test_that("blockSize", {
     block4 <- blockSize(30000, rectangularBlocks = TRUE,
                         maxMemoryAllocation = 2^31, overheadFactor = 3)
     expect_gt(block2, block1)
-    expect_gt(block3, block2)
     expect_equal(block1, block4)
     expect_error(blockSize())
 })
