@@ -40,23 +40,16 @@ reference cluster in the test clustering, while a value close to zero
 indicates a low preservation.
 }
 \examples{
-
-
-  # An example with random (unrelated) clusters:
-
-  set.seed(1)
-  nModules = 10
-  nGenes = 1000
-  cl1 = sample(c(1:nModules), nGenes, replace = TRUE)
-  cl2 = sample(c(1:nModules), nGenes, replace = TRUE)
-  coClustering(cl1, cl2)
-
-  # For the same reference and test clustering:
-
-  coClustering(cl1, cl1)
-
-
-
+# An example with random (unrelated) clusters:
+set.seed(1)
+nModules <- 10
+nGenes <- 1000
+cl1 <- sample(c(1:nModules), nGenes, replace = TRUE)
+cl2 <- sample(c(1:nModules), nGenes, replace = TRUE)
+coClustering(cl1, cl2)
+coClustering(cl1, cl2, tupletSize = 3)
+# For the same reference and test clustering:
+coClustering(cl1, cl1)
 }
 \author{
 Peter Langfelder

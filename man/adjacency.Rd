@@ -6,8 +6,7 @@
 \alias{similarity}
 \title{Calculate network adjacency}
 \usage{
-adjacency.fromSimilarity(similarity, type = "unsigned", power = if (type ==
-  "distance") 1 else 6)
+adjacency.fromSimilarity(similarity, type = "unsigned", power = 6)
 
 adjacency(datExpr, selectCols = NULL, type = "unsigned", power = if (type
   == "distance") 1 else 6, corFnc = "cor", corOptions = "use = 'p'",

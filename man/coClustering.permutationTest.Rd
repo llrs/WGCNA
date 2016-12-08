@@ -63,7 +63,7 @@ test clustering is repeatedly randomly permuted.
   nGenes = 100
   cl1 = sample(c(1:nModules), nGenes, replace = TRUE)
   cl2 = sample(c(1:nModules), nGenes, replace = TRUE)
-  
+
   cc = coClustering(cl1, cl2)
 
   # Choose a low number of permutations to make the example fast
