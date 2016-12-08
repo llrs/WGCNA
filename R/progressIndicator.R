@@ -28,49 +28,54 @@
 #' @author Peter Langfelder
 #' @keywords misc
 #' @examples
-#'
-#' max = 10
-#' prog = initProgInd("Counting: ", "done")
+#' max <- 10
+#' prog <- initProgInd("Counting: ", "done")
 #' for (c in 1:max) {
 #'   Sys.sleep(0.10)
-#'   prog = updateProgInd(c/max, prog)
+#'   prog <- updateProgInd(c/max, prog)
 #' }
 #' printFlush("")
 #'
 #' printFlush("Example 2:")
-#' prog = initProgInd()
+#' prog <- initProgInd()
 #' for (c in 1:max) {
 #'   Sys.sleep(0.10)
-#'   prog = updateProgInd(c/max, prog)
+#'   prog <- updateProgInd(c/max, prog)
 #' }
 #' printFlush("")
 #'
 #' ## Example of a significant slowdown:
-#'
 #' ## Without progress indicator:
-#'
-#' system.time( {a = 0; for (i in 1:10000) a = a+i; } )
-#'
+#' system.time({a = 0
+#'   for (i in 1:10000) {
+#'     a = a + i
+#'     }})
 #' ## With progress indicator, some 50 times slower:
-#'
 #' system.time({
-#'     prog = initProgInd("Counting: ", "done")
-#'     a = 0
+#'     prog <- initProgInd("Counting: ", "done\n")
+#'     a <- 0
 #'     for (i in 1:10000) {
-#'       a = a+i
-#'       prog = updateProgInd(i/10000, prog)
+#'       a <- a + i
+#'       prog <- updateProgInd(i/10000, prog)
+#'     }})
+#' system.time({
+#'     pb <- txtProgressBar(max = 10000, width = 80, style = 3)
+#'     a <- 0
+#'     for (i in 1:10000) {
+#'       a <- a + i
+#'       setTxtProgressBar(pb, a)
 #'     }
-#'   }
-#' )
+#'     close(pb)})
 #' @export
 initProgInd <-function(leadStr = "..", trailStr = "", quiet = !interactive()) {
-    oldStr = " "
+    oldStr <- " "
     cat(oldStr)
-    progInd = list(oldStr = oldStr,
+    progInd <- list(oldStr = oldStr,
                    leadStr = leadStr,
                    trailStr = trailStr)
-    class(progInd) = "progressIndicator"
+    class(progInd) <- "progressIndicator"
     updateProgInd(0, progInd, quiet)
+    # TODO Change this by txtProgressBar
 }
 
 # updateProgInd  ####
@@ -83,16 +88,14 @@ updateProgInd <- function(newFrac, progInd, quiet = !interactive()) {
               "it prior to use.")
     }
 
-    newStr = paste0(progInd$leadStr,
+    newStr <- paste0(progInd$leadStr,
                     as.integer(newFrac * 100),
                     "% ", progInd$trailStr)
     if (newStr != progInd$oldStr) {
         if (quiet) {
             progInd$oldStr = newStr
         } else {
-            cat(paste(rep("\b", nchar(
-                progInd$oldStr
-            )), collapse = ""))
+            cat(paste(rep("\b", nchar(progInd$oldStr)), collapse = ""))
             cat(newStr)
             if (exists("flush.console"))
                 flush.console()

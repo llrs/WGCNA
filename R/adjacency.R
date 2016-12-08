@@ -31,6 +31,7 @@ checkAdjMat <- function(adjMat, min = 0, max = 1) {
     if (min(adjMat, na.rm = TRUE) < min ||
         max(adjMat, na.rm = TRUE) > max)
         stop("some entries are not between ", min, " and ", max)
+    return(TRUE)
 }
 
 # unsignedAdjacency ####

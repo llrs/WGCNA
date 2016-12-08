@@ -364,70 +364,70 @@ collapseRows <- function(datET, rowGroup, rowID, method="MaxMean",
                          connectivityPower=1, selectFewestMissing=TRUE,
                          thresholdCombine=NA) {
 
-	# datET = as.matrix(as.data.frame(datET))
-	methodAverage = FALSE
-	if (method=="Average") {
-	    methodAverage = TRUE
-	}   # Required for later
-	if (method!="function") {
-	    methodFunction = NULL
-	} # Required for later
+    # datET = as.matrix(as.data.frame(datET))
+    methodAverage = FALSE
+    if (method=="Average") {
+        methodAverage = TRUE
+    }   # Required for later
+    if (method!="function") {
+        methodFunction = NULL
+    } # Required for later
 
-	if ( sum(rowGroup=="",na.rm=TRUE)>0 ){
-	   warning(paste("rowGroup contains blanks. It is strongly recommended that you remove",
-                    "these rows before calling the function.\n",
-                    "   But for your convenience, the collapseRow function will remove these rows"))
-	   rowGroup[rowGroup==""]=NA
-	}
+    if ( sum(rowGroup=="",na.rm=TRUE)>0 ){
+        warning(paste("rowGroup contains blanks. It is strongly recommended that you remove",
+                      "these rows before calling the function.\n",
+                      "   But for your convenience, the collapseRow function will remove these rows"))
+        rowGroup[rowGroup==""]=NA
+    }
 
-	# datET is a numeric matrix whose rows correspond to variables
-	# e.g. probes of a microarray and whose columns to observations
-	# e.g. microarrays
+    # datET is a numeric matrix whose rows correspond to variables
+    # e.g. probes of a microarray and whose columns to observations
+    # e.g. microarrays
 
-	if ( sum(is.na(rowGroup))>0 ){
-       warning("The argument rowGroup contains missing data. It is strongly recommended\n",
-              "   that you remove these rows before calling the function. Or redefine rowGroup\n",
-			  "   so that it has no missing data. But for convenience, we remove these data.")
-	}
+    if ( sum(is.na(rowGroup))>0 ){
+        warning("The argument rowGroup contains missing data. It is strongly recommended\n",
+                "   that you remove these rows before calling the function. Or redefine rowGroup\n",
+                "   so that it has no missing data. But for convenience, we remove these data.")
+    }
 
     ## Test to make sure the variables are the right length.
     #     if not, fix it if possible, or return 0 if not possible
-	rowID  = as.character(rowID)
-	rowGroup = as.character(rowGroup)
-	rnDat = rownames(datET)
-	if (length(rowID)!=length(rowGroup)){
-		stop("rowGroup and rowID not the same length... exiting.")
-	}
+    rowID  = as.character(rowID)
+    rowGroup = as.character(rowGroup)
+    rnDat = rownames(datET)
+    if (length(rowID)!=length(rowGroup)){
+        stop("rowGroup and rowID not the same length... exiting.")
+    }
 
-	if (length(unique(rowID)) != length(rowID)) {
-	    stop("rowID contains duplicate entries. Make sure that the argument rowID contains unique entries")
-	    }
+    if (length(unique(rowID)) != length(rowID)) {
+        stop("rowID contains duplicate entries. Make sure that the argument rowID contains unique entries")
+    }
 
-	names(rowGroup) = rowID
+    names(rowGroup) = rowID
 
     if (sum(is.na(rowID)) > 0) {
         warning("The argument rowID contains missing data. I recommend you ",
                 "choose non-missing, unique values for rowID, e.g. character strings.")
-        }
+    }
 
-	if ((is.null(rnDat))&(dim(datET)[1]==length(rowID))){
-		warning("*datET* does not have row names.  Assigning *rowID* as row names.","")
-		rnDat <- rownames(datET) <- rowID
-	}
-	if (is.null(rnDat)){
-		stop("*datET* does not have row names and length of *rowID*...",
-		     "... is not the same as # rows in *datET*... exiting.")
-		return(0)
-	}
-	if (sum(is.element(rnDat,rowID))!=length(rowID)){
-		warning("row names of input data and probes not identical...",
-		        "... Attempting to proceed anyway. Check results carefully.")
-		keepProbes = is.element(rowID, rownames(datET))
-		rowID = rowID[keepProbes]
-		datET= datET[rowID,]
-		rowGroup = rowGroup[rowID]
+    if ((is.null(rnDat))&(dim(datET)[1]==length(rowID))){
+        warning("*datET* does not have row names.  Assigning *rowID* as row names.","")
+        rnDat <- rownames(datET) <- rowID
+    }
+    if (is.null(rnDat)){
+        stop("*datET* does not have row names and length of *rowID*...",
+             "... is not the same as # rows in *datET*... exiting.")
+        return(0)
+    }
+    if (sum(is.element(rnDat,rowID))!=length(rowID)){
+        warning("row names of input data and probes not identical...",
+                "... Attempting to proceed anyway. Check results carefully.")
+        keepProbes = is.element(rowID, rownames(datET))
+        rowID = rowID[keepProbes]
+        datET= datET[rowID,]
+        rowGroup = rowGroup[rowID]
 
-	}
+    }
 
     restRows = (rowGroup!="" & !is.na(rowGroup))
     datET= datET[restRows,]
@@ -436,184 +436,184 @@ collapseRows <- function(datET, rowGroup, rowID, method="MaxMean",
     rnDat = rnDat[restRows]
 
 
-## For each group, select the row with the fewest missing values (if selectFewestMissing==TRUE)
-##  Also, remove all rows with more than 90% missing data
+    ## For each group, select the row with the fewest missing values (if selectFewestMissing==TRUE)
+    ##  Also, remove all rows with more than 90% missing data
 
-	datET_in = datET  # This will be used as a reference later
+    datET_in = datET  # This will be used as a reference later
 
-## For each gene, select the gene with the fewest missing probes (if selectFewestMissing==TRUE)
-##  Also, remove all probes with more than 90% missing data
+    ## For each gene, select the gene with the fewest missing probes (if selectFewestMissing==TRUE)
+    ##  Also, remove all probes with more than 90% missing data
 
-	keep = .selectFewestMissing(datET, rowID, rowGroup, selectFewestMissing)
-        datET = datET[keep, ]
-        rowGroup = rowGroup[keep]
-        rowID = rowID[keep]
+    keep = .selectFewestMissing(datET, rowID, rowGroup, selectFewestMissing)
+    datET = datET[keep, ]
+    rowGroup = rowGroup[keep]
+    rowID = rowID[keep]
 
-	rnDat = rownames(datET)
+    rnDat = rownames(datET)
 
-##   If 0 < thresholdCombine < 1, only combine ids into their corresponding group if their
-#    correlation is greater than thresholdCombine.  This parameter supercedes all remaining
-#    parameters.
+    ##   If 0 < thresholdCombine < 1, only combine ids into their corresponding group if their
+    #    correlation is greater than thresholdCombine.  This parameter supercedes all remaining
+    #    parameters.
 
-	if(!is.na(thresholdCombine)){
-		if(!is.numeric(thresholdCombine)){
-			write("thresholdCombine is not between -1 and 1 and is therefore being treated as NA","")
-		} else if((thresholdCombine<(-1))|(thresholdCombine>1)){
-			write("thresholdCombine is not between -1 and 1 and is therefore being treated as NA","")
-		} else {
-			output = .filterSimilarPS(datET, rowGroup, rowID, thresholdCombine)
-			return(output)
-		}
-	}
+    if(!is.na(thresholdCombine)){
+        if(!is.numeric(thresholdCombine)){
+            write("thresholdCombine is not between -1 and 1 and is therefore being treated as NA","")
+        } else if((thresholdCombine<(-1))|(thresholdCombine>1)){
+            write("thresholdCombine is not between -1 and 1 and is therefore being treated as NA","")
+        } else {
+            output = .filterSimilarPS(datET, rowGroup, rowID, thresholdCombine)
+            return(output)
+        }
+    }
 
-##   If method="function", use the function "methodFunction" as a way of combining genes
-#    Alternatively, use one of the built-in functions
-#    Note: methodFunction must be a function that takes a vector of numbers as input and
-#     outputs a single number. This function will return(0) or crash otherwise.
+    ##   If method="function", use the function "methodFunction" as a way of combining genes
+    #    Alternatively, use one of the built-in functions
+    #    Note: methodFunction must be a function that takes a vector of numbers as input and
+    #     outputs a single number. This function will return(0) or crash otherwise.
 
-        recMethods = c("function","ME","MaxMean","maxRowVariance","MinMean","absMinMean","absMaxMean","Average")
-        imethod = pmatch(method, recMethods)
+    recMethods = c("function","ME","MaxMean","maxRowVariance","MinMean","absMinMean","absMaxMean","Average")
+    imethod = pmatch(method, recMethods)
 
-	if (is.na(imethod)) {
-		printFlush("Error: entered method is not a legal option. Recognized options are *maxRowVariance*,")
-		printFlush("       *maxRowVariance*, *MaxMean*, *MinMean*, *absMaxMean*, *absMinMean*, *ME*,")
-		printFlush("       *Average* or *function* for a user-defined function.")
-		return(0)
-	}
-        if (imethod > 2) method = paste0(".", method)
-	if (method=="function")
-        {
-          method = methodFunction
-	  if((!is.function(methodFunction))&(!is.null(methodFunction))){
+    if (is.na(imethod)) {
+        printFlush("Error: entered method is not a legal option. Recognized options are *maxRowVariance*,")
+        printFlush("       *maxRowVariance*, *MaxMean*, *MinMean*, *absMaxMean*, *absMinMean*, *ME*,")
+        printFlush("       *Average* or *function* for a user-defined function.")
+        return(0)
+    }
+    if (imethod > 2) method = paste0(".", method)
+    if (method=="function")
+    {
+        method = methodFunction
+        if((!is.function(methodFunction))&(!is.null(methodFunction))){
             stop("*methodFunction* must be a function... please read the help file","")
             return(0)
-	  }
         }
-	if (!is.function(method)) if (method!="ME") method = get(method, mode = "function")
+    }
+    if (!is.function(method)) if (method!="ME") method = get(method, mode = "function")
 
-## Format the variables for use by this function
-	rowID[is.na(rowID)] = rowGroup[is.na(rowID)]    # Use group if row is missing
-	rownames(datET)[is.na(rnDat)]   = rowGroup[is.na(rnDat)]
-	remove       = (is.na(rowID))|(is.na(rowGroup)) # Omit if both gene and probe are missing
-	rowID  = rowID[!remove]
-	rowGroup = rowGroup[!remove]
-	names(rowGroup) = rowID
-	rowID = sort(intersect(rnDat,rowID))
-	if (length(rowID)<=1){
-		stop("none of the *datET* rownames are in *rowID*...","")
-		write("... please add rownames and try again... exiting.","")
-		return(0)
-	}
-	rowGroup = rowGroup[rowID]
-	datET  = as.matrix(datET)
-	datET  = datET[rowID,]
-	probes = rownames(datET)
-	genes  = rowGroup[probes]
-	tGenes = table(genes)
-	datETOut=matrix(0,nrow=length(tGenes),ncol=ncol(datET))
-	colnames(datETOut) = colnames(datET)
-	rownames(datETOut) = sort(names(tGenes))
-	rowsOut = rownames(datETOut)
-	names(rowsOut) = rowsOut
+    ## Format the variables for use by this function
+    rowID[is.na(rowID)] = rowGroup[is.na(rowID)]    # Use group if row is missing
+    rownames(datET)[is.na(rnDat)]   = rowGroup[is.na(rnDat)]
+    remove       = (is.na(rowID))|(is.na(rowGroup)) # Omit if both gene and probe are missing
+    rowID  = rowID[!remove]
+    rowGroup = rowGroup[!remove]
+    names(rowGroup) = rowID
+    rowID = sort(intersect(rnDat,rowID))
+    if (length(rowID)<=1){
+        stop("none of the *datET* rownames are in *rowID*...","")
+        write("... please add rownames and try again... exiting.","")
+        return(0)
+    }
+    rowGroup = rowGroup[rowID]
+    datET  = as.matrix(datET)
+    datET  = datET[rowID,]
+    probes = rownames(datET)
+    genes  = rowGroup[probes]
+    tGenes = table(genes)
+    datETOut=matrix(0,nrow=length(tGenes),ncol=ncol(datET))
+    colnames(datETOut) = colnames(datET)
+    rownames(datETOut) = sort(names(tGenes))
+    rowsOut = rownames(datETOut)
+    names(rowsOut) = rowsOut
 
-##  If !is.null(connectivityPower), default to the connectivity method with power=method
-#      Collapse genes with multiple probe sets together using the following algorthim:
-#      1) If there is one ps/g = keep
-#      2) If there are 2 ps/g = (use "method" or "methodFunction")
-#      3) If there are 3+ ps/g = take the max connectivity
-#   Otherwise, use "method" if there are 3+ ps/g as well.
-	if(!is.null(connectivityPower)){
-	  if(!is.numeric(connectivityPower)){
-		stop("if entered, connectivityPower must be numeric... exiting.","")
-		return(0)
-	  }
-	  if(connectivityPower<=0){
-	    warning("connectivityPower must be >= 0.  Defaulting to a power of 2.","")
-	    connectivityPower=2
-	  }
-	  if(dim(datET)[2]<=5){
-	    warning("5 or fewer samples, this method of probe collapse is unreliable...",
-	            "...Running anyway, but we suggest trying another method (for example, *mean*).",)
-	  }
-	}
+    ##  If !is.null(connectivityPower), default to the connectivity method with power=method
+    #      Collapse genes with multiple probe sets together using the following algorthim:
+    #      1) If there is one ps/g = keep
+    #      2) If there are 2 ps/g = (use "method" or "methodFunction")
+    #      3) If there are 3+ ps/g = take the max connectivity
+    #   Otherwise, use "method" if there are 3+ ps/g as well.
+    if(!is.null(connectivityPower)){
+        if(!is.numeric(connectivityPower)){
+            stop("if entered, connectivityPower must be numeric... exiting.","")
+            return(0)
+        }
+        if(connectivityPower<=0){
+            warning("connectivityPower must be >= 0.  Defaulting to a power of 2.","")
+            connectivityPower=2
+        }
+        if(dim(datET)[2]<=5){
+            warning("5 or fewer samples, this method of probe collapse is unreliable...",
+                    "...Running anyway, but we suggest trying another method (for example, *mean*).",)
+        }
+    }
 
-	whichTestFn <- function(x){
-		d    = datETOut[g,]
-		test = (!is.na(x))&(!is.na(d))
-		return(sum(x[test]==d[test]))
-	}
+    whichTestFn <- function(x){
+        d    = datETOut[g,]
+        test = (!is.na(x))&(!is.na(d))
+        return(sum(x[test]==d[test]))
+    }
 
-# If method=ME, this function acts as the function moduleEigengene from the WGCNA library
-	if (!is.function(method)) if (method=="ME"){
-		datETOut = t(moduleEigengenes(t(datET),genes)$eigengenes)
-		colnames(datETOut) = colnames(datET)
-		rownames(datETOut) = substr(rownames(datETOut),3,nchar(rownames(datETOut)))
-		out2 = cbind(rownames(datETOut),paste("ME",rownames(datETOut),sep="."))
-		colnames(out2) = c("group","selectedRowID")
-		out3 = is.element(rownames(datET_in),"@#$%^&*")
-		names(out3) = rownames(datET_in)
-		return(list(datETcollapsed = datETOut, group2row = out2, selectedRow = out3))
-	}
+    # If method=ME, this function acts as the function moduleEigengene from the WGCNA library
+    if (!is.function(method)) if (method=="ME"){
+        datETOut = t(moduleEigengenes(t(datET),genes)$eigengenes)
+        colnames(datETOut) = colnames(datET)
+        rownames(datETOut) = substr(rownames(datETOut),3,nchar(rownames(datETOut)))
+        out2 = cbind(rownames(datETOut),paste("ME",rownames(datETOut),sep="."))
+        colnames(out2) = c("group","selectedRowID")
+        out3 = is.element(rownames(datET_in),"@#$%^&*")
+        names(out3) = rownames(datET_in)
+        return(list(datETcollapsed = datETOut, group2row = out2, selectedRow = out3))
+    }
 
-# Actually run the collapse now!!!
-	if (!is.null(methodFunction))
-		write("Comment: make sure methodFunction takes a matrix as input.","")
-	ones = sort(names(tGenes)[tGenes==1])
-	if(connectivityBasedCollapsing){
-		twos = sort(names(tGenes)[tGenes==2]) # use "method" and connectivity
-		more = sort(names(tGenes)[tGenes>2])
-	} else {
-		twos = sort(names(tGenes)[tGenes>1]) # only use "method"
-		more = character(0)
-	}
-	for (g in ones){
-		datETOut[g,] = as.numeric(datET[probes[genes==g],])
-		rowsOut[g] = probes[genes==g]
-	}
-        count = 0
-	for (g in twos){
-		datETTmp = datET[probes[genes==g],]
-		datETOut[g,] = as.numeric(method(datETTmp))
-		whichTest    = apply(datETTmp,1,whichTestFn)
-		rowsOut[g] = (names(whichTest)[whichTest==max(whichTest)])[1]
-		count = count + 1
-		if (count %% 1000 == 0) collectGarbage()
-	}
-	for (g in more){
-		datETTmp = datET[probes[genes==g],]
-		adj = (0.5+0.5*cor(t(datETTmp),use="p"))^connectivityPower
-		datETOut[g,] = as.numeric(datETTmp[which.max(rowSums(adj,na.rm=TRUE)),])
-		whichTest    = apply(datETTmp,1,whichTestFn)
-                rowsOut[g] = (names(whichTest)[whichTest==max(whichTest)])[1]
-		count = count + 1
-		if (count %% 1000 == 0) collectGarbage()
-	}
-	if (!is.null(methodFunction))
-		write("...Ignore previous comment.  Function completed properly!","")
+    # Actually run the collapse now!!!
+    if (!is.null(methodFunction))
+        write("Comment: make sure methodFunction takes a matrix as input.","")
+    ones = sort(names(tGenes)[tGenes==1])
+    if(connectivityBasedCollapsing){
+        twos = sort(names(tGenes)[tGenes==2]) # use "method" and connectivity
+        more = sort(names(tGenes)[tGenes>2])
+    } else {
+        twos = sort(names(tGenes)[tGenes>1]) # only use "method"
+        more = character(0)
+    }
+    for (g in ones){
+        datETOut[g,] = as.numeric(datET[probes[genes==g],])
+        rowsOut[g] = probes[genes==g]
+    }
+    count = 0
+    for (g in twos){
+        datETTmp = datET[probes[genes==g],]
+        datETOut[g,] = as.numeric(method(datETTmp))
+        whichTest    = apply(datETTmp,1,whichTestFn)
+        rowsOut[g] = (names(whichTest)[whichTest==max(whichTest)])[1]
+        count = count + 1
+        if (count %% 1000 == 0) collectGarbage()
+    }
+    for (g in more){
+        datETTmp = datET[probes[genes==g],]
+        adj = (0.5+0.5*cor(t(datETTmp),use="p"))^connectivityPower
+        datETOut[g,] = as.numeric(datETTmp[which.max(rowSums(adj,na.rm=TRUE)),])
+        whichTest    = apply(datETTmp,1,whichTestFn)
+        rowsOut[g] = (names(whichTest)[whichTest==max(whichTest)])[1]
+        count = count + 1
+        if (count %% 1000 == 0) collectGarbage()
+    }
+    if (!is.null(methodFunction))
+        write("...Ignore previous comment.  Function completed properly!","")
 
 
-# Retreive the information about which probes were saved, and include that information
-#   as part of the output.  If method="function" or "Average" output placeholder values.
-	if (!is.null(methodFunction)) {
-		out2 = cbind(rownames(datETOut),paste("function",rownames(datETOut),sep="."))
-		colnames(out2) = c("group","selectedRowID")
-		out3 = is.element(rownames(datET_in),"@#$%^&*")
-		names(out3) = rownames(datET_in)
-		return(list(datETcollapsed = datETOut, group2row = out2, selectedRow = out3))
-	}
-	if (methodAverage) {
-		out2 = cbind(rownames(datETOut),paste("Average",rownames(datETOut),sep="."))
-		colnames(out2) = c("group","selectedRowID")
-		out3 = is.element(rownames(datET_in),"@#$%^&*")
-		names(out3) = rownames(datET_in)
-		return(list(datETcollapsed = datETOut, group2row = out2, selectedRow = out3))
-	}
-	out2 = cbind(rownames(datETOut),rowsOut)
-	colnames(out2) = c("group","selectedRowID")
-	out3 = is.element(rownames(datET_in),rowsOut)
-	names(out3) = rownames(datET_in)
-	output = list(datETcollapsed = datETOut, group2row = out2, selectedRow = out3)
-	return(output)
+    # Retreive the information about which probes were saved, and include that information
+    #   as part of the output.  If method="function" or "Average" output placeholder values.
+    if (!is.null(methodFunction)) {
+        out2 = cbind(rownames(datETOut),paste("function",rownames(datETOut),sep="."))
+        colnames(out2) = c("group","selectedRowID")
+        out3 = is.element(rownames(datET_in),"@#$%^&*")
+        names(out3) = rownames(datET_in)
+        return(list(datETcollapsed = datETOut, group2row = out2, selectedRow = out3))
+    }
+    if (methodAverage) {
+        out2 = cbind(rownames(datETOut),paste("Average",rownames(datETOut),sep="."))
+        colnames(out2) = c("group","selectedRowID")
+        out3 = is.element(rownames(datET_in),"@#$%^&*")
+        names(out3) = rownames(datET_in)
+        return(list(datETcollapsed = datETOut, group2row = out2, selectedRow = out3))
+    }
+    out2 = cbind(rownames(datETOut),rowsOut)
+    colnames(out2) = c("group","selectedRowID")
+    out3 = is.element(rownames(datET_in),rowsOut)
+    names(out3) = rownames(datET_in)
+    output = list(datETcollapsed = datETOut, group2row = out2, selectedRow = out3)
+    return(output)
 
-# End of function
+    # End of function
 }
