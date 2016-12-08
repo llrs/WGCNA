@@ -110,11 +110,6 @@ disableWGCNAThreads = function() {
   foreach::registerDoSEQ()
 }
 
-.checkAvailableMemory = function() {
-  size = 0
-  res = .C("checkAvailableMemoryForR", size = as.double(size), PACKAGE = "WGCNA")
-  res$size
-}
 
 #' @rdname allowWGCNAThreads
 #' @aliases enableWGCNAThreads
