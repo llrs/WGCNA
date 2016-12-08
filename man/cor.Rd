@@ -116,9 +116,7 @@ order of 1e-15.
 }
 \examples{
 
-
 ## Test the speedup compared to standard function cor
-
 # Generate a random matrix with 200 rows and 1000 columns
 
 set.seed(10)
@@ -127,24 +125,20 @@ ncol = 500
 data = matrix(rnorm(nrow*ncol), nrow, ncol)
 
 ## First test: no missing data
-
 system.time( {corStd = stats::cor(data)} )
 system.time( {corFast = cor(data)} )
 
 all.equal(corStd, corFast)
 
 # Here R's standard correlation performs very well.
-
 # We now add a few missing entries.
 
-data[sample(nrow, 10), 1] = NA
+data[sample(nrow, 10), 1] <- NA
 
 # And test the correlations again...
 
 system.time( {corStd = stats::cor(data, use ='p')} )
-
 system.time( {corFast = cor(data, use = 'p')} )
-
 all.equal(corStd, corFast)
 
 # Here the R's standard correlation slows down considerably

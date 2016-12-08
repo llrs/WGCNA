@@ -13,12 +13,6 @@
 #' @param na.rm logical: should entries missing in either \code{labels1} or
 #' \code{labels2} be removed?
 #' @param ignore an optional vector giving label levels that are to be ignored.
-#' @param levels1 optional vector giving levels for \code{labels1}. Defaults to
-#' sorted unique non-missing values in \code{labels1} that are not present in
-#' \code{ignore}.
-#' @param levels2 optional vector giving levels for \code{labels2}. Defaults to
-#' sorted unique non-missing values in \code{labels2} that are not present in
-#' \code{ignore}.
 #' @return A list with the following components: \item{countTable}{a matrix
 #' whose rows correspond to modules (unique labels) in \code{labels1} and whose
 #' columns correspond to modules (unique labels) in \code{labels2}, giving the

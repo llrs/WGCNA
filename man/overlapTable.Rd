@@ -16,14 +16,6 @@ overlapTable(labels1, labels2, na.rm = TRUE, ignore = NULL)
 \code{labels2} be removed?}
 
 \item{ignore}{an optional vector giving label levels that are to be ignored.}
-
-\item{levels1}{optional vector giving levels for \code{labels1}. Defaults to
-sorted unique non-missing values in \code{labels1} that are not present in
-\code{ignore}.}
-
-\item{levels2}{optional vector giving levels for \code{labels2}. Defaults to
-sorted unique non-missing values in \code{labels2} that are not present in
-\code{ignore}.}
 }
 \value{
 A list with the following components: \item{countTable}{a matrix

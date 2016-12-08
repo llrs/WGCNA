@@ -62,6 +62,7 @@
 #'    y = runif(n)
 #'
 #' # Create a basic scatterplot
+#' \dontrun{
 #'    col = standardColors(n)
 #'    plot(x,y, pch = 21, col =1, bg = col, cex = 2.6,
 #'         xlim = c(-0.1, 1.1), ylim = c(-0.1, 1.0))
@@ -71,8 +72,7 @@
 #'
 #'    plot(x,y, pch = 21, col =1, bg = col, cex = 2.6,
 #'         xlim = c(-0.1, 1.1), ylim = c(-0.1, 1.0))
-#'    labelPoints(x, y, col, offs = 0.10, cex = 0.8)
-#'
+#'    labelPoints(x, y, col, offs = 0.10, cex = 0.8)}
 labelPoints = function(x, y, labels, cex = 0.7, offs = 0.01, xpd = TRUE, jiggle = 0,
                        protectEdges = TRUE,
                        doPlot = TRUE, ...)

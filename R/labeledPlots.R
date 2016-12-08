@@ -253,6 +253,7 @@ formatLabels <- function(labels, maxCharPerLine = 14, split = " ", fixed = TRUE,
 #' extraColLabels = paste("Column", c(1:nCol))
 #'
 #' # Extend margins to fit all labels
+#' \dontrun{
 #' par(mar = c(6, 6, 4, 6))
 #' labeledHeatmap(mat, xLabels = colLabels, yLabels = rowLabels,
 #'                xSymbols = extraColLabels,
@@ -262,8 +263,7 @@ formatLabels <- function(labels, maxCharPerLine = 14, split = " ", fixed = TRUE,
 #'                setStdMargins = FALSE,
 #'                textMatrix = signif(mat, 2),
 #'                main = "Text- + color-labeled heatmap")
-#'
-#'
+#'}
 labeledHeatmap <- function(Matrix,
                            xLabels,
                            yLabels = NULL,

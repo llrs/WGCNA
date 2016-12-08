@@ -27,10 +27,11 @@ the mid-colors more green and red, respectively.
 \examples{
 
   par(mfrow = c(3, 1))
+  \dontrun{
   displayColors(greenBlackRed(50))
   displayColors(greenBlackRed(50, 2))
   displayColors(greenBlackRed(50, 0.5))
-
+}
 }
 \author{
 Peter Langfelder

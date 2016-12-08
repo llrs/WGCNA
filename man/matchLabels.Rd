@@ -61,14 +61,18 @@ module are labeled using those labels from \code{extraLabels} that do not
 occur in either of \code{source}, \code{reference} or \code{ignoreLabels}.
 }
 \examples{
-
+set.seed(1)
+nModules <- 10
+nGenes <- 1000
+labels1 <- sample(c(1:nModules), nGenes, replace = TRUE)
+labels2 <- sample(c(1:nModules), nGenes, replace = TRUE)
+sample(matchLabels(labels1, labels2), 20)
 }
 \author{
 Peter Langfelder
 }
 \seealso{
 \code{\link{overlapTable}} for calculation of overlap counts and p-values
-
 \code{\link{standardColors}} for standard non-numeric WGCNA labels.
 }
 \keyword{misc}

@@ -72,6 +72,7 @@ cause some overlapping with other points or labels; use with care.
    y = runif(n)
 
 # Create a basic scatterplot
+\dontrun{
    col = standardColors(n)
    plot(x,y, pch = 21, col =1, bg = col, cex = 2.6,
         xlim = c(-0.1, 1.1), ylim = c(-0.1, 1.0))
@@ -81,8 +82,7 @@ cause some overlapping with other points or labels; use with care.
 
    plot(x,y, pch = 21, col =1, bg = col, cex = 2.6,
         xlim = c(-0.1, 1.1), ylim = c(-0.1, 1.0))
-   labelPoints(x, y, col, offs = 0.10, cex = 0.8)
-
+   labelPoints(x, y, col, offs = 0.10, cex = 0.8)}
 }
 \author{
 Peter Langfelder

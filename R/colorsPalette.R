@@ -19,10 +19,11 @@
 #' @examples
 #'
 #'   par(mfrow = c(3, 1))
+#'   \dontrun{
 #'   displayColors(greenBlackRed(50))
 #'   displayColors(greenBlackRed(50, 2))
 #'   displayColors(greenBlackRed(50, 0.5))
-#'
+#'}
 greenBlackRed <- function(n, gamma = 1) {
     half = as.integer(n / 2)
     red = c(rep(0, times = half),
@@ -120,10 +121,10 @@ greenWhiteRed <- function(n, gamma = 1, warn = TRUE) {
 #' @keywords color
 #' @examples
 #'
-#'   par(mfrow = c(3, 1))
+#'   \dontrun{par(mfrow = c(3, 1))
 #'   displayColors(redWhiteGreen(50))
 #'   displayColors(redWhiteGreen(50, 3))
-#'   displayColors(redWhiteGreen(50, 0.5))
+#'   displayColors(redWhiteGreen(50, 0.5))}
 #'
 redWhiteGreen <- function(n, gamma = 1) {
     half = as.integer(n / 2)
@@ -180,13 +181,13 @@ redWhiteGreen <- function(n, gamma = 1) {
 #' @keywords color
 #' @examples
 #'
-#'   par(mfrow = c(3, 1))
+#'   \dontrun{par(mfrow = c(3, 1))
 #'   displayColors(blueWhiteRed(50))
 #'   title("gamma = 1")
 #'   displayColors(blueWhiteRed(50, 3))
 #'   title("gamma = 3")
 #'   displayColors(blueWhiteRed(50, 0.5))
-#'   title("gamma = 0.5")
+#'   title("gamma = 0.5")}
 #'
 blueWhiteRed <- function(n, gamma = 1, endSaturation = 1) {
     if (endSaturation  > 1  | endSaturation < 0)
