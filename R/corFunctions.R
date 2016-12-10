@@ -379,7 +379,7 @@ cor <- function(x, y = NULL, use = "all.obs",
         ny <- nx
     }
 
-    if ((method=="pearson") && ( (na.method==1) || (na.method==3) )) {
+    if ((method == "pearson") && ( (na.method == 1) || (na.method == 3) )) {
         Cerrors <- c("Memory allocation error")
         nKnownErrors <- length(Cerrors)
         na.method <- pmatch(use, c("all.obs", "pairwise.complete.obs"))
@@ -435,7 +435,7 @@ cor <- function(x, y = NULL, use = "all.obs",
                      "numbers of rows).")
             }
             bi <- matrix(0, ncol(x), ncol(y))
-            res = .C("corFast", x = as.double(x), nrow = as.integer(nrow(x)),
+            res <- .C("corFast", x = as.double(x), nrow = as.integer(nrow(x)),
                      ncolx = as.integer(ncol(x)),
                      y = as.double(y), ncoly = as.integer(ncol(y)),
                      quick = as.double(quick),
@@ -446,7 +446,7 @@ cor <- function(x, y = NULL, use = "all.obs",
                      nThreads = as.integer(nThreads),
                      verbose = as.integer(verbose), indent = as.integer(indent), NAOK = TRUE,
                      PACKAGE = "WGCNA")
-            res = res$res
+            res <- res$res
             dim(res) <- dim(bi)
             if (!is.null(dimnames(x)[[2]]) || !is.null(dimnames(y)[[2]])) {
                 dimnames(res) = list(dimnames(x)[[2]], dimnames(y)[[2]])
