@@ -51,35 +51,28 @@
 #' corAndPvalue(x)
 #' # Note that changed number of observations.
 #'
-corAndPvalue = function(x, y = NULL,
-                        use = "pairwise.complete.obs",
-                        alternative = c("two.sided", "less", "greater"),
-                        ...)
-{
+corAndPvalue <- function(x, y = NULL, use = "pairwise.complete.obs",
+                        alternative = c("two.sided", "less", "greater"), ...) {
   ia = match.arg(alternative)
-  cor = cor(x, y, use = use, ...)
-  x = as.matrix(x)
-  finMat = !is.na(x)
-  if (is.null(y))
-  {
-    np = t(finMat) %*% finMat
+  cor <- cor(x, y, use = use, ...)
+  x <- as.matrix(x)
+  finMat <- !is.na(x)
+  if (is.null(y)) {
+    np <- t(finMat) %*% finMat
   } else {
-    y = as.matrix(y)
-    np = t(finMat) %*% (!is.na(y))
+    y <- as.matrix(y)
+    np <- t(finMat) %*% (!is.na(y))
   }
-  Z = 0.5 * log( (1+cor)/(1-cor) ) * sqrt(np-2)
-  if (ia=="two.sided")
-  {
-    T = sqrt(np - 2) * abs(cor)/sqrt(1 - cor^2)
-    p = 2*pt(T, np - 2, lower.tail = FALSE)
-  } else if (ia=="less")
-  {
-    T = sqrt(np - 2) * cor/sqrt(1 - cor^2)
-    p = pt(T, np - 2, lower.tail = TRUE)
-  } else if (ia=="greater")
-  {
-    T = sqrt(np - 2) * cor/sqrt(1 - cor^2)
-    p = pt(T, np - 2, lower.tail = FALSE)
+  Z <- 0.5 * log( (1+cor)/(1-cor) ) * sqrt(np-2)
+  if (ia == "two.sided") {
+    T <- sqrt(np - 2) * abs(cor)/sqrt(1 - cor^2)
+    p <- 2*pt(T, np - 2, lower.tail = FALSE)
+  } else if (ia == "less") {
+    T <- sqrt(np - 2) * cor/sqrt(1 - cor^2)
+    p <- pt(T, np - 2, lower.tail = TRUE)
+  } else if (ia == "greater") {
+    T <- sqrt(np - 2) * cor/sqrt(1 - cor^2)
+    p <- pt(T, np - 2, lower.tail = FALSE)
   }
 
   list(cor = cor, p = p, Z = Z, t = T, nObs = np)
@@ -126,45 +119,40 @@ corAndPvalue = function(x, y = NULL,
 #'
 #' # generate random data with non-zero correlation
 #' set.seed(1)
-#' a = rnorm(100)
-#' b = rnorm(100) + a
-#' x = cbind(a, b)
+#' a <- rnorm(100)
+#' b <- rnorm(100) + a
+#' x <- cbind(a, b)
 #' # Call the function and display all results
 #' bicorAndPvalue(x)
 #' # Set some components to NA
-#' x[c(1:4), 1] = NA
+#' x[c(1:4), 1] <- NA
 #' corAndPvalue(x)
 #' # Note that changed number of observations.
 #'
-bicorAndPvalue = function(x, y = NULL, use = "pairwise.complete.obs",
+bicorAndPvalue <- function(x, y = NULL, use = "pairwise.complete.obs",
                           alternative = c("two.sided", "less", "greater"),
-                          ...)
-{
-  ia = match.arg(alternative)
-  cor = bicor(x, y, use = use, ...)
-  x = as.matrix(x)
-  finMat = !is.na(x)
-  if (is.null(y))
-  {
-    np = t(finMat) %*% finMat
+                          ...) {
+  ia <- match.arg(alternative)
+  cor <- bicor(x, y, use = use, ...)
+  x <- as.matrix(x)
+  finMat <- !is.na(x)
+  if (is.null(y)) {
+    np <- t(finMat) %*% finMat
   } else {
-    y = as.matrix(y)
-    np = t(finMat) %*% (!is.na(y))
+    y <- as.matrix(y)
+    np <- t(finMat) %*% (!is.na(y))
   }
-  Z = 0.5 * log( (1+cor)/(1-cor) ) * sqrt(np-2)
-  if (ia=="two.sided")
-  {
-    T = sqrt(np - 2) * abs(cor)/sqrt(1 - cor^2)
-    p = 2*pt(T, np - 2, lower.tail = FALSE)
-  } else if (ia=="less")
-  {
-    T = sqrt(np - 2) * cor/sqrt(1 - cor^2)
-    p = pt(T, np - 2, lower.tail = TRUE)
-  } else if (ia=="greater")
-  {
-    #Z = 0.5 * log( (1+cor)/(1-cor) ) * sqrt(np-3)
-    T = sqrt(np - 2) * cor/sqrt(1 - cor^2)
-    p = pt(T, np - 2, lower.tail = FALSE)
+  Z <- 0.5 * log( (1+cor)/(1-cor) ) * sqrt(np-2)
+  if (ia == "two.sided") {
+    T <- sqrt(np - 2) * abs(cor)/sqrt(1 - cor^2)
+    p <- 2*pt(T, np - 2, lower.tail = FALSE)
+  } else if (ia == "less") {
+    T <- sqrt(np - 2) * cor/sqrt(1 - cor^2)
+    p <- pt(T, np - 2, lower.tail = TRUE)
+  } else if (ia  ==  "greater") {
+    #Z <- 0.5 * log( (1+cor)/(1-cor) ) * sqrt(np-3)
+    T <- sqrt(np - 2) * cor/sqrt(1 - cor^2)
+    p <- pt(T, np - 2, lower.tail = FALSE)
   }
 
   list(bicor = cor, p = p, Z = Z, t = T, nObs = np)
