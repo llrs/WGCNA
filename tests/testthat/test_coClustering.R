@@ -33,7 +33,7 @@ test_that("coClustering.permutationTest", {
 })
 
 test_that(".choosenew", {
-    expect_true(is.numeric(.choosenew(a,"b")))
+    expect_true(is.numeric(.choosenew(2,"b")))
     expect_true(is.numeric(.choosenew(3, 5)))
     expect_error(.choosenew("b","a"))
     expect_equal(.choosenew(2, 1), 2L)

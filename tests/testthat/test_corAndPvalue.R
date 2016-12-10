@@ -37,7 +37,7 @@ test_that("bicorAndPvalue", {
     expect_length(test4, 5L)
     x <- matrix(rnorm(10), 2)
     y <- matrix(rnorm(10), 2)
-    test5 <- bicorAndPvalue(x, y)
+    test5 <- bicorAndPvalue(x)
     expect_warning(bicorAndPvalue(x, y))
     expect_equal(ncol(test5$bicor), 5L)
     expect_equal(nrow(test5$bicor), 5L)
