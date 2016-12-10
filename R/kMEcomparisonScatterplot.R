@@ -56,85 +56,99 @@
 #' @author Jeremy Miller
 #' @keywords misc
 #' @examples
+#' # Example output file "kME_correlations_between_A_and_B_inMod.pdf"
+#' # using simulated data.
 #'
-#' # Example output file ("kME_correlations_between_A_and_B_inMod.pdf") using simulated data.
-#'
-#' set.seed = 100
-#' ME=matrix(0,50,5)
-#' for (i in 1:5) ME[,i]=sample(1:100,50)
-#' simData1 = simulateDatExpr5Modules(MEturquoise=ME[,1],MEblue=ME[,2],
-#'                           MEbrown=ME[,3],MEyellow=ME[,4], MEgreen=ME[,5])
-#' simData2 = simulateDatExpr5Modules(MEturquoise=ME[,1],MEblue=ME[,2],
-#'                           MEbrown=ME[,3],MEyellow=ME[,4], MEgreen=ME[,5])
-#' kMEcomparisonScatterplot(simData1$datExpr,simData2$datExpr,simData1$truemodule)
-#'
-#'
-kMEcomparisonScatterplot <- function (datExpr1, datExpr2, colorh, inA=NULL,
-                                      inB=NULL,
-                                      MEsA=NULL, MEsB=NULL, nameA="A",
-                                      nameB="B", plotAll=FALSE, noGrey=TRUE,
-                                      maxPlot=1000,
-                                      pch=19,
-                                      fileName = ifelse(plotAll, paste0(
-                                          "kME_correlations_between_",
-                                          nameA,"_and_", nameB, "_all.pdf"),
-                                          paste0("kME_correlations_between_",
-                                                 nameA, "_and_", nameB,
-                                                 "_inMod.pdf")),
-                                      ...) {
+#' set.seed <- 100
+#' ME <- matrix(0, 50, 5)
+#' for (i in 1:5) {
+#'     ME[, i] <- sample(1:100, 50)
+#' }
+#' simData1 <- simulateDatExpr5Modules(MEturquoise = ME[, 1], MEblue = ME[, 2],
+#'                           MEbrown = ME[,3], MEyellow = ME[, 4],
+#'                           MEgreen = ME[, 5])
+#' simData2 <- simulateDatExpr5Modules(MEturquoise = ME[, 1], MEblue = ME[, 2],
+#'                           MEbrown = ME[, 3], MEyellow = ME[, 4],
+#'                           MEgreen = ME[, 5])
+#' \dontrun{
+#' kMEcomparisonScatterplot(simData1$datExpr, simData2$datExpr,
+#'                          simData1$truemodule, fileName = "../out.pdf")
+#' }
+kMEcomparisonScatterplot <- function(datExpr1, datExpr2, colorh, inA = NULL,
+                                     inB = NULL, MEsA = NULL, MEsB = NULL,
+                                     nameA = "A", nameB = "B", plotAll = FALSE,
+                                     noGrey = TRUE, maxPlot = 1000, pch = 19,
+                                     fileName = NULL, ...) {
 
-# First, get the data
-	if (is.null(dim(datExpr1))) {
-		write ("Error: datExpr1 must be a matrix",""); return(0)
-	}
-	if (is.null(datExpr2)){
-		datA = datExpr1[inA,]
-		datB = datExpr1[inB,]
-		if ((is.null(dim(datA)))|(is.null(dim(datB)))) {
-			 write ("Error: Check input for inA and inB.",""); return(0)
-		}
-	} else {
-		if (is.null(dim(datExpr2))) {
-			write ("Error: datExpr2 must be a matrix",""); return(0)
-		}
-		datA = datExpr1
-		datB = datExpr2
-	}
-	if ((dim(datA)[2]!=length(colorh))|(dim(datB)[2]!=length(colorh))){
-		write ("Error: Both sets of input data and color vector must all have same length.",""); return(0)
-	}
+    # First, get the data
+    if (is.null(dim(datExpr1))) {
+        stop("datExpr1 must be a matrix")
+    }
+    if (is.null(datExpr2)) {
+        datA <- datExpr1[inA, ]
+        datB <- datExpr1[inB, ]
+        if (is.null(dim(datA)) | is.null(dim(datB))) {
+            stop("Check input for inA and inB.")
+        }
+    } else {
+        if (is.null(dim(datExpr2))) {
+            stop("datExpr2 must be a matrix")
+        }
+        datA <- datExpr1
+        datB <- datExpr2
+    }
+    if (ncol(datA) != length(colorh) | ncol(datB) != length(colorh)) {
+        stop("Both sets of input data and color vector must all have same ",
+             "length.")
+    }
+    if (is.null(fileName)) {
+        fileName <- ifelse(plotAll,
+                           paste0("kME_correlations_between_", nameA, "_and_",
+                                  nameB, "_all.pdf"),
+                           paste0("kME_correlations_between_", nameA, "_and_",
+                                  nameB, "_inMod.pdf"))
+    }
+    if (is.null(MEsA)) {
+        MEsA <- moduleEigengenes(datA, colors=as.character(colorh),
+                                excludeGrey = noGrey)$eigengenes
+    }
+    if (is.null(MEsB)) {
+        MEsB <- moduleEigengenes(datB, colors = as.character(colorh),
+                                 excludeGrey = noGrey)$eigengenes
+    }
+    mods <- substring(names(MEsA), 3)
+    kMEsA <- as.data.frame(cor(datA, MEsA, use = "p"))
+    kMEsB <- as.data.frame(cor(datB, MEsB, use = "p"))
 
-	if(is.null(MEsA))
-		MEsA = (moduleEigengenes(datA, colors=as.character(colorh), excludeGrey=noGrey))$eigengenes
-	if(is.null(MEsB))
-		MEsB = (moduleEigengenes(datB, colors=as.character(colorh), excludeGrey=noGrey))$eigengenes
-	mods  = substring(names(MEsA),3)
-	kMEsA = as.data.frame(cor(datA,MEsA,use="p"))
-	kMEsB = as.data.frame(cor(datB,MEsB,use="p"))
-
-# Second, make the plots
-	xlab  = paste("kME values in",nameA)
-	ylab  = paste("kME values in",nameB)
-        printFlush(paste("Plotting kME scatterplots into file", fileName))
-	if (plotAll){
-		pdf(file=fileName)
-		numPlot = min(maxPlot,length(colorh))
-		these   = sample(1:length(colorh),numPlot)
-		for (i in 1:length(mods)){
-			plotCol = mods[i]; if(mods[i]=="white") plotCol="black"
-			verboseScatterplot(kMEsA[these,i],kMEsB[these,i],main=mods[i],
-							   xlab=xlab,ylab=ylab,pch=pch,col=plotCol,...)
-		}
-		dev.off()
-		return("DONE - Plotted All")
-	}
-	pdf(file=fileName)
-	for (i in 1:length(mods)){
-		these   = colorh==mods[i]
-		plotCol = mods[i]; if(mods[i]=="white") plotCol="black"
-		verboseScatterplot(kMEsA[these,i],kMEsB[these,i],main=mods[i],
-						   xlab=xlab,ylab=ylab,pch=pch,col=plotCol,...)
-	}
-	dev.off()
-	return("DONE - Plotted only in module")
+    # Second, make the plots
+    xlab <- paste("kME values in", nameA)
+    ylab <- paste("kME values in", nameB)
+    printFlush(paste("Plotting kME scatterplots into file", fileName))
+    if (plotAll) {
+        pdf(file = fileName)
+        numPlot <- min(maxPlot, length(colorh))
+        these <- sample(1:length(colorh), numPlot)
+        for (i in 1:length(mods)) {
+            plotCol <- mods[i]
+            if(mods[i] == "white") {
+                plotCol <- "black"
+            }
+            verboseScatterplot(kMEsA[these,i], kMEsB[these, i], main=mods[i],
+                               xlab = xlab, ylab = ylab, pch = pch,
+                               col = plotCol, ...)
+        }
+        dev.off()
+    }
+    pdf(file = fileName)
+    for (i in 1:length(mods)) {
+        these <- colorh == mods[i]
+        plotCol <- mods[i]
+        if(mods[i] == "white") {
+            plotCol <- "black"
+        }
+        verboseScatterplot(kMEsA[these, i], kMEsB[these, i], main = mods[i],
+                           xlab = xlab, ylab = ylab, pch = pch, col = plotCol,
+                           ...)
+    }
+    dev.off()
 }
