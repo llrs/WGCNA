@@ -25,22 +25,13 @@
 #'   displayColors(greenBlackRed(50, 0.5))
 #'}
 greenBlackRed <- function(n, gamma = 1) {
-    half = as.integer(n / 2)
-    red = c(rep(0, times = half),
-            0,
-            seq(
-                from = 0,
-                to = 1,
-                length.out = half
-            ) ^ (1 / gamma))
-    green = c(seq(
-        from = 1,
-        to = 0,
-        length.out = half
-    ) ^ (1 / gamma),
-    rep(0, times = half + 1))
-    blue = rep(0, times = 2 * half + 1)
-    col = rgb(red, green, blue, maxColorValue = 1)
+    half <- as.integer(n / 2)
+    red <- c(rep(0, times = half),
+             0, seq(from = 0, to = 1, length.out = half) ^ (1 / gamma))
+    green <- c(seq(from = 1, to = 0, length.out = half) ^ (1 / gamma),
+              rep(0, times = half + 1))
+    blue <- rep(0, times = 2 * half + 1)
+    col <- rgb(red, green, blue, maxColorValue = 1)
     col
 }
 
@@ -86,19 +77,20 @@ greenBlackRed <- function(n, gamma = 1) {
 #'   title("gamma = 0.5")
 #' }
 greenWhiteRed <- function(n, gamma = 1, warn = TRUE) {
-    if (warn)
+    if (warn) {
         warning("WGCNA::greenWhiteRed: this palette is not suitable for people\n",
                 "with green - red color blindness (the most common kind of color
                 blindness).\n",
                 "Consider using the function blueWhiteRed instead.")
-    half = as.integer(n / 2)
-    red = c(seq(from = 0, to = 1, length.out = half) ^ (1 / gamma),
-            rep(1, times = half + 1))
-    green = c(rep(1, times = half + 1),
-              seq(from = 1, to = 0,length.out = half ) ^ (1 / gamma))
-    blue = c(seq(from = 0, to = 1, length.out = half) ^ (1 / gamma), 1,
-             seq(from = 1, to = 0, length.out = half) ^ (1 / gamma))
-    col = rgb(red, green, blue, maxColorValue = 1)
+    }
+    half <- as.integer(n / 2)
+    red <- c(seq(from = 0, to = 1, length.out = half) ^ (1 / gamma),
+             rep(1, times = half + 1))
+    green <- c(rep(1, times = half + 1),
+               seq(from = 1, to = 0, length.out = half ) ^ (1 / gamma))
+    blue <- c(seq(from = 0, to = 1, length.out = half) ^ (1 / gamma), 1,
+              seq(from = 1, to = 0, length.out = half) ^ (1 / gamma))
+    col <- rgb(red, green, blue, maxColorValue = 1)
     col
 }
 
@@ -127,33 +119,14 @@ greenWhiteRed <- function(n, gamma = 1, warn = TRUE) {
 #'   displayColors(redWhiteGreen(50, 0.5))}
 #'
 redWhiteGreen <- function(n, gamma = 1) {
-    half = as.integer(n / 2)
-    green = c(seq(
-        from = 0,
-        to = 1,
-        length.out = half
-    ) ^ (1 / gamma),
-    rep(1, times = half + 1))
-    red = c(rep(1, times = half + 1),
-            seq(
-                from = 1,
-                to = 0,
-                length.out = half
-            ) ^ (1 / gamma))
-    blue = c(
-        seq(
-            from = 0,
-            to = 1,
-            length.out = half
-        ) ^ (1 / gamma),
-        1,
-        seq(
-            from = 1,
-            to = 0,
-            length.out = half
-        ) ^ (1 / gamma)
-    )
-    col = rgb(red, green, blue, maxColorValue = 1)
+    half <- as.integer(n / 2)
+    green <- c(seq(from = 0, to = 1, length.out = half) ^ (1 / gamma),
+               rep(1, times = half + 1))
+    red <- c(rep(1, times = half + 1),
+            seq(from = 1,to = 0, length.out = half) ^ (1 / gamma))
+    blue <- c(seq(from = 0, to = 1, length.out = half) ^ (1 / gamma),
+              1, seq(from = 1, to = 0, length.out = half) ^ (1 / gamma))
+    col <- rgb(red, green, blue, maxColorValue = 1)
     col
 }
 
@@ -190,29 +163,30 @@ redWhiteGreen <- function(n, gamma = 1) {
 #'   title("gamma = 0.5")}
 #'
 blueWhiteRed <- function(n, gamma = 1, endSaturation = 1) {
-    if (endSaturation  > 1  | endSaturation < 0)
+    if (endSaturation  > 1  | endSaturation < 0) {
         stop("'endSaturation' must be between 0 and 1.")
-    es = 1 - endSaturation
-    blueEnd = c(0.05 + es * 0.45, 0.55 + es * 0.25, 1.00)
-    redEnd = c(1.0, 0.2 + es * 0.6, 0.6 * es)
-    middle = c(1, 1, 1)
-
-    half = as.integer(n / 2)
-    if (n %% 2 == 0) {
-        index1 = c(1:half)
-        index2 = c(1:half) + half
-        frac1 = ((index1 - 1) / (half - 1)) ^ (1 / gamma)
-        frac2 = rev(frac1)
-    } else {
-        index1 = c(1:(half + 1))
-        index2 = c(1:half) + half + 1
-        frac1 = (c(0:half) / half) ^ (1 / gamma)
-        frac2 = rev((c(1:half) / half) ^ (1 / gamma))
     }
-    cols = matrix(0, n, 3)
+    es <- 1 - endSaturation
+    blueEnd <- c(0.05 + es * 0.45, 0.55 + es * 0.25, 1.00)
+    redEnd <- c(1.0, 0.2 + es * 0.6, 0.6 * es)
+    middle <- c(1, 1, 1)
+
+    half <- as.integer(n / 2)
+    if (n %% 2 == 0) {
+        index1 <- c(1:half)
+        index2 <- c(1:half) + half
+        frac1 <- ((index1 - 1) / (half - 1)) ^ (1 / gamma)
+        frac2 <- rev(frac1)
+    } else {
+        index1 <- c(1:(half + 1))
+        index2 <- c(1:half) + half + 1
+        frac1 <- (c(0:half) / half) ^ (1 / gamma)
+        frac2 <- rev((c(1:half) / half) ^ (1 / gamma))
+    }
+    cols <- matrix(0, n, 3)
     for (c in 1:3) {
-        cols[index1, c] = blueEnd[c] + (middle[c] - blueEnd[c]) * frac1
-        cols[index2, c] = redEnd[c] + (middle[c] - redEnd[c]) * frac2
+        cols[index1, c] <- blueEnd[c] + (middle[c] - blueEnd[c]) * frac1
+        cols[index2, c] <- redEnd[c] + (middle[c] - redEnd[c]) * frac2
     }
 
     rgb(cols[, 1], cols[, 2], cols[, 3], maxColorValue = 1)
