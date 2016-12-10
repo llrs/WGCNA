@@ -77,9 +77,40 @@ test_that("adjacency.polyReg", {
     expect_error(checkAdjMat(adj.none), "not symmetric")
 })
 
+test_that("adjacency.splineReg", {
+    m <- 50
+    x1 <- rnorm(m)
+    r <- 0.5
+    x2 <- r * x1 + sqrt(1 - r^2) * rnorm(m)
+    r <- 0.3
+    x3 <- r * (x1 - 0.5) ^ 2 + sqrt(1 - r ^ 2) * rnorm(m)
+    x4 <- rnorm(m)
+    r <- 0.3
+    x5 <- r * x4 + sqrt(1 - r ^ 2) * rnorm(m)
+    datE <- data.frame(x1, x2, x3, x4, x5)
+
+    adj.max <- adjacency.splineReg(datE, symmetrizationMethod = "max")
+    adj.mean <- adjacency.splineReg(datE, symmetrizationMethod = "mean")
+    adj.none <- adjacency.splineReg(datE, symmetrizationMethod = "none")
+
+    expect_true(all(adj.max <= 1))
+    expect_true(all(adj.max >= 0))
+
+    expect_error(checkAdjMat(adj.none), "not symmetric")
+})
+
 test_that("signumAdjacency", {
     datExpr <- matrix(rnorm(150), ncol = 5)
     corMat <- cor(datExpr)
     adj <- signumAdjacency(corMat, 0.1)
     expect_true(sum(adj == 1, adj == 0) == length(adj))
+})
+
+
+test_that("sigmoidAdjacency", {
+    datExpr <- matrix(rnorm(150), ncol = 5)
+    corMat <- cor(datExpr)
+    adj <- sigmoidAdjacency(abs(corMat), 0.1)
+    expect_equal(ncol(adj), 5L)
+    expect_equal(nrow(adj), 5L)
 })
