@@ -14,3 +14,20 @@ test_that("coClustering", {
     expect_length(ref, 10L)
     expect_true(all(ref == 1))
 })
+
+test_that("coClustering.permutationTest", {
+    set.seed(1)
+    nModules <- 5
+    nGenes <- 100
+    cl1 <- sample(c(1:nModules), nGenes, replace = TRUE)
+    cl2 <- sample(c(1:nModules), nGenes, replace = TRUE)
+    cc <- coClustering(cl1, cl2)
+    ccPerm <- coClustering.permutationTest(cl1, cl2, nPermutations = 20,
+                                           verbose = 0)
+    expect_length(ccPerm$observed, 5L)
+    expect_length(ccPerm$Z, 5L)
+    expect_length(ccPerm$permuted.mean, 5L)
+    expect_length(ccPerm$permuted.sd, 5L)
+    expect_equal(ncol(ccPerm$permuted.cc), 5L)
+    expect_equal(nrow(ccPerm$permuted.cc), 20L)
+})
