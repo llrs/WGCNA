@@ -19,7 +19,7 @@ test_that("transposeBigData", {
     expect_error(transposeBigData(x, 1))
 
     x <- matrix(1:10000, nrow = 2500, ncol = 4)
-    colnames(x) <- paste0("Y", 1:2500)
+    rownames(x) <- paste0("Y", 1:2500)
     xTranspose <- transposeBigData(x)
     expect_true(all(x[1:4, 1:4] == t(xTranspose[1:4, 1:4])))
     expect_true(all(colnames(x) == rownames(xTranspose)))

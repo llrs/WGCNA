@@ -77,9 +77,9 @@
 #' colnames(TOM1) <- rownames(TOM1) <- colnames(dat1$datExpr)
 #' tree1  = fastcluster::hclust(as.dist(1-TOM1),method="average")
 #' colorh = labels2colors(dat1$allLabels)
-#'
+#' \dontrun{
 #' plotDendroAndColors(tree1,colorh,dendroLabels=FALSE)
-#'
+#' }
 #' ## Reassign modules using the selectBranch and chooseOneHubInEachModule functions
 #'
 #' datExpr = dat1$datExpr
@@ -91,8 +91,9 @@
 #' colorh2 [selectBranch(tree1,hubs["yellow"],hubs["green"])]   = "yellow"
 #' colorh2 [selectBranch(tree1,hubs["red"],hubs["brown"])]      = "red"
 #' colorh2 [selectBranch(tree1,hubs["brown"],hubs["red"])]      = "brown"
+#' \dontrun{
 #' plotDendroAndColors(tree1,cbind(colorh,colorh2),c("Old","New"),dendroLabels=FALSE)
-#'
+#' }
 #' ## Now swap and reflect some branches, then optimize the order of the branches
 #' # and output pdf with resulting images
 #'
@@ -104,18 +105,17 @@
 #' plotDendroAndColors(tree1,colorh2,dendroLabels=FALSE,main="Swap blue/turquoise and red/brown")
 #'
 #' tree1 = reflectBranch(tree1,hubs["blue"],hubs["green"])
+#'
 #' plotDendroAndColors(tree1,colorh2,dendroLabels=FALSE,main="Reflect turquoise/blue")
 #'
 #' # (This function will take a few minutes)
 #' out = orderBranchesUsingHubGenes(tree1,datExpr,colorh2,useReflections=TRUE,iter=100)
 #' tree1 = out$geneTree
+#'
 #' plotDendroAndColors(tree1,colorh2,dendroLabels=FALSE,main="Semi-optimal branch order")
 #'
 #' out$changeLog
-#'
-#' dev.off()
 #' }
-#'
 orderBranchesUsingHubGenes <- function(hierTOM, datExpr=NULL, colorh=NULL, type="signed",
 adj=NULL, iter=NULL, useReflections=FALSE, allowNonoptimalSwaps=FALSE){
 
@@ -310,19 +310,20 @@ reflectBranch <- function (hierTOM, g1, g2, both=FALSE){
 #' # partition the screen for 3 dendrogram + module color plots
 #'
 #' layout(matrix(c(1:6), 6, 1), heights = c(0.8, 0.2, 0.8, 0.2, 0.8, 0.2))
-#'
+#' \dontrun{
 #' plotDendroAndColors(tree1,colorh2,dendroLabels=FALSE,main="Starting Dendrogram",
 #'                     setLayout = FALSE)
-#'
+#' }
 #' tree1 = swapTwoBranches(tree1,hubs["red"],hubs["turquoise"])
+#' \dontrun{
 #' plotDendroAndColors(tree1,colorh2,dendroLabels=FALSE,main="Swap blue/turquoise and red/brown",
 #'                     setLayout = FALSE)
-#'
+#'}
 #' tree1 = reflectBranch(tree1,hubs["blue"],hubs["green"])
+#' \dontrun{
 #' plotDendroAndColors(tree1,colorh2,dendroLabels=FALSE,main="Reflect turquoise/blue",
 #'                     setLayout = FALSE)
-#'
-#'
+#' }
 swapTwoBranches <- function (hierTOM, g1, g2){
 ## This function re-arranges two branches in a heirarchical clustering tree
 ##  at the nearest branch point of two given genes (or indices)
