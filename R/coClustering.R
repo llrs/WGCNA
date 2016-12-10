@@ -1,4 +1,4 @@
-# coClustering and a permutation test for it
+# coClustering ####
 
 #' Co-clustering measure of cluster preservation between two clusterings
 #'
@@ -165,6 +165,101 @@ coClustering.permutationTest = function(clusters.ref, clusters.test,
        permuted.cc = permValues)
 }
 
+# randIndex ####
+#  Rand index calculation
+# this function is used for computing the Rand index below...
+.choosenew <- function(n, k) {
+    n <- c(n)
+    out1 <- rep(0, length(n))
+    for (i in c(1:length(n))) {
+        if (n[i] < k) {
+            out1[i] <- 0
+        }
+        else {
+            out1[i] <- choose(n[i], k)
+        }
+    }
+    out1
+}
 
+#' Rand index of two partitions
+#'
+#' Computes the Rand index, a measure of the similarity between two
+#' clusterings.
+#'
+#'
+#' @param tab a matrix giving the cross-tabulation table of two clusterings.
+#' @param adjust logical: should the "adjusted" version be computed?
+#' @return the Rand index of the input table.
+#' @author Steve Horvath
+#' @references W. M. Rand (1971). "Objective criteria for the evaluation of
+#' clustering methods". Journal of the American Statistical Association 66:
+#' 846-850
+#' @keywords misc
+randIndex <- function(tab, adjust = TRUE) {
+    a <- 0
+    b <- 0
+    c <- 0
+    d <- 0
+    nn <- 0
+    m <- nrow(tab)
+    n <- ncol(tab)
+    for (i in 1:m) {
+        c <- 0
+        for (j in 1:n) {
+            a <- a + .choosenew(tab[i, j], 2)
+            nj <- sum(tab[, j])
+            c <- c + .choosenew(nj, 2)
+        }
+        ni <- sum(tab[i,])
+        b <- b + .choosenew(ni, 2)
+        nn <- nn + ni
+    }
+    if (adjust) {
+        d <- .choosenew(nn, 2)
+        adrand <- (a - (b * c) / d) / (0.5 * (b + c) - (b * c) / d)
+        adrand
+    } else {
+        b <- b - a
+        c <- c - a
+        d <- .choosenew(nn, 2) - a - b - c
+        rand <- (a + d) / (a + b + c + d)
+        rand
+    }
+}
 
-
+# clusterCoef ####
+#' Clustering coefficient calculation
+#'
+#' This function calculates the clustering coefficients for all nodes in the
+#' network given by the input adjacency matrix.
+#'
+#'
+#' @param adjMat adjacency matrix
+#' @return A vector of clustering coefficients for each node.
+#' @author Steve Horvath
+#' @keywords misc
+clusterCoef <- function(adjMat) {
+    checkAdjMat(adjMat)
+    diag(adjMat) <- 0
+    nNodes <- ncol(adjMat)
+    computeLinksInNeighbors <- function(x, imatrix) {
+        x %*% imatrix %*% x
+    }
+    nolinksNeighbors <- c(rep(-666, nNodes))
+    total.edge <- c(rep(-666, nNodes))
+    maxh1 <- max(as.dist(adjMat))
+    minh1 <- min(as.dist(adjMat))
+    if (maxh1 > 1 | minh1 < 0) {
+        stop("The adjacency matrix contains entries that are larger than 1 or
+                smaller than 0: max  = ", maxh1, ", min  = ", minh1)
+    }
+    nolinksNeighbors <- apply(adjMat, 1, computeLinksInNeighbors,
+                              imatrix = adjMat)
+    plainsum  <- apply(adjMat, 1, sum)
+    squaresum <- apply(adjMat ^ 2, 1, sum)
+    total.edge <- plainsum ^ 2 - squaresum
+    CChelp <- rep(-666, nNodes)
+    CChelp <- ifelse(total.edge == 0, 0, nolinksNeighbors / total.edge)
+    CChelp
+} # end of function
