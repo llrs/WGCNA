@@ -10,45 +10,8 @@
 #' @author Steve Horvath
 #' @keywords utilities
 collectGarbage <- function() {
-    while (gc()[2, 4]  != gc()[2, 4] | gc()[1, 4]  != gc()[1, 4]) {
-    }
+    while (gc()[2, 4]  != gc()[2, 4] | gc()[1, 4]  != gc()[1, 4]) {}
 }
-
-# clusterCoef ####
-#' Clustering coefficient calculation
-#'
-#' This function calculates the clustering coefficients for all nodes in the
-#' network given by the input adjacency matrix.
-#'
-#'
-#' @param adjMat adjacency matrix
-#' @return A vector of clustering coefficients for each node.
-#' @author Steve Horvath
-#' @keywords misc
-clusterCoef <- function(adjMat) {
-    checkAdjMat(adjMat)
-    diag(adjMat) = 0
-    nNodes = dim(adjMat)[[1]]
-    computeLinksInNeighbors <- function(x, imatrix) {
-        x %*% imatrix %*% x
-    }
-    nolinksNeighbors <- c(rep(-666, nNodes))
-    total.edge <- c(rep(-666, nNodes))
-    maxh1 = max(as.dist(adjMat))
-    minh1 = min(as.dist(adjMat))
-    if (maxh1 > 1 | minh1 < 0) {
-        stop("The adjacency matrix contains entries that are larger than 1 or
-                smaller than 0: max  = ", maxh1, ", min  = ", minh1)
-    }
-    nolinksNeighbors <- apply(adjMat, 1, computeLinksInNeighbors,
-                              imatrix = adjMat)
-    plainsum  <- apply(adjMat, 1, sum)
-    squaresum <- apply(adjMat ^ 2, 1, sum)
-    total.edge = plainsum ^ 2 - squaresum
-    CChelp = rep(-666, nNodes)
-    CChelp = ifelse(total.edge == 0, 0, nolinksNeighbors / total.edge)
-    CChelp
-} # end of function
 
 # alignExpr ####
 #' Align expression data with given vector
@@ -69,84 +32,15 @@ clusterCoef <- function(adjMat) {
 #' @author Steve Horvath and Peter Langfelder
 #' @keywords misc
 alignExpr <- function(datExpr, y = NULL) {
-    if (!is.null(y) & dim(as.matrix(datExpr))[[1]]  != length(y))
+    if (!is.null(y) & nrow(as.matrix(datExpr)) != length(y)) {
         stop("Incompatible number of samples in 'datExpr' and 'y'.")
-    if (is.null(y))
+    }
+    if (is.null(y)){
         y <- as.numeric(datExpr[, 1])
+    }
     sign1 <- sign(as.numeric(cor(y, datExpr, use = "p")))
     as.data.frame(scale(t(t(datExpr) * sign1)))
 } # end of function alignExpr
-
-
-# this function can be used to rank the values in x. Ties are broken by the
-# method first.
-# This function does not appear to be used anywhere in these functions.
-# rank1 <- function(x){
-#    rank(x, ties.method = "first")
-#}
-
-# randIndex ####
-#  Rand index calculation
-# this function is used for computing the Rand index below...
-#
-.choosenew <- function(n, k) {
-    n <- c(n)
-    out1 <- rep(0, length(n))
-    for (i in c(1:length(n))) {
-        if (n[i] < k) {
-            out1[i] <- 0
-        }
-        else {
-            out1[i] <- choose(n[i], k)
-        }
-    }
-    out1
-}
-#' Rand index of two partitions
-#'
-#' Computes the Rand index, a measure of the similarity between two
-#' clusterings.
-#'
-#'
-#' @param tab a matrix giving the cross-tabulation table of two clusterings.
-#' @param adjust logical: should the "adjusted" version be computed?
-#' @return the Rand index of the input table.
-#' @author Steve Horvath
-#' @references W. M. Rand (1971). "Objective criteria for the evaluation of
-#' clustering methods". Journal of the American Statistical Association 66:
-#' 846-850
-#' @keywords misc
-randIndex <- function(tab, adjust = TRUE) {
-    a <- 0
-    b <- 0
-    c <- 0
-    d <- 0
-    nn <- 0
-    m <- nrow(tab)
-    n <- ncol(tab)
-    for (i in 1:m) {
-        c <- 0
-        for (j in 1:n) {
-            a <- a + .choosenew(tab[i, j], 2)
-            nj <- sum(tab[, j])
-            c <- c + .choosenew(nj, 2)
-        }
-        ni <- sum(tab[i,])
-        b <- b + .choosenew(ni, 2)
-        nn <- nn + ni
-    }
-    if (adjust) {
-        d <- .choosenew(nn, 2)
-        adrand <- (a - (b * c) / d) / (0.5 * (b + c) - (b * c) / d)
-        adrand
-    } else {
-        b <- b - a
-        c <- c - a
-        d <- .choosenew(nn, 2) - a - b - c
-        rand <- (a + d) / (a + b + c + d)
-        rand
-    }
-}
 
 # vectorizeMatrix ####
 #' Turn a matrix into a vector of non-redundant components
@@ -163,22 +57,25 @@ randIndex <- function(tab, adjust = TRUE) {
 #' @author Steve Horvath
 #' @keywords misc
 vectorizeMatrix <- function(M, diag = FALSE) {
-    if (is.null(dim(M)))
-        stop("The input of the vectorize function is not a matrix or data frame.")
-    if (length(dim(M)) != 2)
-        stop("The input of the vectorize function is not a matrix or data frame.")
+    if (is.null(dim(M)) | length(dim(M)) != 2) {
+        stop("The input of the vectorize function is not a matrix or data ",
+             "frame.")
+    }
+
     # now we check whether the matrix is symmetrical
-    if (dim(M)[[1]] == dim(M)[[2]]) {
-        M = as.matrix(M)
-        Mtranspose = t(M)
-        abs.difference = max(abs(M - Mtranspose), na.rm = TRUE)
+    if (ncol(M) == nrow(M)) {
+        M <- as.matrix(M)
+        Mtranspose <- t(M)
+        abs.difference <- max(abs(M - Mtranspose), na.rm = TRUE)
         if (abs.difference < 10 ^ (-14)) {
-            out = M[upper.tri(M, diag)]
+            out <- M[upper.tri(M, diag)]
         }
-        else
-            out = as.vector(M)
-    } else
-        out = as.vector(M)
+        else {
+            out <- as.vector(M)
+        }
+    } else {
+        out <- as.vector(M)
+    }
     out
 } # end
 
@@ -205,14 +102,14 @@ vectorizeMatrix <- function(M, diag = FALSE) {
 #' @keywords misc
 metaZfunction <- function(datZ, columnweights = NULL) {
     if (!is.null(columnweights))  {
-        datZ = t(t(datZ) *  columnweights)
+        datZ <- t(t(datZ) *  columnweights)
     }
-    datZpresent = !is.na(datZ) + 0.0
+    datZpresent <- !is.na(datZ) + 0.0
     if (!is.null(columnweights))  {
-        datZpresent = t(t(datZpresent) *  columnweights)
+        datZpresent <- t(t(datZpresent) *  columnweights)
     }
-    sumZ = as.numeric(rowSums(datZ, na.rm = TRUE))
-    variance = as.numeric(rowSums(datZpresent ^ 2))
+    sumZ <- as.numeric(rowSums(datZ, na.rm = TRUE))
+    variance <- as.numeric(rowSums(datZpresent ^ 2))
     sumZ / sqrt(variance)
 }
 
@@ -234,8 +131,9 @@ metaZfunction <- function(datZ, columnweights = NULL) {
 #' prepComma("")
 #'
 prepComma <- function(s) {
-    if (s == "")
-        return (s)
+    if (s == "") {
+        return(s)
+    }
     paste(", ", s)
 }
 
@@ -257,11 +155,11 @@ prepComma <- function(s) {
 #' prependZeros(1:10, 4)
 #'
 prependZeros <- function(x, width = max(nchar(x))) {
-    lengths = nchar(x)
+    lengths <- nchar(x)
     if (width < max(lengths))
         stop("Some entries of 'x' are too long.")
-    out = as.character(x)
-    n = length(x)
+    out <- as.character(x)
+    n <- length(x)
     for (i in 1:n) {
         if (lengths[i] < width) {
             out[i] <- paste0(paste(rep("0", width - lengths[i]), collapse = ""),
