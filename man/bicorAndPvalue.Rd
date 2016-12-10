@@ -45,13 +45,13 @@ input.
 
 # generate random data with non-zero correlation
 set.seed(1)
-a = rnorm(100)
-b = rnorm(100) + a
-x = cbind(a, b)
+a <- rnorm(100)
+b <- rnorm(100) + a
+x <- cbind(a, b)
 # Call the function and display all results
 bicorAndPvalue(x)
 # Set some components to NA
-x[c(1:4), 1] = NA
+x[c(1:4), 1] <- NA
 corAndPvalue(x)
 # Note that changed number of observations.
 

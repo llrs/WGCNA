@@ -6,10 +6,7 @@
 \usage{
 kMEcomparisonScatterplot(datExpr1, datExpr2, colorh, inA = NULL, inB = NULL,
   MEsA = NULL, MEsB = NULL, nameA = "A", nameB = "B", plotAll = FALSE,
-  noGrey = TRUE, maxPlot = 1000, pch = 19, fileName = ifelse(plotAll,
-  paste0("kME_correlations_between_", nameA, "_and_", nameB, "_all.pdf"),
-  paste0("kME_correlations_between_", nameA, "_and_", nameB, "_inMod.pdf")),
-  ...)
+  noGrey = TRUE, maxPlot = 1000, pch = 19, fileName = NULL, ...)
 }
 \arguments{
 \item{datExpr1}{The first expression matrix (samples=rows, genes=columns).
@@ -79,19 +76,24 @@ The function "pdf", which can be found in the grDevices library, is
 required to run this function.
 }
 \examples{
+# Example output file "kME_correlations_between_A_and_B_inMod.pdf"
+# using simulated data.
 
-# Example output file ("kME_correlations_between_A_and_B_inMod.pdf") using simulated data.
-
-set.seed = 100
-ME=matrix(0,50,5)
-for (i in 1:5) ME[,i]=sample(1:100,50)
-simData1 = simulateDatExpr5Modules(MEturquoise=ME[,1],MEblue=ME[,2],
-                          MEbrown=ME[,3],MEyellow=ME[,4], MEgreen=ME[,5])
-simData2 = simulateDatExpr5Modules(MEturquoise=ME[,1],MEblue=ME[,2],
-                          MEbrown=ME[,3],MEyellow=ME[,4], MEgreen=ME[,5])
-kMEcomparisonScatterplot(simData1$datExpr,simData2$datExpr,simData1$truemodule)
-
-
+set.seed <- 100
+ME <- matrix(0, 50, 5)
+for (i in 1:5) {
+    ME[, i] <- sample(1:100, 50)
+}
+simData1 <- simulateDatExpr5Modules(MEturquoise = ME[, 1], MEblue = ME[, 2],
+                          MEbrown = ME[,3], MEyellow = ME[, 4],
+                          MEgreen = ME[, 5])
+simData2 <- simulateDatExpr5Modules(MEturquoise = ME[, 1], MEblue = ME[, 2],
+                          MEbrown = ME[, 3], MEyellow = ME[, 4],
+                          MEgreen = ME[, 5])
+\dontrun{
+kMEcomparisonScatterplot(simData1$datExpr, simData2$datExpr,
+                         simData1$truemodule, fileName = "../out.pdf")
+}
 }
 \author{
 Jeremy Miller

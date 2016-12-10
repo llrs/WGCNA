@@ -40,24 +40,27 @@ http://www.genetics.ucla.edu/labs/horvath/CoexpressionNetwork/Rpackages/WGCNA/Tu
 
 # Example consensus network using two simulated data sets
 
-set.seed    = 100
-MEturquoise = sample(1:100,50)
-MEblue      = sample(1:100,50)
-MEbrown     = sample(1:100,50)
-MEyellow    = sample(1:100,50) 
-MEgreen     = sample(1:100,50)
+set.seed <- 100
+MEturquoise <- sample(1:100, 50)
+MEblue <- sample(1:100, 50)
+MEbrown <- sample(1:100, 50)
+MEyellow <- sample(1:100, 50)
+MEgreen <- sample(1:100, 50)
 
-ME   = data.frame(MEturquoise, MEblue, MEbrown, MEyellow, MEgreen)
-dat1 = simulateDatExpr(ME,300,c(0.2,  0.10,  0.10,  0.10,  0.10,  0.2), signed=TRUE)
-dat2 = simulateDatExpr(ME,300,c(0.18, 0.11, 0.11, 0.09, 0.11, 0.23),signed=TRUE)
-multiExpr = list(S1=list(data=dat1$datExpr),S2=list(data=dat2$datExpr))
-softPower=8
+ME <- data.frame(MEturquoise, MEblue, MEbrown, MEyellow, MEgreen)
+dat1 <- simulateDatExpr(ME,300,c(0.2,  0.10,  0.10,  0.10,  0.10,  0.2),
+  signed=TRUE)
+dat2 <- simulateDatExpr(ME, 300, c(0.18, 0.11, 0.11, 0.09, 0.11, 0.23),
+  signed = TRUE)
+multiExpr <- list(S1=list(data=dat1$datExpr), S2=list(data=dat2$datExpr))
+softPower <- 8
 
-consensusNetwork = consensusDissTOMandTree(multiExpr, softPower)
-plotDendroAndColors(consensusNetwork$consTree, cbind(labels2colors(dat1$allLabels), 
-     labels2colors(dat2$allLabels)),c("S1","S2"), dendroLabels=FALSE)
-
-
+consensusNetwork <- consensusDissTOMandTree(multiExpr, softPower)
+\dontrun{
+plotDendroAndColors(consensusNetwork$consTree,
+     cbind(labels2colors(dat1$allLabels),
+     labels2colors(dat2$allLabels)), c("S1","S2"), dendroLabels=FALSE)
+}
 }
 \author{
 Peter Langfelder, Steve Horvath, Jeremy Miller
