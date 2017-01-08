@@ -8,8 +8,7 @@ multiData.eigengeneSignificance(multiData, multiTrait, moduleLabels,
   multiEigengenes = NULL, useModules = NULL,
   corAndPvalueFnc = corAndPvalue, corOptions = list(),
   corComponent = "cor", getQvalues = FALSE, setNames = NULL,
-  excludeGrey = TRUE, greyLabel = ifelse(is.numeric(moduleLabels), 0,
-  "grey"))
+  excludeGrey = TRUE, greyLabel = "grey")
 }
 \arguments{
 \item{multiData}{Expression data (or other data) in multi-set format (see

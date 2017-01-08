@@ -10,11 +10,11 @@ plotCor(x, new = FALSE, nrgcols = 50, labels = FALSE, labcols = 1,
 \arguments{
 \item{x}{a matrix of numerical values.}
 
-\item{new}{If \code{new=F}, \code{x} must already be a correlation matrix.
-If \code{new=T}, the correlation matrix for the columns of \code{x} is
+\item{new}{If \code{new = F}, \code{x} must already be a correlation matrix.
+If \code{new = T}, the correlation matrix for the columns of \code{x} is
 computed and displayed in the image.}
 
-\item{nrgcols}{the number of colors (>= 1) to be used in the red and green
+\item{nrgcols}{the number of colors (> =  1) to be used in the red and green
 palette.}
 
 \item{labels}{vector of character strings to be placed at the tickpoints,
@@ -29,7 +29,7 @@ which case a color is specified for the label of each column of \code{x}.}
 
 \item{\dots}{graphical parameters may also be supplied as arguments to the
 function (see \code{\link{par}}). For comparison purposes, it is good to set
-\code{zlim=c(-1, 1)}.}
+\code{zlim = c(-1, 1)}.}
 }
 \description{
 This function produces a red and green color image of a correlation matrix

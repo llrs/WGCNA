@@ -7,7 +7,7 @@
 rgcolors.func(n = 50)
 }
 \arguments{
-\item{n}{the number of colors (>= 1) to be used in the red and green
+\item{n}{the number of colors (> =  1) to be used in the red and green
 palette.}
 }
 \value{
@@ -25,7 +25,7 @@ graphics functions or in \code{\link{par}}.
 }
 \examples{
 
-rgcolors.func(n=5)
+rgcolors.func(n = 5)
 ## The following vector is returned:
 ## "#00FF00" "#40BF00" "#808000" "#BF4000" "#FF0000"
 

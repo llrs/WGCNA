@@ -5,11 +5,12 @@
 \title{Merge close modules in gene expression data}
 \usage{
 mergeCloseModules(exprData, colors, MEs = NULL, useSets = NULL,
-  impute = TRUE, checkDataFormat = TRUE, unassdColor = if
-  (is.numeric(colors)) 0 else "grey", corFnc = cor, corOptions = list(use =
-  "p"), useAbs = FALSE, equalizeQuantiles = FALSE,
-  quantileSummary = "mean", consensusQuantile = 0, cutHeight = 0.2,
-  iterate = TRUE, relabel = FALSE, colorSeq = NULL, getNewMEs = TRUE,
+  impute = TRUE, checkDataFormat = TRUE,
+  unassdColor = ifelse(is.numeric(colors), 0, "grey"), corFnc = cor,
+  corOptions = list(use <- "p"), useAbs = FALSE,
+  equalizeQuantiles = FALSE, quantileSummary = "mean",
+  consensusQuantile = 0, cutHeight = 0.2, iterate = TRUE,
+  relabel = FALSE, colorSeq = NULL, getNewMEs = TRUE,
   getNewUnassdME = TRUE, trapErrors = FALSE, verbose = 1, indent = 0)
 }
 \arguments{

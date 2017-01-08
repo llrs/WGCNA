@@ -16,6 +16,10 @@ Standard error of the mean of x.
 Returns the standard error of the mean of a given vector. Missing values are
 ignored.
 }
+\examples{
+x <- c(0.2, 0.5, 0.8)
+stdErr(x)
+}
 \author{
 Steve Horvath
 }

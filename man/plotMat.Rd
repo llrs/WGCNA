@@ -10,7 +10,7 @@ plotMat(x, nrgcols = 50, rlabels = FALSE, clabels = FALSE, rcols = 1,
 \arguments{
 \item{x}{a matrix of numbers.}
 
-\item{nrgcols}{the number of colors (>= 1) to be used in the red and green
+\item{nrgcols}{the number of colors (> =  1) to be used in the red and green
 palette.}
 
 \item{rlabels}{vector of character strings to be placed at the row
@@ -32,7 +32,7 @@ which case a color is specified for the label of each column of \code{x}.}
 \item{title}{character string, overall title for the plot.}
 
 \item{\dots}{graphical parameters may also be supplied as arguments to the
-function (see \code{\link{par}}).  E.g. \code{zlim=c(-3, 3)}}
+function (see \code{\link{par}}).  E.g. \code{zlim = c(-3, 3)}}
 }
 \description{
 This function produces a red and green color image of a data matrix using an

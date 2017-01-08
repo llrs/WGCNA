@@ -41,60 +41,51 @@ outputs indices for all genes in the branch containing the first gene, up to
 the nearest branch point of the dendrogram.
 }
 \examples{
-
 ## Example: first simulate some data.
-
-MEturquoise = sample(1:100,50)
-MEblue      = c(MEturquoise[1:25], sample(1:100,25))
-MEbrown     = sample(1:100,50)
-MEyellow    = sample(1:100,50)
-MEgreen     = c(MEyellow[1:30], sample(1:100,20))
-MEred	    = c(MEbrown [1:20], sample(1:100,30))
-ME     = data.frame(MEturquoise, MEblue, MEbrown, MEyellow, MEgreen, MEred)
-dat1   = simulateDatExpr(ME,400 ,c(0.16,0.12,0.11,0.10,0.10,0.09,0.15),
-                         signed=TRUE)
-TOM1   = TOMsimilarityFromExpr(dat1$datExpr, networkType="signed")
+MEturquoise <- sample(1:100, 50)
+MEblue <- c(MEturquoise[1:25], sample(1:100, 25))
+MEbrown <- sample(1:100,50)
+MEyellow <- sample(1:100,50)
+MEgreen <- c(MEyellow[1:30], sample(1:100, 20))
+MEred <- c(MEbrown [1:20], sample(1:100, 30))
+ME  <- data.frame(MEturquoise, MEblue, MEbrown, MEyellow, MEgreen, MEred)
+dat1 <- simulateDatExpr(ME, 400, c(0.16, 0.12, 0.11, 0.10, 0.10, 0.09, 0.15),
+                         signed = TRUE)
+TOM1 <- TOMsimilarityFromExpr(dat1$datExpr, networkType = "signed")
 colnames(TOM1) <- rownames(TOM1) <- colnames(dat1$datExpr)
-tree1  = fastcluster::hclust(as.dist(1-TOM1),method="average")
-colorh = labels2colors(dat1$allLabels)
-
+tree1 <- fastcluster::hclust(as.dist(1-TOM1), method="average")
+colorh <- labels2colors(dat1$allLabels)
+\dontrun{
 plotDendroAndColors(tree1,colorh,dendroLabels=FALSE)
-
 ## Reassign modules using the selectBranch and chooseOneHubInEachModule functions
 
-datExpr = dat1$datExpr
-hubs    = chooseOneHubInEachModule(datExpr, colorh)
-colorh2 = rep("grey", length(colorh))
-colorh2 [selectBranch(tree1,hubs["blue"],hubs["turquoise"])] = "blue"
-colorh2 [selectBranch(tree1,hubs["turquoise"],hubs["blue"])] = "turquoise"
-colorh2 [selectBranch(tree1,hubs["green"],hubs["yellow"])]   = "green"
-colorh2 [selectBranch(tree1,hubs["yellow"],hubs["green"])]   = "yellow"
-colorh2 [selectBranch(tree1,hubs["red"],hubs["brown"])]      = "red"
-colorh2 [selectBranch(tree1,hubs["brown"],hubs["red"])]      = "brown"
-plotDendroAndColors(tree1,cbind(colorh,colorh2),c("Old","New"),dendroLabels=FALSE)
-
+datExpr <- dat1$datExpr
+hubs <- chooseOneHubInEachModule(datExpr, colorh)
+colorh2 <- rep("grey", length(colorh))
+colorh2[selectBranch(tree1, hubs["blue"], hubs["turquoise"])] <- "blue"
+colorh2[selectBranch(tree1, hubs["turquoise"], hubs["blue"])] <- "turquoise"
+colorh2[selectBranch(tree1, hubs["green"], hubs["yellow"])] <- "green"
+colorh2[selectBranch(tree1, hubs["yellow"], hubs["green"])] <- "yellow"
+colorh2[selectBranch(tree1, hubs["red"], hubs["brown"])] <- "red"
+colorh2[selectBranch(tree1, hubs["brown"], hubs["red"])] <- "brown"
+plotDendroAndColors(tree1, cbind(colorh, colorh2), c("Old", "New"),
+                     dendroLabels = FALSE)
 ## Now swap and reflect some branches, then optimize the order of the branches
 
 # Open a suitably sized graphics window
-
 sizeGrWindow(12,9)
-
 # partition the screen for 3 dendrogram + module color plots
-
 layout(matrix(c(1:6), 6, 1), heights = c(0.8, 0.2, 0.8, 0.2, 0.8, 0.2))
-
 plotDendroAndColors(tree1,colorh2,dendroLabels=FALSE,main="Starting Dendrogram",
                     setLayout = FALSE)
-
-tree1 = swapTwoBranches(tree1,hubs["red"],hubs["turquoise"])
-plotDendroAndColors(tree1,colorh2,dendroLabels=FALSE,main="Swap blue/turquoise and red/brown",
+tree1 <- swapTwoBranches(tree1, hubs["red"], hubs["turquoise"])
+plotDendroAndColors(tree1,colorh2,dendroLabels=FALSE,
+                    main="Swap blue/turquoise and red/brown",
                     setLayout = FALSE)
-
-tree1 = reflectBranch(tree1,hubs["blue"],hubs["green"])
-plotDendroAndColors(tree1,colorh2,dendroLabels=FALSE,main="Reflect turquoise/blue",
-                    setLayout = FALSE)
-
-
+tree1 <- reflectBranch(tree1, hubs["blue"], hubs["green"])
+plotDendroAndColors(tree1, colorh2, dendroLabels = FALSE,
+                    main = "Reflect turquoise/blue", setLayout = FALSE)
+}
 }
 \author{
 Jeremy Miller

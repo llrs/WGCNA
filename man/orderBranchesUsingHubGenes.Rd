@@ -73,60 +73,60 @@ the speed of the computer running R.  Please address any problems or
 suggestions to jeremyinla@gmail.com.
 }
 \examples{
-
 ## Example: first simulate some data.
-
-MEturquoise = sample(1:100,50)
-MEblue      = c(MEturquoise[1:25], sample(1:100,25))
-MEbrown     = sample(1:100,50)
-MEyellow    = sample(1:100,50)
-MEgreen     = c(MEyellow[1:30], sample(1:100,20))
-MEred	    = c(MEbrown [1:20], sample(1:100,30))
-ME     = data.frame(MEturquoise, MEblue, MEbrown, MEyellow, MEgreen, MEred)
-dat1   = simulateDatExpr(ME,400,c(0.16,0.12,0.11,0.10,0.10,0.10,0.1), signed=TRUE)
-TOM1   = TOMsimilarityFromExpr(dat1$datExpr, networkType="signed")
+MEturquoise <- sample(1:100, 50)
+MEblue <- c(MEturquoise[1:25], sample(1:100, 25))
+MEbrown <- sample(1:100, 50)
+MEyellow <- sample(1:100, 50)
+MEgreen <- c(MEyellow[1:30], sample(1:100,20))
+MEred <- c(MEbrown [1:20], sample(1:100, 30))
+ME <- data.frame(MEturquoise, MEblue, MEbrown, MEyellow, MEgreen, MEred)
+dat1 <- simulateDatExpr(ME, 400, c(0.16, 0.12, 0.11, 0.10, 0.10, 0.10, 0.1),
+                        signed = TRUE)
+TOM1 <- TOMsimilarityFromExpr(dat1$datExpr, networkType ="signed")
 colnames(TOM1) <- rownames(TOM1) <- colnames(dat1$datExpr)
-tree1  = fastcluster::hclust(as.dist(1-TOM1),method="average")
-colorh = labels2colors(dat1$allLabels)
-
-plotDendroAndColors(tree1,colorh,dendroLabels=FALSE)
-
-## Reassign modules using the selectBranch and chooseOneHubInEachModule functions
-
-datExpr = dat1$datExpr
-hubs    = chooseOneHubInEachModule(datExpr, colorh)
-colorh2 = rep("grey", length(colorh))
-colorh2 [selectBranch(tree1,hubs["blue"],hubs["turquoise"])] = "blue"
-colorh2 [selectBranch(tree1,hubs["turquoise"],hubs["blue"])] = "turquoise"
-colorh2 [selectBranch(tree1,hubs["green"],hubs["yellow"])]   = "green"
-colorh2 [selectBranch(tree1,hubs["yellow"],hubs["green"])]   = "yellow"
-colorh2 [selectBranch(tree1,hubs["red"],hubs["brown"])]      = "red"
-colorh2 [selectBranch(tree1,hubs["brown"],hubs["red"])]      = "brown"
-plotDendroAndColors(tree1,cbind(colorh,colorh2),c("Old","New"),dendroLabels=FALSE)
-
-## Now swap and reflect some branches, then optimize the order of the branches
-# and output pdf with resulting images
-
+tree1 <- fastcluster::hclust(as.dist(1-TOM1), method = "average")
+colorh <- labels2colors(dat1$allLabels)
 \dontrun{
-pdf("DENDROGRAM_PLOTS.pdf",width=10,height=5)
-plotDendroAndColors(tree1,colorh2,dendroLabels=FALSE,main="Starting Dendrogram")
-
-tree1 = swapTwoBranches(tree1,hubs["red"],hubs["turquoise"])
-plotDendroAndColors(tree1,colorh2,dendroLabels=FALSE,main="Swap blue/turquoise and red/brown")
-
-tree1 = reflectBranch(tree1,hubs["blue"],hubs["green"])
-plotDendroAndColors(tree1,colorh2,dendroLabels=FALSE,main="Reflect turquoise/blue")
-
-# (This function will take a few minutes)
-out = orderBranchesUsingHubGenes(tree1,datExpr,colorh2,useReflections=TRUE,iter=100)
-tree1 = out$geneTree
-plotDendroAndColors(tree1,colorh2,dendroLabels=FALSE,main="Semi-optimal branch order")
-
-out$changeLog
-
-dev.off()
+plotDendroAndColors(tree1, colorh, dendroLabels = FALSE)
 }
+## Reassign modules using the selectBranch and chooseOneHubInEachModule
+##functions
+datExpr <- dat1$datExpr
+hubs <- chooseOneHubInEachModule(datExpr, colorh)
+colorh2 <- rep("grey", length(colorh))
+colorh2[selectBranch(tree1, hubs["blue"], hubs["turquoise"])] <- "blue"
+colorh2[selectBranch(tree1, hubs["turquoise"], hubs["blue"])] <- "turquoise"
+colorh2[selectBranch(tree1, hubs["green"], hubs["yellow"])] <- "green"
+colorh2[selectBranch(tree1, hubs["yellow"], hubs["green"])] <- "yellow"
+colorh2[selectBranch(tree1, hubs["red"], hubs["brown"])] <- "red"
+colorh2[selectBranch(tree1, hubs["brown"], hubs["red"])] <- "brown"
+\dontrun{
+plotDendroAndColors(tree1, cbind(colorh, colorh2), c("Old", "New"),
+                    dendroLabels = FALSE)
+}
+## Now swap and reflect some branches, then optimize the order of the
+## branches and output pdf with resulting images
+\dontrun{
+pdf("DENDROGRAM_PLOTS.pdf", width = 10, height = 5)
+plotDendroAndColors(tree1, colorh2, dendroLabels = FALSE,
+                    main = "Starting Dendrogram")
 
+tree1 <- swapTwoBranches(tree1, hubs["red"], hubs["turquoise"])
+plotDendroAndColors(tree1, colorh2, dendroLabels = FALSE,
+                    main = "Swap blue/turquoise and red/brown")
+
+tree1 <- reflectBranch(tree1, hubs["blue"], hubs["green"])
+plotDendroAndColors(tree1, colorh2, dendroLabels = FALSE,
+                    main = "Reflect turquoise/blue")
+# (This function will take a few minutes)
+out <- orderBranchesUsingHubGenes(tree1, datExpr, colorh2,
+                                  useReflections = TRUE, iter = 100)
+tree1 <- out$geneTree
+plotDendroAndColors(tree1, colorh2, dendroLabels = FALSE,
+                    main = "Semi-optimal branch order")
+out$changeLog
+}
 }
 \author{
 Jeremy Miller
