@@ -1484,15 +1484,9 @@ signedKME <- function(datExpr,
 #' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
 #' @seealso \code{\link{moduleEigengenes}}
 #' @keywords misc
-multiSetMEs <- function(exprData,
-                        colors,
-                        universalColors = NULL,
-                        useSets = NULL,
-                        useGenes = NULL,
-                        impute = TRUE,
-                        nPC = 1,
-                        align = "along average",
-                        excludeGrey = FALSE,
+multiSetMEs <- function(exprData, colors, universalColors = NULL,
+                        useSets = NULL, useGenes = NULL, impute = TRUE,
+                        nPC = 1, align = "along average", excludeGrey = FALSE,
                         grey = if (is.null(universalColors)) {
                             if (is.numeric(colors)) {0} else{"grey"}
                         } else {

@@ -293,9 +293,7 @@ reflectBranch <- function (hierTOM, g1, g2, both = FALSE) {
 #' @author Jeremy Miller
 #' @keywords misc
 #' @examples
-#'
 #' ## Example: first simulate some data.
-#'
 #' MEturquoise <- sample(1:100, 50)
 #' MEblue <- c(MEturquoise[1:25], sample(1:100, 25))
 #' MEbrown <- sample(1:100,50)
@@ -330,7 +328,6 @@ reflectBranch <- function (hierTOM, g1, g2, both = FALSE) {
 #' ## Now swap and reflect some branches, then optimize the order of the branches
 #'
 #' # Open a suitably sized graphics window
-#' \dontrun{
 #' sizeGrWindow(12,9)
 #' # partition the screen for 3 dendrogram + module color plots
 #' layout(matrix(c(1:6), 6, 1), heights = c(0.8, 0.2, 0.8, 0.2, 0.8, 0.2))
@@ -338,13 +335,11 @@ reflectBranch <- function (hierTOM, g1, g2, both = FALSE) {
 #'                     setLayout = FALSE)
 #' }
 #' tree1 <- swapTwoBranches(tree1, hubs["red"], hubs["turquoise"])
-#' \dontrun{
 #' plotDendroAndColors(tree1,colorh2,dendroLabels=FALSE,
 #'                     main="Swap blue/turquoise and red/brown",
 #'                     setLayout = FALSE)
 #'}
 #' tree1 <- reflectBranch(tree1, hubs["blue"], hubs["green"])
-#' \dontrun{
 #' plotDendroAndColors(tree1, colorh2, dendroLabels = FALSE,
 #'                     main = "Reflect turquoise/blue", setLayout = FALSE)
 #' }
