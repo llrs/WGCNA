@@ -143,7 +143,7 @@ moduleEigengenes <- function(datExpr, colors, impute = TRUE, nPC = 1,
                              subHubs = TRUE, trapErrors = FALSE,
                              returnValidOnly = trapErrors, softPower = 6,
                              scale = TRUE, verbose = 0, indent = 0) {
-    spaces = indentSpaces(indent)
+    spaces <- indentSpaces(indent)
 
     if (verbose == 1) {
         printFlush(spaces, " moduleEigengenes: Calculating ",
@@ -165,8 +165,8 @@ moduleEigengenes <- function(datExpr, colors, impute = TRUE, nPC = 1,
     }
 
     if (is.factor(colors)) {
-        nl = nlevels(colors)
-        nlDrop = nlevels(colors[, drop = TRUE])
+        nl <- nlevels(colors)
+        nlDrop <- nlevels(colors[, drop = TRUE])
         if (nl > nlDrop) {
             stop(paste("Argument 'colors' contains unused levels ",
                        "(empty modules).",
@@ -178,7 +178,7 @@ moduleEigengenes <- function(datExpr, colors, impute = TRUE, nPC = 1,
         stop("softPower must be non - negative")
     }
 
-    alignRecognizedValues = c("", "along average")
+    alignRecognizedValues <- c("", "along average")
     if (!is.element(align, alignRecognizedValues)) {
         stop(paste("ModulePrincipalComponents: Error:",
                    "parameter align has an unrecognised value:",
@@ -187,7 +187,7 @@ moduleEigengenes <- function(datExpr, colors, impute = TRUE, nPC = 1,
         )
     }
 
-    maxVarExplained = 10
+    maxVarExplained <- 10
     if (nPC > maxVarExplained) {
         warning("Given nPC is too large. Will use value", maxVarExplained)
     }
@@ -335,7 +335,8 @@ moduleEigengenes <- function(datExpr, colors, impute = TRUE, nPC = 1,
             }
             if (verbose > 0) {
                 printFlush(paste(spaces, " ..ME calculation of module",
-                                 modulename, "failed with the following error:"))
+                                 modulename,
+                                 "failed with the following error:"))
                 printFlush(paste(spaces, "     ", pc, spaces,
                                  " ..the offending module has been removed."))
             }
@@ -374,8 +375,10 @@ moduleEigengenes <- function(datExpr, colors, impute = TRUE, nPC = 1,
                 }
                 if (verbose > 0) {
                     printFlush(paste(spaces,
-                                     " ..Average expression calculation of module",
-                                     modulename, "failed with the following error:"))
+                                     " ..Average expression calculation of",
+                                     "module",
+                                     modulename,
+                                     "failed with the following error:"))
                     printFlush(paste(spaces, "     ", ae, spaces,
                                      " ..the returned average expression",
                                      "vector will be invalid."))
@@ -456,13 +459,9 @@ moduleEigengenes <- function(datExpr, colors, impute = TRUE, nPC = 1,
 #' \code{\link{moduleEigengenes}}, \code{\link{multiSetMEs}},
 #' \code{\link{consensusOrderMEs}}
 #' @keywords misc
-orderMEs <- function(MEs,
-                     greyLast = TRUE,
+orderMEs <- function(MEs, greyLast = TRUE,
                      greyName = paste0(getMEprefix(), "grey"),
-                     orderBy = 1,
-                     order = NULL,
-                     useSets = NULL,
-                     verbose = 0,
+                     orderBy = 1, order = NULL, useSets = NULL, verbose = 0,
                      indent = 0) {
     spaces <- indentSpaces(indent)
 
@@ -495,7 +494,7 @@ orderMEs <- function(MEs,
         }
         return(orderedMEs)
     } else {
-        check = checkSets(MEs, checkStructure = TRUE, useSets = useSets)
+        check <- checkSets(MEs, checkStructure = TRUE, useSets = useSets)
         if (check$structureOK) {
             multiSet <- TRUE
         } else {
@@ -507,7 +506,7 @@ orderMEs <- function(MEs,
 
         if (!is.null(useSets)) {
             if (is.na(match(orderBy, useSets))) {
-                orderBy = useSets[1]
+                orderBy <- useSets[1]
             }
 
             if (is.null(order)) {
@@ -516,9 +515,9 @@ orderMEs <- function(MEs,
                                      "orderMEs: order not given, calculating using given set",
                                      orderBy))
                 }
-                corPC = cor(MEs[[orderBy]]$data, use = "p")
-                disPC = 1 - corPC
-                order = .clustOrder(disPC,
+                corPC <- cor(MEs[[orderBy]]$data, use = "p")
+                disPC <- 1 - corPC
+                order <- .clustOrder(disPC,
                                     greyLast = greyLast,
                                     greyName = greyName)
             }
@@ -529,18 +528,18 @@ orderMEs <- function(MEs,
             nSets <- length(MEs)
             orderedMEs <- MEs
             if (is.null(useSets)) {
-                useSets = c(1:nSets)
+                useSets <- c(1:nSets)
             }
             for (set in useSets) {
-                orderedMEs[[set]]$data = as.data.frame(MEs[[set]]$data[, order])
-                colnames(orderedMEs[[set]]$data) = colnames(MEs[[set]]$data)[order]
+                orderedMEs[[set]]$data <- as.data.frame(MEs[[set]]$data[, order])
+                colnames(orderedMEs[[set]]$data) <- colnames(MEs[[set]]$data)[order]
                 if (!is.null(MEs[[set]]$averageExpr)) {
-                    orderedMEs[[set]]$averageExpr = as.data.frame(MEs[[set]]$averageExpr[, order])
-                    colnames(orderedMEs[[set]]$averageExpr) = colnames(MEs[[set]]$data)[order]
+                    orderedMEs[[set]]$averageExpr <- as.data.frame(MEs[[set]]$averageExpr[, order])
+                    colnames(orderedMEs[[set]]$averageExpr) <- colnames(MEs[[set]]$data)[order]
                 }
                 if (!is.null(MEs[[set]]$varExplained)) {
-                    orderedMEs[[set]]$varExplained = as.data.frame(MEs[[set]]$varExplained[, order])
-                    colnames(orderedMEs[[set]]$varExplained) = colnames(MEs[[set]]$data)[order]
+                    orderedMEs[[set]]$varExplained <- as.data.frame(MEs[[set]]$varExplained[, order])
+                    colnames(orderedMEs[[set]]$varExplained) <- colnames(MEs[[set]]$data)[order]
                 }
             }
             if (multiSet) {
@@ -572,7 +571,7 @@ orderMEs <- function(MEs,
 #' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
 #' @keywords misc
 removeGreyME <- function(MEs, greyMEName = paste0(getMEprefix(), "grey")) {
-    newMEs = MEs
+    newMEs <- MEs
     if (is.vector(MEs) & mode(MEs) == "list") {
         warned <- 0
         newMEs <- vector(mode = "list", length = length(MEs))
@@ -598,9 +597,9 @@ removeGreyME <- function(MEs, greyMEName = paste0(getMEprefix(), "grey")) {
         if (length(dim(MEs)) != 2) {
             stop("Argument 'MEs' has incorrect dimensions.")
         }
-        MEs = as.data.frame(MEs)
+        MEs <- as.data.frame(MEs)
         if (greyMEName %in% names(MEs)) {
-            newMEs = MEs[, names(MEs) != greyMEName]
+            newMEs <- MEs[, names(MEs) != greyMEName]
         } else {
             warning(
                 "removeGreyME: The given grey ME name was not ",
@@ -665,10 +664,10 @@ getMEprefix <- function() {
 #' @keywords misc
 propVarExplained <- function(datExpr, colors, MEs, corFnc = "cor",
                              corOptions = "use = 'p'") {
-    fc = as.factor(colors)
-    mods = levels(fc)
-    nMods = nlevels(fc)
-    nGenes = ncol(datExpr)
+    fc <- as.factor(colors)
+    mods <- levels(fc)
+    nMods <- nlevels(fc)
+    nGenes <- ncol(datExpr)
     if (nMods != ncol(MEs)) {
         stop("Input error: number of distinct 'colors' differs from\n",
              "     the number of module eigengenes given in ME.")
@@ -683,26 +682,26 @@ propVarExplained <- function(datExpr, colors, MEs, corFnc = "cor",
         stop("Input error: number of observations (rows) in 'datExpr' and 'MEs'
              differ.")
 
-    PVE = rep(0, nMods)
+    PVE <- rep(0, nMods)
 
-    col2MEs = match(mods, substring(names(MEs), 3))
+    col2MEs <- match(mods, substring(names(MEs), 3))
 
     if (sum(is.na(col2MEs)) > 0) {
         stop("Input error: not all given colors could be matched to names of",
              " module eigengenes.")
     }
     for (mod in 1:nMods) {
-        modGenes = c(1:nGenes)[as.character(colors) == mods[mod]]
-        corExpr = parse(text = paste(
+        modGenes <- c(1:nGenes)[as.character(colors) == mods[mod]]
+        corExpr <- parse(text = paste(
             corFnc,
             "(datExpr[, modGenes], MEs[, col2MEs[mod]]",
             prepComma(corOptions),
             ")"
         ))
-        PVE[mod] = mean(as.vector(eval(corExpr) ^ 2))
+        PVE[mod] <- mean(as.vector(eval(corExpr) ^ 2))
     }
 
-    names(PVE) = paste0("PVE", mods)
+    names(PVE) <- paste0("PVE", mods)
     PVE
 }
 
@@ -830,62 +829,29 @@ propVarExplained <- function(datExpr, colors, MEs, corFnc = "cor",
 #' \item{allOK}{a boolean set to \code{FALSE}.}
 #' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
 #' @keywords misc
-mergeCloseModules <- function(# input data
-    exprData,
-    colors,
-
-    # Optional starting eigengenes
-    MEs = NULL,
-
-    # Optional restriction to a subset of all sets
-    useSets = NULL,
-
-    # If missing data are present, impute them?
-    impute = TRUE,
-
-    # Input handling options
-    checkDataFormat = TRUE,
-    unassdColor = if (is.numeric(colors))
-        0
-    else
-        "grey",
-
-    # Options for eigengene network construction
-    corFnc = cor,
-    corOptions = list(use = 'p'),
-    useAbs = FALSE,
-
-    # Options for constructing the consensus
-    equalizeQuantiles = FALSE,
-    quantileSummary = "mean",
-    consensusQuantile = 0,
-
-    # Merging options
-    cutHeight = 0.2,
-    iterate = TRUE,
-
-    # Output options
-    relabel = FALSE,
-    colorSeq = NULL,
-    getNewMEs = TRUE,
-    getNewUnassdME = TRUE,
-
-    # Options controlling behaviour of the function
-    trapErrors = FALSE,
-    verbose = 1,
-    indent = 0) {
+mergeCloseModules <- function(exprData, colors, MEs = NULL, useSets = NULL,
+                              impute = TRUE, checkDataFormat = TRUE,
+                              unassdColor = ifelse(is.numeric(colors), 0,
+                                                   "grey"),
+                              corFnc = cor, corOptions = list(use <- 'p'),
+                              useAbs = FALSE, equalizeQuantiles = FALSE,
+                              quantileSummary = "mean", consensusQuantile = 0,
+                              cutHeight = 0.2, iterate = TRUE, relabel = FALSE,
+                              colorSeq = NULL, getNewMEs = TRUE,
+                              getNewUnassdME = TRUE, trapErrors = FALSE,
+                              verbose = 1, indent = 0) {
     MEsInSingleFrame = FALSE
     spaces = indentSpaces(indent)
 
-    #numCols = is.numeric(colors)
-    #facCols = is.factor(colors)
-    #charCols = is.character(colors)
+    #numCols <- is.numeric(colors)
+    #facCols <- is.factor(colors)
+    #charCols <- is.character(colors)
 
     origColors = colors
 
     colors = colors[, drop = TRUE]
 
-    greyMEname = paste0(getMEprefix(), unassdColor)
+    greyMEname <- paste0(getMEprefix(), unassdColor)
 
     if (verbose > 0) {
         printFlush(
@@ -906,19 +872,19 @@ mergeCloseModules <- function(# input data
     {
         if (checkDataFormat)
         {
-            exprData = fixDataStructure(exprData)
-            MEsInSingleFrame = TRUE
+            exprData <- fixDataStructure(exprData)
+            MEsInSingleFrame <- TRUE
         } else {
             stop("Given exprData appear to be misformatted.")
         }
     }
 
-    setsize = checkSets(exprData, useSets = useSets)
-    nSets = setsize$nSets
+    setsize <- checkSets(exprData, useSets = useSets)
+    nSets <- setsize$nSets
 
     if (!is.null(MEs))
     {
-        checkMEs = checkSets(MEs, checkStructure = TRUE, useSets = useSets)
+        checkMEs <- checkSets(MEs, checkStructure = TRUE, useSets = useSets)
         if (checkMEs$structureOK)
         {
             if (nSets != checkMEs$nSets)
@@ -937,8 +903,8 @@ mergeCloseModules <- function(# input data
         } else {
             if (MEsInSingleFrame)
             {
-                MEs = fixDataStructure(MEs)
-                checkMEs = checkSets(MEs)
+                MEs <- fixDataStructure(MEs)
+                checkMEs <- checkSets(MEs)
             } else {
                 stop("MEs do not have the appropriate structure (same as exprData).")
             }
@@ -957,16 +923,16 @@ mergeCloseModules <- function(# input data
             1 + as.integer(useAbs)
         ))
 
-    done = FALSE
-    iteration = 1
+    done <- FALSE
+    iteration <- 1
 
-    MergedColors = colors
-    ok = try({
+    MergedColors <- colors
+    ok <- try({
         while (!done)
         {
             if (is.null(MEs))
             {
-                MEs = multiSetMEs(
+                MEs <- multiSetMEs(
                     exprData,
                     colors = NULL,
                     universalColors = colors,
@@ -979,7 +945,7 @@ mergeCloseModules <- function(# input data
                     verbose = verbose - 1,
                     indent = indent + 1
                 )
-                MEs = consensusOrderMEs(
+                MEs <- consensusOrderMEs(
                     MEs,
                     useAbs = useAbs,
                     useSets = useSets,
@@ -997,7 +963,7 @@ mergeCloseModules <- function(# input data
                         )
                     )
                 }
-                MEs = multiSetMEs(
+                MEs <- multiSetMEs(
                     exprData,
                     colors = NULL,
                     universalColors = colors,
@@ -1010,7 +976,7 @@ mergeCloseModules <- function(# input data
                     verbose = verbose - 1,
                     indent = indent + 1
                 )
-                MEs = consensusOrderMEs(
+                MEs <- consensusOrderMEs(
                     MEs,
                     useAbs = useAbs,
                     useSets = useSets,
@@ -1019,11 +985,11 @@ mergeCloseModules <- function(# input data
                 collectGarbage()
             }
             if (iteration == 1)
-                oldMEs = MEs
+                oldMEs <- MEs
 
             # Check colors for number of distinct colors that are not grey
 
-            colLevs = as.character(levels(as.factor(colors)))
+            colLevs <- as.character(levels(as.factor(colors)))
             if (length(colLevs[colLevs != as.character(unassdColor)]) <
                 2)
             {
@@ -1037,21 +1003,21 @@ mergeCloseModules <- function(# input data
                     paste(colLevs, collapse = ", ")
                 ))
                 printFlush(paste(spaces, " ..there is nothing to merge."))
-                MergedNewColors = colors
-                MergedColors = colors
-                nOldMods = 1
-                nNewMods = 1
-                oldTree = NULL
-                Tree = NULL
+                MergedNewColors <- colors
+                MergedColors <- colors
+                nOldMods <- 1
+                nNewMods <- 1
+                oldTree <- NULL
+                Tree <- NULL
                 break
             }
 
             # Cluster the found module eigengenes and merge ones that are too close
             # according to the specified quantile.
 
-            nOldMods = nlevels(as.factor(colors))
+            nOldMods <- nlevels(as.factor(colors))
 
-            ConsDiss = .consensusMEDissimilarity(MEs,
+            ConsDiss <- .consensusMEDissimilarity(MEs,
                                                  equalizeQuantiles = equalizeQuantiles,
                                                  quantileSummary = quantileSummary,
                                                  consensusQuantile = consensusQuantile,
@@ -1061,26 +1027,26 @@ mergeCloseModules <- function(# input data
                                                  useSets = useSets,
                                                  greyMEname = greyMEname)
 
-            Tree = fastcluster::hclust(as.dist(ConsDiss), method = "average")
+            Tree <- fastcluster::hclust(as.dist(ConsDiss), method = "average")
             if (iteration == 1) {
-                oldTree = Tree
+                oldTree <- Tree
             }
-            TreeBranches = as.factor(moduleNumber(dendro = Tree,
+            TreeBranches <- as.factor(moduleNumber(dendro = Tree,
                                                   cutHeight = cutHeight,
                                                   minSize = 1))
-            UniqueBranches = levels(TreeBranches)
-            nBranches = nlevels(TreeBranches)
-            NumberOnBranch = table(TreeBranches)
-            MergedColors = colors
+            UniqueBranches <- levels(TreeBranches)
+            nBranches <- nlevels(TreeBranches)
+            NumberOnBranch <- table(TreeBranches)
+            MergedColors <- colors
 
             # Merge modules on the same branch
 
             for (branch in 1:nBranches)
                 if (NumberOnBranch[branch] > 1) {
-                    ModulesOnThisBranch = names(TreeBranches)[TreeBranches == UniqueBranches[branch]]
-                    ColorsOnThisBranch = substring(ModulesOnThisBranch, 3)
+                    ModulesOnThisBranch <- names(TreeBranches)[TreeBranches == UniqueBranches[branch]]
+                    ColorsOnThisBranch <- substring(ModulesOnThisBranch, 3)
                     if (is.numeric(origColors)) {
-                        ColorsOnThisBranch = as.numeric(ColorsOnThisBranch)
+                        ColorsOnThisBranch <- as.numeric(ColorsOnThisBranch)
                     }
                     if (verbose > 3)
                         printFlush(paste(
@@ -1094,53 +1060,53 @@ mergeCloseModules <- function(# input data
                     }
                 }
 
-            MergedColors = MergedColors[, drop = TRUE]
+            MergedColors <- MergedColors[, drop = TRUE]
 
-            nNewMods = nlevels(as.factor(MergedColors))
+            nNewMods <- nlevels(as.factor(MergedColors))
 
             if (nNewMods < nOldMods & iterate)
             {
-                colors = MergedColors
-                MEs = NULL
+                colors <- MergedColors
+                MEs <- NULL
             } else {
-                done = TRUE
+                done <- TRUE
             }
-            iteration = iteration + 1
+            iteration <- iteration + 1
         }
         if (relabel)
         {
-            RawModuleColors = levels(as.factor(MergedColors))
+            RawModuleColors <- levels(as.factor(MergedColors))
             # relabel the merged colors to the usual order based on the number of
             # genes in each module
             if (is.null(colorSeq))
             {
                 if (is.numeric(origColors)) {
-                    colorSeq = c(1:length(table(origColors)))
+                    colorSeq <- c(1:length(table(origColors)))
                 } else {
-                    nNewColors = length(RawModuleColors)
-                    colorSeq = labels2colors(c(1:nNewColors))
+                    nNewColors <- length(RawModuleColors)
+                    colorSeq <- labels2colors(c(1:nNewColors))
                 }
             }
 
-            # nGenesInModule = rep(0, nNewMods)
+            # nGenesInModule <- rep(0, nNewMods)
             # for (mod in 1:nNewMods) nGenesInModule[mod] =
             # sum(MergedColors == RawModuleColors[mod])
-            nGenesInModule = table(MergedColors)
+            nGenesInModule <- table(MergedColors)
 
-            SortedRawModuleColors = RawModuleColors[order(-nGenesInModule)]
+            SortedRawModuleColors <- RawModuleColors[order(-nGenesInModule)]
 
             # Change the color names to the standard sequence, but leave grey grey
             # (that's why rank in general does not equal color)
-            MergedNewColors = MergedColors
+            MergedNewColors <- MergedColors
             if (is.factor(MergedNewColors)) {
-                MergedNewColors = as.character(MergedNewColors)
+                MergedNewColors <- as.character(MergedNewColors)
             }
             if (verbose > 3)
                 printFlush(paste(spaces, "   Changing original colors:"))
-            rank = 0
+            rank <- 0
             for (color in 1:length(SortedRawModuleColors)) {
                 if (SortedRawModuleColors[color] != unassdColor) {
-                    rank = rank + 1
+                    rank <- rank + 1
                     if (verbose > 3) {
                         printFlush(paste(
                             spaces,
@@ -1156,11 +1122,11 @@ mergeCloseModules <- function(# input data
 
             }
             if (is.factor(MergedColors))
-                MergedNewColors = as.factor(MergedNewColors)
+                MergedNewColors <- as.factor(MergedNewColors)
         } else {
-            MergedNewColors = MergedColors
+            MergedNewColors <- MergedColors
         }
-        MergedNewColors = MergedNewColors[, drop = TRUE]
+        MergedNewColors <- MergedNewColors[, drop = TRUE]
 
         if (getNewMEs)
         {
@@ -1168,7 +1134,7 @@ mergeCloseModules <- function(# input data
             {
                 if (verbose > 0)
                     printFlush(paste(spaces, "  Calculating new MEs..."))
-                NewMEs = multiSetMEs(
+                NewMEs <- multiSetMEs(
                     exprData,
                     colors = NULL,
                     universalColors = MergedNewColors,
@@ -1181,7 +1147,7 @@ mergeCloseModules <- function(# input data
                     verbose = verbose - 1,
                     indent = indent + 1
                 )
-                newMEs = consensusOrderMEs(
+                newMEs <- consensusOrderMEs(
                     NewMEs,
                     useAbs = useAbs,
                     useSets = useSets,
@@ -1189,7 +1155,7 @@ mergeCloseModules <- function(# input data
                     greyName = greyMEname
                 )
 
-                ConsDiss = .consensusMEDissimilarity(
+                ConsDiss <- .consensusMEDissimilarity(
                     newMEs,
                     equalizeQuantiles = equalizeQuantiles,
                     quantileSummary = quantileSummary,
@@ -1202,19 +1168,19 @@ mergeCloseModules <- function(# input data
                 )
                 if (length(ConsDiss) > 1)
                 {
-                    Tree = fastcluster::hclust(as.dist(ConsDiss), method = "average")
+                    Tree <- fastcluster::hclust(as.dist(ConsDiss), method = "average")
                 } else
-                    Tree = NULL
+                    Tree <- NULL
             } else {
-                newMEs = MEs
+                newMEs <- MEs
             }
         } else {
-            newMEs = NULL
+            newMEs <- NULL
         }
         if (MEsInSingleFrame)
         {
-            newMEs = newMEs[[1]]$data
-            oldMEs = oldMEs[[1]]$data
+            newMEs <- newMEs[[1]]$data
+            oldMEs <- oldMEs[[1]]$data
         }
     }, silent = TRUE)
 
@@ -1293,21 +1259,18 @@ mergeCloseModules <- function(# input data
 #' Horvath S, Dong J (2008) Geometric Interpretation of Gene Coexpression
 #' Network Analysis. PLoS Comput Biol 4(8): e1000117
 #' @keywords misc
-signedKME <- function(datExpr,
-                      datME,
-                      outputColumnName = "kME",
-                      corFnc = "cor",
+signedKME <- function(datExpr, datME, outputColumnName = "kME", corFnc = "cor",
                       corOptions = "use = 'p'") {
-    datExpr = data.frame(datExpr)
-    datME = data.frame(datME)
-    output = list()
+    datExpr <- data.frame(datExpr)
+    datME <- data.frame(datME)
+    output <- list()
     if (dim(as.matrix(datME))[[1]]  != dim(as.matrix(datExpr))[[1]]) {
         stop("Number of samples (rows) in 'datExpr' and 'datME' must be the ",
              "same.")
     }
-    varianceZeroIndicatordatExpr = as.vector(apply(as.matrix(datExpr), 2, var,
+    varianceZeroIndicatordatExpr <- as.vector(apply(as.matrix(datExpr), 2, var,
                                                    na.rm = TRUE)) == 0
-    varianceZeroIndicatordatME  = as.vector(apply(as.matrix(datME), 2, var,
+    varianceZeroIndicatordatME  <- as.vector(apply(as.matrix(datME), 2, var,
                                                   na.rm = TRUE)) == 0
     if (sum(varianceZeroIndicatordatExpr, na.rm = TRUE) > 0) {
         warning("Some genes are constant. Hint: consider removing constant ",
@@ -1317,22 +1280,22 @@ signedKME <- function(datExpr,
         warning("Some module eigengenes are constant, which is suspicious.\n",
                 "    Hint: consider removing constant columns from datME.")
     }
-    no.presentdatExpr = as.vector(apply(!is.na(as.matrix(datExpr)), 2, sum))
+    no.presentdatExpr <- as.vector(apply(!is.na(as.matrix(datExpr)), 2, sum))
     if (min(no.presentdatExpr) < ..minNSamples) {
         warning("Some gene expressions have fewer than 4 observations.\n",
                 "    Hint: consider removing genes with too many missing values or
                 collect more arrays.")
     }
 
-    #output = data.frame(cor(datExpr, datME, use = "p"))
-    corExpr = parse(text = paste("data.frame(", corFnc, "(datExpr, datME ",
+    #output <- data.frame(cor(datExpr, datME, use = "p"))
+    corExpr <- parse(text = paste("data.frame(", corFnc, "(datExpr, datME ",
                                  prepComma(corOptions), "))"))
-    output = eval(corExpr)
+    output <- eval(corExpr)
 
-    output[no.presentdatExpr < ..minNSamples,] = NA
-    names(output) = paste0(outputColumnName, substring(names(datME), first = 3,
+    output[no.presentdatExpr < ..minNSamples,] <- NA
+    names(output) <- paste0(outputColumnName, substring(names(datME), first = 3,
                                                        last = 100))
-    dimnames(output)[[1]] = names(datExpr)
+    dimnames(output)[[1]] <- names(datExpr)
     output
 } # end of function signedKME
 
@@ -1484,43 +1447,42 @@ signedKME <- function(datExpr,
 #' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
 #' @seealso \code{\link{moduleEigengenes}}
 #' @keywords misc
-multiSetMEs <- function(exprData, colors, universalColors = NULL,
+multiSetMEs <- function(exprData, colors = NULL, universalColors = NULL,
                         useSets = NULL, useGenes = NULL, impute = TRUE,
                         nPC = 1, align = "along average", excludeGrey = FALSE,
-                        grey = if (is.null(universalColors)) {
-                            if (is.numeric(colors)) {0} else{"grey"}
-                        } else {
-                            if (is.numeric(universalColors)) {0} else {"grey"}},
-                        subHubs = TRUE,
-                        trapErrors = FALSE,
-                        returnValidOnly = trapErrors,
-                        softPower = 6,
-                        verbose = 1,
-                        indent = 0) {
-    spaces = indentSpaces(indent)
-    nSets = length(exprData)
-    setsize = checkSets(exprData, useSets = useSets)
-    nGenes = setsize$nGenes
-    nSamples = setsize$nSamples
+                        grey = ifelse(is.null(universalColors),
+                                      ifelse(is.numeric(colors), 0, "grey"),
+                                      ifelse(is.numeric(universalColors), 0,
+                                             "grey")),
+                        subHubs = TRUE, trapErrors = FALSE,
+                        returnValidOnly = trapErrors, softPower = 6,
+                        verbose = 1, indent = 0) {
+    if (is.null(colors) & is.null(universalColors)) {
+        stop("Set one of colors or universalColors")
+    }
+    spaces <- indentSpaces(indent)
+    nSets <- length(exprData)
+
     if (verbose > 0) {
         printFlush(paste(spaces, "multiSetMEs: Calculating module MEs."))
     }
-    MEs = vector(mode = "list", length = nSets)
-    consValidMEs = NULL
+    MEs <- vector(mode = "list", length = nSets)
+    consValidMEs <- NULL
     if (!is.null(universalColors)) {
-        consValidColors = universalColors}
+        consValidColors <- universalColors}
     if (is.null(useSets)) {
-        useSets = c(1:nSets)}
+        useSets <- c(1:nSets)}
     if (is.null(useGenes)) {
         for (set in useSets) {
             if (verbose > 0)
-                printFlush(paste(spaces, "  Working on set", as.character(set), "..."))
+                printFlush(paste(spaces, "  Working on set",
+                                 as.character(set), "..."))
             if (is.null(universalColors)) {
-                setColors = colors[, set]
+                setColors <- colors[, set]
             } else {
-                setColors = universalColors
+                setColors <- universalColors
             }
-            setMEs = moduleEigengenes(
+            setMEs <- moduleEigengenes(
                 datExpr = exprData[[set]]$data,
                 colors = setColors,
                 impute = impute,
@@ -1537,20 +1499,21 @@ multiSetMEs <- function(exprData, colors, universalColors = NULL,
             )
             if (!is.null(universalColors) && (!setMEs$allOK)) {
                 if (is.null(consValidMEs)) {
-                    consValidMEs = setMEs$validMEs
+                    consValidMEs <- setMEs$validMEs
                 } else {
-                    consValidMEs = consValidMEs * setMEs$validMEs
+                    consValidMEs <- consValidMEs * setMEs$validMEs
                 }
                 consValidColors[setMEs$validColors != universalColors]  =
                     setMEs$validColors[setMEs$validColors != universalColors]
             }
-            MEs[[set]] = setMEs
-            names(MEs[[set]])[names(setMEs) == 'eigengenes'] = 'data'
+            MEs[[set]] <- setMEs
+            names(MEs[[set]])[names(setMEs) == 'eigengenes'] <- 'data'
             # Here's what moduleEigengenes returns:
             #
             #  list(eigengenes = PrinComps, averageExpr = averExpr,
             #  varExplained = varExpl, nPC = nPC,
-            #       validMEs = validMEs, validColors = validColors, allOK = allOK,
+            #       validMEs = validMEs, validColors = validColors,
+            #       allOK = allOK,
             #       allPC = allPC, isPC = isPC,
             #       isHub = isHub, validAEs = validAEs, allAEOK = allAEOK)
         }
@@ -1561,11 +1524,11 @@ multiSetMEs <- function(exprData, colors, universalColors = NULL,
                            "...")
             }
             if (is.null(universalColors)) {
-                setColors = colors[useGenes, set]
+                setColors <- colors[useGenes, set]
             } else {
-                setColors = universalColors[useGenes]
+                setColors <- universalColors[useGenes]
             }
-            setMEs = moduleEigengenes(
+            setMEs <- moduleEigengenes(
                 datExpr = exprData[[set]]$data[, useGenes],
                 colors = setColors,
                 impute = impute,
@@ -1582,39 +1545,39 @@ multiSetMEs <- function(exprData, colors, universalColors = NULL,
             )
             if (!is.null(universalColors) && (!setMEs$allOK)) {
                 if (is.null(consValidMEs)) {
-                    consValidMEs = setMEs$validMEs
+                    consValidMEs <- setMEs$validMEs
                 } else {
-                    consValidMEs = consValidMEs * setMEs$validMEs
+                    consValidMEs <- consValidMEs * setMEs$validMEs
                 }
                 consValidColors[
                     setMEs$validColors != universalColors[useGenes]]  =
                     setMEs$validColors[
                         setMEs$validColors != universalColors[useGenes]]
             }
-            MEs[[set]] = setMEs
-            names(MEs[[set]])[names(setMEs) == 'eigengenes'] = 'data'
+            MEs[[set]] <- setMEs
+            names(MEs[[set]])[names(setMEs) == 'eigengenes'] <- 'data'
         }
     }
     if (!is.null(universalColors)) {
         for (set in 1:nSets) {
             if (!is.null(consValidMEs))
-                MEs[[set]]$validMEs = consValidMEs
-            MEs[[set]]$validColors = consValidColors
+                MEs[[set]]$validMEs <- consValidMEs
+            MEs[[set]]$validColors <- consValidColors
         }
     }
     for (set in 1:nSets) {
-        MEs[[set]]$allOK = (sum(!MEs[[set]]$validMEs) == 0)
+        MEs[[set]]$allOK <- (sum(!MEs[[set]]$validMEs) == 0)
         if (returnValidOnly) {
-            valid = (MEs[[set]]$validMEs > 0)
-            MEs[[set]]$data = MEs[[set]]$data[, valid]
-            MEs[[set]]$averageExpr = MEs[[set]]$averageExpr[, valid]
-            MEs[[set]]$varExplained = MEs[[set]]$varExplained[, valid]
-            MEs[[set]]$isPC = MEs[[set]]$isPC[valid]
-            MEs[[set]]$allPC = (sum(!MEs[[set]]$isPC) == 0)
-            MEs[[set]]$isHub = MEs[[set]]$isHub[valid]
-            MEs[[set]]$validAEs = MEs[[set]]$validAEs[valid]
-            MEs[[set]]$allAEOK = (sum(!MEs[[set]]$validAEs) == 0)
-            MEs[[set]]$validMEs = rep(TRUE, times = ncol(MEs[[set]]$data))
+            valid <- (MEs[[set]]$validMEs > 0)
+            MEs[[set]]$data <- MEs[[set]]$data[, valid]
+            MEs[[set]]$averageExpr <- MEs[[set]]$averageExpr[, valid]
+            MEs[[set]]$varExplained <- MEs[[set]]$varExplained[, valid]
+            MEs[[set]]$isPC <- MEs[[set]]$isPC[valid]
+            MEs[[set]]$allPC <- (sum(!MEs[[set]]$isPC) == 0)
+            MEs[[set]]$isHub <- MEs[[set]]$isHub[valid]
+            MEs[[set]]$validAEs <- MEs[[set]]$validAEs[valid]
+            MEs[[set]]$allAEOK <- (sum(!MEs[[set]]$validAEs) == 0)
+            MEs[[set]]$validMEs <- rep(TRUE, times = ncol(MEs[[set]]$data))
         }
     }
     MEs
