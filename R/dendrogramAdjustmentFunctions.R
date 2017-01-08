@@ -309,7 +309,6 @@ reflectBranch <- function (hierTOM, g1, g2, both = FALSE) {
 #' colorh <- labels2colors(dat1$allLabels)
 #' \dontrun{
 #' plotDendroAndColors(tree1,colorh,dendroLabels=FALSE)
-#' }
 #' ## Reassign modules using the selectBranch and chooseOneHubInEachModule functions
 #'
 #' datExpr <- dat1$datExpr
@@ -321,10 +320,8 @@ reflectBranch <- function (hierTOM, g1, g2, both = FALSE) {
 #' colorh2[selectBranch(tree1, hubs["yellow"], hubs["green"])] <- "yellow"
 #' colorh2[selectBranch(tree1, hubs["red"], hubs["brown"])] <- "red"
 #' colorh2[selectBranch(tree1, hubs["brown"], hubs["red"])] <- "brown"
-#' \dontrun{
 #' plotDendroAndColors(tree1, cbind(colorh, colorh2), c("Old", "New"),
 #'                      dendroLabels = FALSE)
-#' }
 #' ## Now swap and reflect some branches, then optimize the order of the branches
 #'
 #' # Open a suitably sized graphics window
@@ -333,12 +330,10 @@ reflectBranch <- function (hierTOM, g1, g2, both = FALSE) {
 #' layout(matrix(c(1:6), 6, 1), heights = c(0.8, 0.2, 0.8, 0.2, 0.8, 0.2))
 #' plotDendroAndColors(tree1,colorh2,dendroLabels=FALSE,main="Starting Dendrogram",
 #'                     setLayout = FALSE)
-#' }
 #' tree1 <- swapTwoBranches(tree1, hubs["red"], hubs["turquoise"])
 #' plotDendroAndColors(tree1,colorh2,dendroLabels=FALSE,
 #'                     main="Swap blue/turquoise and red/brown",
 #'                     setLayout = FALSE)
-#'}
 #' tree1 <- reflectBranch(tree1, hubs["blue"], hubs["green"])
 #' plotDendroAndColors(tree1, colorh2, dendroLabels = FALSE,
 #'                     main = "Reflect turquoise/blue", setLayout = FALSE)
