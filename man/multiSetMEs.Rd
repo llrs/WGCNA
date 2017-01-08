@@ -4,12 +4,13 @@
 \alias{multiSetMEs}
 \title{Calculate module eigengenes.}
 \usage{
-multiSetMEs(exprData, colors, universalColors = NULL, useSets = NULL,
-  useGenes = NULL, impute = TRUE, nPC = 1, align = "along average",
-  excludeGrey = FALSE, grey = ifelse(is.null(universalColors),
-  ifelse(is.numeric(colors), 0, "grey"), ifelse(is.numeric(universalColors), 0,
-  "grey")), subHubs = TRUE, trapErrors = FALSE,
-  returnValidOnly = trapErrors, softPower = 6, verbose = 1, indent = 0)
+multiSetMEs(exprData, colors = NULL, universalColors = NULL,
+  useSets = NULL, useGenes = NULL, impute = TRUE, nPC = 1,
+  align = "along average", excludeGrey = FALSE,
+  grey = ifelse(is.null(universalColors), ifelse(is.numeric(colors), 0,
+  "grey"), ifelse(is.numeric(universalColors), 0, "grey")), subHubs = TRUE,
+  trapErrors = FALSE, returnValidOnly = trapErrors, softPower = 6,
+  verbose = 1, indent = 0)
 }
 \arguments{
 \item{exprData}{Expression data in a multi-set format (see

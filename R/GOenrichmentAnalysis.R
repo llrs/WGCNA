@@ -1,9 +1,4 @@
-# Function that returns GO terms with best enrichment and highest number of genes.
-
-# So that I don't forget: information about GO categories is contained in the GO.db package
-
-
-
+# GOenrichmentAnalysis
 #' Calculation of GO enrichment (experimental)
 #'
 #' WARNING: This function should be considered experimental. The arguments and
