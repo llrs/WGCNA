@@ -19,6 +19,9 @@ A vector of p-values of the same length as the input correlations.
 \description{
 Calculates Student asymptotic p-value for given correlations.
 }
+\examples{
+corPvalueStudent(0.5, 10)
+}
 \author{
 Steve Horvath and Peter Langfelder
 }

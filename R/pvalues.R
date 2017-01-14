@@ -1,4 +1,3 @@
-
 # corPvalueFisher ####
 #' Fisher's asymptotic p-value for correlation
 #'
@@ -13,15 +12,19 @@
 #' @return A vector of p-values of the same length as the input correlations.
 #' @author Steve Horvath and Peter Langfelder
 #' @keywords misc
+#' @examples
+#' corPvalueFisher(0.5, 10, FALSE)
+#' corPvalueFisher(0.5, 10)
 corPvalueFisher <- function(cor, nSamples, twoSided = TRUE) {
-    if (sum(abs(cor) > 1, na.rm = TRUE) > 0)
+    if (sum(abs(cor) > 1, na.rm = TRUE) > 0) {
         stop("Some entries in 'cor' are out of normal range  - 1 to 1.")
+    }
     if (twoSided) {
-        z = abs(0.5 * log((1 + cor) / (1 - cor)) * sqrt(nSamples - 3))
+        z <- abs(0.5 * log((1 + cor) / (1 - cor)) * sqrt(nSamples - 3))
         2 * pnorm(-z)
     } else {
         # return a small p-value for positive correlations
-        z = -0.5 * log((1 + cor) / (1 - cor)) * sqrt(nSamples - 3)
+        z <- -0.5 * log((1 + cor) / (1 - cor)) * sqrt(nSamples - 3)
         pnorm(-z)
     }
 }
@@ -39,8 +42,10 @@ corPvalueFisher <- function(cor, nSamples, twoSided = TRUE) {
 #' @return A vector of p-values of the same length as the input correlations.
 #' @author Steve Horvath and Peter Langfelder
 #' @keywords misc
+#' @examples
+#' corPvalueStudent(0.5, 10)
 corPvalueStudent <- function(cor, nSamples) {
-    T = sqrt(nSamples - 2) * cor / sqrt(1 - cor ^ 2)
+    T <- sqrt(nSamples - 2) * cor / sqrt(1 - cor ^ 2)
     2 * pt(abs(T), nSamples - 2, lower.tail = FALSE)
 }
 
@@ -182,132 +187,129 @@ corPvalueStudent <- function(cor, nSamples) {
 #' experiments. Proceedings of the National Academy of Sciences, 100:
 #' 9440-9445.
 #' @keywords misc
-rankPvalue <- function(datS,
-                       columnweights = NULL,
-                       na.last = "keep",
-                       ties.method = "average",
-                       calculateQvalue = TRUE,
+rankPvalue <- function(datS, columnweights = NULL, na.last = "keep",
+                       ties.method = "average", calculateQvalue = TRUE,
                        pValueMethod = "all") {
-    no.rows = dim(datS)[[1]]
-    no.cols = dim(datS)[[2]]
-    if (!is.null(columnweights) & no.cols  != length(columnweights))
-        stop(
-            "The number of components of the vector columnweights is unequal",
-            "to the number of columns of datS. Hint: consider transposing ",
-            "datS."
-        )
-
+    no.rows <- dim(datS)[[1L]]
+    no.cols <- dim(datS)[[2L]]
+    if (!is.null(columnweights) & no.cols != length(columnweights)) {
+        stop("The number of components of the vector columnweights is unequal",
+             "to the number of columns of datS. Hint: consider transposing ",
+             "datS.")
+    }
     if (!is.null(columnweights)) {
-        if (min(columnweights, na.rm = TRUE) < 0)
-            stop(
-                "At least one component of columnweights is negative, which ",
-                "makes no sense. The entries should be positive numbers"
-            )
-        if (sum(is.na(columnweights)) > 0)
-            stop(
-                "At least one component of columnweights is missing, which ",
-                "makes no sense. The entries should be positive numbers"
-            )
+        if (min(columnweights, na.rm = TRUE) < 0L) {
+            stop("At least one component of columnweights is negative, which ",
+                 "makes no sense. The entries should be positive numbers")
+        }
+        if (sum(is.na(columnweights)) > 0L){
+            stop("At least one component of columnweights is missing, which ",
+                 "makes no sense. The entries should be positive numbers")
+            }
         if (sum(columnweights) != 1) {
             # warning("The entries of columnweights do not sum to 1.
             # Therefore, they will divided by the sum. Then the resulting
             # weights sum to 1.")
-            columnweights = columnweights / sum(columnweights)
+            columnweights <- columnweights / sum(columnweights)
         }
     }
 
-    if (pValueMethod  != "scale") {
+    if (pValueMethod != "scale") {
         percentilerank1 <- function(x) {
-            R1 = rank(x, ties.method = ties.method, na.last = na.last)
+            R1 <- rank(x, ties.method = ties.method, na.last = na.last)
             (R1 - .5) / max(R1, na.rm = TRUE)
         }
 
-        datrankslow = apply(datS, 2, percentilerank1)
+        datrankslow <- apply(datS, 2, percentilerank1)
         if (!is.null(columnweights)) {
-            datrankslow = t(t(datrankslow) * columnweights)
+            datrankslow <- t(t(datrankslow) * columnweights)
         }
-        datSpresent = !is.na(datS) + 0
+        datSpresent <- !is.na(datS) + 0
         if (!is.null(columnweights)) {
-            datSpresent = t(t(datSpresent) * columnweights)
+            datSpresent <- t(t(datSpresent) * columnweights)
         }
-        expectedsum = rowSums(datSpresent, na.rm = TRUE)  *
-            0.5
-        varsum = rowSums(datSpresent ^ 2, na.rm = TRUE) * 1 / 12
-        observed.sumPercentileslow = as.numeric(rowSums(datrankslow,
-                                                        na.rm = TRUE))
-        Zstatisticlow = (observed.sumPercentileslow - expectedsum) / sqrt(varsum)
-        datrankshigh = apply(-datS, 2, percentilerank1)
-        if (!is.null(columnweights)) {
-            datrankshigh = t(t(datrankshigh) * columnweights)
-        }
-        observed.sumPercentileshigh = as.numeric(rowSums(datrankshigh,
+        expectedsum <- rowSums(datSpresent, na.rm = TRUE) * 0.5
+        varsum <- rowSums(datSpresent ^ 2, na.rm = TRUE) * 1 / 12
+        observed.sumPercentileslow <- as.numeric(rowSums(datrankslow,
                                                          na.rm = TRUE))
-        Zstatistichigh = (observed.sumPercentileshigh - expectedsum) / sqrt(varsum)
-        pValueLow = pnorm((Zstatisticlow))
-        pValueHigh = pnorm((Zstatistichigh))
-        pValueExtreme = pmin(pValueLow, pValueHigh)
-        datoutrank = data.frame(pValueExtreme, pValueLow, pValueHigh)
+        Zstatisticlow <- (observed.sumPercentileslow -
+                              expectedsum) / sqrt(varsum)
+        datrankshigh <- apply(-datS, 2, percentilerank1)
+        if (!is.null(columnweights)) {
+            datrankshigh <- t(t(datrankshigh) * columnweights)
+        }
+        observed.sumPercentileshigh <- as.numeric(rowSums(datrankshigh,
+                                                         na.rm = TRUE))
+        Zstatistichigh <- (observed.sumPercentileshigh -
+                               expectedsum) / sqrt(varsum)
+        pValueLow <- pnorm((Zstatisticlow))
+        pValueHigh <- pnorm((Zstatistichigh))
+        pValueExtreme <- pmin(pValueLow, pValueHigh)
+        datoutrank <- data.frame(pValueExtreme, pValueLow, pValueHigh)
         if (calculateQvalue) {
-            qValueLow = rep(NA, dim(datS)[[1]])
-            qValueHigh = rep(NA, dim(datS)[[1]])
-            qValueExtreme = rep(NA, dim(datS)[[1]])
-            rest1 = !is.na(pValueLow)
-            qValueLow[rest1] = qvalue(pValueLow[rest1])$qvalues
-            rest1 = !is.na(pValueHigh)
-            qValueHigh[rest1] = qvalue(pValueHigh[rest1])$qvalues
-            rest1 = !is.na(pValueExtreme)
-            qValueExtreme = pmin(qValueLow, qValueHigh)
-            datq = data.frame(qValueExtreme, qValueLow, qValueHigh)
-            datoutrank = data.frame(datoutrank, datq)
-            names(datoutrank) = paste0(names(datoutrank), "Rank")
+            qValueLow <- rep(NA, nrow(datS))
+            qValueHigh <- rep(NA, nrow(datS))
+            qValueExtreme <- rep(NA, nrow(datS))
+            rest1 <- !is.na(pValueLow)
+            qValueLow[rest1] <- qvalue(pValueLow[rest1])$qvalues
+            rest1 <- !is.na(pValueHigh)
+            qValueHigh[rest1] <- qvalue(pValueHigh[rest1])$qvalues
+            rest1 <- !is.na(pValueExtreme)
+            qValueExtreme <- pmin(qValueLow, qValueHigh)
+            datq <- data.frame(qValueExtreme, qValueLow, qValueHigh)
+            datoutrank <- data.frame(datoutrank, datq)
+            names(datoutrank) <- paste0(names(datoutrank), "Rank")
         }
     }
-    if (pValueMethod  != "rank") {
-        datSpresent = !is.na(datS) + 0
-        scaled.datS = scale(datS)
+    if (pValueMethod != "rank") {
+        datSpresent <- !is.na(datS) + 0
+        scaled.datS <- scale(datS)
         if (!is.null(columnweights)) {
-            scaled.datS = t(t(scaled.datS) * columnweights)
-            datSpresent = t(t(datSpresent) * columnweights)
+            scaled.datS <- t(t(scaled.datS) * columnweights)
+            datSpresent <- t(t(datSpresent) * columnweights)
         }
-        expected.value = rep(0, no.rows)
-        varsum = rowSums(datSpresent ^ 2) * 1
-        observed.sumScaleddatS = as.numeric(rowSums(scaled.datS, na.rm = TRUE))
-        Zstatisticlow = (observed.sumScaleddatS - expected.value) / sqrt(varsum)
-        scaled.minusdatS = scale(-datS)
+        expected.value <- rep(0, no.rows)
+        varsum <- rowSums(datSpresent ^ 2) * 1
+        observed.sumScaleddatS <- as.numeric(rowSums(scaled.datS,
+                                                     na.rm = TRUE))
+        Zstatisticlow <- (observed.sumScaleddatS -
+                              expected.value) / sqrt(varsum)
+        scaled.minusdatS <- scale(-datS)
         if (!is.null(columnweights)) {
-            scaled.minusdatS = t(t(scaled.minusdatS) * columnweights)
+            scaled.minusdatS <- t(t(scaled.minusdatS) * columnweights)
         }
-        observed.sumScaledminusdatS = as.numeric(rowSums(scaled.minusdatS,
+        observed.sumScaledminusdatS <- as.numeric(rowSums(scaled.minusdatS,
                                                          na.rm = TRUE))
-        Zstatistichigh = (observed.sumScaledminusdatS - expected.value) /
+        Zstatistichigh <- (observed.sumScaledminusdatS - expected.value) /
             sqrt(varsum)
-        pValueLow = pnorm((Zstatisticlow))
-        pValueHigh = pnorm((Zstatistichigh))
-        pValueExtreme = 2 * pnorm(-abs(Zstatisticlow))
-        datoutscale = data.frame(pValueExtreme, pValueLow, pValueHigh)
+        pValueLow <- pnorm((Zstatisticlow))
+        pValueHigh <- pnorm((Zstatistichigh))
+        pValueExtreme <- 2 * pnorm(-abs(Zstatisticlow))
+        datoutscale <- data.frame(pValueExtreme, pValueLow, pValueHigh)
         if (calculateQvalue) {
-            qValueLow = rep(NA, dim(datS)[[1]])
-            qValueHigh = rep(NA, dim(datS)[[1]])
-            qValueExtreme = rep(NA, dim(datS)[[1]])
-            rest1 = !is.na(pValueLow)
-            qValueLow[rest1] = qvalue(pValueLow[rest1])$qvalues
-            rest1 = !is.na(pValueHigh)
-            qValueHigh[rest1] = qvalue(pValueHigh[rest1])$qvalues
-            rest1 = !is.na(pValueExtreme)
-            qValueExtreme[rest1] = qvalue(pValueExtreme[rest1])$qvalues
-            datq = data.frame(qValueExtreme, qValueLow, qValueHigh)
-            datoutscale = data.frame(datoutscale, datq)
+            qValueLow <- rep(NA, nrow(datS))
+            qValueHigh <- rep(NA, nrow(datS))
+            qValueExtreme <- rep(NA, nrow(datS))
+            rest1 <- !is.na(pValueLow)
+            qValueLow[rest1] <- qvalue(pValueLow[rest1])$qvalues
+            rest1 <- !is.na(pValueHigh)
+            qValueHigh[rest1] <- qvalue(pValueHigh[rest1])$qvalues
+            rest1 <- !is.na(pValueExtreme)
+            qValueExtreme[rest1] <- qvalue(pValueExtreme[rest1])$qvalues
+            datq <- data.frame(qValueExtreme, qValueLow, qValueHigh)
+            datoutscale <- data.frame(datoutscale, datq)
         }
-        names(datoutscale) = paste0(names(datoutscale), "Scale")
+        names(datoutscale) <- paste0(names(datoutscale), "Scale")
     }
     if (pValueMethod == "rank") {
-        datout = datoutrank
+        datout <- datoutrank
     }
     if (pValueMethod == "scale") {
-        datout = datoutscale
+        datout <- datoutscale
     }
-    if (pValueMethod  != "rank" & pValueMethod  != "scale")
-        datout = data.frame(datoutrank, datoutscale)
+    if (pValueMethod != "rank" & pValueMethod != "scale") {
+        datout <- data.frame(datoutrank, datoutscale)
+    }
     datout
 } # End of function
 

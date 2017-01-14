@@ -21,6 +21,10 @@ A vector of p-values of the same length as the input correlations.
 \description{
 Calculates Fisher's asymptotic p-value for given correlations.
 }
+\examples{
+corPvalueFisher(0.5, 10, FALSE)
+corPvalueFisher(0.5, 10)
+}
 \author{
 Steve Horvath and Peter Langfelder
 }
