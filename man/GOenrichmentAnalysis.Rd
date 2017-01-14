@@ -24,7 +24,7 @@ are given in \code{labels}. A single vector; the i-th entry corresponds to
 row i of the matrix \code{labels} (or to the i-the entry if \code{labels} is
 a vector).}
 
-\item{yeastORFs}{if \code{organism=="yeast"} (below), this argument can be
+\item{yeastORFs}{if \code{organism == "yeast"} (below), this argument can be
 used to input yeast open reading frame (ORF) identifiers instead of Entrez
 codes. Since the GO mappings for yeast are provided in terms of ORF
 identifiers, this may lead to a more accurate GO enrichment analysis. If
