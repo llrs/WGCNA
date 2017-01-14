@@ -12,13 +12,13 @@ qvalue(p, lambda = seq(0, 0.9, 0.05), pi0.method = "smoother",
 \item{p}{A vector of p-values (only necessary input)}
 
 \item{lambda}{The value of the tuning parameter to estimate
-\eqn{\pi_0}{pi_0}. Must be in [0,1). Optional, see Storey (2002).}
+\eqn{\pi_0}{pi_0}. Must be in [0, 1). Optional, see Storey (2002).}
 
 \item{pi0.method}{Either "smoother" or "bootstrap"; the method for
 automatically choosing tuning parameter in the estimation of
 \eqn{\pi_0}{pi_0}, the proportion of true null hypotheses}
 
-\item{fdr.level}{A level at which to control the FDR. Must be in (0,1].
+\item{fdr.level}{A level at which to control the FDR. Must be in (0, 1].
 Optional; if this is selected, a vector of TRUE and FALSE is returned that
 specifies whether each q-value is less than fdr.level or not.}
 
@@ -35,7 +35,8 @@ of \eqn{log} \eqn{\pi_0}{pi_0} estimates against the tuning parameter
 \eqn{\lambda}{lambda}. Optional.}
 }
 \value{
-A list containing: \item{call}{function call} \item{pi0}{an estimate
+A list containing:
+\item{call}{gives the function call} \item{pi0}{an estimate
 of the proportion of null p-values} \item{qvalues}{a vector of the estimated
 q-values (the main quantity of interest)} \item{pvalues}{a vector of the
 original p-values} \item{significant}{if fdr.level is specified, and
