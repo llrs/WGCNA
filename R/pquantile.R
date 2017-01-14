@@ -1,19 +1,20 @@
 # Parallel version of quantile, mean and median
 
-.dimensions = function(x) {
+.dimensions <- function(x) {
    if (is.null(dim(x))) {
        return(length(x))
    }
    return(dim(x))
 }
 
-.shiftList = function(c0, lst) {
+.shiftList <- function(c0, lst) {
   if (length(lst) == 0) return(list(c0))
-  ll = length(lst)
-  out = list()
-  out[[1]] = c0
-  for (i in 1:ll)
-    out[[i+1]] = lst[[i]]
+  ll <- length(lst)
+  out <- list()
+  out[[1]] <- c0
+  for (i in 1:ll) {
+    out[[i+1]] <- lst[[i]]
+  }
   out
 }
 
@@ -47,35 +48,29 @@
 #' underlying statistics.
 #' @keywords misc
 #' @examples
-#'
-#'
 #' # Generate 2 simple matrices
-#' a = matrix(c(1:12), 3, 4)
-#' b = a+ 1
-#' c = a + 2
+#' a <- matrix(c(1:12), 3, 4)
+#' b <- a + 1
+#' c <- a + 2
 #'
 #' # Set the colnames on matrix a
-#'
-#' colnames(a) = paste0("col_", c(1:4))
+#' colnames(a) <- paste0("col_", c(1:4))
 #'
 #' # Example use
-#'
 #' pquantile(prob = 0.5, a, b, c)
-#' pquantile(prob = c(0, 0.5, 1), a,b, c)
+#' pquantile(prob = c(0, 0.5, 1), a, b, c)
 #'
-#' pmean(a,b,c)
-#' pmedian(a,b,c)
-#'
-#'
-pquantile = function(prob, ...) {
-   pars = list(...)
-   nPars = length(pars)
-   dn = NULL
+#' pmean(a, b, c)
+#' pmedian(a, b, c)
+pquantile <- function(prob, ...) {
+   pars <- list(...)
+   nPars <- length(pars)
+   dn <- NULL
    for (p in 1:nPars) {
        if (mode(pars[[p]]) != "numeric")
           stop("Argument number", p, " is not numeric.")
        if (p == 1) {
-          dims = .dimensions(pars[[p]])
+          dims <- .dimensions(pars[[p]])
        } else {
           if (!isTRUE(all.equal(.dimensions(pars[[p]]), dims))) {
              stop("Argument dimensions are not consistent.")
@@ -85,16 +80,16 @@ pquantile = function(prob, ...) {
            stop("Argument has zero dimension.")
        }
        if (is.null(dn)) {
-           dn = dimnames(pars[[p]])
+           dn <- dimnames(pars[[p]])
        }
-       pars[[p]] = as.numeric(pars[[p]])
+       pars[[p]] <- as.numeric(pars[[p]])
    }
-   x = as.matrix(as.data.frame(pars))
+   x <- as.matrix(as.data.frame(pars))
    if (any(is.na(x))) {
       warning("The input contains missing data that will be removed.")
    }
-   q = apply(x, 1, quantile, prob = prob, na.rm = TRUE)
-   rnq = rownames(q)
+   q <- apply(x, 1, quantile, prob = prob, na.rm = TRUE)
+   rnq <- rownames(q)
    if (length(dims) > 1) {
        if (length(prob) ==  1) {
            dim(q) <- dims
@@ -113,18 +108,24 @@ pquantile = function(prob, ...) {
    q
 }
 
-pmedian = function(...) { pquantile(0.5, ...)}
+#' @export
+#' @rdname pquantile
+pmedian <- function(...) {
+    pquantile(0.5, ...)
+}
 
-pmean = function(...) {
-   pars = list(...)
-   nPars = length(pars)
-   dn = NULL
+#' @export
+#' @rdname pquantile
+pmean <- function(...) {
+   pars <- list(...)
+   nPars <- length(pars)
+   dn <- NULL
    for (p in 1:nPars) {
        if (mode(pars[[p]]) != "numeric") {
           stop(paste("Argument number", p, " is not numeric."))
        }
        if (p == 1) {
-          dim = .dimensions(pars[[p]])
+          dim <- .dimensions(pars[[p]])
        } else {
           if (!isTRUE(all.equal(.dimensions(pars[[p]]), dim))) {
              stop("Argument dimensions are not consistent.")
@@ -134,20 +135,20 @@ pmean = function(...) {
            stop(paste("Argument has zero dimension."))
        }
        if (is.null(dn)) {
-           dn = dimnames(pars[[p]])
+           dn <- dimnames(pars[[p]])
        }
-       pars[[p]] = as.numeric(pars[[p]])
+       pars[[p]] <- as.numeric(pars[[p]])
    }
-   x = as.matrix(as.data.frame(pars))
+   x <- as.matrix(as.data.frame(pars))
    if (any(is.na(x))) {
       warning("The input contains missing data that will be removed.")
    }
-   q = rowMeans(x, na.rm = TRUE)
+   q <- rowMeans(x, na.rm = TRUE)
    if (length(dim) > 1) {
-       dim(q) = dim
+       dim(q) <- dim
    }
    if (!is.null(dn)) {
-       dimnames(q) = dn
+       dimnames(q) <- dn
    }
    q
 }
