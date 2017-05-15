@@ -8,7 +8,7 @@
 \alias{similarity}
 \title{Calculate network adjacency}
 \usage{
-adjacency.fromSimilarity(similarity, type = "unsigned", power = 6)
+adjacency.fromSimilarity(similarity, ...)
 
 adjacency(datExpr, selectCols = NULL, type = "unsigned", power = if (type
   == "distance") 1 else 6, corFnc = "cor", corOptions = "use = 'p'",
@@ -22,12 +22,6 @@ similarity(datExpr, selectCols = NULL, corFnc = "cor",
 \item{similarity}{A (signed) similarity matrix: square, symmetric matrix
 with entries between - 1 and 1.}
 
-\item{type}{Network type, allowed values are \code{"unsigned"},
-\code{"signed"}, \code{"signed hybrid"}, \code{"distance"}.}
-
-\item{power}{Soft thresholding power, integer used in the function of the
-network type.}
-
 \item{datExpr}{data.frame containing expression data. Columns correspond to
 genes and rows to samples.}
 
@@ -35,6 +29,12 @@ genes and rows to samples.}
 select genes whose adjacencies will be calculated. Should be either a
 numeric vector giving the indices of the genes to be used, or a boolean
 vector indicating which genes are to be used.}
+
+\item{type}{Network type, allowed values are \code{"unsigned"},
+\code{"signed"}, \code{"signed hybrid"}, \code{"distance"}.}
+
+\item{power}{Soft thresholding power, integer used in the function of the
+network type.}
 
 \item{corFnc}{Character string specifying the function to be used to
 calculate co - expression similarity for correlation networks. Defaults to

@@ -6,11 +6,7 @@
 \alias{pickSoftThreshold.fromSimilarity}
 \title{Analysis of scale free topology for soft-thresholding}
 \usage{
-pickSoftThreshold.fromSimilarity(similarity, RsquaredCut = 0.85,
-  powerVector = c(seq(1, 10, by = 1), seq(12, 20, by = 2)),
-  removeFirst = FALSE, nBreaks = 10, blockSize = 1000,
-  networkType = "unsigned", moreNetworkConcepts = FALSE, verbose = 0,
-  indent = 0)
+pickSoftThreshold.fromSimilarity(similarity, ...)
 
 pickSoftThreshold(data, dataIsExpr = TRUE, RsquaredCut = 0.85,
   powerVector = c(seq(1, 10, by = 1), seq(12, 20, by = 2)),
@@ -20,6 +16,12 @@ pickSoftThreshold(data, dataIsExpr = TRUE, RsquaredCut = 0.85,
 }
 \arguments{
 \item{similarity}{Matrix whose values are between -1 and 1}
+
+\item{data}{expression data in a matrix or data frame. Rows correspond to
+samples and columns to genes.}
+
+\item{dataIsExpr}{logical: should the data be interpreted as expression (or
+other numeric) data, or as a similarity matrix of network nodes?}
 
 \item{RsquaredCut}{desired minimum scale free topology fitting index
 \eqn{R^2}.}
@@ -37,6 +39,11 @@ should be broken up. If not given, a suitable value will be calculated using
 function \code{blockSize} and printed if \code{verbose>0}. If R runs into
 memory problems, decrease this value.}
 
+\item{corFnc}{the correlation function to be used in adjacency calculation.}
+
+\item{corOptions}{a list giving further options to the correlation function
+specified in \code{corFnc}.}
+
 \item{networkType}{network type. Allowed values are (unique abbreviations
 of) \code{"unsigned"}, \code{"signed"}, \code{"signed hybrid"}. See
 \code{\link{adjacency}}.}
@@ -52,17 +59,6 @@ make the output progressively more and more verbose.}
 
 \item{indent}{indentation for diagnostic messages. Zero means no
 indentation, each unit adds two spaces.}
-
-\item{data}{expression data in a matrix or data frame. Rows correspond to
-samples and columns to genes.}
-
-\item{dataIsExpr}{logical: should the data be interpreted as expression (or
-other numeric) data, or as a similarity matrix of network nodes?}
-
-\item{corFnc}{the correlation function to be used in adjacency calculation.}
-
-\item{corOptions}{a list giving further options to the correlation function
-specified in \code{corFnc}.}
 }
 \value{
 A list with the following components:

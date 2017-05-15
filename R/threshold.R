@@ -1,4 +1,4 @@
-#===============================================================================
+# pickHardThreshold ####
 # The function PickHardThreshold can help one to estimate the cut - off value
 # when using the signum (step) function.
 # The first column lists the threshold ("cut"), the second column lists the
@@ -77,7 +77,10 @@
 #' @keywords misc
 pickHardThreshold <- function(data, dataIsExpr = TRUE, RsquaredCut = 0.85,
                               cutVector = seq(0.1, 0.9,
-                                              by = 0.05), moreNetworkConcepts = FALSE, removeFirst = FALSE, nBreaks = 10,
+                                              by = 0.05),
+                              moreNetworkConcepts = FALSE,
+                              removeFirst = FALSE,
+                              nBreaks = 10,
                               corFnc = "cor",
                               corOptions = "use = 'p'") {
     nGenes = dim(data)[[2]]
@@ -86,36 +89,36 @@ pickHardThreshold <- function(data, dataIsExpr = TRUE, RsquaredCut = 0.85,
     if (moreNetworkConcepts) {
         colname1 = c(colname1, "Density", "Centralization", "Heterogeneity")
     }
-    if (!dataIsExpr)
-    {
+    if (!dataIsExpr) {
         checkAdjMat(data)
-        if (any(diag(data) != 1)) diag(data) = 1
-    } else
+        if (any(diag(data) != 1)) {
+          diag(data) <- 1
+        }
+    } else {
         nSamples = dim(data)[[1]]
+    }
 
     datout = data.frame(matrix(nrow = length(cutVector),
                                ncol = length(colname1)))
     names(datout) = colname1
     datout[, 1] = cutVector
-    if (dataIsExpr)
-    {
-        for (i in 1:length(cutVector))
-        {
+    if (dataIsExpr) {
+        for (i in 1:length(cutVector)) {
             cut1 = cutVector[i]
-            datout[i, 2] = 2 * (1 - pt(sqrt(nSamples - 1) * cut1/sqrt(1  -
-                                                                          cut1^2), nSamples - 1))
+            datout[i, 2] = 2 * (1 - pt(sqrt(nSamples - 1) * cut1/sqrt(
+              1 - cut1^2), nSamples - 1))
         }
     } else
         datout[, 2] = NA
 
     fun1 <- function(x, dataIsExpr) {
-        if (dataIsExpr)
-        {
+        if (dataIsExpr) {
             corExpr = parse(text = paste(corFnc, "(x, data",
                                          prepComma(corOptions), ")"))
             corx = abs(eval(corExpr))
-        } else
+        } else {
             corx = x
+        }
         out1 = rep(NA, length(cutVector))
         for (j in c(1:length(cutVector))) {
             out1[j] = sum(corx > cutVector[j], na.rm = TRUE)
@@ -152,11 +155,8 @@ pickHardThreshold <- function(data, dataIsExpr = TRUE, RsquaredCut = 0.85,
 } # end of function pickHardThreshold
 
 
-#===============================================================================
+# pickSoftThreshold ####
 #
-# pickSoftThreshold
-#
-#===============================================================================
 # The function pickSoftThreshold allows one to estimate the power parameter when
 # using a soft thresholding approach with the use of the power function
 # AF(s) = s^Power

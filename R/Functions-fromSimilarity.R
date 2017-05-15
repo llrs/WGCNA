@@ -98,7 +98,7 @@ matrixToNetwork <- function(mat, symmetrizeMethod = c("average", "min", "max"),
 checkSimilarity <- function(similarity, min =  - 1, max = 1) {
     checkAdjMat(similarity, min, max)
 }
-
+# Kept for backward compatibility
 #' @name adjacency
 #' @rdname adjacency
 #' @examples
@@ -106,53 +106,28 @@ checkSimilarity <- function(similarity, min =  - 1, max = 1) {
 #' similarity <- similarity(datExpr)
 #' adj <-  adjacency.fromSimilarity(similarity)
 #' @export
-adjacency.fromSimilarity <- function(similarity, type = "unsigned",
-                                     power = 6) {
+adjacency.fromSimilarity <- function(similarity, ...) {
     power <- ifelse(type == "distance", 1 , power)
     checkSimilarity(similarity)
-    adjacency(similarity, type = type, power = power, corFnc = "I",
-              corOptions = "", distFnc = "I", distOptions = "")
+    adjacency(similarity, ...)
 }
 
+# Kept for backward compatibility
 #' @name pickHardThreshold.fromSimilarity
 #' @rdname pickHardThreshold
 #' @param similarity Matrix whose values are between -1 and 1
 #' @export
-pickHardThreshold.fromSimilarity <- function(similarity,
-                                             RsquaredCut = 0.85,
-                                             cutVector = seq(0.1, 0.9,
-                                                             by = 0.05),
-                                             moreNetworkConcepts = FALSE ,
-                                             removeFirst = FALSE,
-                                             nBreaks = 10) {
+pickHardThreshold.fromSimilarity <- function(similarity, ...) {
     checkSimilarity(similarity)
-    pickHardThreshold(similarity, dataIsExpr = FALSE,
-                      RsquaredCut =  RsquaredCut, cutVector = cutVector,
-                      moreNetworkConcepts = moreNetworkConcepts,
-                      removeFirst = removeFirst,
-                      nBreaks = nBreaks, corFnc = "I", corOptions = "")
+    pickHardThreshold(similarity, dataIsExpr = FALSE, ...)
 }
 
 #' @name pickSoftThreshold.fromSimilarity
 #' @rdname pickSoftThreshold
 #' @param similarity Matrix whose values are between -1 and 1
 #' @export
-pickSoftThreshold.fromSimilarity <- function(similarity,
-                                             RsquaredCut = 0.85,
-                                             powerVector = c(seq(1, 10, by = 1),
-                                                             seq(12, 20, by = 2)
-                                             ),
-                                             removeFirst = FALSE, nBreaks = 10,
-                                             blockSize = 1000,
-                                             networkType = "unsigned",
-                                             moreNetworkConcepts = FALSE,
-                                             verbose = 0, indent = 0) {
+pickSoftThreshold.fromSimilarity <- function(similarity, ...) {
     checkSimilarity(similarity)
-    pickSoftThreshold(similarity, dataIsExpr = FALSE,
-                      RsquaredCut =  RsquaredCut, powerVector = powerVector,
-                      removeFirst = removeFirst, nBreaks = nBreaks,
-                      blockSize = blockSize, networkType = networkType,
-                      moreNetworkConcepts = moreNetworkConcepts,
-                      verbose = verbose, indent = indent)
+    pickSoftThreshold(similarity, dataIsExpr = FALSE, ...)
 
 }

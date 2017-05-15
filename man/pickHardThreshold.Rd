@@ -6,9 +6,7 @@
 \alias{pickHardThreshold.fromSimilarity}
 \title{Analysis of scale free topology for hard-thresholding.}
 \usage{
-pickHardThreshold.fromSimilarity(similarity, RsquaredCut = 0.85,
-  cutVector = seq(0.1, 0.9, by = 0.05), moreNetworkConcepts = FALSE,
-  removeFirst = FALSE, nBreaks = 10)
+pickHardThreshold.fromSimilarity(similarity, ...)
 
 pickHardThreshold(data, dataIsExpr = TRUE, RsquaredCut = 0.85,
   cutVector = seq(0.1, 0.9, by = 0.05), moreNetworkConcepts = FALSE,
@@ -17,6 +15,12 @@ pickHardThreshold(data, dataIsExpr = TRUE, RsquaredCut = 0.85,
 }
 \arguments{
 \item{similarity}{Matrix whose values are between -1 and 1}
+
+\item{data}{expression data in a matrix or data frame. Rows correspond to
+samples and columns to genes.}
+
+\item{dataIsExpr}{logical: should the data be interpreted as expression (or
+other numeric) data, or as a similarity matrix of network nodes?}
 
 \item{RsquaredCut}{desired minimum scale free topology fitting index
 \eqn{R^2}.}
@@ -34,12 +38,6 @@ Horvath and Dong (2008).  PloS Comp Biol.}
 histogram?}
 
 \item{nBreaks}{number of bins in connectivity histograms}
-
-\item{data}{expression data in a matrix or data frame. Rows correspond to
-samples and columns to genes.}
-
-\item{dataIsExpr}{logical: should the data be interpreted as expression (or
-other numeric) data, or as a similarity matrix of network nodes?}
 
 \item{corFnc}{a character string giving the correlation function to be used
 in adjacency calculation.}
