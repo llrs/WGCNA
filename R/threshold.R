@@ -337,19 +337,20 @@ pickSoftThreshold <- function(data, dataIsExpr = TRUE, RsquaredCut = 0.85,
                     corOptions$x <- data
                     corOptions$y <- data[, useGenes]
                     corx <- do.call(corFnc, corOptions)
-                    if (intType == 1) {
-                        corx <- abs(corx)
-                    } else if (intType == 2) {
-                        corx <- (1 + corx)/2
-                    } else if (intType == 3) {
-                        corx[corx < 0] <- 0
-                    }
-                    if (sum(is.na(corx))  != 0)
-                        warning(paste("Some correlations are NA in block",
-                                      startG, ":", endG, "."))
                 } else {
-                    corx <- data[, useGenes]
+                  corx <- data[, useGenes]
                 }
+                if (intType == 1) {
+                  corx <- abs(corx)
+                } else if (intType == 2) {
+                  corx <- (1 + corx)/2
+                } else if (intType == 3) {
+                  corx[corx < 0] <- 0
+                }
+                if (sum(is.na(corx))  != 0)
+                  warning(paste("Some correlations are NA in block",
+                                startG, ":", endG, "."))
+
                 datk.local <- matrix(nGenes1, nPowers)
                 for (j in 1:nPowers) {
                     datk.local[, j] <- colSums(corx^powerVector[j],
