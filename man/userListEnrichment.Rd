@@ -133,21 +133,23 @@ set.seed(100)
 geneR = sort(sample(listGenes,2000))
 categories = sort(rep(standardColors(10),200))
 categories[sample(1:2000,200)] = "grey"
+\dontrun{
 write(c("TESTLIST1",geneR[300:400], sep="\\n"),"TESTLIST1.txt")
 write(c("TESTLIST2",geneR[800:1000],sep="\\n"),"TESTLIST2.txt")
 
 # Now run the function!
-testResults = userListEnrichment(geneR, labelR=categories, 
-                                 fnIn=c("TESTLIST1.txt","TESTLIST2.txt"), 
-                                 catNmIn=c("TEST1","TEST2"), 
-nameOut = "testEnrichment.csv",useBrainLists=TRUE, omitCategories ="grey")
+testResults = userListEnrichment(geneR, labelR=categories,
+                                 fnIn=c("TESTLIST1.txt","TESTLIST2.txt"),
+                                 catNmIn=c("TEST1","TEST2"),
+                                 nameOut = "testEnrichment.csv",
+                                 useBrainLists=TRUE, omitCategories ="grey")
 
-# To see a list of all significant enrichments, either open 
+# To see a list of all significant enrichments, either open
 # the file "testEnrichments.csv" in the current directory, or type:
 testResults$sigOverlaps
 
-# To see all of the overlapping genes between two categories 
-#(whether or not the p-value is significant), type 
+# To see all of the overlapping genes between two categories
+#(whether or not the p-value is significant), type
 #restResults$ovGenes$'<labelR> -- <comparisonCategory>'.  For example:
 
 testResults$ovGenes$"black -- TESTLIST1__TEST1"
@@ -155,7 +157,7 @@ testResults$ovGenes$"red -- salmon_M12_Ribosome__HumanMeta"
 
 # More detailed overlap information is in the pValue output.  For example:
 head(testResults$pValue)
-
+}
 }
 \references{
 The primary reference for this function is: Miller JA, Cai C,
