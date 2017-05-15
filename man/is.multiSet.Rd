@@ -35,12 +35,11 @@ This function checks whether the supplied \code{x} is a multiSet structure
 in the "strict" (when \code{strict = TRUE} or "loose" \code{strict = FALSE}
 sense.
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 Other multiSet handling functions whose names start with
 \code{multiSet.}
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

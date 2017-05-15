@@ -163,13 +163,12 @@ is calculated similarly to the consensus selection statistic above. In each
 group, the variable with the highest consensus intra-group connectivity is
 chosen as the representative.
 }
-\author{
-Peter Langfelder, based on code by Jeremy Miller
-}
 \seealso{
 \code{\link{multiSet}} for a description of the \code{multiSet}
 structures; \code{\link{collapseRows}} that solves a related but different
 problem. Please note the differences in input and output!
 }
+\author{
+Peter Langfelder, based on code by Jeremy Miller
+}
 \keyword{misc}
-

@@ -56,11 +56,10 @@ process is repeated until the lists of good samples and genes are stable.
 The constants \code{..minNSamples} and \code{..minNGenes} are both set to
 the value 4.
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{goodSamples}}, \code{\link{goodGenes}}
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

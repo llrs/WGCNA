@@ -24,4 +24,3 @@ triangle and optionally the diagonal.
 Steve Horvath
 }
 \keyword{misc}
-

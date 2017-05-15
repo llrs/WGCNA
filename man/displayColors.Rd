@@ -24,11 +24,10 @@ standardColors(n)}.
 \dontrun{
 displayColors(standardColors(10))}
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{standardColors}}
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

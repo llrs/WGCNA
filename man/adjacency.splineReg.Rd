@@ -82,9 +82,6 @@ A.min
 R.squared <- adjacency.splineReg(datE, symmetrizationMethod = "none")
 R.squared
 }
-\author{
-Lin Song, Steve Horvath
-}
 \references{
 Song L, Langfelder P, Horvath S Avoiding mutual information
 based co-expression measures (to appear).
@@ -95,5 +92,7 @@ Systems Biology. Springer Book. ISBN: 978-1-4419-8818-8
 \seealso{
 \code{\link[splines]{ns}}, \code{\link{glm}}
 }
+\author{
+Lin Song, Steve Horvath
+}
 \keyword{misc}
-

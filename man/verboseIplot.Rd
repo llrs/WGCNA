@@ -83,11 +83,10 @@ This funtion is based on verboseScatterplot (Steve Horvath and Peter
 Langfelder), iplot (Andreas Ruckstuhl, Rene Locher) and greenWhiteRed(Peter
 Langfelder )
 }
-\author{
-Chaochao Cai, Steve Horvath
-}
 \seealso{
 \link{image} for more parameters
 }
+\author{
+Chaochao Cai, Steve Horvath
+}
 \keyword{graphics}
-

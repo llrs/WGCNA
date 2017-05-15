@@ -245,13 +245,12 @@ a given gene symbol into one representative.
     rownames(collapse.object.ME.2) = sort(unique(rowGroup))
 
 }
-\author{
-Jeremy A. Miller, Steve Horvath, Peter Langfelder, Chaochao Cai
-}
 \references{
 Miller JA, Langfelder P, Cai C, Horvath S (2010) Strategies for
 optimally aggregating gene expression data: The collapseRows R function.
 Technical Report.
 }
+\author{
+Jeremy A. Miller, Steve Horvath, Peter Langfelder, Chaochao Cai
+}
 \keyword{misc}
-

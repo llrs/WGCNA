@@ -43,4 +43,3 @@ rest from the path coefficients given in the matrix \code{causeMat}.
 Peter Langfelder
 }
 \keyword{misc}
-

@@ -114,9 +114,6 @@ min)/(max+min)^2]}{tanh[( max - min)/(max+min)^2]}, where \eqn{max}{max} and
 \eqn{min}{min} are the componentwise maximum and minimum of the compared
 adjacencies, respectively.
 }
-\author{
-Peter Langfelder
-}
 \references{
 Langfelder P, Horvath S (2007) Eigengene networks for studying
 the relationships between co-expression modules. BMC Systems Biology 2007,
@@ -125,5 +122,7 @@ the relationships between co-expression modules. BMC Systems Biology 2007,
 \seealso{
 \code{\link{adjacency}} for calculation of adjacency
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

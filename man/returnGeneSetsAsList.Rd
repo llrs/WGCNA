@@ -89,12 +89,11 @@ geneSets   = returnGeneSetsAsList(useImmunePathwayLists=TRUE)
 geneSets[7:8]
 
 }
-\author{
-Jeremy Miller
-}
 \references{
 Please see the help file for userListEnrichment in the WGCNA
 library for references for the pre-defined lists.
 }
+\author{
+Jeremy Miller
+}
 \keyword{misc}
-

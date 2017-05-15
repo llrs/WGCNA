@@ -12,6 +12,9 @@ multiSet.mapply(FUN, ..., MoreArgs = NULL, mdma.argIsMultiData = NULL,
 \arguments{
 \item{FUN}{Function to be applied.}
 
+\item{\dots}{Arguments to be vectorized over. These can be multiSet
+structures or simple vectors (e.g., lists).}
+
 \item{MoreArgs}{A named list that specifies the scalar arguments (if any) to
 \code{FUN}.}
 
@@ -56,9 +59,6 @@ diagnostic messages.}
 
 \item{mdmaIndent}{Integer specifying the indentation of the printed progress
 messages. Each unit equals two spaces.}
-
-\item{\dots}{Arguments to be vectorized over. These can be multiSet
-structures or simple vectors (e.g., lists).}
 }
 \value{
 A multiSet structure containing (as the \code{data} components) the
@@ -93,14 +93,13 @@ colnames(data2) <- LETTERS[2:6]
 md <- list2multiSet(list(Set1 = data1, Set2 = data2))
 multiSet.mapply(md, FUN = sum)
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{multiSet}} to create a multiSet structure
 
 \code{apply.multiSet} for application of a function to a single multiSet
 structure.
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

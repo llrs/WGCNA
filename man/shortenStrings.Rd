@@ -46,12 +46,11 @@ given character string. If such occurrences are found at positions between
 last such \code{split}; otherwise, the string will be truncated at
 \code{maxLength}. The \code{ellipsis} is appended to each truncated string.
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{gregexpr}}, the workhorse pattern matching function
 \code{\link{formatLabels}} for splitting strings into multiple lines
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

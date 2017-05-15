@@ -26,9 +26,6 @@ datExpr <- matrix(rnorm(150), ncol = 5)
 corMat <- cor(datExpr)
 signumAdjacency(corMat, 0.1)
 }
-\author{
-Steve Horvath
-}
 \references{
 Bin Zhang and Steve Horvath (2005) "A General Framework for
 Weighted Gene Co-Expression Network Analysis", Statistical Applications in
@@ -38,5 +35,7 @@ Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 \code{\link{adjacency}} for soft-thresholding and creating weighted
 networks.
 }
+\author{
+Steve Horvath
+}
 \keyword{misc}
-

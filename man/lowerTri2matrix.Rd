@@ -56,4 +56,3 @@ result of the function is then an n times n matrix.
 Peter Langfelder
 }
 \keyword{misc}
-

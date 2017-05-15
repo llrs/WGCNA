@@ -175,9 +175,6 @@ its eigengene-based analog have been used to characterize networks where
 highly connected hub genes are important with regard to a trait based gene
 significance measure (Horvath and Dong 2008).
 }
-\author{
-Jun Dong, Steve Horvath, Peter Langfelder
-}
 \references{
 Bin Zhang and Steve Horvath (2005) "A General Framework for
 Weighted Gene Co-Expression Network Analysis", Statistical Applications in
@@ -196,5 +193,7 @@ conformity-based network concepts
 \code{\link{fundamentalNetworkConcepts}} for calculation of fundamental
 network concepts only.
 }
+\author{
+Jun Dong, Steve Horvath, Peter Langfelder
+}
 \keyword{misc}
-

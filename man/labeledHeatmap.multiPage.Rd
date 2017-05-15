@@ -136,9 +136,6 @@ allocated automatically as uniformly as possible, in contiguous blocks of
 size at most \code{maxRowsPerPage} (\code{maxColsPerPage}).  The allocation
 is performed by the function \code{\link{allocateJobs}}.
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 The workhorse function \code{\link{labeledHeatmap}} for the actual
 heatmap plot
@@ -146,5 +143,7 @@ heatmap plot
 function \code{\link{allocateJobs}} for the allocation of rows/columns to
 each plot.
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

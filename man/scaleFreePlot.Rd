@@ -33,9 +33,6 @@ The function plots a log-log plot of a histogram of the given
 exponential model. The \eqn{R^2} of the fit can be considered an index of
 the scale freedom of the network topology.
 }
-\author{
-Steve Horvath
-}
 \references{
 Bin Zhang and Steve Horvath (2005) "A General Framework for
 Weighted Gene Co-Expression Network Analysis", Statistical Applications in
@@ -45,5 +42,7 @@ Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 \code{\link{softConnectivity}} for connectivity calculation in
 weigheted networks.
 }
+\author{
+Steve Horvath
+}
 \keyword{misc}
-

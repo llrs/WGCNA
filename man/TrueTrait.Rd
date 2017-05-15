@@ -183,9 +183,6 @@ True1[[3]]
 # with the true SD
 sqrt(var(yTRUE - datTrue$y.true3))
 }
-\author{
-Steve Horvath
-}
 \references{
 Klemera P, Doubal S (2006) A new approach to the concept and
 computation of biological age. Mechanisms of Ageing and Development 127
@@ -196,5 +193,7 @@ Validation of Biological Age Estimation Algorithms with an Application of
 Work Ability Index. Mechanisms of Ageing and Development Volume 131, Issue
 2, February 2010, Pages 69-78
 }
+\author{
+Steve Horvath
+}
 \keyword{misc}
-

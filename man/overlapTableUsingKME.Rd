@@ -99,11 +99,10 @@ results$PvaluesHypergeo
 results$OverlappingGenes$MM1_green_MM2_black
 
 }
-\author{
-Jeremy Miller
-}
 \seealso{
 \code{\link{overlapTable}}
 }
+\author{
+Jeremy Miller
+}
 \keyword{misc}
-

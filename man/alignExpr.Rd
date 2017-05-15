@@ -30,4 +30,3 @@ in \code{datExpr} will be used as the reference vector.
 Steve Horvath and Peter Langfelder
 }
 \keyword{misc}
-

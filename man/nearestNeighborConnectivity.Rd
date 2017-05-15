@@ -64,11 +64,10 @@ strengths are calculated by correlating the given expression data using the
 function supplied in \code{corFNC} and transforming them into adjacency
 according to the given network \code{type} and \code{power}.
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{adjacency}}, \code{\link{softConnectivity}}
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

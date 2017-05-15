@@ -20,4 +20,3 @@ network given by the input adjacency matrix.
 Steve Horvath
 }
 \keyword{misc}
-

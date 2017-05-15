@@ -38,11 +38,10 @@ eigengenes (plus the trait \code{y}, if given). On the diagonal it plots
 histograms of sample values for each eigengene. Below the diagonal, it
 displays the pairwise correlations of the eigengenes.
 }
-\author{
-Steve Horvath
-}
 \seealso{
 \code{\link{pairs}}
 }
+\author{
+Steve Horvath
+}
 \keyword{hplot}
-

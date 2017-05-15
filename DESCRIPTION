@@ -19,4 +19,4 @@ NeedsCompilation: yes
 Packaged: 2016-03-14 22:18:51 UTC; plangfelder
 Repository: CRAN
 Date/Publication: 2016-03-15 00:24:08
-RoxygenNote: 5.0.1.9000
+RoxygenNote: 6.0.1

@@ -34,4 +34,3 @@ Adds vertical ``guide lines'' to a dendrogram plot.
 Peter Langfelder
 }
 \keyword{hplot}
-

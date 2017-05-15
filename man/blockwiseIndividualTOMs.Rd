@@ -222,9 +222,6 @@ within the return value can quickly exhaust the system's memory. In
 particular, if the block-wise calculation is necessary, it is nearly certain
 that returning all matrices via the return value will be impossible.
 }
-\author{
-Peter Langfelder
-}
 \references{
 For a general discussion of the weighted network formalism, see
 
@@ -241,5 +238,7 @@ network analysis".  BMC Bioinformatics 2008, 9:559
 \seealso{
 \code{\link{blockwiseConsensusModules}}
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

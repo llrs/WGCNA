@@ -99,11 +99,10 @@ are two-sided.
 
 
 }
-\author{
-Steve Horvath
-}
 \seealso{
 \code{\link{barplot}}
 }
+\author{
+Steve Horvath
+}
 \keyword{misc}
-

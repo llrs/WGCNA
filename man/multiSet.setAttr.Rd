@@ -21,13 +21,12 @@ component.
 \description{
 Set attributes on each \code{data} component of a multiSet structure
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{multiSet}} to create a multiSet structure
 
 \code{is.multiSet} for a description of the multiSet structure.
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

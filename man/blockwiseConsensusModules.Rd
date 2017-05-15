@@ -517,9 +517,6 @@ the package is compiled on your target system (which is always the %case for
 Unix, Unix-like and Mac systems, but is normally not the case on Windows
 systems).
 }
-\author{
-Peter Langfelder
-}
 \references{
 Langfelder P, Horvath S (2007) Eigengene networks for studying
 the relationships between co-expression modules. BMC Systems Biology 2007,
@@ -538,5 +535,7 @@ hierarchical clustering dendrograms
 
 \code{\link{mergeCloseModules}} for merging of close modules.
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

@@ -37,12 +37,11 @@ hc <- hclust(dist(datExpr))
 cutreeStaticColor(hc, minSize = 2)
 cutreeStatic(hc, minSize = 2)
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 for hierarchical clustering: \code{\link[stats]{hclust}} ,
 for for other constant-height branch cuts\code{\link[stats]{cutree}} and
 \code{\link{cutreeStatic}}.
 }
-
+\author{
+Peter Langfelder
+}

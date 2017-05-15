@@ -36,14 +36,13 @@ md <- multiSet(Set1 = data1, Set2 = data2)
 
 checkSets(md)
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{multiSet2list}} for converting a multiSet structure
 to a list; \code{\link{list2multiSet}} for an alternative way of creating a
 multiSet structure; \code{\link{apply.multiSet}, \link{multiSet.mapply}} for
 ways of applying a function to each component of a multiSet structure.
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

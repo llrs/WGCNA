@@ -28,4 +28,3 @@ prependZeros(1:10, 4)
 Peter Langfelder
 }
 \keyword{misc}
-

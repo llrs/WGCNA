@@ -24,4 +24,3 @@ stdErr(x)
 Steve Horvath
 }
 \keyword{misc}
-

@@ -48,11 +48,10 @@ Returns the value returned by the function \code{\link{boxplot}}.
 Plot a boxplot annotated by the Kruskal-Wallis p-value. Uses the function
 \code{\link[graphics]{boxplot}} for the actual drawing.
 }
-\author{
-Steve Horvath
-}
 \seealso{
 \code{\link{boxplot}}
 }
+\author{
+Steve Horvath
+}
 \keyword{misc}
-

@@ -157,9 +157,6 @@ testResults$ovGenes$"red -- salmon_M12_Ribosome__HumanMeta"
 head(testResults$pValue)
 
 }
-\author{
-Jeremy Miller
-}
 \references{
 The primary reference for this function is: Miller JA, Cai C,
 Langfelder P, Geschwind DH, Kurian SM, Salomon DR, Horvath S. (2011)
@@ -427,5 +424,7 @@ component of NCBI Biosystems: Geer LY et al 2010 (full citation above).
 Yang ==> These gene sets were compiled from a variety of sources by Mike
 Palazzolo and Jim Wang at CHDI.
 }
+\author{
+Jeremy Miller
+}
 \keyword{misc}
-

@@ -37,12 +37,11 @@ using an RGB color specification. Increasingly positive correlations are
 represented with reds of increasing intensity, and increasingly negative
 correlations are represented with greens of increasing intensity.
 }
-\author{
-Sandrine Dudoit, \email{sandrine@stat.berkeley.edu}
-}
 \seealso{
 \code{\link{plotMat}}, \code{\link{rgcolors.func}},
 \code{\link{cor}}, \code{\link{image}}, \code{\link{rgb}}.
 }
+\author{
+Sandrine Dudoit, \email{sandrine@stat.berkeley.edu}
+}
 \keyword{hplot}
-

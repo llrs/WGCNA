@@ -53,11 +53,10 @@ calculates, for each variable in \code{mdx}, its proportion of present
 and forms the consensus. Only variables whose consensus proportion of
 present data is at least \code{selectFewestMissing} are retained.
 }
-\author{
-Jeremy Miller and Peter Langfelder
-}
 \seealso{
 \code{\link{multiSet}}
 }
+\author{
+Jeremy Miller and Peter Langfelder
+}
 \keyword{misc}
-

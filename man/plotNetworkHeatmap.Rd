@@ -40,9 +40,6 @@ calculates Topological Overlap (TOM) and plots a heatmap of the network.
 Note that all network calculations are done in one block and may fail due to
 memory allocation issues for large numbers of genes.
 }
-\author{
-Steve Horvath
-}
 \references{
 Bin Zhang and Steve Horvath (2005) "A General Framework for
 Weighted Gene Co-Expression Network Analysis", Statistical Applications in
@@ -51,5 +48,7 @@ Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 \seealso{
 \code{\link{adjacency}}, \code{\link{TOMsimilarity}}
 }
+\author{
+Steve Horvath
+}
 \keyword{hplot}
-

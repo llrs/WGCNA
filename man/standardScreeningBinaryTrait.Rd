@@ -115,14 +115,13 @@ Result3[1:5,]
 
 
 }
-\author{
-Steve Horvath
-}
 \references{
 Storey JD, Taylor JE, and Siegmund D. (2004) Strong control,
 conservative point estimation, and simultaneous conservative consistency of
 false discovery rates: A unified approach. Journal of the Royal Statistical
 Society, Series B, 66: 187-205.
 }
+\author{
+Steve Horvath
+}
 \keyword{misc}
-

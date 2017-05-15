@@ -65,9 +65,6 @@ the value 4.  For most data sets, the fraction of missing samples criterion
 will be much more stringent than the absolute number of missing samples
 criterion.
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{goodGenes}}, \code{\link{goodSamples}},
 \code{\link{goodSamplesGenes}} for cleaning individual sets separately
@@ -75,5 +72,7 @@ Peter Langfelder
 \code{\link{goodSamplesMS}}, \code{\link{goodSamplesGenesMS}} for additional
 cleaning of multiple data sets together.
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

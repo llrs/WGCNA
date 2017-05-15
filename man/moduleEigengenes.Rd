@@ -157,10 +157,6 @@ calculation), it takes many more irregularities in the data for the hubgene
 calculation to fail. In fact such a failure signals there likely is
 something seriously wrong with the data.
 }
-\author{
-Steve Horvath \email{SHorvath@mednet.ucla.edu}, Peter Langfelder
-\email{Peter.Langfelder@gmail.com}
-}
 \references{
 Zhang, B. and Horvath, S. (2005), "A General Framework for
 Weighted Gene Co-Expression Network Analysis", Statistical Applications in
@@ -169,5 +165,8 @@ Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 \seealso{
 \code{\link{svd}}, \code{impute.knn}
 }
+\author{
+Steve Horvath \email{SHorvath@mednet.ucla.edu}, Peter Langfelder
+\email{Peter.Langfelder@gmail.com}
+}
 \keyword{misc}
-

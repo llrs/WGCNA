@@ -36,9 +36,6 @@ significance of the genes within the module. The result is plotted in a
 barplot or boxplot form. Each bar or box is labeled by the corresponding
 module color.
 }
-\author{
-Steve Horvath
-}
 \references{
 Bin Zhang and Steve Horvath (2005) "A General Framework for Weighted Gene
 Co-Expression Network Analysis", Statistical Applications in Genetics and
@@ -50,6 +47,8 @@ Systems Biology 2007, 1:24
 \seealso{
 \code{\link{barplot}}, \code{\link{boxplot}}
 }
+\author{
+Steve Horvath
+}
 \keyword{hplot}
 \keyword{misc}
-

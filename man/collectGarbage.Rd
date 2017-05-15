@@ -16,4 +16,3 @@ Performs garbage collection until free memory idicators show no change.
 Steve Horvath
 }
 \keyword{utilities}
-

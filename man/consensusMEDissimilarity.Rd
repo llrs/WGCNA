@@ -37,11 +37,10 @@ eigengenes in each set, then takes the (parallel) maximum or average over
 all sets. For details on the structure of imput data, see
 \code{\link{checkSets}}.
 }
-\author{
-Peter Langfelder, \email{Peter.Langfelder@gmail.com}
-}
 \seealso{
 \code{\link{checkSets}}
 }
+\author{
+Peter Langfelder, \email{Peter.Langfelder@gmail.com}
+}
 \keyword{misc}
-

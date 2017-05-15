@@ -38,9 +38,6 @@ The function calculates the preservation of correlation of each eigengene
 with all other eigengenes (optionally except the 'grey' eigengene) in all
 pairs of sets.
 }
-\author{
-Peter Langfelder
-}
 \references{
 Langfelder P, Horvath S (2007) Eigengene networks for studying
 the relationships between co-expression modules. BMC Systems Biology 2007,
@@ -50,5 +47,7 @@ the relationships between co-expression modules. BMC Systems Biology 2007,
 \code{\link{multiSetMEs}} and module\code{\link{checkSets}} in
 package moduleColor for more on eigengenes and the multi-set format
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

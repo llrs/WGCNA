@@ -38,4 +38,3 @@ The function is relatively fragile and may fail. Use at your own risk.
 \code{\link{multiSet2list}} for converting multiData structures to plain
 lists.
 }
-

@@ -91,11 +91,10 @@ results = stratifiedBarplot(datExpr, split, groups, subset)
 
 
 }
-\author{
-Jeremy Miller
-}
 \seealso{
 \code{\link{barplot}}, \code{\link{verboseBarplot}}
 }
+\author{
+Jeremy Miller
+}
 \keyword{misc}
-

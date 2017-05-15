@@ -59,11 +59,10 @@ head(results$MMcollapsed)
 head(results$group2Row)
 head(results$selectedRow)
 }
-\author{
-Jeremy Miller
-}
 \seealso{
 \code{\link{collapseRows}}
 }
+\author{
+Jeremy Miller
+}
 \keyword{misc}
-

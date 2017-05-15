@@ -81,12 +81,11 @@ datResiduals <- coxRegressionResiduals(time = time1, event = event1,
 datCovariates <- data.frame(z))
 cor(datResiduals, use="p")
 }
-\author{
-Steve Horvath
-}
 \references{
 Thereneau TM, Grambsch PM, Fleming TR (1990) Martingale-based residuals for
 survival models. Biometrika (1990), 77, 1, pp. 147-60
 }
+\author{
+Steve Horvath
+}
 \keyword{misc}
-

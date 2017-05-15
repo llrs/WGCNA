@@ -53,12 +53,11 @@ which the correlations of the eigengenes will determine the order. For the
 latter, a hierarchical dendrogram is calculated and the order given by the
 dendrogram is used for the eigengenes in all other sets.
 }
-\author{
-Peter Langfelder, \email{Peter.Langfelder@gmail.com}
-}
 \seealso{
 \code{\link{moduleEigengenes}}, \code{\link{multiSetMEs}},
 \code{\link{consensusOrderMEs}}
 }
+\author{
+Peter Langfelder, \email{Peter.Langfelder@gmail.com}
+}
 \keyword{misc}
-

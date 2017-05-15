@@ -40,4 +40,3 @@ The function does not work whenever logarithmic scales are in use.
 Peter Langfelder
 }
 \keyword{hplot}
-

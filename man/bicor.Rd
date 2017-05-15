@@ -119,9 +119,6 @@ analyzed together, the missing data from both columns may make a mad zero.
 In such a case, the calculation is treated as Pearson, but other columns
 will be treated as bicor.
 }
-\author{
-Peter Langfelder
-}
 \references{
 Peter Langfelder, Steve Horvath (2012) Fast R Functions for Robust
 Correlations and Hierarchical Clustering. Journal of Statistical Software,
@@ -136,5 +133,7 @@ Academic Press, 1997.
 "Data Analysis and Regression: A Second Course in Statistics", Mosteller and
 Tukey, Addison-Wesley, 1977, pp. 203-209.
 }
+\author{
+Peter Langfelder
+}
 \keyword{robust}
-

@@ -3,6 +3,8 @@
 \name{adjacency}
 \alias{adjacency}
 \alias{adjacency.fromSimilarity}
+\alias{adjacency}
+\alias{adjacency.fromSimilarity}
 \alias{similarity}
 \title{Calculate network adjacency}
 \usage{
@@ -113,9 +115,6 @@ datExpr[lower.tri(datExpr)] <- t(datExpr)[lower.tri(datExpr)]
 adj <- adjacency(datExpr)
 
 }
-\author{
-Peter Langfelder and Steve Horvath
-}
 \references{
 Bin Zhang and Steve Horvath (2005) A General Framework for
 Weighted Gene Co-Expression Network Analysis, Statistical Applications in
@@ -125,5 +124,7 @@ Langfelder P, Horvath S (2007) Eigengene networks for studying the
 relationships between co - expression modules. BMC Systems Biology 2007,
 1:54
 }
+\author{
+Peter Langfelder and Steve Horvath
+}
 \keyword{array}
-

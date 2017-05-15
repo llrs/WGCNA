@@ -71,9 +71,6 @@ Optionally, the function can also simulate genes that are "near" the module,
 meaning they are simulated with a low but non-zero correlation with the seed
 eigengene. The correlations run between \code{minCor} and zero.
 }
-\author{
-Peter Langfelder
-}
 \references{
 A short description of the simulation method can also be found
 in the Supplementary Material to the article
@@ -97,5 +94,7 @@ expression simulations
 \code{\link{simulateMultiExpr}} for a simulation of several related data
 sets.
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

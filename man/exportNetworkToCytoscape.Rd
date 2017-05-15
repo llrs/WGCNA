@@ -47,11 +47,10 @@ If the corresponding file names are supplied, the edge and node data is
 written to the appropriate files. The edge and node data is also returned as
 return value (see below).
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{exportNetworkToVisANT}}
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

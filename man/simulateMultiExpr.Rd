@@ -117,9 +117,6 @@ memberships are also the same, but modules can optionally be ``dissolved'',
 that is their genes will be simulated as unassigned. Such ``dissolved'', or
 left out, modules can be specified in the matrix \code{leaveOut}.
 }
-\author{
-Peter Langfelder
-}
 \references{
 A short description of the simulation method can also be found
 in the Supplementary Material to the article
@@ -141,5 +138,7 @@ consisting of 5 modules
 
 \code{\link{simulateModule}} for simulations of individual modules
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

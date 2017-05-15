@@ -40,11 +40,10 @@ labels1 <- sample(c(1:nModules), nGenes, replace = TRUE)
 labels2 <- sample(c(1:nModules), nGenes, replace = TRUE)
 overlapTable(labels1, labels2)
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{fisher.test}}, \code{\link{matchLabels}}
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

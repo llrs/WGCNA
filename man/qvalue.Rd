@@ -60,10 +60,6 @@ our own copy is that package qvalue contains additional functionality that
 relies on Tcl/Tk which has led to multiple problems. Our copy does not
 require Tcl/Tk.
 }
-\author{
-John D. Storey \email{jstorey@u.washington.edu}, adapted for WGCNA
-by Peter Langfelder
-}
 \references{
 Storey JD. (2002) A direct approach to false discovery rates.
 Journal of the Royal Statistical Society, Series B, 64: 479-498.
@@ -80,5 +76,8 @@ point estimation, and simultaneous conservative consistency of false
 discovery rates: A unified approach. Journal of the Royal Statistical
 Society, Series B, 66: 187-205.
 }
+\author{
+John D. Storey \email{jstorey@u.washington.edu}, adapted for WGCNA
+by Peter Langfelder
+}
 \keyword{misc}
-

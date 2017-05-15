@@ -30,13 +30,12 @@ rgcolors.func(n = 5)
 ## "#00FF00" "#40BF00" "#808000" "#BF4000" "#FF0000"
 
 }
-\author{
-Sandrine Dudoit, \email{sandrine@stat.berkeley.edu} \cr Jane
-Fridlyand, \email{janef@stat.berkeley.edu}
-}
 \seealso{
 \code{\link{plotCor}}, \code{\link{plotMat}}, \code{\link{colors}},
 \code{\link{rgb}}, \code{\link{image}}.
 }
+\author{
+Sandrine Dudoit, \email{sandrine@stat.berkeley.edu} \cr Jane
+Fridlyand, \email{janef@stat.berkeley.edu}
+}
 \keyword{color}
-

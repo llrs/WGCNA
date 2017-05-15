@@ -39,11 +39,10 @@ entry \code{"turquoise"} in \code{colors} will be matched to the eigengene
 named \code{"MEturquoise"}. The first two characters of the eigengene name
 are ignored and can be arbitrary.
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{moduleEigengenes}}
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

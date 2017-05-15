@@ -18,13 +18,12 @@ the Rand index of the input table.
 Computes the Rand index, a measure of the similarity between two
 clusterings.
 }
-\author{
-Steve Horvath
-}
 \references{
 W. M. Rand (1971). "Objective criteria for the evaluation of
 clustering methods". Journal of the American Statistical Association 66:
 846-850
 }
+\author{
+Steve Horvath
+}
 \keyword{misc}
-

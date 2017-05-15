@@ -246,9 +246,6 @@ For large data sets, the permutation study may take a while (typically on
 the order of several hours). Use \code{verbose = 3} to get detailed progress
 report as the calculations advance.
 }
-\author{
-Rui Luo and Peter Langfelder
-}
 \references{
 Peter Langfelder, Rui Luo, Michael C. Oldham, and Steve Horvath,
 to appear
@@ -259,5 +256,7 @@ package such as \code{\link{adjacency}}, \code{\link{blockwiseModules}}
 rudimentary cleaning in \code{\link{goodSamplesGenesMS}}; the WGCNA
 implementation of correlation in \code{\link{cor}}.
 }
+\author{
+Rui Luo and Peter Langfelder
+}
 \keyword{misc}
-

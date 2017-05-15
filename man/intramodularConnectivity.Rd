@@ -77,9 +77,6 @@ function sums adjacency entries (excluding the diagonal) to other nodes
 within the same module. Optionally, the connectivities can be scaled by the
 maximum connectivy in each module.
 }
-\author{
-Steve Horvath and Peter Langfelder
-}
 \references{
 Dong J, Horvath S (2007) Understanding Network Concepts in
 Modules, BMC Systems Biology 2007, 1:24
@@ -87,5 +84,7 @@ Modules, BMC Systems Biology 2007, 1:24
 \seealso{
 \code{\link{adjacency}}
 }
+\author{
+Steve Horvath and Peter Langfelder
+}
 \keyword{misc}
-

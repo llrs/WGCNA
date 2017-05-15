@@ -272,9 +272,6 @@ vary from association to association), and (4) \code{Z} giving a Z static
 for each observation. If these are missing, \code{nObs} is calculated in the
 main function, and calculations using the Z statistic are skipped.
 }
-\author{
-Peter Langfelder
-}
 \references{
 Langfelder P, Horvath S., WGCNA: an R package for weighted
 correlation network analysis. BMC Bioinformatics. 2008 Dec 29; 9:559.
@@ -285,5 +282,7 @@ set. \link{corAndPvalue}, \link{bicorAndPvalue} for two alternatives for
 calculating correlations and the corresponding p-values and Z scores. Both
 can be used with this function.
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

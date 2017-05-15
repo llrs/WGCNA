@@ -42,9 +42,6 @@ x[1] = 10
 plot(x, bicovWeights(x))
 
 }
-\author{
-Peter Langfelder
-}
 \references{
 This function is based on Equation (3) in
 
@@ -63,5 +60,7 @@ Wilcox RR (2005). Introduction to Robust Estimation and Hypothesis Testing.
 \seealso{
 \code{\link{bicor}}
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

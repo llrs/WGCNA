@@ -346,9 +346,6 @@ and often the only way to work with large numbers of genes. As a rough
 guide, it is unlikely a standard desktop computer with 4GB memory or less
 will be able to work with blocks larger than 8000 genes.
 }
-\author{
-Peter Langfelder
-}
 \references{
 Bin Zhang and Steve Horvath (2005) "A General Framework for
 Weighted Gene Co-Expression Network Analysis", Statistical Applications in
@@ -367,5 +364,7 @@ hierarchical clustering dendrograms
 
 \code{\link{mergeCloseModules}} for merging of close modules.
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

@@ -99,4 +99,3 @@ kMEcomparisonScatterplot(simData1$datExpr, simData2$datExpr,
 Jeremy Miller
 }
 \keyword{misc}
-

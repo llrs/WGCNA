@@ -29,13 +29,12 @@ anything (but for most purposes should be of comparable type and content).
 
 This function requires a "strict" multiSet structure.
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{multiSet}} to create a multiSet structure
 
 \code{\link{rbind}} for various subtleties of the row binding operation.
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

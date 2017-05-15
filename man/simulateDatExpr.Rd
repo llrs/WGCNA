@@ -139,9 +139,6 @@ that tends to correlate random groups of genes. The size and effect
 parameters are the same as for the ordered submodules, and the number of
 layers added is controlled by \code{nScatteredModuleLayers}.
 }
-\author{
-Peter Langfelder
-}
 \references{
 A short description of the simulation method can also be found
 in the Supplementary Material to the article
@@ -164,5 +161,7 @@ expression simulations
 \code{\link{simulateMultiExpr}} for a simulation of several related data
 sets.
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

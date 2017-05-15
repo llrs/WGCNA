@@ -145,9 +145,6 @@ using a device such as \code{\link{postscript}} or \code{\link{pdf}} where
 the user can specify large dimensions; such plots can be conveniently viewed
 in standard pdf or postscript viewers.
 }
-\author{
-Peter Langfelder
-}
 \references{
 For theory and applications of consensus eigengene networks, see
 
@@ -160,5 +157,7 @@ heatmaps and barplots
 
 \code{\link[stats]{hclust}} for hierarchical clustering and dendrogram plots
 }
+\author{
+Peter Langfelder
+}
 \keyword{hplot}
-

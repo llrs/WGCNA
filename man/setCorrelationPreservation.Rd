@@ -43,9 +43,6 @@ the abosolute preservation (high if the two correlations are similar and low
 if they are different), and the hyperbolically scaled preservation, which
 de-emphasizes preservation of low correlation values.
 }
-\author{
-Peter Langfelder
-}
 \references{
 Langfelder P, Horvath S (2007) Eigengene networks for studying
 the relationships between co-expression modules. BMC Systems Biology 2007,
@@ -56,5 +53,7 @@ the relationships between co-expression modules. BMC Systems Biology 2007,
 
 \code{\link{plotEigengeneNetworks}} for eigengene network visualization.
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

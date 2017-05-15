@@ -26,4 +26,3 @@ Peter Langfelder, \email{Peter.Langfelder@gmail.com}
 }
 \keyword{color}
 \keyword{misc}
-

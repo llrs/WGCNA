@@ -319,9 +319,6 @@ input sets. Alternatively, one can also use (weighted) component-wise mean
 across all imput data sets. If requested, the consensus topological overlaps
 are saved to disk for later use.
 }
-\author{
-Peter Langfelder
-}
 \references{
 WGCNA methodology has been described in
 
@@ -349,5 +346,7 @@ variance and bias", Bioinformatics. 2003 Jan 22;19(2):1
 \code{\link{blockwiseIndividualTOMs}} for calculation of
 topological overlaps across multiple sets.
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

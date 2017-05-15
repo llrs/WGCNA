@@ -40,9 +40,6 @@ Signed eigengene-based connectivity of a gene in a module is defined as the
 correlation of the gene with the corresponding module eigengene.  The
 samples in \code{datExpr} and \code{datME} must be the same.
 }
-\author{
-Steve Horvath
-}
 \references{
 Dong J, Horvath S (2007) Understanding Network Concepts in Modules, BMC
 Systems Biology 2007, 1:24
@@ -50,5 +47,7 @@ Systems Biology 2007, 1:24
 Horvath S, Dong J (2008) Geometric Interpretation of Gene Coexpression
 Network Analysis. PLoS Comput Biol 4(8): e1000117
 }
+\author{
+Steve Horvath
+}
 \keyword{misc}
-

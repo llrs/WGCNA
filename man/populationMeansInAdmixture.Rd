@@ -129,13 +129,12 @@ for (i in 1:4 ){
 
 
 }
-\author{
-Steve Horvath, Chaochao Cai
-}
 \references{
 Shen-Orr SS, Tibshirani R, Khatri P, Bodian DL, Staedtler F,
 Perry NM, Hastie T, Sarwal MM, Davis MM, Butte AJ (2010) Cell type-specific
 gene expression differences in complex tissues.  Nature Methods, vol 7 no.4
 }
+\author{
+Steve Horvath, Chaochao Cai
+}
 \keyword{misc}
-

@@ -88,4 +88,3 @@ this approximation is used.
 Peter Langfelder
 }
 \keyword{cluster}
-

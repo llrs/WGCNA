@@ -54,11 +54,10 @@ the value 4.  For most data sets, the fraction of missing samples criterion
 will be much more stringent than the absolute number of missing samples
 criterion.
 }
-\author{
-Peter Langfelder and Steve Horvath
-}
 \seealso{
 \code{\link{goodSamples}}, \code{\link{goodSamplesGenes}}
 }
+\author{
+Peter Langfelder and Steve Horvath
+}
 \keyword{misc}
-

@@ -30,11 +30,10 @@ colnames(data2) <- LETTERS[2:6]
 md <- multiSet(Set1 = data1, Set2 = data2)
 keepCommonProbes(md)
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{checkSets}}
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

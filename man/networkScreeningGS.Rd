@@ -38,12 +38,11 @@ variables in general) with high gene significance
 This function should be considered experimental. It takes into account both
 the "standard" and the network measures of gene importance for the trait.
 }
-\author{
-Steve Horvath
-}
 \seealso{
 \code{\link{networkScreening}},
 \code{\link{automaticNetworkScreeningGS}}
 }
+\author{
+Steve Horvath
+}
 \keyword{misc}
-

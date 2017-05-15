@@ -253,11 +253,10 @@ labeledHeatmap(mat, xLabels = colLabels, yLabels = rowLabels,
                main = "Text- + color-labeled heatmap")
 }
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{heatmap}}, \code{\link{colors}}
 }
+\author{
+Peter Langfelder
+}
 \keyword{hplot}
-

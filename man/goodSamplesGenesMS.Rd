@@ -63,9 +63,6 @@ process is repeated until the lists of good samples and genes are stable.
 The constants \code{..minNSamples} and \code{..minNGenes} are both set to
 the value 4.
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{goodGenes}}, \code{\link{goodSamples}},
 \code{\link{goodSamplesGenes}} for cleaning individual sets separately
@@ -73,5 +70,7 @@ Peter Langfelder
 \code{\link{goodSamplesMS}}, \code{\link{goodGenesMS}} for additional
 cleaning of multiple data sets together.
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

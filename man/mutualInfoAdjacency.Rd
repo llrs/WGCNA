@@ -132,9 +132,6 @@ if (require(infotheo, quietly = TRUE) &&
   MIadj <- mutualInfoAdjacency(datE = datE)
   }
 }
-\author{
-Steve Horvath, Lin Song, Peter Langfelder
-}
 \references{
 Hausser J, Strimmer K (2008) Entropy inference and the
 James-Stein estimator, with application to nonlinear gene association
@@ -150,5 +147,7 @@ Clustering Based on Mutual Information. ArXiv q-bio/0311039
 \seealso{
 \code{\link{adjacency}}
 }
+\author{
+Steve Horvath, Lin Song, Peter Langfelder
+}
 \keyword{misc}
-

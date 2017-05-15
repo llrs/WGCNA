@@ -57,9 +57,6 @@ functions expect the diagonal of an adjacency matrix to be 1.
 mat <- matrix(rnorm(25), ncol = 5)
 matrixToNetwork(mat, "max")
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{adjacency} for calculation of a correlation network
 (adjacency) from a numeric matrix such as expression data
@@ -67,5 +64,7 @@ Peter Langfelder
 \code{adjacency.fromSimilarity} for simpler calculation of a network from a
 symmetric similarity matrix.
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

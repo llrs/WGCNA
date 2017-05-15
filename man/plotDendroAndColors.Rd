@@ -117,11 +117,10 @@ The function slits the plotting device into two regions, plots the given
 dendrogram in the upper region, then plots color rows in the region below
 the dendrogram.
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{plotColorUnderTree}}
 }
+\author{
+Peter Langfelder
+}
 \keyword{hplot}
-

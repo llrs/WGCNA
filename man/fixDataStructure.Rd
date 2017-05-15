@@ -43,11 +43,10 @@ dim(encapsData[[1]]$data)
 all.equal(encapsData[[1]]$data, singleSetData)
 
 }
-\author{
-Peter Langfelder, \email{Peter.Langfelder@gmail.com}
-}
 \seealso{
 \code{\link{checkSets}}
 }
+\author{
+Peter Langfelder, \email{Peter.Langfelder@gmail.com}
+}
 \keyword{misc}
-

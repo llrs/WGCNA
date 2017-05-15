@@ -192,12 +192,11 @@ Annotation
 
 Obsolete Evidence Codes NR: Not Recorded }
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 Bioconductor's annotation packages such as GO.db and
 organism-specific annotation packages such as org.Hs.eg.db.
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

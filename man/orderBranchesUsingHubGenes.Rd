@@ -132,4 +132,3 @@ out$changeLog
 Jeremy Miller
 }
 \keyword{misc}
-

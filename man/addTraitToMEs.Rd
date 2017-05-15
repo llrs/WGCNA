@@ -29,11 +29,10 @@ The function simply \code{cbind}'s the module eigengenes and traits for each
 set. The number of sets and numbers of samples in each set must be
 consistent between \code{multiMEs} and \code{multiTraits}.
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{checkSets}}, \code{\link{moduleEigengenes}}
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

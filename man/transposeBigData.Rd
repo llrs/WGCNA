@@ -41,14 +41,13 @@ xTranspose <- transposeBigData(x)
 x[1:4, 1:4]
 xTranspose[1:4, 1:4]
 }
-\author{
-Steve Horvath, UCLA
-}
 \references{
 Any linear algebra book will explain the transpose.
 }
 \seealso{
 The standard function \code{\link{t}}.
 }
+\author{
+Steve Horvath, UCLA
+}
 \keyword{misc}
-

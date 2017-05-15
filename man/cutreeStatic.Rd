@@ -35,9 +35,6 @@ datExpr <- matrix(rnorm(150), ncol = 5)
 hc <- hclust(dist(datExpr))
 cutreeStatic(hc, minSize = 2)
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link[stats]{hclust}} for hierarchical clustering,
 \code{\link[stats]{cutree}} for other constant-height branch cuts,
@@ -45,5 +42,7 @@ Peter Langfelder
 retuned numerical lables into colors for easier visualization or
 \code{\link{cutreeStaticColor}}.
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

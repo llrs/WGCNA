@@ -40,12 +40,11 @@ saturated, respectively.
   title("gamma = 0.5")}
 
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{numbers2colors}} for a function that produces a color
 representation for continuous numbers.
 }
+\author{
+Peter Langfelder
+}
 \keyword{color}
-

@@ -54,12 +54,11 @@ the sets specified by \code{useSets} (defaults to all sets). A hierarchical
 dendrogram is calculated using the dissimilarity and the order given by the
 dendrogram is used for the eigengenes in all other sets.
 }
-\author{
-Peter Langfelder, \email{Peter.Langfelder@gmail.com}
-}
 \seealso{
 \code{\link{moduleEigengenes}}, \code{\link{multiSetMEs}},
 \code{\link{orderMEs}}
 }
+\author{
+Peter Langfelder, \email{Peter.Langfelder@gmail.com}
+}
 \keyword{misc}
-

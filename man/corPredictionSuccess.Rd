@@ -30,11 +30,10 @@ For each column in \code{corPrediction}, the function evaluates the mean
 \code{corTestSet} (for positive \code{corPrediction}) or negative (for
 negative \code{corPrediction}), the more successful the prediction.
 }
-\author{
-Steve Horvath
-}
 \seealso{
 \code{\link{relativeCorPredictionSuccess}}
 }
+\author{
+Steve Horvath
+}
 \keyword{misc}
-

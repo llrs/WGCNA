@@ -108,11 +108,10 @@ approximated by a weighted average of expression profiles in the cluster. If
 \code{verbose} is set above 2, an informational message is printed whenever
 this approximation is used.
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{projectiveKMeans}}
 }
+\author{
+Peter Langfelder
+}
 \keyword{cluster}
-

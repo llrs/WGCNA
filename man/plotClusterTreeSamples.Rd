@@ -99,13 +99,12 @@ The trait \code{y} must be numeric. If \code{y} is integer, the colors will
 correspond to values. If \code{y} is continouos, it will be dichotomized to
 two classes, below and above median.
 }
-\author{
-Steve Horvath and Peter Langfelder
-}
 \seealso{
 \code{\link[stats]{dist}}, \code{\link[stats]{hclust}},
 \code{\link{plotDendroAndColors}}
 }
+\author{
+Steve Horvath and Peter Langfelder
+}
 \keyword{hplot}
 \keyword{misc}
-

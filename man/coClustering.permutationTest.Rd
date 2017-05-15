@@ -87,9 +87,6 @@ test clustering is repeatedly randomly permuted.
   ccPerm$Z
 
 }
-\author{
-Peter Langfelder
-}
 \references{
 For example, see Langfelder P, Luo R, Oldham MC, Horvath S
 (2011) Is My Network Module Preserved and Reproducible? PLoS Comput Biol
@@ -101,5 +98,7 @@ For example, see Langfelder P, Luo R, Oldham MC, Horvath S
 co-clustering measure \code{\link{modulePreservation}} for a large suite of
 module preservation statistics
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

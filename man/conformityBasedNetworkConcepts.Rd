@@ -86,9 +86,6 @@ node significance measure GS. These network concepts are very useful for
 deriving relationships between network concepts in networks that are
 approximately factorizable.
 }
-\author{
-Steve Horvath
-}
 \references{
 Dong J, Horvath S (2007) Understanding Network Concepts in
 Modules, BMC Systems Biology 2007, 1:24 Horvath S, Dong J (2008) Geometric
@@ -102,5 +99,7 @@ network concepts for a correlation network
 \code{\link{fundamentalNetworkConcepts}} for calculation of fundamental
 network concepts only.
 }
+\author{
+Steve Horvath
+}
 \keyword{misc}
-

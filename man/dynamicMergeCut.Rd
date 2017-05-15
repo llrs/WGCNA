@@ -31,11 +31,10 @@ dynamicMergeCut(20)
 dynamicMergeCut(50)
 dynamicMergeCut(100)
 }
-\author{
-Steve Horvath
-}
 \seealso{
 \code{\link{moduleEigengenes}}, \code{\link{mergeCloseModules}}
 }
+\author{
+Steve Horvath
+}
 \keyword{misc}
-

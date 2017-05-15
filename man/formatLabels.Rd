@@ -56,4 +56,3 @@ formatLabels(s)
 Peter Langfelder
 }
 \keyword{misc}
-

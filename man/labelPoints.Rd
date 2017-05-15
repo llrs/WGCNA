@@ -84,11 +84,10 @@ cause some overlapping with other points or labels; use with care.
         xlim = c(-0.1, 1.1), ylim = c(-0.1, 1.0))
    labelPoints(x, y, col, offs = 0.10, cex = 0.8)}
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{plot.default}}, \code{\link{text}}
 }
+\author{
+Peter Langfelder
+}
 \keyword{plot}
-

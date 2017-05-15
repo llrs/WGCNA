@@ -60,4 +60,3 @@ labels2colors(labels, commonColorCode = FALSE)
 Peter Langfelder, \email{Peter.Langfelder@gmail.com}
 }
 \keyword{color}
-

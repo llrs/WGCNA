@@ -2,8 +2,8 @@
 % Please edit documentation in R/WGCNA-package.R
 \docType{package}
 \name{WGCNA-package}
-\alias{WGCNA}
 \alias{WGCNA-package}
+\alias{WGCNA}
 \title{Weighted Gene Co-Expression Network Analysis}
 \description{
 Functions necessary to perform Weighted Correlation Network Analysis. WGCNA
@@ -177,13 +177,6 @@ annotated by regression line and p-value verboseIplot Scatterplot annotated
 by regression line, p-value, and color for density votingLinearPredictor
 Voting linear predictor }
 }
-\author{
-Peter Langfelder <Peter.Langfelder@gmail.com> and Steve Horvath
-<SHorvath@mednet.ucla.edu>, with contributions by Jun Dong, Jeremy Miller,
-Lin Song, Andy Yip, and Bin Zhang
-
-Maintainer: Peter Langfelder <Peter.Langfelder@gmail.com>
-}
 \references{
 Peter Langfelder and Steve Horvath (2008) WGCNA: an R package
 for weighted correlation network analysis. BMC Bioinformatics 2008, 9:559
@@ -212,5 +205,11 @@ Bioinformatics. November/btm563
 Langfelder P, Horvath S (2007) Eigengene networks for studying the
 relationships between co-expression modules. BMC Systems Biology 2007, 1:54
 }
-\keyword{package}
+\author{
+Peter Langfelder <Peter.Langfelder@gmail.com> and Steve Horvath
+<SHorvath@mednet.ucla.edu>, with contributions by Jun Dong, Jeremy Miller,
+Lin Song, Andy Yip, and Bin Zhang
 
+Maintainer: Peter Langfelder <Peter.Langfelder@gmail.com>
+}
+\keyword{package}

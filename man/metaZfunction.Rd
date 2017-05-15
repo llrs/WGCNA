@@ -33,4 +33,3 @@ p-value, one an use the following code pvalue=2*pnorm(-abs(ZMeta) )
 Steve Horvath
 }
 \keyword{misc}
-

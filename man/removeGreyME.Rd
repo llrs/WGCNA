@@ -29,4 +29,3 @@ are not found, a warning is issued.
 Peter Langfelder, \email{Peter.Langfelder@gmail.com}
 }
 \keyword{misc}
-

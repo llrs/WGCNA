@@ -40,12 +40,11 @@ RGB color specification. Larger entries are represented with reds of
 increasing intensity, and smaller entries are represented with greens of
 increasing intensity.
 }
-\author{
-Sandrine Dudoit, \email{sandrine@stat.berkeley.edu}
-}
 \seealso{
 \code{\link{plotCor}}, \code{\link{rgcolors.func}},
 \code{\link{cor}}, \code{\link{image}}, \code{\link{rgb}}.
 }
+\author{
+Sandrine Dudoit, \email{sandrine@stat.berkeley.edu}
+}
 \keyword{hplot}
-

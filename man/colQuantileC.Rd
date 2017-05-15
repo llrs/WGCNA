@@ -32,11 +32,10 @@ data <- rnorm(100)
 p <- 0.1
 colQuantileC(data, p)
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link[stats]{quantile}}
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

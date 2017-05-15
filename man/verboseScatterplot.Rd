@@ -80,11 +80,10 @@ line.
 Irrespective of the specified correlation function, the p-value is always
 calculated for pearson correlation.
 }
-\author{
-Steve Horvath and Peter Langfelder
-}
 \seealso{
 \code{\link{plot.default}} for standard scatterplots
 }
+\author{
+Steve Horvath and Peter Langfelder
+}
 \keyword{hplot}
-

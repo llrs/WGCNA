@@ -3,6 +3,8 @@
 \name{checkAdjMat}
 \alias{checkAdjMat}
 \alias{checkSimilarity}
+\alias{checkAdjMat}
+\alias{checkSimilarity}
 \title{Check adjacency matrix}
 \usage{
 checkSimilarity(similarity, min = -1, max = 1)
@@ -30,11 +32,10 @@ numeric matrix, whether it is square, symmetric, and all finite entries are
 between \code{min} and \code{max}.  If any of the conditions is not met, the
 function issues an error.
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{adjacency}}
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

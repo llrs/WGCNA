@@ -263,9 +263,6 @@ for example if a data set needs to be downweighted due to technical
 concerns; however, specifying own weights by hand should be done carefully
 to avoid possible selection biases.
 }
-\author{
-Peter Langfelder
-}
 \references{
 For Stouffer's method, see
 
@@ -284,5 +281,7 @@ Z-method is superior to Fisher's approach, Journal of Evolutionary Biology
 \code{\link{standardScreeningNumericTrait}} for screening functions for
 individual data sets
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

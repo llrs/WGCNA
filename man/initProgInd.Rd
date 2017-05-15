@@ -3,6 +3,7 @@
 \name{initProgInd}
 \alias{initProgInd}
 \alias{updateProgInd}
+\alias{updateProgInd}
 \title{Inline display of progress}
 \usage{
 initProgInd(leadStr = "..", trailStr = "", quiet = !interactive())
@@ -85,4 +86,3 @@ system.time({
 Peter Langfelder
 }
 \keyword{misc}
-

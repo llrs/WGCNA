@@ -24,4 +24,3 @@ This function adds error bars to an existing barplot.
 Steve Horvath and Peter Langfelder
 }
 \keyword{hplot}
-

@@ -56,11 +56,10 @@ num <- 0:30
 numbers2colors(num)
 numbers2colors(num, TRUE)
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{labels2colors}} for color coding of ordinal labels.
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

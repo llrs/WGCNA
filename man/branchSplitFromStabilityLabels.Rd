@@ -54,12 +54,11 @@ distinguishable).
 This is a very simple statistic that does not attempt to correct for the
 similarity that would be expected by chance.
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 This function is utilized in \code{\link{blockwiseModules}} and
 \code{\link{blockwiseConsensusModules}}.
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

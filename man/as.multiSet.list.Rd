@@ -22,4 +22,3 @@ Convert a list to a multiSet
 \seealso{
 \code{\link{list2multiSet}}, \code{\link{multiSet2list}}
 }
-

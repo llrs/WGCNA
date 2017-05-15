@@ -190,9 +190,6 @@ given by one minus their correlation, cutting the dendrogram at the height
 iterated until no modules are merged. See \code{\link{mergeCloseModules}}
 for more details on module merging.
 }
-\author{
-Peter Langfelder
-}
 \references{
 Bin Zhang and Steve Horvath (2005) "A General Framework for
 Weighted Gene Co-Expression Network Analysis", Statistical Applications in
@@ -206,5 +203,7 @@ hierarchical clustering dendrograms
 
 \code{\link{mergeCloseModules}} for merging of close modules.
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

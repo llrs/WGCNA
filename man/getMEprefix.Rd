@@ -26,11 +26,10 @@ eigengene will be labeled "PCturquoise". Most of old code assumes "PC", but
 Currently the standard prefix is \code{"ME"} and there is no way to
 change it.
 }
-\author{
-Peter Langfelder, \email{Peter.Langfelder@gmail.com}
-}
 \seealso{
 \code{\link{moduleEigengenes}}
 }
+\author{
+Peter Langfelder, \email{Peter.Langfelder@gmail.com}
+}
 \keyword{misc}
-

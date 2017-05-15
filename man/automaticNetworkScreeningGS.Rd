@@ -50,12 +50,11 @@ significance and are members of important modules at the same time.  If
 with the default parameters. If \code{datME} is not given, module eigengenes
 are first calculated using network analysis based on supplied parameters.
 }
-\author{
-Steve Horvath
-}
 \seealso{
 \code{\link{networkScreening}}, \code{\link{hubGeneSignificance}},
 \code{\link{networkScreening}}, \code{\link[dynamicTreeCut]{cutreeDynamic}}
 }
+\author{
+Steve Horvath
+}
 \keyword{misc}
-

@@ -21,11 +21,10 @@ A single integer that equals the number of sets given in the input
 A convenience function that returns the number of sets in a multi-set
 variable.
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{checkSets}}
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

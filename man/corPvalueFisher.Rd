@@ -29,4 +29,3 @@ corPvalueFisher(0.5, 10)
 Steve Horvath and Peter Langfelder
 }
 \keyword{misc}
-

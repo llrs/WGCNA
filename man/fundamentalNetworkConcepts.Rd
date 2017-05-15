@@ -53,9 +53,6 @@ Fundamental network concepts are defined as a function of the off-diagonal
 elements of an adjacency matrix \code{adj} and/or a node significance
 measure \code{GS}.
 }
-\author{
-Steve Horvath
-}
 \references{
 Dong J, Horvath S (2007) Understanding Network Concepts in Modules, BMC
 Systems Biology 2007, 1:24
@@ -70,5 +67,7 @@ conformity based network concepts for a network adjacency matrix
 \code{\link{networkConcepts}}, for calculation of conformity based and
 eigennode based network concepts for a correlation network.
 }
+\author{
+Steve Horvath
+}
 \keyword{misc}
-

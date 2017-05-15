@@ -108,4 +108,3 @@ corPvalueFisher(cor(devianceResidual,datE[,i]), nSamples)
 Steve Horvath
 }
 \keyword{misc}
-

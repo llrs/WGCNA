@@ -41,11 +41,10 @@ to set the following layout (when \code{Colors} is given): \preformatted{ 0
 0 5 0 0 2 4 1 3 } To get a meaningful heatmap plot, user-set layout must
 respect this geometry.
 }
-\author{
-Steve Horvath and Peter Langfelder
-}
 \seealso{
 \code{\link{heatmap}}, the workhorse function doing the plotting.
 }
+\author{
+Steve Horvath and Peter Langfelder
+}
 \keyword{misc}
-

@@ -49,11 +49,10 @@ If \code{probeToGene} is given, it is expected to have two columns, the
 first one corresponding to the probe names, the second to their
 corresponding gene names that will be used in the output.
 }
-\author{
-Peter Langfelder
-}
 \references{
 VisANT software is available from http://visant.bu.edu/.
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

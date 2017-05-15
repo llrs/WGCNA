@@ -42,9 +42,6 @@ calculate the corelation of columns in \code{datExpr}.
 datExpr <- matrix(rnorm(150), ncol = 5)
 unsignedAdjacency(datExpr)
 }
-\author{
-Steve Horvath and Peter Langfelder
-}
 \references{
 Bin Zhang and Steve Horvath (2005) "A General Framework for
 Weighted Gene Co-Expression Network Analysis", Statistical Applications in
@@ -53,5 +50,7 @@ Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 \seealso{
 \code{\link{adjacency}}
 }
+\author{
+Steve Horvath and Peter Langfelder
+}
 \keyword{misc}
-

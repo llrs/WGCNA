@@ -25,13 +25,12 @@ adjacency.
 The sigmoid adjacency function is defined as \eqn{1/(1+\exp[-\alpha(ss -
 \mu)])}{1/(1 + exp(-alpha * (ss - mu)))}.
 }
-\author{
-Steve Horvath
-}
 \references{
 Bin Zhang and Steve Horvath (2005) "A General Framework for
 Weighted Gene Co-Expression Network Analysis", Statistical Applications in
 Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 }
+\author{
+Steve Horvath
+}
 \keyword{misc}
-

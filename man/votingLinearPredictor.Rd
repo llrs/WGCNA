@@ -124,12 +124,11 @@ It makes little practical sense to supply neither \code{xtest} nor
 \code{CVfold} since the prediction accuracy on training data will be highly
 biased.
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{bicor}} for robust correlation that can be used as an
 association measure
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

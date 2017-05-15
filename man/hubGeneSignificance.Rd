@@ -23,12 +23,11 @@ Calculate approximate hub gene significance for all modules in network.
 \details{
 In \code{datKME} rows correspond to genes and columns to modules.
 }
-\author{
-Steve Horvath
-}
 \references{
 Dong J, Horvath S (2007) Understanding Network Concepts in
 Modules, BMC Systems Biology 2007, 1:24
 }
+\author{
+Steve Horvath
+}
 \keyword{misc}
-

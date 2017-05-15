@@ -18,12 +18,11 @@ Matrix of the same dimension as the input \code{adjMat}.
 Generalized Topological Overlap Measure, taking into account interactions of
 higher degree.
 }
-\author{
-Steve Horvath and Andy Yip
-}
 \references{
 Yip A, Horvath S (2007) Gene network interconnectedness and the
 generalized topological overlap measure. BMC Bioinformatics 2007, 8:22
 }
+\author{
+Steve Horvath and Andy Yip
+}
 \keyword{misc}
-

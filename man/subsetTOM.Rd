@@ -45,9 +45,6 @@ respect to a whole data set.
 This function is designed to calculated topological overlaps of small
 subsets of large expression data sets, for example in individual modules.
 }
-\author{
-Peter Langfelder
-}
 \references{
 Bin Zhang and Steve Horvath (2005) "A General Framework for
 Weighted Gene Co-Expression Network Analysis", Statistical Applications in
@@ -57,5 +54,7 @@ Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 \code{\link{TOMsimilarity}} for standard calculation of topological
 overlap.
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

@@ -4,6 +4,8 @@
 \alias{cor}
 \alias{cor1}
 \alias{corFast}
+\alias{cor1}
+\alias{corFast}
 \title{Fast calculations of Pearson correlation.}
 \usage{
 cor(x, y = NULL, use = "all.obs", method = c("pearson", "kendall",
@@ -145,9 +147,6 @@ all.equal(corStd, corFast)
 # while corFast still retains it speed. Choosing
 # higher ncol above will make the difference more pronounced.
 }
-\author{
-Peter Langfelder
-}
 \references{
 Peter Langfelder, Steve Horvath (2012) Fast R Functions for
 Robust Correlations and Hierarchical Clustering.  Journal of Statistical
@@ -156,5 +155,7 @@ Software, 46(11), 1-17.  \url{http://www.jstatsoft.org/v46/i11/}
 \seealso{
 R's standard Pearson correlation function \code{\link{cor}}.
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

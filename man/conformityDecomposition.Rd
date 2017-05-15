@@ -124,9 +124,6 @@ conformityDecomposition(adj= blockdiag.A,Cl=block.Cl)
 
 
 }
-\author{
-Steve Horvath
-}
 \references{
 Dong J, Horvath S (2007) Understanding Network Concepts in
 Modules. BMC Systems Biology 2007, June 1:24 Horvath S, Dong J (2008)
@@ -141,5 +138,7 @@ based decomposition of a network. Currently a draft.
 \code{\link{conformityBasedNetworkConcepts}}
 \code{propensityDecomposition}
 }
+\author{
+Steve Horvath
+}
 \keyword{misc}
-

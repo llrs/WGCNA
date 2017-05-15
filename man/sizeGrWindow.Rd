@@ -22,4 +22,3 @@ specified dimensions (in inches); otherwise a new window is opened.
 Peter Langfelder
 }
 \keyword{misc}
-

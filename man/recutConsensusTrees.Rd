@@ -213,9 +213,6 @@ for more details on module merging.
 Basic sanity checks are performed on given arguments, but it is left
 to the user's responsibility to provide valid input.
 }
-\author{
-Peter Langfelder
-}
 \references{
 Langfelder P, Horvath S (2007) Eigengene networks for studying
 the relationships between co-expression modules. BMC Systems Biology 2007,
@@ -230,5 +227,7 @@ hierarchical clustering dendrograms
 
 \code{\link{mergeCloseModules}} for merging of close modules.
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

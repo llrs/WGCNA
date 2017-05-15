@@ -108,11 +108,10 @@ accuracyMeasures(tab)
 # Should get the same result:
 accuracyMeasures(predictedOutcome, trueOutcome)
 }
-\author{
-Steve Horvath and Peter Langfelder
-}
 \references{
 See wikipedia \url{http://en.wikipedia.org/wiki/Sensitivity_and_specificity}
 }
+\author{
+Steve Horvath and Peter Langfelder
+}
 \keyword{misc}
-

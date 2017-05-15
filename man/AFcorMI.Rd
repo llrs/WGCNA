@@ -46,11 +46,10 @@ cor.data <- cor(datE, use = "p")
 AUV2 <- AFcorMI(r = cor.data, m = nrow(datE))
 }
 }
-\author{
-Steve Horvath, Lin Song, Peter Langfelder
-}
 \seealso{
 \code{\link{mutualInfoAdjacency}}
 }
+\author{
+Steve Horvath, Lin Song, Peter Langfelder
+}
 \keyword{misc}
-

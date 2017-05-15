@@ -88,9 +88,6 @@ et al (2009).
 \note{
 This function can be considered a wrapper of the \code{lm} function.
 }
-\author{
-Steve Horvath, Chaochao Cai
-}
 \references{
 Abbas AR, Wolslegel K, Seshasayee D, Modrusan Z, Clark HF (2009)
 Deconvolution of Blood Microarray Data Identifies Cellular Activation
@@ -107,5 +104,7 @@ in a complex mammalian organ. BMC Bioinformatics 7: 328.
 \seealso{
 \code{\link{lm}}, \code{\link{kappa}}
 }
+\author{
+Steve Horvath, Chaochao Cai
+}
 \keyword{misc}
-

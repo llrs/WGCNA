@@ -177,13 +177,12 @@ covariate outliers can be attributed to a relevant vriation in experimental
 conditions, samples with covariate outliers are best removed entirely before
 calling this function.
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{bicovWeights}} for suitable weights that make the
 adjustment robust to outliers.
 }
+\author{
+Peter Langfelder
+}
 \keyword{models}
 \keyword{regression}
-

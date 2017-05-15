@@ -25,4 +25,3 @@ the same.
 \description{
 Extract the colnames of the multiSet
 }
-

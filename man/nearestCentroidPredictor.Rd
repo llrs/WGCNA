@@ -212,11 +212,10 @@ Similarly, the user can specify a clustering function using
 \code{clusteringFnc}. The requirements on the clustering function are
 described in a separate section below.
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{votingLinearPredictor}}
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

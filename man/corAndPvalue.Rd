@@ -55,9 +55,6 @@ corAndPvalue(x)
 # Note that changed number of observations.
 
 }
-\author{
-Peter Langfelder and Steve Horvath
-}
 \references{
 Peter Langfelder, Steve Horvath (2012) Fast R Functions for
 Robust Correlations and Hierarchical Clustering.  Journal of Statistical
@@ -69,5 +66,7 @@ Software, 46(11), 1-17.  \url{http://www.jstatsoft.org/v46/i11/}
 \code{\link{cor.test}} for another function for significance test of
 correlations
 }
+\author{
+Peter Langfelder and Steve Horvath
+}
 \keyword{stats}
-

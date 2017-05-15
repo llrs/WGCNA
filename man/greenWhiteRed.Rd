@@ -46,9 +46,6 @@ returned by the function \code{\link{blueWhiteRed}}.
   title("gamma = 0.5")
 }
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{blueWhiteRed}} for a color sequence more friendly to
 people with the most common type of color blindness
@@ -56,5 +53,7 @@ people with the most common type of color blindness
 \code{\link{numbers2colors}} for a function that produces a color
 representation for continuous numbers.
 }
+\author{
+Peter Langfelder
+}
 \keyword{color}
-

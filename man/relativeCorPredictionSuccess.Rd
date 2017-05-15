@@ -23,11 +23,10 @@ Data frame with components \item{topNumber}{copy of the input
 \description{
 Compare prediction success of several gene screening methods.
 }
-\author{
-Steve Horvath
-}
 \seealso{
 \code{\link{corPredictionSuccess}}
 }
+\author{
+Steve Horvath
+}
 \keyword{misc}
-

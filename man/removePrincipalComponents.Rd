@@ -21,12 +21,11 @@ This function calculates a fixed number of the first principal components of
 the given data and returns the residuals of a linear regression of each
 column on the principal components.
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{svd}} for singular value decomposition,
 \code{\link{lm}} for linear regression
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

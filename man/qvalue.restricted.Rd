@@ -24,11 +24,10 @@ This function calls \code{\link{qvalue}} on finite input p-values,
 optionally traps errors from the q-value calculation, and returns just the q
 values.
 }
-\author{
-Peter Langfelder
-}
 \seealso{
 \code{\link{qvalue}}
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

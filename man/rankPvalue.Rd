@@ -139,9 +139,6 @@ central limit theorem are met. In practice, we find that the second approach
 is often more powerful but it makes more distributional assumptions (if datS
 has few columns).
 }
-\author{
-Steve Horvath
-}
 \references{
 Killmann F, VonCollani E (2001) A Note on the Convolution of the
 Uniform and Related Distributions and Their Use in Quality Control. Economic
@@ -154,5 +151,7 @@ experiments. Proceedings of the National Academy of Sciences, 100:
 \seealso{
 \code{\link{rank}}, \code{\link{qvalue}}
 }
+\author{
+Steve Horvath
+}
 \keyword{misc}
-

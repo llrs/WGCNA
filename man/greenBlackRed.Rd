@@ -37,4 +37,3 @@ the mid-colors more green and red, respectively.
 Peter Langfelder
 }
 \keyword{color}
-

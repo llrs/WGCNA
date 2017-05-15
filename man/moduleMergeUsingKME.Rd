@@ -124,4 +124,3 @@ plotDendroAndColors(tree1, colorPlot, c("ORIG",merges), dendroLabels=FALSE)
 Jeremy Miller
 }
 \keyword{misc}
-

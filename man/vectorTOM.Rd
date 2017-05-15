@@ -56,9 +56,6 @@ is calculated between the columns of \code{vect} and \code{datExpr} and the
 topological overlap of vectors in \code{vect} measures the number of shared
 neighbors in \code{datExpr} that vectors of \code{vect} share.
 }
-\author{
-Peter Langfelder
-}
 \references{
 Bin Zhang and Steve Horvath (2005) "A General Framework for
 Weighted Gene Co-Expression Network Analysis", Statistical Applications in
@@ -68,5 +65,7 @@ Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 \code{\link{TOMsimilarity}} for standard calculation of topological
 overlap.
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

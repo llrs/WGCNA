@@ -55,14 +55,13 @@ Roughly one-third of the genes are simulated with a negative correlation to
 their seed eigengene. See the functions \code{\link{simulateModule}} and
 \code{\link{simulateDatExpr}} for more details.
 }
-\author{
-Steve Horvath and Peter Langfelder
-}
 \seealso{
 \code{\link{simulateModule}} for simulation of individual modules
 
 \code{\link{simulateDatExpr}} for a more comprehensive data simulation
 interface.
 }
+\author{
+Steve Horvath and Peter Langfelder
+}
 \keyword{misc}
-

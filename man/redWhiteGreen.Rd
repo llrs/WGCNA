@@ -37,4 +37,3 @@ saturated, respectively.
 Peter Langfelder
 }
 \keyword{color}
-

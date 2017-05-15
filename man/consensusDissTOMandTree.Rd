@@ -62,9 +62,6 @@ plotDendroAndColors(consensusNetwork$consTree,
      labels2colors(dat2$allLabels)), c("S1","S2"), dendroLabels=FALSE)
 }
 }
-\author{
-Peter Langfelder, Steve Horvath, Jeremy Miller
-}
 \references{
 Langfelder P, Horvath S (2007) Eigengene networks for studying
 the relationships between co-expression modules. BMC Systems Biology 2007,
@@ -73,5 +70,7 @@ the relationships between co-expression modules. BMC Systems Biology 2007,
 \seealso{
 \code{\link{blockwiseConsensusModules}}
 }
+\author{
+Peter Langfelder, Steve Horvath, Jeremy Miller
+}
 \keyword{misc}
-

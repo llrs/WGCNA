@@ -48,12 +48,11 @@ Standard screening for numeric traits based on Pearson correlation.
 The function calculates the correlations, associated p-values, area under
 the ROC, and q-values
 }
-\author{
-Steve Horvath
-}
 \seealso{
 \code{\link{standardScreeningBinaryTrait}},
 \code{\link{standardScreeningCensoredTime}}
 }
+\author{
+Steve Horvath
+}
 \keyword{misc}
-

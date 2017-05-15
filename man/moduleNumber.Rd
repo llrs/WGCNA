@@ -38,12 +38,11 @@ moduleNumber(hc)
 moduleNumber(hc, minSize = 2)
 moduleNumber(hc, cutHeight = 0.1, minSize = 2)
 }
-\author{
-Peter Langfelder, \email{Peter.Langfelder@gmail.com}
-}
 \seealso{
 \code{\link{hclust}}, \code{\link{cutree}},
 \code{\link{normalizeLabels}}
 }
+\author{
+Peter Langfelder, \email{Peter.Langfelder@gmail.com}
+}
 \keyword{cluster}
-

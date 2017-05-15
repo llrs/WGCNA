@@ -63,4 +63,3 @@ blockSize(30000, rectangularBlocks = TRUE, maxMemoryAllocation = 2^31)
 Peter Langfelder
 }
 \keyword{misc}
-

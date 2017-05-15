@@ -51,9 +51,6 @@ coClustering(cl1, cl2, tupletSize = 3)
 # For the same reference and test clustering:
 coClustering(cl1, cl1)
 }
-\author{
-Peter Langfelder
-}
 \references{
 For example, see Langfelder P, Luo R, Oldham MC, Horvath S
 (2011) Is My Network Module Preserved and Reproducible? PLoS Comput Biol
@@ -65,5 +62,7 @@ For example, see Langfelder P, Luo R, Oldham MC, Horvath S
 preservation statistics \code{\link{coClustering.permutationTest}} for a
 permutation test for co-clustering significance
 }
+\author{
+Peter Langfelder
+}
 \keyword{misc}
-

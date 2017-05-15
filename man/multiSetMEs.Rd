@@ -175,11 +175,10 @@ calculation), it takes many more irregularities in the data for the hubgene
 calculation to fail. In fact such a failure signals there likely is
 something seriously wrong with the data.
 }
-\author{
-Peter Langfelder, \email{Peter.Langfelder@gmail.com}
-}
 \seealso{
 \code{\link{moduleEigengenes}}
 }
+\author{
+Peter Langfelder, \email{Peter.Langfelder@gmail.com}
+}
 \keyword{misc}
-
