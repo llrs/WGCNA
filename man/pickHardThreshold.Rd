@@ -16,6 +16,8 @@ pickHardThreshold(data, dataIsExpr = TRUE, RsquaredCut = 0.85,
 \arguments{
 \item{similarity}{Matrix whose values are between -1 and 1}
 
+\item{...}{Other arguments from pickHardThreshold}
+
 \item{data}{expression data in a matrix or data frame. Rows correspond to
 samples and columns to genes.}
 

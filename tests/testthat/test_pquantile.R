@@ -14,10 +14,10 @@ test_that("pquantile", {
 
 test_that("pmean", {
     test2 <- pmean(a, b, c)
-    expect_true(test1[1, 1] == 2L)
+    expect_true(test2[1, 1] == 2L)
 })
 
 test_that("pmedian", {
     test2 <- pmean(a, b, c)
-    expect_true(test1[1, 1] == 2L)
+    expect_true(test2[1, 1] == 2L)
 })

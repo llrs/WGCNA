@@ -22,6 +22,8 @@ similarity(datExpr, selectCols = NULL, corFnc = "cor",
 \item{similarity}{A (signed) similarity matrix: square, symmetric matrix
 with entries between - 1 and 1.}
 
+\item{...}{Other arguments from adjacency}
+
 \item{datExpr}{data.frame containing expression data. Columns correspond to
 genes and rows to samples.}
 
@@ -108,12 +110,11 @@ similarity <- similarity(datExpr)
 adj <-  adjacency.fromSimilarity(similarity)
 similarity <- matrix(seq(-1, 1, length.out = 25), 5)
 similarity[lower.tri(similarity)] <- t(similarity)[lower.tri(similarity)]
-adj <-  adjacency.fromSimilarity(similarity)
+adj <-  adjacency.fromSimilarity(similarity, type = "unsigned", power = 5)
 
 datExpr <- matrix(seq(-1, 1, length.out = 25), 5)
 datExpr[lower.tri(datExpr)] <- t(datExpr)[lower.tri(datExpr)]
 adj <- adjacency(datExpr)
-
 }
 \references{
 Bin Zhang and Steve Horvath (2005) A General Framework for

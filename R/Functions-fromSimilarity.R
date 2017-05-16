@@ -100,6 +100,7 @@ checkSimilarity <- function(similarity, min =  - 1, max = 1) {
 }
 # Kept for backward compatibility
 #' @name adjacency
+#' @param ... Other arguments from adjacency
 #' @rdname adjacency
 #' @examples
 #' datExpr <- matrix(rnorm(100), 10, 10)
@@ -107,7 +108,6 @@ checkSimilarity <- function(similarity, min =  - 1, max = 1) {
 #' adj <-  adjacency.fromSimilarity(similarity)
 #' @export
 adjacency.fromSimilarity <- function(similarity, ...) {
-    power <- ifelse(type == "distance", 1 , power)
     checkSimilarity(similarity)
     adjacency(similarity, ...)
 }
@@ -116,6 +116,7 @@ adjacency.fromSimilarity <- function(similarity, ...) {
 #' @name pickHardThreshold.fromSimilarity
 #' @rdname pickHardThreshold
 #' @param similarity Matrix whose values are between -1 and 1
+#' @param ... Other arguments from pickHardThreshold
 #' @export
 pickHardThreshold.fromSimilarity <- function(similarity, ...) {
     checkSimilarity(similarity)
@@ -124,6 +125,7 @@ pickHardThreshold.fromSimilarity <- function(similarity, ...) {
 
 #' @name pickSoftThreshold.fromSimilarity
 #' @rdname pickSoftThreshold
+#' @param ... Other arguments from pickSoftThreshold
 #' @param similarity Matrix whose values are between -1 and 1
 #' @export
 pickSoftThreshold.fromSimilarity <- function(similarity, ...) {
