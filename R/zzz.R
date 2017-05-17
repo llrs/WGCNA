@@ -10,7 +10,6 @@
 #' @import survival
 #' @import parallel
 #' @import AnnotationDbi
-#' @import parallel
 #' @importFrom Hmisc rcorr.cens errbar
 #' @import impute
 #' @import splines
