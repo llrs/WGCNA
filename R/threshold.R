@@ -232,7 +232,8 @@ pickHardThreshold <- function(data, dataIsExpr = TRUE, RsquaredCut = 0.85,
 #' maximum connectivity. If input \code{moreNetworkConcepts} is \code{TRUE}, 3
 #' additional columns containing network density, centralization, and
 #' heterogeneity.}
-#' @author Steve Horvath and Peter Langfelder
+#' @author Steve Horvath and Peter Langfelder with improvements from Alexey
+#' Segushichev
 #' @seealso \code{\link{adjacency}}, \code{\link{softConnectivity}}
 #' @references Bin Zhang and Steve Horvath (2005) "A General Framework for
 #' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
@@ -360,8 +361,9 @@ pickSoftThreshold <- function(data, dataIsExpr = TRUE, RsquaredCut = 0.85,
         corxPowers <- lapply(uniquePowerSteps, function(p) {corx^p})
         names(corxPowers) <- uniquePowerSteps
         for (j in 1:nPowers) {
-          datk.local[, j] <- colSums(corx^powerVector[j],
-                                     na.rm = TRUE) - 1
+          corxCur <- corxPrev * corxPowers[[as.character(powerSteps[j])]]
+          datk.local[, j] <- colSums(corxCur, na.rm = TRUE) - 1
+          corxPrev <- corxCur
         }
         datk.local
       } # End of %dopar% evaluation
@@ -370,6 +372,7 @@ pickSoftThreshold <- function(data, dataIsExpr = TRUE, RsquaredCut = 0.85,
     if (verbose == 1) {
       pind <- updateProgInd(endG/nGenes, pind)
     }
+    gc()
   }
   if (verbose == 1) {
     printFlush("")
@@ -400,5 +403,6 @@ pickSoftThreshold <- function(data, dataIsExpr = TRUE, RsquaredCut = 0.85,
   indcut <- NA
   indcut = ifelse(sum(ind1) > 0, min(c(1:length(ind1))[ind1]), indcut)
   powerEstimate <- powerVector[indcut][[1]]
+  collectGarbage()
   list(powerEstimate = powerEstimate, fitIndices = data.frame(datout))
 }

@@ -108,6 +108,7 @@ Network Analysis. PLoS Comput Biol 4(8): e1000117
 \code{\link{adjacency}}, \code{\link{softConnectivity}}
 }
 \author{
-Steve Horvath and Peter Langfelder
+Steve Horvath and Peter Langfelder with improvements from Alexey
+Segushichev
 }
 \keyword{misc}
