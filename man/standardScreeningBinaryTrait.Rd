@@ -94,26 +94,24 @@ test.
 
 
 require(survival) # For is.Surv in rcorr.cens
-m=50
-y=sample(c(1,2),m,replace=TRUE)
-datExprSignal=simulateModule(scale(y),30)
-datExprNoise=simulateModule(rnorm(m),150)
-datExpr=data.frame(datExprSignal,datExprNoise)
+m <- 50
+y <- sample(c(1,2), m, replace = TRUE)
+datExprSignal <- simulateModule(scale(y), 30)
+datExprNoise <- simulateModule(rnorm(m), 150)
+datExpr <- data.frame(datExprSignal, datExprNoise)
 
-Result1=standardScreeningBinaryTrait(datExpr,y)
-Result1[1:5,]
-
-
+Result1 <- standardScreeningBinaryTrait(datExpr, y)
+Result1[1:5, ]
 
 # use unequal variances and calculate q-values
-Result2=standardScreeningBinaryTrait(datExpr,y, var.equal=FALSE,qValue=TRUE)
-Result2[1:5,]
+Result2 <- standardScreeningBinaryTrait(datExpr, y,
+                                       var.equal = FALSE, qValue = TRUE)
+Result2[1:5, ]
 
 # calculate Kruskal Wallis test and q-values
-Result3=standardScreeningBinaryTrait(datExpr,y,kruskalTest=TRUE,qValue=TRUE)
-Result3[1:5,]
-
-
+Result3 <- standardScreeningBinaryTrait(datExpr, y, kruskalTest = TRUE,
+                                       qValue=TRUE)
+Result3[1:5, ]
 }
 \references{
 Storey JD, Taylor JE, and Siegmund D. (2004) Strong control,

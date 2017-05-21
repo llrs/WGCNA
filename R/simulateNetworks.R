@@ -3,19 +3,19 @@
 # simulateEigengeneNetwork ####
 # Note: The returned vector may contain multiple occurences of the same child.
 .causalChildren <- function(parents, causeMat) {
-    nNodes <- dim(causeMat)[[1]]
+  nNodes <- dim(causeMat)[[1]]
 
-    # print(paste("Length of parents: ", length(parents)))
-    if (length(parents) == 0)
-        return(NULL)
+  # print(paste("Length of parents: ", length(parents)))
+  if (length(parents) == 0)
+    return(NULL)
 
-    Child_ind <- apply(as.matrix(abs(causeMat[, parents])), 1, sum) > 0
-    if (sum(Child_ind) > 0) {
-        children <- c(1:nNodes)[Child_ind]
-    } else {
-        children <- NULL
-    }
-    children
+  Child_ind <- apply(as.matrix(abs(causeMat[, parents])), 1, sum) > 0
+  if (sum(Child_ind) > 0) {
+    children <- c(1:nNodes)[Child_ind]
+  } else {
+    children <- NULL
+  }
+  children
 }
 
 # Given a set of causal anchors, this function creates a network of vectors that
@@ -52,84 +52,84 @@
 #' @keywords misc
 simulateEigengeneNetwork <- function(causeMat, anchorIndex, anchorVectors,
                                      noise = 1, verbose = 0, indent = 0) {
-    spaces <- indentSpaces(indent)
+  spaces <- indentSpaces(indent)
 
-    if (verbose > 0){
-        printFlush(paste(spaces, "Creating seed vectors..."))
+  if (verbose > 0){
+    printFlush(paste(spaces, "Creating seed vectors..."))
+  }
+  nNodes <- dim(causeMat)[[1]]
+  nSamples <- dim(anchorVectors)[[1]]
+
+  if (length(anchorIndex) != dim(anchorVectors)[[2]]) {
+    stop("Length of anchorIndex must equal the number of vectors in",
+         "anchorVectors.")
+  }
+
+  if (length(noise) == 1) {
+    noise <- rep(noise, nNodes)
+  }
+  if (length(noise) != nNodes) {
+    stop("Length of noise must equal the number of nodes as given by the ",
+         "dimension of the causeMat matrix."
+    )
+  }
+
+  # Initialize all node vectors to noise with given standard deviation
+  NodeVectors <- matrix(0, nrow = nSamples, ncol = nNodes)
+  for (i in 1:nNodes) {
+    NodeVectors[, i] <- rnorm(n = nSamples, mean = 0,
+                              sd = noise[i])}
+
+  Levels <- rep(0, times = nNodes)
+
+  # Calculate levels for all nodes: start from anchors and go through each
+  # successive level of children
+  level <- 0
+  parents <- anchorIndex
+  Children <- .causalChildren(parents = parents, causeMat = causeMat)
+  if (verbose > 1) {
+    printFlush(spaces, "..Determining level structure...")
+  }
+  while (!is.null(Children)) {
+    # print(paste("level:", level))
+    # print(paste("   parents:", parents))
+    # print(paste("   Children:", Children))
+    level <- level + 1
+    if ((verbose > 1) & (level / 10 == as.integer(level / 10))) {
+      printFlush(spaces, "  ..Detected level", level)
     }
-    nNodes <- dim(causeMat)[[1]]
-    nSamples <- dim(anchorVectors)[[1]]
-
-    if (length(anchorIndex) != dim(anchorVectors)[[2]]) {
-        stop("Length of anchorIndex must equal the number of vectors in",
-            "anchorVectors.")
-    }
-
-    if (length(noise) == 1) {
-        noise <- rep(noise, nNodes)
-    }
-    if (length(noise) != nNodes) {
-        stop("Length of noise must equal the number of nodes as given by the ",
-             "dimension of the causeMat matrix."
-        )
-    }
-
-    # Initialize all node vectors to noise with given standard deviation
-    NodeVectors <- matrix(0, nrow = nSamples, ncol = nNodes)
-    for (i in 1:nNodes) {
-        NodeVectors[, i] <- rnorm(n = nSamples, mean = 0,
-                                 sd = noise[i])}
-
-    Levels <- rep(0, times = nNodes)
-
-    # Calculate levels for all nodes: start from anchors and go through each
-    # successive level of children
-    level <- 0
-    parents <- anchorIndex
+    #printFlush(paste("Detected level", level))
+    Levels[Children] <- level
+    parents <- Children
     Children <- .causalChildren(parents = parents, causeMat = causeMat)
-    if (verbose > 1) {
-        printFlush(spaces, "..Determining level structure...")
-    }
-    while (!is.null(Children)) {
-        # print(paste("level:", level))
-        # print(paste("   parents:", parents))
-        # print(paste("   Children:", Children))
-        level <- level + 1
-        if ((verbose > 1) & (level / 10 == as.integer(level / 10))) {
-            printFlush(spaces, "  ..Detected level", level)
-        }
-        #printFlush(paste("Detected level", level))
-        Levels[Children] <- level
-        parents <- Children
-        Children <- .causalChildren(parents = parents, causeMat = causeMat)
-    }
+  }
 
-    HighestLevel <- level
+  HighestLevel <- level
 
-    # Generate the whole network
-    if (verbose > 1) {
-        printFlush(spaces, "..Calculating network...")
+  # Generate the whole network
+  if (verbose > 1) {
+    printFlush(spaces, "..Calculating network...")
+  }
+  NodeVectors[, anchorIndex] = NodeVectors[, anchorIndex] + anchorVectors
+  for (level in (1:HighestLevel)) {
+    if ((verbose > 1) & (level / 10 == as.integer(level / 10))) {
+      printFlush(spaces, " .Working on level", level)
     }
-    NodeVectors[, anchorIndex] = NodeVectors[, anchorIndex] + anchorVectors
-    for (level in (1:HighestLevel)) {
-        if ((verbose > 1) & (level / 10 == as.integer(level / 10))) {
-            printFlush(spaces, " .Working on level", level)
-        }
-        #printFlush(paste("Working on level", level))
-        LevelChildren = c(1:nNodes)[Levels == level]
-        for (child in LevelChildren) {
-            LevelParents <- c(1:nNodes)[causeMat[child,] != 0]
-            for (parent in LevelParents) {
-                NodeVectors[, child] <- scale(NodeVectors[, child] +
-                                                  causeMat[child, parent]  *
-                                                  NodeVectors[, parent])
-            }
-        }
+    #printFlush(paste("Working on level", level))
+    LevelChildren = c(1:nNodes)[Levels == level]
+    for (child in LevelChildren) {
+      LevelParents <- c(1:nNodes)[causeMat[child,] != 0]
+      for (parent in LevelParents) {
+        NodeVectors[, child] <- scale(NodeVectors[, child] +
+                                        causeMat[child, parent]  *
+                                        NodeVectors[, parent])
+      }
     }
+  }
 
-    Nodes <- list(eigengenes = NodeVectors, causeMat = causeMat,
-                  levels = Levels, anchorIndex = anchorIndex)
-    Nodes
+  Nodes <- list(eigengenes = NodeVectors, causeMat = causeMat,
+                levels = Levels, anchorIndex = anchorIndex)
+  Nodes
 }
 
 # simulateModule ####
@@ -211,71 +211,81 @@ simulateEigengeneNetwork <- function(causeMat, anchorIndex, anchorVectors,
 #' The material is posted at
 #' \url{http://www.genetics.ucla.edu/labs/horvath/CoexpressionNetwork/EigengeneNetwork/SupplementSimulations.pdf}.
 #' @keywords misc
+#' @examples
+#' nSamples <- 50
+#' nGenes <- 30
+#' y <- sample(c(1,2), nSamples, replace = TRUE)
+#' module1 <- simulateModule(scale(y), nGenes)
+#' module2 <- simulateModule(scale(y), nGenes, signed = TRUE)
+#' geneMeans <- sample(c(4, 5, 10), nGenes, replace = TRUE)
+#' module3 <- simulateModule(scale(y), nGenes, signed = TRUE,
+#'                           geneMeans = geneMeans)
 simulateModule <- function(ME, nGenes, nNearGenes = 0, minCor = 0.3, maxCor = 1,
                            corPower = 1, signed = FALSE, propNegativeCor = 0.3,
                            geneMeans = NULL, verbose = 0, indent = 0) {
-    nSamples <- length(ME)
+  ME <- as.vector(ME)
+  nSamples <- length(ME)
 
-    datExpr <- matrix(rnorm((nGenes + nNearGenes) * nSamples),
-                     nrow = nSamples,
-                     ncol = nGenes + nNearGenes)
+  datExpr <- matrix(rnorm((nGenes + nNearGenes) * nSamples),
+                    nrow = nSamples,
+                    ncol = nGenes + nNearGenes)
 
-    VarME <- var(ME)
+  VarME <- var(ME)
 
-    # generate the in - module genes
-    CorME <- maxCor - (c(1:nGenes) / nGenes) ^ (1 / corPower) * (maxCor - minCor)
+  # generate the in - module genes
+  CorME <- maxCor - (c(1:nGenes) / nGenes) ^ (1 / corPower) * (maxCor - minCor)
+  noise <- sqrt(VarME * (1 - CorME ^ 2) / CorME ^ 2)
+  sign <- rep(1, nGenes)
+  if (!signed) {
+    negGenes <- as.integer(seq(
+      from = 1 / propNegativeCor,
+      by = 1 / propNegativeCor,
+      length.out = nGenes * propNegativeCor)
+    )
+    negGenes <- negGenes[negGenes <= nGenes]
+    sign[negGenes] <- - 1
+  }
+  for (gene in 1:nGenes) {
+    datExpr[, gene] <- sign[gene] * (ME + rnorm(nSamples, sd = noise[gene]))
+  }
+
+  trueKME <- CorME
+  # generate the near - module genes
+  if (nNearGenes > 0) {
+    CorME <- c(1:nNearGenes) / nNearGenes * minCor
     noise <- sqrt(VarME * (1 - CorME ^ 2) / CorME ^ 2)
-    sign <- rep(1, nGenes)
+    sign <- rep(1, nNearGenes)
     if (!signed) {
-        negGenes <- as.integer(seq(
-            from = 1 / propNegativeCor,
+      negGenes <- as.integer(
+        seq(from = 1 / propNegativeCor,
             by = 1 / propNegativeCor,
-            length.out = nGenes * propNegativeCor)
-        )
-        negGenes <- negGenes[negGenes <= nGenes]
-        sign[negGenes] <- - 1
+            length.out = nNearGenes * propNegativeCor)
+      )
+      negGenes <- negGenes[negGenes <= nNearGenes]
+      sign[negGenes] <- - 1
     }
-    for (gene in 1:nGenes) {
-        datExpr[, gene] <- sign[gene] * (ME + rnorm(nSamples, sd = noise[gene]))
+    for (gene in 1:nNearGenes) {
+      datExpr[, nGenes + gene] <- ME + sign[gene] * rnorm(
+        nSamples, sd = noise[gene])
     }
+    trueKME <- c(trueKME, CorME)
+  }
 
-    trueKME <- CorME
-    # generate the near - module genes
-    if (nNearGenes > 0) {
-        CorME <- c(1:nNearGenes) / nNearGenes * minCor
-        noise <- sqrt(VarME * (1 - CorME ^ 2) / CorME ^ 2)
-        sign <- rep(1, nNearGenes)
-        if (!signed) {
-            negGenes <- as.integer(
-                seq(from = 1 / propNegativeCor,
-                    by = 1 / propNegativeCor,
-                    length.out = nNearGenes * propNegativeCor)
-            )
-            negGenes <- negGenes[negGenes <= nNearGenes]
-            sign[negGenes] <- - 1
-        }
-        for (gene in 1:nNearGenes) {
-            datExpr[, nGenes + gene] <- ME + sign[gene] * rnorm(
-                nSamples, sd = noise[gene])
-            }
-        trueKME <- c(trueKME, CorME)
+  datExpr <- scale(datExpr)
+  if (!is.null(geneMeans)) {
+    if (any(is.na(geneMeans))) {
+      stop("All entries of 'geneMeans' must be finite.")
     }
-
-    datExpr <- scale(datExpr)
-    if (!is.null(geneMeans)) {
-        if (any(is.na(geneMeans))) {
-            stop("All entries of 'geneMeans' must be finite.")
-        }
-        if (length(geneMeans) != nGenes + nNearGenes) {
-            stop("The lenght of 'geneMeans' must equal nGenes + nNearGenes.")
-        }
-        datExpr <- datExpr + matrix(geneMeans, nSamples, nGenes + nNearGenes,
-                                   byrow = TRUE)
+    if (length(geneMeans) != nGenes + nNearGenes) {
+      stop("The lenght of 'geneMeans' must equal nGenes + nNearGenes.")
     }
+    datExpr <- datExpr + matrix(geneMeans, nSamples, nGenes + nNearGenes,
+                                byrow = TRUE)
+  }
 
-    attributes(datExpr)$trueKME <- trueKME
+  attributes(datExpr)$trueKME <- trueKME
 
-    datExpr
+  datExpr
 }
 
 # simulateSmallLayer ####
@@ -333,45 +343,45 @@ simulateModule <- function(ME, nGenes, nNearGenes = 0, minCor = 0.3, maxCor = 1,
 simulateSmallLayer <- function(order, nSamples, minCor = 0.3, maxCor = 0.5,
                                corPower = 1, averageModuleSize, averageExpr,
                                moduleSpacing, verbose = 4, indent = 0) {
-    spaces <- indentSpaces(indent)
-    nGenes <- length(order)
-    datExpr <- matrix(0, nrow = nSamples, ncol = nGenes)
+  spaces <- indentSpaces(indent)
+  nGenes <- length(order)
+  datExpr <- matrix(0, nrow = nSamples, ncol = nGenes)
 
-    maxCorN0 <- averageModuleSize
+  maxCorN0 <- averageModuleSize
 
-    if (verbose > 0) {
-        printFlush(spaces, "simulateSmallLayer: simulating modules with min ",
-                   "corr ", minCor, ", average expression ", averageExpr,
-                   ", average module size ", averageModuleSize,
-                   ", inverse density ",moduleSpacing)
+  if (verbose > 0) {
+    printFlush(spaces, "simulateSmallLayer: simulating modules with min ",
+               "corr ", minCor, ", average expression ", averageExpr,
+               ", average module size ", averageModuleSize,
+               ", inverse density ",moduleSpacing)
+  }
+  index <- 0
+  while (index < nGenes) {
+    ModSize <- as.integer(rexp(1, 1 / averageModuleSize))
+    if (ModSize < 3) {
+      ModSize <- 3
     }
-    index <- 0
-    while (index < nGenes) {
-        ModSize <- as.integer(rexp(1, 1 / averageModuleSize))
-        if (ModSize < 3) {
-            ModSize <- 3
-        }
-        if (index + ModSize > nGenes) {
-            ModSize <- nGenes - index
-        }
-        if (ModSize > 2) {
-            ModuleExpr = rexp(1, 1 / averageExpr)
-            if (verbose > 4) {
-                printFlush(spaces,"  Module of size ", ModSize, ", expression ",
-                        ModuleExpr, ", min corr ", minCor," inserted at index ",
-                        index + 1)
-            }
-            ME <- rnorm(nSamples, sd = ModuleExpr)
-            NInModule <- as.integer(ModSize * 2 / 3)
-            nNearModule <- ModSize - NInModule
-            EffMinCor <- minCor * maxCor
-            datExpr[, order[(index + 1):(index + ModSize)]] <- ModuleExpr *
-                simulateModule(ME, NInModule, nNearModule, EffMinCor, maxCor,
-                               corPower)
-        }
-        index <- index + ModSize * moduleSpacing
+    if (index + ModSize > nGenes) {
+      ModSize <- nGenes - index
     }
-    datExpr
+    if (ModSize > 2) {
+      ModuleExpr = rexp(1, 1 / averageExpr)
+      if (verbose > 4) {
+        printFlush(spaces,"  Module of size ", ModSize, ", expression ",
+                   ModuleExpr, ", min corr ", minCor," inserted at index ",
+                   index + 1)
+      }
+      ME <- rnorm(nSamples, sd = ModuleExpr)
+      NInModule <- as.integer(ModSize * 2 / 3)
+      nNearModule <- ModSize - NInModule
+      EffMinCor <- minCor * maxCor
+      datExpr[, order[(index + 1):(index + ModSize)]] <- ModuleExpr *
+        simulateModule(ME, NInModule, nNearModule, EffMinCor, maxCor,
+                       corPower)
+    }
+    index <- index + ModSize * moduleSpacing
+  }
+  datExpr
 }
 
 # simulateDatExpr ####
@@ -521,204 +531,204 @@ simulateDatExpr <- function(eigengenes, nGenes, modProportions, minCor = 0.3,
                             averageNGenesInSubmodule = 10,
                             averageExprInSubmodule = 0.2, submoduleSpacing = 2,
                             verbose = 1, indent = 0) {
-    spaces <- indentSpaces(indent)
+  spaces <- indentSpaces(indent)
 
-    nMods <- length(modProportions) - 1
+  nMods <- length(modProportions) - 1
 
-    nSamples <- dim(eigengenes)[[1]]
+  nSamples <- dim(eigengenes)[[1]]
 
-    if (length(minCor) == 1) {
-        minCor <- rep(minCor, nMods)
+  if (length(minCor) == 1) {
+    minCor <- rep(minCor, nMods)
+  }
+  if (length(maxCor) == 1) {
+    maxCor <- rep(maxCor, nMods)
+  }
+
+  if (length(minCor) != nMods) {
+    stop("Input error: minCor is an array of different lentgh than",
+         " the length - 1 of modProportions array.")
+  }
+
+  if (length(maxCor) != nMods) {
+    stop("Input error: maxCor is an array of different lentgh than",
+         "the length - 1 of modProportions array.")
+  }
+
+  if (dim(eigengenes)[[2]] != nMods) {
+    stop("Input error: Number of seed vectors must equal the",
+         "length of modProportions.")
+  }
+
+  if (is.null(geneMeans)) {
+    geneMeans <- rep(0, nGenes)
+  }
+  if (length(geneMeans) != nGenes) {
+    stop("Length of 'geneMeans' must equal 'nGenes'.")
+  }
+  if (any(is.na(geneMeans))) {
+    stop("All entries of 'geneMeans' must be finite.")
+  }
+  grey <- 0
+  moduleLabels <- c(1:nMods)
+
+  if (sum(modProportions) > 1) {
+    stop("Input error: the sum of Mod.Props must be less than 1")
+  }
+
+  no.in.modules <- as.integer(nGenes * modProportions)
+  no.in.proper.modules <- no.in.modules[c(1:(length(modProportions) - 1))]
+  no.near.modules <- as.integer((nGenes - sum(no.in.modules))  *
+                                  no.in.proper.modules / sum(
+                                    no.in.proper.modules))
+
+  simulate.module <- rep(TRUE, times = nMods)
+  if (!is.null(leaveOut)){
+    simulate.module[leaveOut] <- FALSE
+  }
+  no.in.modules[nMods + 1] <- nGenes - sum(
+    no.in.proper.modules[simulate.module]) -
+    sum(no.near.modules[simulate.module])
+
+  labelOrder <- moduleLabels[rank(-modProportions[-length(modProportions)],
+                                  ties.method = "first")]
+  labelOrder <- c(labelOrder, grey)
+
+  if (verbose > 0) {
+    printFlush(spaces, "simulateDatExpr: simulating ", nGenes, " genes in ",
+               nMods, " modules. ")
+  }
+
+  if (verbose > 1) {
+    printFlush(spaces, "    Simulated labels:", paste(labelOrder[1:nMods],
+                                                      collapse = ", "),
+               " and ", grey)
+    printFlush(paste(
+      spaces,
+      "    Module sizes:",
+      paste(no.in.modules,
+            collapse = ", ")
+    ))
+    printFlush(paste(
+      spaces,
+      "    near module sizes:",
+      paste(no.near.modules, collapse = ", ")
+    ))
+    printFlush(paste(
+      spaces,
+      "    Min correaltion:",
+      paste(minCor, collapse = ", ")
+    ))
+    if (!is.null(leaveOut))
+      printFlush(paste(
+        spaces,
+        "    _leaving out_ modules",
+        paste(labelOrder[leaveOut],
+              collapse = ", ")
+      ))
+  }
+
+  truemodule = rep(grey, nGenes)
+  # These have the colors for left - out modules as well.
+  allLabels = rep(grey, nGenes)
+
+  # This matrix contains the simulated expression values (rows are genes,
+  # columns samples)
+  # Each simulated cluster has a distinct mean expression across the samples
+
+  datExpr = matrix(rnorm(nGenes * nSamples), nrow = nSamples, ncol = nGenes)
+  trueKME = rep(NA, nGenes)
+  trueKME.whichMod = rep(0, nGenes)
+
+  gene.index = 0 # Where to put the current gene into datExpr
+
+  for (mod in c(1:nMods)) {
+    nModGenes = no.in.modules[mod]
+    nNearGenes = no.near.modules[mod]
+    if (simulate.module[mod]) {
+      ME = eigengenes[, mod]
+      EffMaxCor = maxCor[mod]
+      EffMinCor = minCor[mod]
+      range = (gene.index + 1):(gene.index + nModGenes + nNearGenes)
+      temp = simulateModule(
+        ME,
+        nModGenes,
+        nNearGenes,
+        minCor[mod],
+        maxCor[mod],
+        corPower,
+        signed = signed,
+        propNegativeCor = propNegativeCor,
+        geneMeans = NULL,
+        verbose = verbose - 2,
+        indent = indent + 2
+      )
+      datExpr[, range] = temp
+      truemodule[(gene.index + 1):(gene.index + nModGenes)] = labelOrder[mod]
+      trueKME[range] = attributes(temp)$trueKME
+      trueKME.whichMod[range] = mod
     }
-    if (length(maxCor) == 1) {
-        maxCor <- rep(maxCor, nMods)
+    allLabels[(gene.index + 1):(gene.index + nModGenes)] = labelOrder[mod]
+    gene.index = gene.index + nModGenes + nNearGenes
+  }
+
+  if (nSubmoduleLayers > 0) {
+    OrderVector = c(1:nGenes)
+    for (layer in 1:nSubmoduleLayers) {
+      if (verbose > 1)
+        printFlush(paste(spaces,
+                         "Simulating ordereded extra layer",
+                         layer))
+      datExpr = datExpr + simulateSmallLayer(
+        OrderVector,
+        nSamples,
+        minCor[1],
+        maxCor[1],
+        corPower,
+        averageNGenesInSubmodule,
+        averageExprInSubmodule,
+        submoduleSpacing,
+        verbose - 1,
+        indent + 1
+      )
     }
-
-    if (length(minCor) != nMods) {
-        stop("Input error: minCor is an array of different lentgh than",
-             " the length - 1 of modProportions array.")
+  }
+  if (nScatteredModuleLayers > 0)
+    for (layer in 1:nScatteredModuleLayers) {
+      if (verbose > 1) {
+        printFlush(spaces, "Simulating unordereded extra layer ",
+                   layer)
+      }
+      OrderVector <- sample(nGenes)
+      datExpr <- datExpr + simulateSmallLayer(OrderVector, nSamples,
+                                              minCor[1], maxCor[1],
+                                              corPower,
+                                              averageNGenesInSubmodule,
+                                              averageExprInSubmodule,
+                                              submoduleSpacing,
+                                              verbose = verbose - 1,
+                                              indent = indent + 1)
     }
+  collectGarbage()
+  if (verbose > 1) {
+    printFlush(spaces, "  Adding background noise with amplitude ",
+               backgroundNoise)
+  }
+  datExpr <- datExpr + rnorm(n = nGenes * nSamples, sd = backgroundNoise)
+  means <- colMeans(datExpr)
 
-    if (length(maxCor) != nMods) {
-        stop("Input error: maxCor is an array of different lentgh than",
-             "the length - 1 of modProportions array.")
-    }
+  datExpr <- datExpr + matrix(geneMeans - means, nSamples, nGenes,
+                              byrow = TRUE)
 
-    if (dim(eigengenes)[[2]] != nMods) {
-        stop("Input error: Number of seed vectors must equal the",
-             "length of modProportions.")
-    }
+  colnames(datExpr) <- paste0("Gene.", c(1:nGenes))
+  rownames(datExpr) <- paste0("Sample.", c(1:nSamples))
 
-    if (is.null(geneMeans)) {
-        geneMeans <- rep(0, nGenes)
-    }
-    if (length(geneMeans) != nGenes) {
-        stop("Length of 'geneMeans' must equal 'nGenes'.")
-    }
-    if (any(is.na(geneMeans))) {
-        stop("All entries of 'geneMeans' must be finite.")
-    }
-    grey <- 0
-    moduleLabels <- c(1:nMods)
-
-    if (sum(modProportions) > 1) {
-        stop("Input error: the sum of Mod.Props must be less than 1")
-    }
-
-    no.in.modules <- as.integer(nGenes * modProportions)
-    no.in.proper.modules <- no.in.modules[c(1:(length(modProportions) - 1))]
-    no.near.modules <- as.integer((nGenes - sum(no.in.modules))  *
-                                      no.in.proper.modules / sum(
-                                          no.in.proper.modules))
-
-    simulate.module <- rep(TRUE, times = nMods)
-    if (!is.null(leaveOut)){
-        simulate.module[leaveOut] <- FALSE
-    }
-    no.in.modules[nMods + 1] <- nGenes - sum(
-        no.in.proper.modules[simulate.module]) -
-        sum(no.near.modules[simulate.module])
-
-    labelOrder <- moduleLabels[rank(-modProportions[-length(modProportions)],
-                                   ties.method = "first")]
-    labelOrder <- c(labelOrder, grey)
-
-    if (verbose > 0) {
-        printFlush(spaces, "simulateDatExpr: simulating ", nGenes, " genes in ",
-                nMods, " modules. ")
-    }
-
-    if (verbose > 1) {
-        printFlush(spaces, "    Simulated labels:", paste(labelOrder[1:nMods],
-                                                          collapse = ", "),
-                   " and ", grey)
-        printFlush(paste(
-            spaces,
-            "    Module sizes:",
-            paste(no.in.modules,
-                  collapse = ", ")
-        ))
-        printFlush(paste(
-            spaces,
-            "    near module sizes:",
-            paste(no.near.modules, collapse = ", ")
-        ))
-        printFlush(paste(
-            spaces,
-            "    Min correaltion:",
-            paste(minCor, collapse = ", ")
-        ))
-        if (!is.null(leaveOut))
-            printFlush(paste(
-                spaces,
-                "    _leaving out_ modules",
-                paste(labelOrder[leaveOut],
-                      collapse = ", ")
-            ))
-    }
-
-    truemodule = rep(grey, nGenes)
-    # These have the colors for left - out modules as well.
-    allLabels = rep(grey, nGenes)
-
-    # This matrix contains the simulated expression values (rows are genes,
-    # columns samples)
-    # Each simulated cluster has a distinct mean expression across the samples
-
-    datExpr = matrix(rnorm(nGenes * nSamples), nrow = nSamples, ncol = nGenes)
-    trueKME = rep(NA, nGenes)
-    trueKME.whichMod = rep(0, nGenes)
-
-    gene.index = 0 # Where to put the current gene into datExpr
-
-    for (mod in c(1:nMods)) {
-        nModGenes = no.in.modules[mod]
-        nNearGenes = no.near.modules[mod]
-        if (simulate.module[mod]) {
-            ME = eigengenes[, mod]
-            EffMaxCor = maxCor[mod]
-            EffMinCor = minCor[mod]
-            range = (gene.index + 1):(gene.index + nModGenes + nNearGenes)
-            temp = simulateModule(
-                ME,
-                nModGenes,
-                nNearGenes,
-                minCor[mod],
-                maxCor[mod],
-                corPower,
-                signed = signed,
-                propNegativeCor = propNegativeCor,
-                geneMeans = NULL,
-                verbose = verbose - 2,
-                indent = indent + 2
-            )
-            datExpr[, range] = temp
-            truemodule[(gene.index + 1):(gene.index + nModGenes)] = labelOrder[mod]
-            trueKME[range] = attributes(temp)$trueKME
-            trueKME.whichMod[range] = mod
-        }
-        allLabels[(gene.index + 1):(gene.index + nModGenes)] = labelOrder[mod]
-        gene.index = gene.index + nModGenes + nNearGenes
-    }
-
-    if (nSubmoduleLayers > 0) {
-        OrderVector = c(1:nGenes)
-        for (layer in 1:nSubmoduleLayers) {
-            if (verbose > 1)
-                printFlush(paste(spaces,
-                                 "Simulating ordereded extra layer",
-                                 layer))
-            datExpr = datExpr + simulateSmallLayer(
-                OrderVector,
-                nSamples,
-                minCor[1],
-                maxCor[1],
-                corPower,
-                averageNGenesInSubmodule,
-                averageExprInSubmodule,
-                submoduleSpacing,
-                verbose - 1,
-                indent + 1
-            )
-        }
-    }
-    if (nScatteredModuleLayers > 0)
-        for (layer in 1:nScatteredModuleLayers) {
-            if (verbose > 1) {
-                printFlush(spaces, "Simulating unordereded extra layer ",
-                                 layer)
-            }
-            OrderVector <- sample(nGenes)
-            datExpr <- datExpr + simulateSmallLayer(OrderVector, nSamples,
-                                                    minCor[1], maxCor[1],
-                                                    corPower,
-                                                    averageNGenesInSubmodule,
-                                                    averageExprInSubmodule,
-                                                    submoduleSpacing,
-                                                    verbose = verbose - 1,
-                                                    indent = indent + 1)
-        }
-    collectGarbage()
-    if (verbose > 1) {
-        printFlush(spaces, "  Adding background noise with amplitude ",
-                   backgroundNoise)
-    }
-    datExpr <- datExpr + rnorm(n = nGenes * nSamples, sd = backgroundNoise)
-    means <- colMeans(datExpr)
-
-    datExpr <- datExpr + matrix(geneMeans - means, nSamples, nGenes,
-                               byrow = TRUE)
-
-    colnames(datExpr) <- paste0("Gene.", c(1:nGenes))
-    rownames(datExpr) <- paste0("Sample.", c(1:nSamples))
-
-    list(datExpr = datExpr,
-         setLabels = truemodule,
-         allLabels = allLabels,
-         labelOrder = labelOrder,
-         trueKME = trueKME,
-         trueKME.whichMod = trueKME.whichMod
-    )
+  list(datExpr = datExpr,
+       setLabels = truemodule,
+       allLabels = allLabels,
+       labelOrder = labelOrder,
+       trueKME = trueKME,
+       trueKME.whichMod = trueKME.whichMod
+  )
 } # end of function
 
 # simulateMultiExpr ####
@@ -846,90 +856,90 @@ simulateMultiExpr <- function(eigengenes,
                               submoduleSpacing = 2,
                               verbose = 1,
                               indent = 0) {
-    MEsize = checkSets(eigengenes)
-    nSets = MEsize$nSets
-    nMods = MEsize$nGenes
-    nSamples = MEsize$nSamples
+  MEsize = checkSets(eigengenes)
+  nSets = MEsize$nSets
+  nMods = MEsize$nGenes
+  nSamples = MEsize$nSamples
 
-    nAllSamples = sum(nSamples)
+  nAllSamples = sum(nSamples)
 
-    if (is.null(geneMeans)) {
-        geneMeans = matrix(0, nGenes, nSets)
-    } else {
-        geneMeans = as.matrix(geneMeans)
-        if (nrow(geneMeans) != nGenes) {
-            stop("Number of rows (or entries) in 'geneMeans' must equal
+  if (is.null(geneMeans)) {
+    geneMeans = matrix(0, nGenes, nSets)
+  } else {
+    geneMeans = as.matrix(geneMeans)
+    if (nrow(geneMeans) != nGenes) {
+      stop("Number of rows (or entries) in 'geneMeans' must equal
                  'nGenes'.")
-        } else if (ncol(geneMeans) == 1) {
-            geneMeans = matrix(geneMeans, nGenes, nSets)
-        } else if (ncol(geneMeans) != nSets)
-            stop("Number of columns in geneMeans must either equal the number
+    } else if (ncol(geneMeans) == 1) {
+      geneMeans = matrix(geneMeans, nGenes, nSets)
+    } else if (ncol(geneMeans) != nSets)
+      stop("Number of columns in geneMeans must either equal the number
                  of sets or be 1.")
-    }
+  }
 
-    if (any(is.na(geneMeans)))
-        stop("All entries of 'geneMeans' must be finite.")
+  if (any(is.na(geneMeans)))
+    stop("All entries of 'geneMeans' must be finite.")
 
-    d2 = length(modProportions) - 1
-    if (d2  != nMods)
-        stop(paste(
-            "Incompatible numbers of modules in
+  d2 = length(modProportions) - 1
+  if (d2  != nMods)
+    stop(paste(
+      "Incompatible numbers of modules in
             'eigengenes' and 'modProportions'"
-        ))
-    if (is.null(leaveOut)) {
-        leaveOut = matrix(FALSE, nMods, nSets)
-    } else {
-        d3 = dim(leaveOut)
-        if ((d3[1]  != nMods) | (d3[2]  != nSets))
-            stop(paste(
-                "Incompatible dimensions of 'leaveOut' and set
+    ))
+  if (is.null(leaveOut)) {
+    leaveOut = matrix(FALSE, nMods, nSets)
+  } else {
+    d3 = dim(leaveOut)
+    if ((d3[1]  != nMods) | (d3[2]  != nSets))
+      stop(paste(
+        "Incompatible dimensions of 'leaveOut' and set
                 eigengenes."
-            ))
-    }
+      ))
+  }
 
-    multiExpr = vector(mode = "list", length = nSets)
-    setLabels = NULL
-    allLabels = NULL
-    labelOrder = NULL
+  multiExpr = vector(mode = "list", length = nSets)
+  setLabels = NULL
+  allLabels = NULL
+  labelOrder = NULL
 
-    for (set in 1:nSets) {
-        SetEigengenes = scale(eigengenes[[set]]$data)
-        setLeaveOut = leaveOut[, set]
-        # Convert setLeaveOut from boolean to a list of indices where it's TRUE
-        # SetMinCor = rep(minCor, nMods)
-        # SetMaxCor = rep(maxCor, nMods)
-        SetLO = c(1:nMods)[setLeaveOut]
-        setData = simulateDatExpr(
-            SetEigengenes,
-            nGenes,
-            modProportions,
-            minCor = minCor,
-            maxCor = maxCor,
-            corPower = corPower,
-            signed = signed,
-            propNegativeCor = propNegativeCor,
-            backgroundNoise = backgroundNoise,
-            leaveOut = SetLO,
-            nSubmoduleLayers = nSubmoduleLayers,
-            nScatteredModuleLayers  = nScatteredModuleLayers ,
-            averageNGenesInSubmodule = averageNGenesInSubmodule,
-            averageExprInSubmodule = averageExprInSubmodule,
-            submoduleSpacing = submoduleSpacing,
-            verbose = verbose - 1,
-            indent = indent + 1
-        )
-        multiExpr[[set]] = list(data = setData$datExpr)
-        setLabels = cbind(setLabels, setData$setLabels)
-        allLabels = cbind(allLabels, setData$allLabels)
-        labelOrder = cbind(labelOrder, setData$labelOrder)
-    }
-    list(
-        multiExpr = multiExpr,
-        setLabels = setLabels,
-        allLabels = allLabels,
-        labelOrder = labelOrder
+  for (set in 1:nSets) {
+    SetEigengenes = scale(eigengenes[[set]]$data)
+    setLeaveOut = leaveOut[, set]
+    # Convert setLeaveOut from boolean to a list of indices where it's TRUE
+    # SetMinCor = rep(minCor, nMods)
+    # SetMaxCor = rep(maxCor, nMods)
+    SetLO = c(1:nMods)[setLeaveOut]
+    setData = simulateDatExpr(
+      SetEigengenes,
+      nGenes,
+      modProportions,
+      minCor = minCor,
+      maxCor = maxCor,
+      corPower = corPower,
+      signed = signed,
+      propNegativeCor = propNegativeCor,
+      backgroundNoise = backgroundNoise,
+      leaveOut = SetLO,
+      nSubmoduleLayers = nSubmoduleLayers,
+      nScatteredModuleLayers  = nScatteredModuleLayers ,
+      averageNGenesInSubmodule = averageNGenesInSubmodule,
+      averageExprInSubmodule = averageExprInSubmodule,
+      submoduleSpacing = submoduleSpacing,
+      verbose = verbose - 1,
+      indent = indent + 1
     )
-    }
+    multiExpr[[set]] = list(data = setData$datExpr)
+    setLabels = cbind(setLabels, setData$setLabels)
+    allLabels = cbind(allLabels, setData$allLabels)
+    labelOrder = cbind(labelOrder, setData$labelOrder)
+  }
+  list(
+    multiExpr = multiExpr,
+    setLabels = setLabels,
+    allLabels = allLabels,
+    labelOrder = labelOrder
+  )
+}
 
 # simulateDatExpr5Modules ####
 #' Simplified simulation of expression data
@@ -985,53 +995,53 @@ simulateDatExpr5Modules <- function(nGenes = 2000,
                                     MEgreen,
                                     SDnoise = 1,
                                     backgroundCor = 0.3) {
-    nSamples = length(MEturquoise)
-    if (length(MEturquoise)  != length(MEblue) |
-        length(MEturquoise)  != length(MEbrown) |
-        length(MEturquoise)  != length(MEyellow) |
-        length(MEturquoise)  != length(MEgreen))
-        stop("Numbers of samples in module eigengenes (MEs) are not consistent")
-    if (sum(simulateProportions) > 1) {
-        stop(
-            "Sum of module proportions is larger than 1. Please ensure
+  nSamples = length(MEturquoise)
+  if (length(MEturquoise)  != length(MEblue) |
+      length(MEturquoise)  != length(MEbrown) |
+      length(MEturquoise)  != length(MEyellow) |
+      length(MEturquoise)  != length(MEgreen))
+    stop("Numbers of samples in module eigengenes (MEs) are not consistent")
+  if (sum(simulateProportions) > 1) {
+    stop(
+      "Sum of module proportions is larger than 1. Please ensure
             sum(simulateProportions) <= 1."
-        )
-        # simulateProportions = rep(1/10, 5)
-    }
-    modulesizes = round(nGenes * c(simulateProportions, 1 - sum(simulateProportions)))
-    truemodule = rep(c(as.character(colorLabels), "grey"), modulesizes)
-    ModuleEigengenes = data.frame(MEturquoise, MEblue, MEbrown, MEyellow, MEgreen)
-    no.MEs = dim(ModuleEigengenes)[[2]]
-    # This matrix contains the simulated expression values
-    #(rows are samples, columns genes)
-    # it contains some background noise
-    datExpr = matrix(rnorm(nSamples * nGenes, mean = 0, sd = SDnoise),
-                     nrow = nSamples,
-                     ncol = nGenes)
+    )
+    # simulateProportions = rep(1/10, 5)
+  }
+  modulesizes = round(nGenes * c(simulateProportions, 1 - sum(simulateProportions)))
+  truemodule = rep(c(as.character(colorLabels), "grey"), modulesizes)
+  ModuleEigengenes = data.frame(MEturquoise, MEblue, MEbrown, MEyellow, MEgreen)
+  no.MEs = dim(ModuleEigengenes)[[2]]
+  # This matrix contains the simulated expression values
+  #(rows are samples, columns genes)
+  # it contains some background noise
+  datExpr = matrix(rnorm(nSamples * nGenes, mean = 0, sd = SDnoise),
+                   nrow = nSamples,
+                   ncol = nGenes)
 
-    if (is.logical(backgroundCor))
-        backgroundCor = 0.3 * as.numeric(backgroundCor)
+  if (is.logical(backgroundCor))
+    backgroundCor = 0.3 * as.numeric(backgroundCor)
 
-    if (as.numeric(backgroundCor) > 0) {
-        MEbackground = MEturquoise
-        datSignal = matrix(
-            MEbackground,
-            nrow = length(MEturquoise),
-            ncol = nGenes,
-            byrow = FALSE
-        )
-        datExpr = datExpr + as.numeric(backgroundCor) * datSignal
-    }# end of if backgroundCor
+  if (as.numeric(backgroundCor) > 0) {
+    MEbackground = MEturquoise
+    datSignal = matrix(
+      MEbackground,
+      nrow = length(MEturquoise),
+      ncol = nGenes,
+      byrow = FALSE
+    )
+    datExpr = datExpr + as.numeric(backgroundCor) * datSignal
+  }# end of if backgroundCor
 
-    for (i in c(1:no.MEs)) {
-        restrict1 = truemodule == colorLabels[i]
-        datModule = simulateModule(ModuleEigengenes[, i],
-                                   nGenes = modulesizes[i],
-                                   corPower = 2.5)
-        datExpr[, restrict1] = datModule
-    } # end of for loop
-    # this is the output of the function
-    list(datExpr  = datExpr,
-         truemodule  = truemodule,
-         datME = ModuleEigengenes)
+  for (i in c(1:no.MEs)) {
+    restrict1 = truemodule == colorLabels[i]
+    datModule = simulateModule(ModuleEigengenes[, i],
+                               nGenes = modulesizes[i],
+                               corPower = 2.5)
+    datExpr[, restrict1] = datModule
+  } # end of for loop
+  # this is the output of the function
+  list(datExpr  = datExpr,
+       truemodule  = truemodule,
+       datME = ModuleEigengenes)
 } # end of simulation function
