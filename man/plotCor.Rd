@@ -37,6 +37,9 @@ using an RGB color specification. Increasingly positive correlations are
 represented with reds of increasing intensity, and increasingly negative
 correlations are represented with greens of increasing intensity.
 }
+\examples{
+plotCor(matrix(runif(4), ncol = 2, nrow = 2))
+}
 \seealso{
 \code{\link{plotMat}}, \code{\link{rgcolors.func}},
 \code{\link{cor}}, \code{\link{image}}, \code{\link{rgb}}.

@@ -154,7 +154,6 @@ stratum specific estimates by specifying the strata using the argument
 time.
 }
 \examples{
-
 # observed trait
 y <- rnorm(1000, mean = 50, sd = 20)
 # unobserved, true trait

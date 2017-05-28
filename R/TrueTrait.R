@@ -144,7 +144,6 @@
 #' 2, February 2010, Pages 69-78
 #' @keywords misc
 #' @examples
-#'
 #' # observed trait
 #' y <- rnorm(1000, mean = 50, sd = 20)
 #' # unobserved, true trait

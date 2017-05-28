@@ -1199,9 +1199,8 @@ plotEigengeneNetworks <- function(multiME,
     nPlotRows = as.numeric(plotDendrograms) + nSets * as.numeric(plotHeatmaps)
     if (nPlotRows == 0)
         stop("Nothing to plot: neither dendrograms not heatmaps requested.")
-    oldpar <- par(mfrow = c(nPlotRows, nPlotCols))
+    oldpar <- par(mfrow = c(nPlotRows, nPlotCols), cex = cex)
     on.exit(par(oldpar))
-    par(cex = cex)
     if (excludeGrey)
         for (set in 1:nSets)
             multiME[[set]]$data  =

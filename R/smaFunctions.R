@@ -69,7 +69,8 @@ rgcolors.func <- function(n = 50) {
 #' @seealso \code{\link{plotMat}}, \code{\link{rgcolors.func}},
 #' \code{\link{cor}}, \code{\link{image}}, \code{\link{rgb}}.
 #' @keywords hplot
-#' @example plotCor(matrix(runif(4), ncol = 2, nrow = 2))
+#' @examples
+#' plotCor(matrix(runif(4), ncol = 2, nrow = 2))
 plotCor <- function(x, new = FALSE, nrgcols = 50, labels = FALSE, labcols = 1,
                     title = "", ...) {
     #   X <- x

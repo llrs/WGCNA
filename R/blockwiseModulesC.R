@@ -1,6 +1,4 @@
-#  TOM similarity via a call to a compiled code.
-
-
+#  TOMsimilarity  ####
 #' Topological overlap matrix
 #'
 #' Calculation of the topological overlap matrix from given expression data.
@@ -71,6 +69,9 @@
 #' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 #' @keywords misc
 #' @export
+#' @examples
+#' datExpr <- matrix(runif(500*25), ncol = 500, nrow = 25)
+#' TOM <- TOMsimilarityFromExpr(datExpr)
 TOMsimilarityFromExpr = function(datExpr, corType = "pearson",
                                  networkType = "unsigned",
                                  power = 6, TOMType = "signed", TOMDenom = "min",
@@ -192,6 +193,10 @@ TOMsimilarityFromExpr = function(datExpr, corType = "pearson",
 #' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
 #' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 #' @keywords misc
+#' @examples
+#' datExpr <- matrix(runif(500*25), ncol = 500, nrow = 25)
+#' sim <- cor(datExpr)
+#' TOM <- TOMsimilarity(abs(sim))
 TOMsimilarity = function(adjMat, TOMType = "unsigned", TOMDenom = "min",
                          verbose = 1, indent = 0) {
   TOMTypeC = pmatch(TOMType, .TOMTypes)-1
@@ -243,15 +248,7 @@ TOMdist = function(adjMat, TOMType = "unsigned", TOMDenom = "min", verbose = 1,
 }
 
 
-#==========================================================================================================
-#
-# blockwiseModules
-#
-#==========================================================================================================
-# Function to calculate modules and eigengenes from all genes.
-
-
-
+# blockwiseModules ####
 #' Automatic network construction and module detection
 #'
 #' This function performs automatic network construction and module detection
@@ -605,10 +602,8 @@ blockwiseModules <- function(
      printFlush(paste(spaces, "Calculating module eigengenes block-wise from all genes"))
 
   seedSaved = FALSE
-  if (!is.null(randomSeed))
-  {
-    if (exists(".Random.seed"))
-    {
+  if (!is.null(randomSeed)) {
+    if (exists(".Random.seed")) {
        seedSaved = TRUE
        savedSeed = .Random.seed
     }
@@ -617,29 +612,39 @@ blockwiseModules <- function(
 
   intCorType = pmatch(corType, .corTypes)
   if (is.na(intCorType))
-    stop(paste("Invalid 'corType'. Recognized values are", paste(.corTypes, collapse = ", ")))
+    stop("Invalid 'corType'. Recognized values are", paste(.corTypes, collapse = ", "))
 
   intTOMType = pmatch(TOMType, .TOMTypes)
   if (is.na(intTOMType))
-    stop(paste("Invalid 'TOMType'. Recognized values are", paste(.TOMTypes, collapse = ", ")))
+    stop("Invalid 'TOMType'. Recognized values are", paste(.TOMTypes, collapse = ", "))
 
   TOMDenomC = pmatch(TOMDenom, .TOMDenoms)-1
   if (is.na(TOMDenomC))
     stop(paste("Invalid 'TOMDenom'. Recognized values are", paste(.TOMDenoms, collapse = ", ")))
 
-  if ( (maxPOutliers < 0) | (maxPOutliers > 1)) stop("maxPOutliers must be between 0 and 1.")
-  if (quickCor < 0) stop("quickCor must be positive.")
-  if (nThreads < 0) stop("nThreads must be positive.")
-  if (is.null(nThreads) || (nThreads==0)) nThreads = .useNThreads()
+  if ((maxPOutliers < 0) | (maxPOutliers > 1)) {
+    stop("maxPOutliers must be between 0 and 1.")
+  }
+  if (quickCor < 0) {
+    stop("quickCor must be positive.")
+  }
+  if (nThreads < 0)
+    stop("nThreads must be positive.")
+  if (is.null(nThreads) || (nThreads==0)) {
+    nThreads = .useNThreads()
+  }
 
-  if ( (power<1) | (power>30) ) stop("power must be between 1 and 30.")
+  if ( (power<1) | (power>30) ) {
+    stop("power must be between 1 and 30.")
+  }
   # if ( (minKMEtoJoin >1) | (minKMEtoJoin  <0) ) stop("minKMEtoJoin  must be between 0 and 1.")
 
   intNetworkType = charmatch(networkType, .networkTypes)
-  if (is.na(intNetworkType))
-    stop(paste("Unrecognized networkType argument.",
-         "Recognized values are (unique abbreviations of)", paste(.networkTypes, collapse = ", ")))
-
+  if (is.na(intNetworkType)){
+    stop("Unrecognized networkType argument.",
+         "Recognized values are (unique abbreviations of)",
+         paste(.networkTypes, collapse = ", "))
+  }
   fallback = pmatch(pearsonFallback, .pearsonFallbacks)
   if (is.na(fallback))
       stop(paste0("Unrecognized value '", pearsonFallback, "' of argument 'pearsonFallback'.",
@@ -648,7 +653,9 @@ blockwiseModules <- function(
 
 
   dimEx = dim(datExpr)
-  if (length(dimEx)!=2) stop("datExpr has incorrect dimensions.")
+  if (length(dimEx)!=2) {
+    stop("datExpr has incorrect dimensions.")
+  }
   nGenes = dimEx[2]
   nSamples = dimEx[1]
   allLabels = rep(0, nGenes)
@@ -656,18 +663,19 @@ blockwiseModules <- function(
   allLabelIndex = NULL
 
   if (maxBlockSize >= floor(sqrt(2^31)) )
-    stop("'maxBlockSize must be less than ", floor(sqrt(2^31)), ". Please decrease it and try again.")
+    stop("'maxBlockSize must be less than ", floor(sqrt(2^31)),
+         ". Please decrease it and try again.")
 
-  if (!is.null(blocks) && (length(blocks)!=nGenes))
-    stop("Input error: the length of 'geneRank' does not equal the number of genes in given 'datExpr'.")
-
-  if (!is.null(getTOMs))
+  if (!is.null(blocks) && (length(blocks)!=nGenes)) {
+    stop("Input error: the length of 'geneRank' does not",
+         "equal the number of genes in given 'datExpr'.")
+  }
+  if (!is.null(getTOMs)) {
     warning("getTOMs is deprecated, please use saveTOMs instead.")
-
+  }
   # Check data for genes and samples that have too many missing values
 
-  if (checkMissingData)
-  {
+  if (checkMissingData) {
     gsg = goodSamplesGenes(datExpr, verbose = verbose - 1, indent = indent + 1)
     if (!gsg$allOK) datExpr = datExpr[gsg$goodSamples, gsg$goodGenes]
     nGGenes = sum(gsg$goodGenes)
@@ -678,8 +686,7 @@ blockwiseModules <- function(
     gsg = list(goodSamples = rep(TRUE, nSamples), goodGenes = rep(TRUE, nGenes), allOK = TRUE)
   }
 
-  if (any(is.na(datExpr)))
-  {
+  if (any(is.na(datExpr))) {
      datExpr.scaled.imputed = t(impute.knn(t(scale(datExpr)))$data)
   } else
      datExpr.scaled.imputed = scale(datExpr)
@@ -1191,16 +1198,10 @@ blockwiseModules <- function(
        MEsOK = MEsOK)
 }
 
-#==================================================================================
-#
 # Helper functions
-#
-#==================================================================================
 
 # order labels by size
-
-.orderLabelsBySize = function(labels, exclude = NULL)
-{
+.orderLabelsBySize = function(labels, exclude = NULL){
   levels.0 = sort(unique(labels))
   levels = levels.0[ !levels.0 %in% exclude]
   levels.excl = levels.0 [levels.0 %in% exclude]
@@ -1215,14 +1216,7 @@ blockwiseModules <- function(
   newOrder[ match(labels, oldOrder) ]
 }
 
-#======================================================================================================
-#
-# Re-cut trees for blockwiseModules
-#
-#======================================================================================================
-
-
-
+# Re-cut trees ####
 #' Repeat blockwise module detection from pre-calculated data
 #'
 #' Given consensus networks constructed for example using
@@ -1779,11 +1773,6 @@ recutBlockwiseTrees = function(datExpr,
        MEsOK = MEsOK)
 }
 
-#==========================================================================================================
-#
-# blockwiseIndividualTOMs
-#
-#==========================================================================================================
 
 # This function calculates and saves blockwise topological overlaps for a given multi expression data. The
 # argument blocks can be given to specify blocks, or the blocks can be omitted and will be calculated if
@@ -1815,6 +1804,7 @@ recutBlockwiseTrees = function(datExpr,
                   c(setNumber, setNames[setNumber], blockNumber))
 }
 
+# blockwiseIndividualTOMs ####
 #' Calculation of block-wise topological overlaps
 #'
 #' Calculates topological overlaps in the given (expression) data. If the
@@ -2192,14 +2182,7 @@ blockwiseIndividualTOMs = function(multiExpr,
        )
 }
 
-#==========================================================================================================
-#
-# lowerTri2matrix
-#
-#==========================================================================================================
-
-
-
+# lowerTri2matrix ####
 #' Reconstruct a symmetric matrix from a distance (lower-triangular)
 #' representation
 #'
@@ -2259,13 +2242,6 @@ lowerTri2matrix = function(x, diag = 1) {
   mat
 }
 
-#==========================================================================================================
-#
-# blockwiseConsensusModules
-#
-#==========================================================================================================
-
-
 .checkComponents = function(object, names) {
   objNames = names(object)
   inObj = names %in% objNames
@@ -2277,7 +2253,7 @@ lowerTri2matrix = function(x, diag = 1) {
 # Function to calculate consensus modules and eigengenes from all genes.
 
 
-
+# blockwiseConsensusModules ####
 #' Find consensus modules across several datasets.
 #'
 #' Perform network construction and consensus module detection across several
@@ -3453,14 +3429,7 @@ blockwiseConsensusModules <- function(multiExpr,
 }
 
 
-#==========================================================================================================
-#
-# recutConsensusTrees
-#
-#==========================================================================================================
-
-
-
+# recutConsensusTrees ####
 #' Repeat blockwise consensus module detection from pre-calculated data
 #'
 #' Given consensus networks constructed for example using
@@ -4121,14 +4090,7 @@ recutConsensusTrees = function(multiExpr,
 
 
 
-#======================================================================================================
-#
-# preliminary partitioning
-#
-#======================================================================================================
-
-
-
+# preliminary partitioning ####
 #' Projective K-means (pre-)clustering of expression data
 #'
 #' Implementation of a variant of K-means clustering for expression data.
@@ -4488,14 +4450,7 @@ projectiveKMeans = function (
   return( list(clusters = membershipAll, centers = centers) )
 }
 
-#======================================================================================================
-#
-# Consensus preliminary partitioning
-#
-#======================================================================================================
-
-
-
+# consensusProjectiveKMeans ####
 #' Consensus projective K-means (pre-)clustering of expression data
 #'
 #' Implementation of a consensus variant of K-means clustering for expression

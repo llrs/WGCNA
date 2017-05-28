@@ -7,7 +7,7 @@
 GTOMdist(adjMat, degree = 1)
 }
 \arguments{
-\item{adjMat}{adjacency matrix. See details below.}
+\item{adjMat}{adjacency matrix with entries between [0, 1]}
 
 \item{degree}{integer specifying the maximum degree to be calculated.}
 }
@@ -16,7 +16,11 @@ Matrix of the same dimension as the input \code{adjMat}.
 }
 \description{
 Generalized Topological Overlap Measure, taking into account interactions of
-higher degree.
+higher degree. This function computes a TOM dissimilarity
+}
+\details{
+WARNING:  ONLY FOR UNWEIGHTED NETWORKS, i.e. the adjacency matrix contains
+binary entries.
 }
 \references{
 Yip A, Horvath S (2007) Gene network interconnectedness and the

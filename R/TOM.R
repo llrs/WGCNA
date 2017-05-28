@@ -1,18 +1,13 @@
-
 # GTOMdist ####
-# This function computes a TOMk dissimilarity
-# which generalizes the topological overlap matrix (Ravasz et al)
-# Input: an Adjacency matrix with entries in [0, 1]
-# WARNING:  ONLY FOR UNWEIGHTED NETWORKS, i.e. the adjacency matrix contains
-# binary entries...
-# This function is explained in Yip and Horvath (2005)
-# http://www.genetics.ucla.edu/labs/horvath/GTOM/
 #' Generalized Topological Overlap Measure
 #'
 #' Generalized Topological Overlap Measure, taking into account interactions of
-#' higher degree.
+#' higher degree. This function computes a TOM dissimilarity
 #'
-#' @param adjMat adjacency matrix. See details below.
+#' WARNING:  ONLY FOR UNWEIGHTED NETWORKS, i.e. the adjacency matrix contains
+#' binary entries.
+#'
+#' @param adjMat adjacency matrix with entries between [0, 1]
 #' @param degree integer specifying the maximum degree to be calculated.
 #' @return Matrix of the same dimension as the input \code{adjMat}.
 #' @author Steve Horvath and Andy Yip
@@ -135,31 +130,22 @@ vectorTOM <-function(datExpr, vect, subtract1 = FALSE, blockSize = 2000,
              'datExpr' must be the same.")
 
     if (ncol(vect) > blockSize)
-        stop(
-            paste(
-                "Input error: number of columns in 'vect' is too large.",
-                "If you are certain you want to try anyway, increase 'blockSize'
-                to at least the number of columns in 'vect'."
-            )
-            )
+      stop("Input error: number of columns in 'vect' is too large.",
+           "If you are certain you want to try anyway, increase 'blockSize'",
+           "to at least the number of columns in 'vect'.")
 
     corEval = parse(text = paste(corFnc,
                                  "(datExpr, vect ", prepComma(corOptions), ")"))
     corVE = eval(corEval)
-    if (intType == 1)
-    {
+    if (intType == 1) {
         corVE = abs(corVE)
-    } else if (intType == 2)
-    {
+    } else if (intType == 2) {
         corVE = (1 + corVE) / 2
-    } else if (intType == 3)
-    {
+    } else if (intType == 3) {
         corVE[corVE < 0] = 0
     } else
-        stop(
-            "Unrecognized networkType argument. Recognized values are 'unsigned',
-            'signed', and 'signed hybrid'."
-        )
+        stop("Unrecognized networkType argument. Recognized values are ",
+             "'unsigned', 'signed', and 'signed hybrid'.")
 
     corVE = corVE ^ power
 
@@ -180,8 +166,7 @@ vectorTOM <-function(datExpr, vect, subtract1 = FALSE, blockSize = 2000,
     }
     start = 1
     denomArr = array(0, dim = c(2, blockSize, nVect))
-    while (start <= nGenes)
-    {
+    while (start <= nGenes) {
         end = min(start + blockSize - 1, nGenes)
         blockInd = c(start:end)
         corEval = parse(text = paste(
@@ -290,20 +275,14 @@ subsetTOM <- function(datExpr,
         stop("Entries of 'subset' must all be finite.")
 
     if (min(subset) < 1 | max(subset) > nGenes)
-        stop(
-            paste(
-                "Some entries of 'subset' are out of range.",
-                "\nNote: 'subset' must contain indices of the subset
-                for which the TOM is calculated."
-            )
-            )
+      stop("Some entries of 'subset' are out of range.",
+           "\nNote: 'subset' must contain indices of the subset",
+           "for which the TOM is calculated.")
 
     intType = charmatch(networkType, .networkTypes)
     if (is.na(intType))
-        stop(paste(
-            "Unrecognized 'networkType'. Recognized values are",
-            paste(.networkTypes, collapse = ", ")
-        ))
+        stop("Unrecognized 'networkType'. Recognized values are",
+            paste(.networkTypes, collapse = ", "))
 
     adj = adjacency(
         datExpr,

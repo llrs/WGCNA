@@ -24,11 +24,7 @@ the blue intensities set to zero. The values returned by
 graphics functions or in \code{\link{par}}.
 }
 \examples{
-
 rgcolors.func(n = 5)
-## The following vector is returned:
-## "#00FF00" "#40BF00" "#808000" "#BF4000" "#FF0000"
-
 }
 \seealso{
 \code{\link{plotCor}}, \code{\link{plotMat}}, \code{\link{colors}},

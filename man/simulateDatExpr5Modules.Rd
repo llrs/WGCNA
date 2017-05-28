@@ -19,7 +19,8 @@ total number of genes to be placed in each individual module. The entries
 must be positive and sum to at most 1. If the sum is less than 1, the
 leftover genes will be simulated outside of modules.}
 
-\item{MEturquoise, MEblue, MEbrown, Eyellow, MEgreen}{seed module eigengene}
+\item{MEturquoise, MEblue, MEbrown, MEyellow, MEgreen}{seed eigengenes for the
+simulated modules. If several are provided each one correesponds to a sample.}
 
 \item{SDnoise}{level of noise to be added to the simulated expressions.}
 
@@ -46,6 +47,10 @@ simulation, at the cost of considerably less flexibility.
 Roughly one-third of the genes are simulated with a negative correlation to
 their seed eigengene. See the functions \code{\link{simulateModule}} and
 \code{\link{simulateDatExpr}} for more details.
+}
+\examples{
+sample <- simulateDatExpr5Modules(MEturquoise = 1, MEblue = 2, MEbrown = 1,
+                         MEyellow = 3, MEgreen = 45)
 }
 \seealso{
 \code{\link{simulateModule}} for simulation of individual modules

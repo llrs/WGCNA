@@ -1,9 +1,6 @@
 library("WGCNA")
 context("Testing useNThreads")
 
-test_that("simulateModule works", {
-  expect_null(disableWGCNAThreads())
-})
 test_that("WGNCAnTrheads", {
   expect_true(is.numeric(WGCNAnThreads()))
 })
