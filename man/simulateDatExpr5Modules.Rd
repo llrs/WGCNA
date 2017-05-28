@@ -19,15 +19,7 @@ total number of genes to be placed in each individual module. The entries
 must be positive and sum to at most 1. If the sum is less than 1, the
 leftover genes will be simulated outside of modules.}
 
-\item{MEturquoise}{seed module eigengene for the first module.}
-
-\item{MEblue}{seed module eigengene for the second module.}
-
-\item{MEbrown}{seed module eigengene for the third module.}
-
-\item{MEyellow}{seed module eigengene for the fourth module.}
-
-\item{MEgreen}{seed module eigengene for the fifth module.}
+\item{MEturquoise, MEblue, MEbrown, Eyellow, MEgreen}{seed module eigengene}
 
 \item{SDnoise}{level of noise to be added to the simulated expressions.}
 

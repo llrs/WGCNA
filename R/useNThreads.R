@@ -3,10 +3,7 @@
 .useNThreads = function(nThreads = 0) {
   if (nThreads == 0) {
     nt.env = Sys.getenv(.threadAllowVar, unset = NA)
-    if (is.na(nt.env)) {
-        return(1)
-    }
-    if (nt.env == "") {
+    if (is.na(nt.env) | nt.env == "") {
         return(1)
     }
 
@@ -27,9 +24,13 @@
 
 .nProcessorsOnline = function() {
   n = detectCores()
-  if (!is.numeric(n)) n = 2
-  if (!is.finite(n)) n = 2
-  if (n<1) n = 2
+  if (!is.numeric(n)){
+    n = 2
+  } else  if (!is.finite(n)){
+    n = 2
+  } else if (n < 1) {
+    n = 2
+  }
   n
 }
 

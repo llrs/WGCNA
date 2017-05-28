@@ -32,11 +32,7 @@
 #' \code{\link{rgb}}, \code{\link{image}}.
 #' @keywords color
 #' @examples
-#'
 #' rgcolors.func(n = 5)
-#' ## The following vector is returned:
-#' ## "#00FF00" "#40BF00" "#808000" "#BF4000" "#FF0000"
-#'
 rgcolors.func <- function(n = 50) {
     k <- round(n/2)
     r <- c(rep(0, k), seq(0, 1, length = k))
@@ -73,6 +69,7 @@ rgcolors.func <- function(n = 50) {
 #' @seealso \code{\link{plotMat}}, \code{\link{rgcolors.func}},
 #' \code{\link{cor}}, \code{\link{image}}, \code{\link{rgb}}.
 #' @keywords hplot
+#' @example plotCor(matrix(runif(4), ncol = 2, nrow = 2))
 plotCor <- function(x, new = FALSE, nrgcols = 50, labels = FALSE, labcols = 1,
                     title = "", ...) {
     #   X <- x

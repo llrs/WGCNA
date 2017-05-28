@@ -71,6 +71,16 @@ Optionally, the function can also simulate genes that are "near" the module,
 meaning they are simulated with a low but non-zero correlation with the seed
 eigengene. The correlations run between \code{minCor} and zero.
 }
+\examples{
+nSamples <- 50
+nGenes <- 30
+y <- sample(c(1,2), nSamples, replace = TRUE)
+module1 <- simulateModule(scale(y), nGenes)
+module2 <- simulateModule(scale(y), nGenes, signed = TRUE)
+geneMeans <- sample(c(4, 5, 10), nGenes, replace = TRUE)
+module3 <- simulateModule(scale(y), nGenes, signed = TRUE,
+                          geneMeans = geneMeans)
+}
 \references{
 A short description of the simulation method can also be found
 in the Supplementary Material to the article

@@ -957,11 +957,8 @@ simulateMultiExpr <- function(eigengenes,
 #' total number of genes to be placed in each individual module. The entries
 #' must be positive and sum to at most 1. If the sum is less than 1, the
 #' leftover genes will be simulated outside of modules.
-#' @param MEturquoise seed module eigengene for the first module.
-#' @param MEblue seed module eigengene for the second module.
-#' @param MEbrown seed module eigengene for the third module.
-#' @param MEyellow seed module eigengene for the fourth module.
-#' @param MEgreen seed module eigengene for the fifth module.
+#' @param MEturquoise,MEblue,MEbrown,MEyellow,MEgreen seed eigengenes for the
+#' simulated modules. If several are provided each one correesponds to a sample.
 #' @param SDnoise level of noise to be added to the simulated expressions.
 #' @param backgroundCor backgrond correlation. If non-zero, a component will be
 #' added to all genes such that the average correlation of otherwise unrelated
@@ -985,6 +982,9 @@ simulateMultiExpr <- function(eigengenes,
 #' \code{\link{simulateDatExpr}} for a more comprehensive data simulation
 #' interface.
 #' @keywords misc
+#' @examples
+#' sample <- simulateDatExpr5Modules(MEturquoise = 1, MEblue = 2, MEbrown = 1,
+#'                          MEyellow = 3, MEgreen = 45)
 simulateDatExpr5Modules <- function(nGenes = 2000,
                                     colorLabels = c("turquoise", "blue", "brown", "yellow", "green"),
                                     simulateProportions = c(0.10, 0.08, 0.06, 0.04, 0.02),

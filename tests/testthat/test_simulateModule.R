@@ -29,4 +29,21 @@ test_that("simulateEigengeneNetwork works",{})
 test_that("simulateSmallLayer works",{})
 test_that("simulateDatExpr works",{})
 test_that("simulateMultiExpr works",{})
-test_that("simulateDatExpr5Modules works",{})
+
+test_that("simulateDatExpr5Modules works",{
+  test <- simulateDatExpr5Modules(MEturquoise = 1, MEblue = 2, MEbrown = 1,
+                                  MEyellow = 3, MEgreen = 45)
+  expect_equal(ncol(test$datExpr), 2000L)
+  expect_equal(nrow(test$datExpr), 1L)
+  expect_equal(as.numeric(test$datME), c(1, 2, 1, 3, 45))
+
+  test2 <- simulateDatExpr5Modules(MEturquoise = c(1, 2), MEblue = c(2, 1),
+                                   MEbrown = c(1, 1),
+                                   MEyellow = c(2, 3), MEgreen = c(2, 45))
+  expect_equal(nrow(test2$datExpr), 2L)
+  expect_error(simulateDatExpr5Modules(MEturquoise = c(1, 2),
+                                                MEblue = c(2, 1),
+                                                MEbrown = c(1, 1),
+                                                MEyellow = c(2, 3),
+                                                MEgreen = 2), "not consistent")
+})
