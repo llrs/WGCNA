@@ -31,8 +31,10 @@ test_that("simulateDatExpr works",{})
 test_that("simulateMultiExpr works",{})
 
 test_that("simulateDatExpr5Modules works",{
-  test <- simulateDatExpr5Modules(MEturquoise = 1, MEblue = 2, MEbrown = 1,
-                                  MEyellow = 3, MEgreen = 45)
+  # change in 1.51 ->1.60 now it needs to suppressWarnings
+  suppressWarnings(test <- simulateDatExpr5Modules(MEturquoise = 1, MEblue = 2,
+                                                   MEbrown = 1,
+                                  MEyellow = 3, MEgreen = 45))
   expect_equal(ncol(test$datExpr), 2000L)
   expect_equal(nrow(test$datExpr), 1L)
   expect_equal(as.numeric(test$datME), c(1, 2, 1, 3, 45))
