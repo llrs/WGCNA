@@ -1,5 +1,98 @@
 Note: as of 2009/03/10, changes that lead to different calculational results are marked as DIFF.
+2017/08/06: 1.61
 
+  - Some changes in mtd. functions now replaced for multiSet class methods.
+
+2017/07/07: 1.60
+
+	. empiricalBayesLM expanded with additional arguments allowing
+	  specification of initial fit function
+
+	. DIFF: New branch split function that works with stability labels,
+	  branchSplitFromStabilityLabels.individualFraction, that tweaks the
+	  branch dissimilarity measure to work better when one branch is large
+	  and one small. To reproduce old results, use argument
+	  stabilityCriterion = "Common fraction" to functions
+	  hierarchicalConsensusModules and blockwiseConsensusModules.
+
+	. verboseBoxplot and verboseBarplot can now optionally overlay
+	  scatterplots of the underlying data (thanks to Zhijin (Jean) Wu for
+	  suggestion and code).
+
+	. Bugfix in enrichmentAnalysis: function does work when the number of
+	  reported terms is zero. (Thanks to Zhijie Cao for bug report and
+	  fix.)
+
+	. New functionality that allows a hierarchical calculation of
+	  consensus modules, with multiple new functions.
+
+	. New arguments colorHeightBase, colorHeightMax control layout in
+	  function plotDendroAndColors
+
+	. Arguments controlling the legend size in heatmaps with legends
+	  been tweaked to make the legend width independent of the width of
+	  the plotting region.
+
+	. The horizontal adjusting of row labels in labeledHeatmap can now be
+	  set using the new argument x.adj.lab.y.
+
+	. Bugfix in mtd.susbet: function now works properly when invert is
+	  TRUE.
+
+	. formatLabels can now format strings to a maximum width in user
+	  coordinates and shorten the results to a given number of lines.
+
+	. Limitation to block sizes less than the integer addressing limit
+	  (sqrt(2^31)) has been removed.
+
+	. Multiple mtd.... functions now return NULL when the input multiData
+	  argument has length zero.
+
+	. Function adjacency now accepts corOptions in both character and list
+	  formats.
+
+	. New function minWhichMin that calculates the row- or column-wise
+	  minimum and index of the minimum.
+
+	. New functions pmin.fromList, pmean.fromList, pquantile.fromList, for
+	  parallel minimum, mean and quantile whose input is a list of
+	  identically sized arrays; functions pmin, pmean and pquantile now
+	  use compiled code and should be substantially faster and more memory
+	  efficient.
+
+	. Bugfix in function blockwiseModules: corrected conditional module
+	  removal if too few genes remain.
+
+	. pickSoftThreshold is now faster thanks to Alexey Sergushichev; new
+	  argument gcInterval allows the user to fine tune frequency of garbage
+	  collection to suit the size of the data.
+
+	. verboseBarplot now takes argument ylim which defaults to
+	  incorporating all bar heights plus error bars (if requested)
+
+	. Cleanup in function labeledHeatmap: incorrect text and color label
+	  offsets and widths fixed. The corresponding arguments xColorWidth,
+	  yColorWidth are now measured in user units rather than fractions of
+	  overall width and height.
+
+	. New functions bicovWeightFactors and bicovWeightsFromFactors
+
+2016/05/30: 1.52
+
+	. New function plotMultiHist for plotting multiple histograms in one
+	  plot
+
+	. New functions multiGrep, multiGrepl, multiSub, multiGSub
+
+	. New argument invert in mtd.subset allows consistent excluding of
+	  rows and columns from multiData structures.
+
+	. Bugfix in modulePreservation: accuracy statistics now work also with
+	  a single module. Thanks to Victor Hanson-Smith for pointing this
+	  out.
+
+	. mtd.rbindSelf now warns when colnames of the individual data sets do
+	  not agree.
 
 2016/03/08: 1.51
 
@@ -8,9 +101,9 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	  consensusProjectiveKMeans have changed to prevent the
 	  pre-clustering from becoming too long. To reproduce old results, use
 	  (nPreclusteringCenters or nCenters) = min(nGenes/20,
-	  maxBlockSize^2/nGenes), where nGenes is the number of genes (variables) 
+	  maxBlockSize^2/nGenes), where nGenes is the number of genes (variables)
 	  in the input data.
-	
+
 2016/02/23: 1.50
 
 	. Bugfix in function cor: function now correctly handles cases where
@@ -43,7 +136,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	  because of numeric under/overflow errors in the fast calculation of
 	  variance. This may possibly result in removal of genes that were
 	  retained in WGCNA versions 1.47-2 and newer, but should remove the
-	  same genes as 1.47-1 and older. 
+	  same genes as 1.47-1 and older.
 
 2015/12/16: 1.48-2
 
@@ -69,7 +162,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 
 2015/10/09: 1.47-6
 
-	. Bug in consensusTOM fixed that caused a spurious error 
+	. Bug in consensusTOM fixed that caused a spurious error
 	  "File names to save blocks of consensus TOM are not unique."
 	  when calculating with more than on block.
 
@@ -99,7 +192,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 2015/08/07: 1.47-4
 
 	. DIFF: projectiveKMeans now by default imputes missing data in
-	  datExpr at the start of the function. 
+	  datExpr at the start of the function.
 	  This can lead to somewhat different output; old
 	  behaviour can be forced by setting imputeMissing = FALSE. This
 	  change does not affect blockwiseModules since blockwiseModules
@@ -141,12 +234,12 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	. Function blockwiseModules can now optionally use module merging
 	  criteria derived from stability studies.
 
-	. Functions blockwiseModules, blockwiseIndividualTOMs and 
+	. Functions blockwiseModules, blockwiseIndividualTOMs and
 	  consensusBlockwiseModules now accept argument blockSizePenaltyPower
 	  that lets the user specify the severity of penalty for blocks
-	  exceeding maximum size. 
+	  exceeding maximum size.
 
-	. Functions projectiveKMeans and consensusProjectiveKMeans now accept 
+	. Functions projectiveKMeans and consensusProjectiveKMeans now accept
 	  Inf for sizePenaltyPower.
 
 	. Function labeledHeatmap.multiPage now accepts more explicit
@@ -173,7 +266,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 2015/02/06: 1.43-11
 
 	. Bugfix in C code fixes memory allocation errors with large data
-	  sets. The C code was also made more consistent in the use of 
+	  sets. The C code was also made more consistent in the use of
 	  size_t whenever needed and possible.
 
 	. Bugfix in labeledHeatmap fixes the direction of extended separator
@@ -198,7 +291,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	  to place horizontal and vertical divider lines into the heatmap.
 
 	. Bugs introduced into GOenrichmentAnalysis in the previous release
-	  are now fixed.  
+	  are now fixed.
 
 2014/11/25: 1.42
 
@@ -217,7 +310,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 
 	. Bugfixes in function TrueTrait
 
-	. DIFF: Bugfix in mtd.branchEigengeneDissim that primarilly affects 
+	. DIFF: Bugfix in mtd.branchEigengeneDissim that primarilly affects
 	  blockwiseConsensusModules. The consensus quantile was incorrectly
 	  applied, which led to overly aggressive module merging. The bugfix
 	  will lead to a different final modules if useBranchEigengeneDissim
@@ -226,7 +319,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 
 	. New function consensusTOM implements calculation of consensus TOM
 	  in a stand-alone function; this calculation was previously hidden
-	  inside blockwiseConsensusModules. 
+	  inside blockwiseConsensusModules.
 
 	. Network calibration methods in consensusTOM now include full
 	  quantile normalization
@@ -239,7 +332,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	  serious omission.
 
 	. blockwiseIndividualTOMs gains additional output components.
-	  
+
 	. Internal C code changed some index variables from int to size_t.
 
 	. Function individualTOMs now uses a more memory-efficient way to call
@@ -267,7 +360,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 
 2014/06/12: 1.41
 
-	. New function shortenStrings 
+	. New function shortenStrings
 
 	. Changed several packages we depend on from Depends: to Imports:
 
@@ -276,7 +369,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	. Bugfix in userListEnrichment: function no longer crashes when there
 	  are no "significant" overlaps
 
-	. New function intramodularConnectivity.fromExpr 
+	. New function intramodularConnectivity.fromExpr
 
 2014/05/07: 1.40
 
@@ -290,7 +383,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 2014/04/28: 1.39
 
 	. Function exportNetworkToVisANT can now restrict connections to a
-	  given number of top connections. 
+	  given number of top connections.
 
 	. Function exportNetworkToVisANT returns the resulting data frame
 	  invisibly.
@@ -346,7 +439,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	  superimposed on the strongest colors.
 
 	. More descriptive error message in cor() and bicor() when input
-	  contains missing data and 'use = "all.observations"'. 
+	  contains missing data and 'use = "all.observations"'.
 
 2013/11/04: 1.35
 
@@ -358,25 +451,25 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	. Functions mtd.apply, mtd.applyToSubset, and mtd.mapply gain
 	  arguments controling whether and how progress should be displayed;
 	  they also gain arguments that let the user specify calculation on
-	  only a subset of the input sets. 
+	  only a subset of the input sets.
 
 
 2013/10/10: 1.34
 
 	. Function verboseBarplot gains argument addCellCounts that enables
-	  display of counts above each bar. 
+	  display of counts above each bar.
 
 	. Function mtd.subset gains the argument 'permissive' that allows
 	  subsetting of "loose" multiData structures as well as 'drop' that
 	  controls dropping of dimensions with extent 1.
 
 	. Internal: Depends and Imports fields were cleaned up as per new CRAN
-	  requirements. Users should be aware that loading and attaching WGCNA 
+	  requirements. Users should be aware that loading and attaching WGCNA
 	  now does not automatically attach all packages from which WGCNA imports.
 
 	. Potentially serious bug has been fixed in the internal C code for
 	  calculations of correlation (function cor()). This bug seems to have led to
-	  correlation sometimes returning 0 where it should have returned an NA. 
+	  correlation sometimes returning 0 where it should have returned an NA.
 
 
 2013/08/29: 1.33
@@ -389,7 +482,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 
 	. New function plotOrderedColors that extends plotColorUnderTree to
 	  the case where the plot 'above' is not a dendrogram but a general plot
-	  (a useful example is a barplot). 
+	  (a useful example is a barplot).
 
 	. DIFF: bugfix in blockwiseModules, recutBlockwiseTrees,
 	  blockwiseConsensusModules, recutConsensusTrees: gene reassignment by
@@ -403,7 +496,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	  criteria that are supplied by the blockwise* functions. The
 	  criteria are implemented in functions branchEigengeneDissim,
 	  mtd.branchEigengeneDissim, branchSplit, branchSplit.dissim
-	  To preserve results of older calculations, new features are disabled 
+	  To preserve results of older calculations, new features are disabled
 	  by default.
 
 	. New functions for convenient handling of multiData structures:
@@ -428,7 +521,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 
 	. Argument order in mergeCloseModules has changed to a more logical
 	  order
-	  
+
 2013/07/18: 1.29
 
 	. Functions determining the number of available cores are now more
@@ -442,7 +535,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	. Help files formatted to narrower line width.
 
 	. bugfix in pickSoftThreshold when dataIsExpr is FALSE: function now
-	  correctly checks similarity (thanks to Lourdes Pena Castillo for 
+	  correctly checks similarity (thanks to Lourdes Pena Castillo for
 	  reporting it).
 
 	. updateProgInd now only updates display if the value to be displayed
@@ -450,8 +543,8 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	  to  somewhat better performance if updateProgInd is the performance
 	  bottleneck.
 
-	. DIFF: Bug fix in GOenrichmentAnalysis: all evidence codes listed on 
-	  http://www.geneontology.org/GO.evidence.shtml are now recognized. 
+	. DIFF: Bug fix in GOenrichmentAnalysis: all evidence codes listed on
+	  http://www.geneontology.org/GO.evidence.shtml are now recognized.
 	  This will likely may change GO enrichment results. We apologize for
 	  this omission.
 
@@ -490,7 +583,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	. Function verboseScatterplot gains a new argument displayAsZero that
 	  allows displaying small correlations as 0 (rather than say 1e-13).
 
-	. New function returnGeneSetsAsList returns gene sets used by function 
+	. New function returnGeneSetsAsList returns gene sets used by function
 	  userListEnrichment.
 
 2012/12/01: 1.25-2 ("We ain't done fixin' yet")
@@ -516,14 +609,14 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	  functions other than the default "cor" and options other than
 	  the default "use = 'p'".
 
-	. Introducing parallelization to user-level R functions through the use 
-	  of packages parallel, foreach and the doParallel backend. The parallelization 
+	. Introducing parallelization to user-level R functions through the use
+	  of packages parallel, foreach and the doParallel backend. The parallelization
 	  should work on all R-supported platforms. This change does not
 	  affect C-level workhorse functions for calculating correlations.
 
 	. New function blockSize that attempts to choose a suitable block size
 	  for most functions that use a block-wise approach to fit
-	  calculations into memory. 
+	  calculations into memory.
 
 	. Function labels2colors is now more robust and should work for
 	  data.frames as well
@@ -531,7 +624,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	. Function verboseBoxplot gains arguments notch and varwidth that are
 	  passed to the underlying boxplot call.
 
-	. Functions plotDendroUnderTree and plotDendroAndColors now 
+	. Functions plotDendroUnderTree and plotDendroAndColors now
 	  display missing color values as grey.
 
 	. Function verboseBarplot can now handle binary variables as well and
@@ -552,7 +645,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	. GOenrichmentAnalysis can now optionally shorten output by omitting
 	  details of highest-enriched GO terms.
 
-	. Defaults in randomGLMpredictor have been slightly tweaked for better 
+	. Defaults in randomGLMpredictor have been slightly tweaked for better
 	  performance.
 
 	. New function transposeBigData for transposing big matrices.
@@ -580,7 +673,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	  enabled using the new argument getAreaUnderROC.
 
 	. New function randomGLMpredictor that implements an ensemble predictor based on
-	  bootstrap aggregation (bagging) of generalized linear models whose covariates 
+	  bootstrap aggregation (bagging) of generalized linear models whose covariates
 	  are selected using forward stepwise regression according to AIC criteria.
 
 
@@ -597,10 +690,10 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	. Function modulePreservation gains an additional argument
 	  calculateClusterCoeff, with default value FALSE, that can be used to
 	  enable/disable clustering coefficient calculations. These tend to be
-	  slow and for efficiency purposes the default is FALSE. 
+	  slow and for efficiency purposes the default is FALSE.
 
 	. DIFF: because of the above, clustering coefficient calculations in
-	  function modulePreservation are disabled as a default. 
+	  function modulePreservation are disabled as a default.
 
 	. Error message in modulePreservation about input containing genes
 	  with too many missing values is now more informative.
@@ -614,7 +707,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	. DIFF: bugfix in function userListEnrichment corrects output.
 	  Previously, UNcorrected p-values were returned when corrected
 	  p-values were requested, and no p-values were returned when
-	  uncorrected p-values were requested. 
+	  uncorrected p-values were requested.
 
 	. p-value display in function verboseBarplot is now cleaned up by
 	  properly arranging spaces.
@@ -631,7 +724,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	  distinguishable by people with the most common kind of color
 	  blindness (green-red color blindness). The currently much-used
 	  greenWhiteRed now outputs a warning to that effect. We recommend
-	  that users switch to blueWhiteRed. 
+	  that users switch to blueWhiteRed.
 
 	. The default color palette for numbers2colors is now blueWhiteRed.
 
@@ -639,11 +732,11 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	  adjacency matrix to be 1. The diagonal is not really meaningful in a
 	  network analysis, but the underlying C code assumes the diagonal to
 	  be 1 since it simplifies calculations. This change also applies to
-	  TOMdist (which calls TOMsimilarity). 
+	  TOMdist (which calls TOMsimilarity).
 
 	. Function blockwiseConsensusModules now accepts argument
 	  trimmingConsensusQuantile and makes the consensus in module trimmimg
-	  consistent with the consensus in network construction and 
+	  consistent with the consensus in network construction and
 	  module identification.
 
 	. Function recutConsensusTrees now accepts arguments trimmingConsensusQuantile
@@ -668,14 +761,14 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	  mergeCloseModules.
 
 	. DIFF: blockwiseConsensusModules now passes the argument mergeConsensusQuantile
-	  to mergeCloseModules, which can lead to different module merging 
-	  compared to previous versions. Use mergeConsensusQuantile = 0 to 
+	  to mergeCloseModules, which can lead to different module merging
+	  compared to previous versions. Use mergeConsensusQuantile = 0 to
 	  reproduce results from older versions of this package.
-	  
+
 	. Function mergeCloseModules now takes arguments consensusQuantile,
 	  corFnc and corOptions
 
-	. New function blockwiseIndividualTOMs to calculate individual TOMs 
+	. New function blockwiseIndividualTOMs to calculate individual TOMs
 	  across multi-set expression data
 
 	. New functionality in blockwiseConsensusModules that can now utilize
@@ -712,19 +805,19 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 
 2011/12/22: 1.18
 
-	. DIFF: p-value calculation in userListEnrichment is now corrected 
+	. DIFF: p-value calculation in userListEnrichment is now corrected
 	  to give the probability of overlap **as strong or stronger** than observed,
-	  rather than that of overlap **stronger** than observed. The resulting 
+	  rather than that of overlap **stronger** than observed. The resulting
 	  p-values are more conservative; the difference can be large for very small
 	  categories.
 
 	. metaAnalysis and consensusKME now also calculate meta-analysis
-	  statistics using weights proportional to the square root 
+	  statistics using weights proportional to the square root
 	  of the number of samples
 
 	. Added citation information for the package. The citation is available
-	  by typing the command citation("WGCNA"). Please cite the package 
-	  if you use it in published research. (The citation("WGCNA") gives 
+	  by typing the command citation("WGCNA"). Please cite the package
+	  if you use it in published research. (The citation("WGCNA") gives
 	  somewhat mis-formatted results on older R versions, sorry.)
 
 2011/12/20: 1.17-1
@@ -765,7 +858,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 
 	. Due to CRAN requirements, R versions below 2.10 are not supported anymore.
 
-	. New function multiData.eigengeneSignificance for calculating module eigengene 
+	. New function multiData.eigengeneSignificance for calculating module eigengene
 	  significances in multi-set situations.
 
 	. DIFF: bugfix in function pickSoftThreshold, subtraction of
@@ -808,16 +901,16 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	. Function pickSoftThreshold now alos accepts similarity matrix as
 	  input.
 
-	. Function nearestCentroidPredictor now works also without specifying 
+	. Function nearestCentroidPredictor now works also without specifying
 	  test data (xtest).
 
-	. Function nearestCentroidPredictor lost multiple input arguments that 
+	. Function nearestCentroidPredictor lost multiple input arguments that
 	  related to un-loved sample network options and removal of PCs.
 
 	. Function accuracyMeasures now also outputs the naive accuracy rate.
 
 	. New data set SCsList containing stemm cell marker genes that can be
-	  used with userListEnrichment. 
+	  used with userListEnrichment.
 
 	. New function metaAnalysis to calculate meta-analysis significance
 	  statistics
@@ -827,12 +920,12 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 
 	. Multi-threading is now disabled by default but can be enabled by
 	  setting the environment variable ALLOW_WGCNA_THREADS=<number_of_threads>
-	  or using the function allowWGCNAThreads(). 
+	  or using the function allowWGCNAThreads().
 
 2011/08/16: 1.12
 
 	. Code cleanup to satisfy CRAN package check
-	. Functions plot.cor and plot.mat renamed to plotCor and plotMat to avoid 
+	. Functions plot.cor and plot.mat renamed to plotCor and plotMat to avoid
 	  confusion with methods for the plot generic
 	. Function userListEnrichment now returns a slightly more informative
 	  output in which the type of the refrence category is also indicated.
@@ -840,7 +933,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 
 2011/07/06: 1.11-3
 
-	. bugfix in modulePreservation fixes an additional bug that was introduced in 1.11-1 
+	. bugfix in modulePreservation fixes an additional bug that was introduced in 1.11-1
 	. bugfix in votingLinearPredictor: function now produces valid output
 	  when some (but not all!) features have zero variance
 	. fixed names of output in votingLinearPredictor
@@ -862,7 +955,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	. bugfix in collapseRows that affected the group2row component in the returned value.
 	  The bug caused some of the returned representative rows to be incorrect but had
 	  no effect on the collapsed data.
-	. bicor now issues a warning when any of the input variables 
+	. bicor now issues a warning when any of the input variables
 	  (or their columns) have zero MAD.
 	. numbers2colors gains the argument commonLim to specify whether
 	  limits should be column-specific or universal
@@ -878,14 +971,14 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 
 2011/04/19: 1.10
 
-	. New function accuracyMeasures for summarizing 2x2 confusion tables 
+	. New function accuracyMeasures for summarizing 2x2 confusion tables
 	. New prediction function votingLinearPredictor and
 	  nearestCentroidPredictor
-	. New functions proportionsInAdmixture.R and populationMeansInAdmixture.R 
+	. New functions proportionsInAdmixture.R and populationMeansInAdmixture.R
 	  for estimating proportions and populations meanspopulations means in
 	  admixtures
-	. Several additional functions by Jeremy Miller: 
-	  chooseOneHubInEachModule, consensusDissTOMandTree, kMEcomparisonScatterplot, 
+	. Several additional functions by Jeremy Miller:
+	  chooseOneHubInEachModule, consensusDissTOMandTree, kMEcomparisonScatterplot,
 	  moduleMergeUsingKME, orderBranchesUsingHubGenes, overlapTableUsingKME,
 	  stratifiedBarplot, swapTwoBranches, reflectBranches, selectBranch, userListEnrichment
 	. New function mutualInfoAdjacency by Lin Song
@@ -894,7 +987,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	  package qvalue and incorporated the necessary R code directly into
 	  WGCNA
 	. plotColorUnderTree and plotDendroAndColors gain additional
-	  flexibility when working with rows of text labels. 
+	  flexibility when working with rows of text labels.
 	. The argument 'colorText' to the above functions has been renamed to
 	  'rowText'. Sorry for any code that becomes broken because of this!
 	. VerboseScatterplot gains arguments to set the regression line color and type.
@@ -904,7 +997,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 
 	. Functions standardScreeningBinaryTrait and standardScreeningNumericTrait can now optionally turn
 	  off the calculation of q-values as the latter sometimes leads to problems.
-	. Character expansion for axis labels in labeledHeatmap can be set separately 
+	. Character expansion for axis labels in labeledHeatmap can be set separately
 	  for x and y axis.
 	. The ubiquitous corOptions argument can now take the value of an empty string ("").
 	. New utility function prepComma.
@@ -913,10 +1006,10 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 
 2010/12/17: 0.99
 
-	. Functions [bi]cor gain the ability to calculate cosine [bi]correlations, 
-	  invoked using the argument cosine = TRUE. Similar functionality added 
-	  to blockwise[Consensus]Modules and TOMsimilarityFromExpr. 
-	  For most other functions using correlations, the argument corOptions can be 
+	. Functions [bi]cor gain the ability to calculate cosine [bi]correlations,
+	  invoked using the argument cosine = TRUE. Similar functionality added
+	  to blockwise[Consensus]Modules and TOMsimilarityFromExpr.
+	  For most other functions using correlations, the argument corOptions can be
 	  used to request cosine correlations.
 	. Corrected error message in function adjacency
 	. Functions [bi]corAndPvalue now also return the number of
@@ -927,14 +1020,14 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	. Bugfix in functions [bi]corAndPvalue that gave incorrect p-values
 	  when input y = NULL
 	. Functions [bi]corAndPvalue now also return the Student t statistic
-	  from which the p-values are calculated. 
+	  from which the p-values are calculated.
 	. Function standardScreeningNumericTrait now accepts arguments corFnc
 	  and corOptions
 
 2010/10/29: 0.97
 
 	. Functions [bi]corAndPvalue now also return the Fisher Z statistics.
-	. Function adjacency can now calculate distance-based networks as well, 
+	. Function adjacency can now calculate distance-based networks as well,
 	  via type="distance". Various distance functions and options can be used.
 	. Functions signedKME and networkScreening now accept arguments cor
 	  and corOptions that can be used to specify the correlation function
@@ -948,12 +1041,12 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 
 	. New functions pquantile, pmean, pmedian for calculation of
 	  "parallel" quantiles, means, and medians.
-	. Functions cor and bicor now give a more descriptive error description when 
+	. Functions cor and bicor now give a more descriptive error description when
 	  an argument with one dimension equal zero is passed to the functions.
 
 2010/09/16: 0.95
 
-	. More changes to function collapseRows: renamed arguments, changed defaults, 
+	. More changes to function collapseRows: renamed arguments, changed defaults,
 	  code cleaned up and bugs fixed. The function collapseRows should still be
 	  considered experimental.
 
@@ -989,7 +1082,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	  from meanAdj, cor.kIM and cor.Adj.
 	. DIFF: in modulePreservation, a new option includekMEallInSummary (default FALSE)
 	  controls whether cor.kMEall should be included in summary statistis
-	. output of modulePreservation now has names in permutationDetails to facilitate 
+	. output of modulePreservation now has names in permutationDetails to facilitate
 	  detailed studies of permutation results
 
 2010/06/10: 0.91
@@ -998,11 +1091,11 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	  meanSignAwarekME are now stripped of their sign, both in observed
 	  values and in permutations. This is done because the eigengene may
 	  flip sign between data sets, leading to artificially low
-	  preservation scores. 
+	  preservation scores.
 	. DIFF: p-values calculated by modulePreservation are now returned as logarithms in base 10
 	  (previously they were returned as natural logarithms). Names of the returned components also
 	  changed slightly to emphasize that the p-values are returned as logarithms.
-	. Additional summarycolumns added to the output of modulePreservation 
+	. Additional summarycolumns added to the output of modulePreservation
 	  for observed and permutation preservation statistics
 	. Function collapseRows now selects a single probe to represent each gene
 
@@ -1010,11 +1103,11 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 
 	. modulePreservation now also returns p-values and optionally the q-values corresponding to the
 	  permutation Z scores
-	. simulateDatExpr now sets (artificial) gene and sample names, for easier integration with some	
+	. simulateDatExpr now sets (artificial) gene and sample names, for easier integration with some
 	  analysis functions (notably modulePreservation)
-	. incompatibilities with new versions of R in exportNetworkTo[Visant,Cytoscape] fixed 
+	. incompatibilities with new versions of R in exportNetworkTo[Visant,Cytoscape] fixed
 	. new function subsetTOM to efficiently calculate TOM among a subset
-	  of network nodes 
+	  of network nodes
 	. bugs in vectorTOM fixed
 	. DIFF: modulePreservation now limits the size of the gold module to
 	  at most half the total number of genes in the comparison, to make
@@ -1039,7 +1132,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 
 2010/05/07: 0.88-2
 
-	. unnecessary dependence on package fields removed. 
+	. unnecessary dependence on package fields removed.
 
 2010/05/07: 0.88-1
 
@@ -1055,22 +1148,22 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 
 2010/02/19: 0.87
 
-	. bicor gets a new argument pearsonFallback that lets the user specify 
+	. bicor gets a new argument pearsonFallback that lets the user specify
 	  the handling of cases with zero median absolute deviation that would
 	  normally lead to NA values.
-	. mergeCloseModules (and blockwise[Consensus]Modules) now more robust: 
+	. mergeCloseModules (and blockwise[Consensus]Modules) now more robust:
 	  works also in the case of a single module
 	. DIFF: A bug was fixed that affected bicor(x) calculation with missing data on Windows
-	  (calculations of 2-variable bicor, single-variable bicor without missing data, and any 
-	   calculations where multi-threading is available [most platforms except Windows] were 
-	   not affected by this bug). The bug caused some calculations to be a bit off. 
+	  (calculations of 2-variable bicor, single-variable bicor without missing data, and any
+	   calculations where multi-threading is available [most platforms except Windows] were
+	   not affected by this bug). The bug caused some calculations to be a bit off.
 	   We apologize for any problems this may have caused.
 
 2010/02/10: 0.86
 
 	. bug in colQuantileC fixed.
 	. EXPERIMENTAL: a major addition to modulePreservation now allows
-	  module preservation calculations based on general adjacency matrices. 
+	  module preservation calculations based on general adjacency matrices.
 	. bugfix in labelPoints fixes a warning message
 
 2009/12/26: 0.85
@@ -1116,12 +1209,12 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	. new function standardScreeningBinaryTrait
 	. bugfix in verboseBarplot: the function now passes the ... arguments to barplot
 	. verboseScatterplot gets argument sample for better handling of large vectors
-	. labeledHeatmap gets arguments xColorWidth and yColorWidth that control the witdth 
+	. labeledHeatmap gets arguments xColorWidth and yColorWidth that control the witdth
 	  of the color labels
 
 2009/10/29: 0.81-2
 
-	. bugfix in blockwise[Consensus]Modules: function now works when number of modules 
+	. bugfix in blockwise[Consensus]Modules: function now works when number of modules
 	  exceeds number of available colors
 	. bugfix in exportNetworkToCytoscape: all nodes are now included in
 	  the node file (thanks to Tim Gernat for pointing it out and suggesting
@@ -1136,9 +1229,9 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 2009/10/19: 0.81
 
 	. several functions from the now defunct package sma were added, mainly
-	  to allow our users to run all tutorials smoothly. Note that if 
-	  sma package is used concurrently, identical copies of the duplicated 
-	  functions will be available. Warning messages about this fact can be 
+	  to allow our users to run all tutorials smoothly. Note that if
+	  sma package is used concurrently, identical copies of the duplicated
+	  functions will be available. Warning messages about this fact can be
 	  disregarded safely.
 	. labeledHeatmap re-written to use an internal heatmapWithLegend
 	  function. This means labeledHeatmap now works also in complicated
@@ -1194,7 +1287,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	. GOenrichmentAnalysis a bit more stable
 	. GOenrichmentAnalysis can now analyze several sets of labels at the same time;
 	  the idea is to give the user the option to quickly calculate enrichments
-	  for a collection of competing module assignments. 
+	  for a collection of competing module assignments.
 	. Enrichment calculations can optionally be restricted to a subset of modules
 
 2009/06/05: 0.79-1
@@ -1206,7 +1299,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 2009/06/01: 0.79
 
 	. Added (experimental) function GOenrichmentAnalysis for automatic GO enrichment
-	  analysis 
+	  analysis
 
 2009/05/26: 0.78
 
@@ -1229,7 +1322,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 
 	. Display of p-value in verboseScatterplot improved: small p values now shown more accurately
 	. Spurious warning message in matchLabels is now suppressed
-	. additional TOM option added: use mean denominator instead of minimum	
+	. additional TOM option added: use mean denominator instead of minimum
 	. DIFF: default TOM denominator method is mean. Use TOMDenom = "min" where necessary to reproduce
 	  older results
 	. help files for [unsigned]adjacency corrected
@@ -1248,7 +1341,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	. fixed a bug in bicor(x,y) that was present when any of the columns
 	  consisted of only missing data and that caused incorrect NAs and 0s
 	  in the result.
-	. DIFF: softConnectivity now subtracts 1 from the sum of adjacencies to remove 
+	. DIFF: softConnectivity now subtracts 1 from the sum of adjacencies to remove
 	  the adjacency of a gene with itself.
 	. DIFF: order of parameters in softConnectivity has changed.
 	. DIFF: default number of centers in [consensus]projectiveKMeans is
@@ -1263,7 +1356,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	. default p value threshold in matchLables relaxed to 5e-2
 	. DIFF: [consensus]ProjectiveKMeans now default to a much higher number
 	  since that seems to lead to better results.
-	. Faster versions of correlation and bicorrelation implemented. Fast correlation available 
+	. Faster versions of correlation and bicorrelation implemented. Fast correlation available
 	  for general use in function cor1.
 	. bugfix in labeledHeatmap: xLabels and xSymbols do not overlap anymore
 	. goodGenes, goodGenesMS, etc now resistant to whole gene profiles containing only NAs
@@ -1277,7 +1370,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	  (previously was bottom to top)
 	. faster median calculation in C implementation of bicor
 	. added function overlapTable for computing significance of module overlaps
-	. added function matchLabels for relabeling modules in a source partition 
+	. added function matchLabels for relabeling modules in a source partition
 	  to best approximate module labels in a given reference partition
 
 2009/02/06: 0.71-1
@@ -1306,7 +1399,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	. bug in clusterCoef fixed
 	. typos in help files fixed (cutreeStatic[Color])
 	. drawing of color label rectangles slightly modified in labeledHeatmap to
-	prevent excessively large rectangles 
+	prevent excessively large rectangles
 
 2008/12/23: 0.67-1
 
@@ -1315,7 +1408,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 
 2008/12/09: 0.67
 
-	. addTraitToMEs now works also when the multiMEs only contain the eigengenes but no average 
+	. addTraitToMEs now works also when the multiMEs only contain the eigengenes but no average
 	  expression
 	. labeledBarplot now accepts xLabelsAngle
 	. fixed interpretation of grey name in orderMEs, consensusOrderMEs
@@ -1338,13 +1431,13 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 
 2008/11/02: 0.65-1
 
-	. Bugfix in reassigning genes between modules when KME difference too significant: 
+	. Bugfix in reassigning genes between modules when KME difference too significant:
 	  an empty set of reassign candidates doesn't throw an error anymore.
 	. Several help files added
 
 2008/10/25: 0.65
 
-	. added function preservationNetworkAdjacency 
+	. added function preservationNetworkAdjacency
 
 2008/10/09: 0.64
 
@@ -1360,17 +1453,17 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	. numbers2colors resistant to values out of range of the given min and max.
 	. p-value in verboseScaterplot now corresponds to the actual correlation printed instead of
 	  the Pearson correlation value. However, the p-values are always calculated assuming the
-	  correlation value is actually Pearson. 
+	  correlation value is actually Pearson.
 
 2008/09/18: 0.63
 
-	. [automaticN|n]etworkScreening now accept option getQValue that can be used to turn off q value 
+	. [automaticN|n]etworkScreening now accept option getQValue that can be used to turn off q value
 	  calculations; they also report counts of module eigengenes with gene
 	  significances in specific intervals.
 
 2008/09/17: 0.62-1
 
-	. C implementation of column quantile (i.e., apply(data, 2, quantile)) giving immense speedup 
+	. C implementation of column quantile (i.e., apply(data, 2, quantile)) giving immense speedup
 	  of consensus quantile calculations in new function colQuantileC
 
 2008/09/17: 0.62
@@ -1406,7 +1499,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	. several help files added
 	. bicor now implemented consistently in R code and in compiled code:
 	  both call the same set of C functions and treat NAs correctly and
-	  consistently. Functions bicov and bicorNAy are removed. 
+	  consistently. Functions bicov and bicorNAy are removed.
 	. pickSoftThreshold now accepts networkType argument
 	. blockwiseConsensusModules can now optionally save samples used for TOM scaling
 
@@ -1416,7 +1509,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 	. Errors in pre-clustering and calculation of signed networks fixed
 	. New functions for re-cutting dendrograms produced in blockwise[Consenus]Modules
 	. Bug in the return value of blockwise[Consensus]Modules fixed: blockGenes now correctly refer to
-	  all genes instead of goodGenes; 
+	  all genes instead of goodGenes;
 	. New function numbers2colors
 
 2008/08/26: 0.50-2
@@ -1426,7 +1519,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 2008/08/20: 0.50-1
 
 	. fixed bug in compiled code bicor1 function that used quick calculation whenever at least one of
-	  the x,y had the correct NAs instead of both.  
+	  the x,y had the correct NAs instead of both.
 	. fixed crash in consensusBlockwiseModules when data not checked for missing entries
 	. added info printing when merging clusters in consensusProjectiveKMeans
 
@@ -1439,7 +1532,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 
 2008/08/05
 
-	. Added random seed setting to blockwise[Consensus]Modules and [consensus]ProjectiveKMeans 
+	. Added random seed setting to blockwise[Consensus]Modules and [consensus]ProjectiveKMeans
 	  for repeatability
 
 	. Lowered reassignThreshold to 1e-6 to prevent too many reassigned genes.
@@ -1456,7 +1549,7 @@ Note: as of 2009/03/10, changes that lead to different calculational results are
 
 	. Many enhancements, improvements and bugfixes
 
-2008/06/02: 
+2008/06/02:
 
 	. Changes to TOMplot to make the dendrograms on the side more informative
 
