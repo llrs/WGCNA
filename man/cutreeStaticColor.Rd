@@ -32,14 +32,16 @@ branch and only keeps branches that have at least \code{minSize} objects on
 them.
 }
 \examples{
+
 datExpr <- matrix(rnorm(150), ncol = 5)
 hc <- hclust(dist(datExpr))
 cutreeStaticColor(hc, minSize = 2)
 cutreeStatic(hc, minSize = 2)
+
 }
 \seealso{
-for hierarchical clustering: \code{\link[stats]{hclust}} ,
-for for other constant-height branch cuts\code{\link[stats]{cutree}} and
+for hierarchical clustering: \code{\link[stats]{hclust}} , for for
+other constant-height branch cuts\code{\link[stats]{cutree}} and
 \code{\link{cutreeStatic}}.
 }
 \author{

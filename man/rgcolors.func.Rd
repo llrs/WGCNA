@@ -7,7 +7,7 @@
 rgcolors.func(n = 50)
 }
 \arguments{
-\item{n}{the number of colors (> =  1) to be used in the red and green
+\item{n}{the number of colors (> = 1) to be used in the red and green
 palette.}
 }
 \value{
@@ -20,11 +20,13 @@ value in the range 00 to FF.
 This function creates a vector of n ``contiguous'' colors, corresponding to
 n intensities (between 0 and 1) of the red, green and blue primaries, with
 the blue intensities set to zero. The values returned by
-\code{rgcolors.func} can be used with a \code{col} specification in
-graphics functions or in \code{\link{par}}.
+\code{rgcolors.func} can be used with a \code{col} specification in graphics
+functions or in \code{\link{par}}.
 }
 \examples{
+
 rgcolors.func(n = 5)
+
 }
 \seealso{
 \code{\link{plotCor}}, \code{\link{plotMat}}, \code{\link{colors}},

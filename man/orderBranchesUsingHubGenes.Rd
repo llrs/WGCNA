@@ -111,24 +111,31 @@ plotDendroAndColors(tree1, cbind(colorh, colorh2), c("Old", "New"),
 pdf("DENDROGRAM_PLOTS.pdf", width = 10, height = 5)
 plotDendroAndColors(tree1, colorh2, dendroLabels = FALSE,
                     main = "Starting Dendrogram")
+tree1  = fastcluster::hclust(as.dist(1-TOM1),method="average")
+colorh = labels2colors(dat1$allLabels)
 
-tree1 <- swapTwoBranches(tree1, hubs["red"], hubs["turquoise"])
-plotDendroAndColors(tree1, colorh2, dendroLabels = FALSE,
-                    main = "Swap blue/turquoise and red/brown")
+plotDendroAndColors(tree1,colorh,dendroLabels=FALSE)
+}
+## Reassign modules using the selectBranch and chooseOneHubInEachModule functions
 
-tree1 <- reflectBranch(tree1, hubs["blue"], hubs["green"])
-plotDendroAndColors(tree1, colorh2, dendroLabels = FALSE,
-                    main = "Reflect turquoise/blue")
-# (This function will take a few minutes)
-out <- orderBranchesUsingHubGenes(tree1, datExpr, colorh2,
-                                  useReflections = TRUE, iter = 100)
-tree1 <- out$geneTree
-plotDendroAndColors(tree1, colorh2, dendroLabels = FALSE,
-                    main = "Semi-optimal branch order")
-out$changeLog
+datExpr = dat1$datExpr
+hubs    = chooseOneHubInEachModule(datExpr, colorh)
+colorh2 = rep("grey", length(colorh))
+colorh2 [selectBranch(tree1,hubs["blue"],hubs["turquoise"])] = "blue"
+colorh2 [selectBranch(tree1,hubs["turquoise"],hubs["blue"])] = "turquoise"
+colorh2 [selectBranch(tree1,hubs["green"],hubs["yellow"])]   = "green"
+colorh2 [selectBranch(tree1,hubs["yellow"],hubs["green"])]   = "yellow"
+colorh2 [selectBranch(tree1,hubs["red"],hubs["brown"])]      = "red"
+colorh2 [selectBranch(tree1,hubs["brown"],hubs["red"])]      = "brown"
+\dontrun{
+plotDendroAndColors(tree1,cbind(colorh,colorh2),c("Old","New"),dendroLabels=FALSE)
+
+## Now swap and reflect some branches, then optimize the order of the branches
+# and output pdf with resulting images
+pdf("DENDROGRAM_PLOTS.pdf",width=10,height=5)
+plotDendroAndColors(tree1,colorh2,dendroLabels=FALSE,main="Starting Dendrogram")
+
+tree1 = swapTwoBranches(tree1,hubs["red"],hubs["turquoise"])
+plotDendroAndColors(tree1,colorh2,dendroLabels=FALSE,main="Swap blue/turquoise and red/brown")
 }
 }
-\author{
-Jeremy Miller
-}
-\keyword{misc}

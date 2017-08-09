@@ -54,8 +54,8 @@ elements of an adjacency matrix \code{adj} and/or a node significance
 measure \code{GS}.
 }
 \references{
-Dong J, Horvath S (2007) Understanding Network Concepts in Modules, BMC
-Systems Biology 2007, 1:24
+Dong J, Horvath S (2007) Understanding Network Concepts in
+Modules, BMC Systems Biology 2007, 1:24
 
 Horvath S, Dong J (2008) Geometric Interpretation of Gene Coexpression
 Network Analysis. PLoS Comput Biol 4(8): e1000117

@@ -35,12 +35,12 @@ be written.  (Note that this file includes only a subset of what is returned
 by the function.)}
 
 \item{useBrainLists}{If TRUE, a pre-made set of brain-derived enrichment
-lists will be added to any user-defined lists for enrichment comparison.
-The default is FALSE.  See references section for related references.}
+lists will be added to any user-defined lists for enrichment comparison. The
+default is FALSE.  See references section for related references.}
 
 \item{useBloodAtlases}{If TRUE, a pre-made set of blood-derived enrichment
-lists will be added to any user-defined lists for enrichment comparison.
-The default is FALSE.  See references section for related references.}
+lists will be added to any user-defined lists for enrichment comparison. The
+default is FALSE.  See references section for related references.}
 
 \item{omitCategories}{Any labelR entries corresponding to these categories
 will be ignored.  The default ("grey") will ignore unassigned genes in a
@@ -111,8 +111,8 @@ RPS4 RPS8 ...
 
 2) Gene / category files (must be csv files), where the first line is the
 column headers corresponding to Genes and Lists, and the remaining lines
-correspond to the genes in each list, for any number of genes and lists.
-For example: Gene, Category RPS4, Ribosome RPS8, Ribosome ... NDUF1,
+correspond to the genes in each list, for any number of genes and lists. For
+example: Gene, Category RPS4, Ribosome RPS8, Ribosome ... NDUF1,
 Mitohcondria NDUF3, Mitochondria ... MAPT, AlzheimersDisease PSEN1,
 AlzheimersDisease PSEN2, AlzheimersDisease ...
 
@@ -125,6 +125,7 @@ blue, <other columns> <psid>, NDUF3, red, <other columns> <psid>, MAPT,
 green, <other columns> ...
 }
 \examples{
+
 
 # Example: first, read in some gene names and split them into categories
 data(BrainLists)
@@ -158,6 +159,7 @@ testResults$ovGenes$"red -- salmon_M12_Ribosome__HumanMeta"
 # More detailed overlap information is in the pValue output.  For example:
 head(testResults$pValue)
 }
+
 }
 \references{
 The primary reference for this function is: Miller JA, Cai C,

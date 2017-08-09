@@ -27,6 +27,8 @@
 
 
 
+
+
 #' Voting linear predictor
 #' 
 #' Predictor based on univariate regression on all or selected given features
@@ -576,6 +578,8 @@ votingLinearPredictor = function(x, y, xtest = NULL,
 
   list(CVpredicted = CVpredicted, predictedTest= predictedTest)
 }
+
+
 
 
 

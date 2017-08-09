@@ -10,7 +10,7 @@ plotMat(x, nrgcols = 50, rlabels = FALSE, clabels = FALSE, rcols = 1,
 \arguments{
 \item{x}{a matrix of numbers.}
 
-\item{nrgcols}{the number of colors (> =  1) to be used in the red and green
+\item{nrgcols}{the number of colors (> = 1) to be used in the red and green
 palette.}
 
 \item{rlabels}{vector of character strings to be placed at the row

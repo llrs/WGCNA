@@ -35,13 +35,13 @@ of \eqn{log} \eqn{\pi_0}{pi_0} estimates against the tuning parameter
 \eqn{\lambda}{lambda}. Optional.}
 }
 \value{
-A list containing:
-\item{call}{gives the function call} \item{pi0}{an estimate
-of the proportion of null p-values} \item{qvalues}{a vector of the estimated
-q-values (the main quantity of interest)} \item{pvalues}{a vector of the
-original p-values} \item{significant}{if fdr.level is specified, and
-indicator of whether the q-value fell below fdr.level (taking all such
-q-values to be significant controls FDR at level fdr.level)}
+A list containing: \item{call}{gives the function call}
+\item{pi0}{an estimate of the proportion of null p-values} \item{qvalues}{a
+vector of the estimated q-values (the main quantity of interest)}
+\item{pvalues}{a vector of the original p-values} \item{significant}{if
+fdr.level is specified, and indicator of whether the q-value fell below
+fdr.level (taking all such q-values to be significant controls FDR at level
+fdr.level)}
 }
 \description{
 Estimate the q-values for a given set of p-values.  The q-value of a test

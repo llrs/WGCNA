@@ -242,9 +242,9 @@ package qvalue.
 Missing data are removed (but see \code{quickCor} above).
 }
 \note{
-For large data sets, the permutation study may take a while (typically on
-the order of several hours). Use \code{verbose = 3} to get detailed progress
-report as the calculations advance.
+For large data sets, the permutation study may take a while (typically
+on the order of several hours). Use \code{verbose = 3} to get detailed
+progress report as the calculations advance.
 }
 \references{
 Peter Langfelder, Rui Luo, Michael C. Oldham, and Steve Horvath,

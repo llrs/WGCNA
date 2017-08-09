@@ -35,11 +35,13 @@ to columns otherwise to the rows.
 This function can be considered a wrapper of \code{\link{t}()}
 }
 \examples{
+
 x <- data.frame(matrix(1:10000, nrow = 4, ncol = 2500))
 colnames(x) <- paste0("Y", 1:2500)
 xTranspose <- transposeBigData(x)
 x[1:4, 1:4]
 xTranspose[1:4, 1:4]
+
 }
 \references{
 Any linear algebra book will explain the transpose.

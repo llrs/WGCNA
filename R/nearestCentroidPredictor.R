@@ -79,13 +79,14 @@
 
 
 
+
+
 #' Nearest centroid predictor
 #' 
 #' Nearest centroid predictor for binary (i.e., two-outcome) data. Implements a
 #' whole host of options and improvements such as accounting for within-class
 #' heterogeneity using sample networks, various ways of feature selection and
 #' weighing etc.
-#' 
 #' 
 #' Nearest centroid predictor works by forming a representative profile
 #' (centroid) across features for each class from the training data, then

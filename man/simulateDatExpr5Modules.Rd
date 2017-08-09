@@ -20,7 +20,8 @@ must be positive and sum to at most 1. If the sum is less than 1, the
 leftover genes will be simulated outside of modules.}
 
 \item{MEturquoise, MEblue, MEbrown, MEyellow, MEgreen}{seed eigengenes for the
-simulated modules. If several are provided each one correesponds to a sample.}
+simulated modules. If several are provided each one correesponds to a
+sample.}
 
 \item{SDnoise}{level of noise to be added to the simulated expressions.}
 
@@ -49,8 +50,10 @@ their seed eigengene. See the functions \code{\link{simulateModule}} and
 \code{\link{simulateDatExpr}} for more details.
 }
 \examples{
+
 sample <- simulateDatExpr5Modules(MEturquoise = 1, MEblue = 2, MEbrown = 1,
                          MEyellow = 3, MEgreen = 45)
+
 }
 \seealso{
 \code{\link{simulateModule}} for simulation of individual modules

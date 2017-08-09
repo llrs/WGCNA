@@ -162,6 +162,7 @@ a given gene symbol into one representative.
 }
 \examples{
 
+
     ########################################################################
     # EXAMPLE 1:
     # The code simulates a data frame (called dat1) of correlated rows.
@@ -243,6 +244,7 @@ a given gene symbol into one representative.
     collapse.object.ME.2 = t(moduleEigengenes(datExpr=t(datET),colors=rowGroup)$eigengene)
     colnames(collapse.object.ME.2) = ColumnName
     rownames(collapse.object.ME.2) = sort(unique(rowGroup))
+
 
 }
 \references{

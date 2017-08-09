@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiData.R
 \name{simplify}
 \alias{simplify}
-\title{If possible, simplify a multiData structure to a 3-dimensional array}
+\title{If possible, simplify a multiSet structure to a 3-dimensional array}
 \usage{
 simplify(multiSet)
 }
@@ -13,28 +13,27 @@ simplify(multiSet)
 A 3-dimensional array collecting all \code{data} components.
 }
 \description{
-This function attempts to put all \code{data} components into a 3-dimensional
- array, with the last dimension corresponding to the sets. This is only
-possible if all \code{data} components are matrices or data frames with the
-same dimension.
+This function attempts to put all \code{data} components into a
+3-dimensional array, with the last dimension corresponding to the sets. This
+is only possible if all \code{data} components are matrices or data frames
+with the same dimension.
 }
 \details{
-A multiData structure is intended to store (the same type of) data for
-multiple, possibly independent, realizations
-(for example, expression data for several independent experiments). It is a
-list where each component corresponds to an (independent) data set. Each
-component is in turn a list that can hold various types of information but
-must have a \code{data} component. In a "strict" multiData structure, the
-\code{data} components are required to each be a matrix or a data frame and
-have the same number of columns. In a "loose" multiData structure, the
-\code{data} components can be anything (but for most purposes should be of
-comparable type and content).
+A multiSet structure is intended to store (the same type of) data for
+multiple, possibly independent, realizations (for example, expression data
+for several independent experiments). It is a list where each component
+corresponds to an (independent) data set. Each component is in turn a list
+that can hold various types of information but must have a \code{data}
+component. In a "strict" multiSet structure, the \code{data} components are
+required to each be a matrix or a data frame and have the same number of
+columns. In a "loose" multiSet structure, the \code{data} components can be
+anything (but for most purposes should be of comparable type and content).
 }
 \note{
 The function is relatively fragile and may fail. Use at your own risk.
 }
 \seealso{
-\code{\link{multiSet}} to create a multiData structure
-\code{\link{multiSet2list}} for converting multiData structures to plain
+\code{\link{multiSet}} to create a multiSet structure
+\code{\link{multiSet2list}} for converting multiSet structures to plain
 lists.
 }

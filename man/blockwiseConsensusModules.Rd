@@ -18,7 +18,7 @@ blockwiseConsensusModules(multiExpr, checkMissingData = TRUE, blocks = NULL,
   sampleForCalibrationFactor = 1000, getNetworkCalibrationSamples = FALSE,
   consensusQuantile = 0, useMean = FALSE, setWeights = NULL,
   saveConsensusTOMs = FALSE,
-  consensusTOMFileNames = "consensusTOM-block.\%b.RData",
+  consensusTOMFilePattern = "consensusTOM-block.\%b.RData",
   useDiskCache = TRUE, chunkSize = NULL,
   cacheBase = ".blockConsModsCache", cacheDir = ".",
   consensusTOMInfo = NULL, deepSplit = 2, detectCutHeight = 0.995,
@@ -186,13 +186,6 @@ is \code{TRUE}.}
 \item{saveConsensusTOMs}{logical: should the consensus topological overlap
 matrices for each block be saved and returned?.}
 
-\item{consensusTOMFileNames}{character string containing the file namefiles
-containing the consensus topological overlaps. The tag \code{\%b} will be
-replaced by the block number. If the resulting file names are non-unique
-(for example, because the user gives a file name without a \code{\%b} tag),
-an error will be generated. These files are standard R data files and can be
-loaded using the \code{\link{load}} function.}
-
 \item{useDiskCache}{should calculated network similarities in individual
 sets be temporarilly saved to disk? Saving to disk is somewhat slower than
 keeping all data in memory, but for large blocks and/or many sets the memory
@@ -346,6 +339,13 @@ indentation, each unit adds two spaces.}
 \code{reproduceBranchEigennodeQuantileError} that instructs the function to
 reproduce a bug in branch eigennode dissimilarity calculations for purposes
 if reproducing old reults.}
+
+\item{consensusTOMFileNames}{character string containing the file namefiles
+containing the consensus topological overlaps. The tag \code{\%b} will be
+replaced by the block number. If the resulting file names are non-unique
+(for example, because the user gives a file name without a \code{\%b} tag),
+an error will be generated. These files are standard R data files and can be
+loaded using the \code{\link{load}} function.}
 }
 \value{
 A list with the following components:
@@ -523,7 +523,8 @@ the relationships between co-expression modules. BMC Systems Biology 2007,
 1:54
 }
 \seealso{
-\code{\link{goodSamplesGenesMS}} for basic quality control and filtering
+\code{\link{goodSamplesGenesMS}} for basic quality control and
+filtering
 
 \code{\link{adjacency}}, \code{\link{TOMsimilarity}} for network
 construction

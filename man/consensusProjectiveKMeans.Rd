@@ -86,7 +86,8 @@ several sets is defined as the maximum of the corresponding distances in
 individual sets; however, if \code{useMean} is set, the mean distance will
 be used instead of the maximum.  The distance between a gene and a center of
 a cluster is multiplied by a factor of \eqn{max(clusterSize/preferredSize,
-1)^{sizePenaltyPower}}{\code{max(clusterSize/preferredSize,
+}{\code{max(clusterSize/preferredSize,
+1)^sizePenaltyPower}}\eqn{1)^{sizePenaltyPower}}{\code{max(clusterSize/preferredSize,
 1)^sizePenaltyPower}}, thus penalizing clusters whose size exceeds
 \code{preferredSize}. The function starts with randomly generated cluster
 assignment (hence the need to set the random seed for repeatability) and

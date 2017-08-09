@@ -1,7 +1,8 @@
-
 # standardScreeningBinaryTrait ####
+
+
 #' Standard screening for binatry traits
-#'
+#' 
 #' The function standardScreeningBinaryTrait computes widely used statistics
 #' for relating the columns of the input data frame (argument datE) to a binary
 #' sample trait (argument y). The statistics include Student t-test p-value and
@@ -11,8 +12,8 @@
 #' it also computes the Kruskal Wallist test p-value and corresponding q-value.
 #' The Kruskal Wallis test is a non-parametric, rank-based group comparison
 #' test.
-#'
-#'
+#' 
+#' 
 #' @param datExpr a data frame or matrix whose columns will be related to the
 #' binary trait
 #' @param y a binary vector whose length (number of components) equals the
@@ -50,7 +51,7 @@
 #' \item{meanFirstGroup}{means of columns in input \code{datExpr} across
 #' samples in the first group.} \item{meanSecondGroup}{means of columns in
 #' input \code{datExpr} across samples in the second group.}
-#'
+#' 
 #' \item{SE.FirstGroup}{standard errors of columns in input \code{datExpr}
 #' across samples in the first group. Recall that SE(x)=sqrt(var(x)/n) where n
 #' is the number of non-missing values of x. } \item{SE.SecondGroup}{standard
@@ -63,7 +64,7 @@
 #' \code{outx=TRUE} (from Frank Harrel's package Hmisc). Only present if input
 #' \code{getAreUnderROC} is \code{TRUE}.} \item{nPresentSamples}{number of
 #' samples with finite measurements for each gene.}
-#'
+#' 
 #' If input \code{kruskalTest} is \code{TRUE}, the following columns further
 #' summarize results of Kruskal-Wallis test: \item{stat.Kruskal}{Kruskal-Wallis
 #' test statistic.} \item{stat.Kruskal.signed}{(Warning: experimental)
@@ -79,27 +80,29 @@
 #' Society, Series B, 66: 187-205.
 #' @keywords misc
 #' @examples
-#'
-#'
+#' 
+#' 
+#' 
 #' require(survival) # For is.Surv in rcorr.cens
 #' m <- 50
 #' y <- sample(c(1,2), m, replace = TRUE)
 #' datExprSignal <- simulateModule(scale(y), 30)
 #' datExprNoise <- simulateModule(rnorm(m), 150)
 #' datExpr <- data.frame(datExprSignal, datExprNoise)
-#'
+#' 
 #' Result1 <- standardScreeningBinaryTrait(datExpr, y)
 #' Result1[1:5, ]
-#'
+#' 
 #' # use unequal variances and calculate q-values
 #' Result2 <- standardScreeningBinaryTrait(datExpr, y,
 #'                                        var.equal = FALSE, qValue = TRUE)
 #' Result2[1:5, ]
-#'
+#' 
 #' # calculate Kruskal Wallis test and q-values
 #' Result3 <- standardScreeningBinaryTrait(datExpr, y, kruskalTest = TRUE,
 #'                                        qValue=TRUE)
 #' Result3[1:5, ]
+#' 
 standardScreeningBinaryTrait <- function(datExpr, y,
                                          corFnc = cor,
                                          corOptions = list(use = 'p'),

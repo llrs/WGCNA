@@ -55,8 +55,10 @@ the available memory by hand.
 }
 \examples{
 
+
 # Suitable blocks for handling 30,000 genes within 2GB (=2^31 bytes) of memory
 blockSize(30000, rectangularBlocks = TRUE, maxMemoryAllocation = 2^31)
+
 
 }
 \author{

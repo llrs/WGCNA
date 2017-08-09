@@ -14,7 +14,7 @@ plotCor(x, new = FALSE, nrgcols = 50, labels = FALSE, labcols = 1,
 If \code{new = T}, the correlation matrix for the columns of \code{x} is
 computed and displayed in the image.}
 
-\item{nrgcols}{the number of colors (> =  1) to be used in the red and green
+\item{nrgcols}{the number of colors (> = 1) to be used in the red and green
 palette.}
 
 \item{labels}{vector of character strings to be placed at the tickpoints,
@@ -38,7 +38,9 @@ represented with reds of increasing intensity, and increasingly negative
 correlations are represented with greens of increasing intensity.
 }
 \examples{
+
 plotCor(matrix(runif(4), ncol = 2, nrow = 2))
+
 }
 \seealso{
 \code{\link{plotMat}}, \code{\link{rgcolors.func}},

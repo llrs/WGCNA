@@ -3,6 +3,7 @@
 \name{intramodularConnectivity}
 \alias{intramodularConnectivity}
 \alias{intramodularConnectivity.fromExpr}
+\alias{intramodularConnectivity.fromExpr}
 \title{Calculation of intramodular connectivity}
 \usage{
 intramodularConnectivity(adjMat, colors, scaleByMax = FALSE)
@@ -23,6 +24,42 @@ module label for each gene (node) of the network.}
 
 \item{scaleByMax}{logical: should intramodular connectivities be scaled by
 the maximum IM connectivity in each module?}
+
+\item{datExpr}{data frame containing expression data. Columns correspond to
+genes and rows to samples.}
+
+\item{corFnc}{character string specifying the function to be used to
+calculate co-expression similarity for correlation networks. Defaults to
+Pearson correlation. Any function returning values between -1 and 1 can be
+used.}
+
+\item{corOptions}{character string specifying additional arguments to be
+passed to the function given by \code{corFnc}. Use \code{"use = 'p', method
+= 'spearman'"} to obtain Spearman correlation.}
+
+\item{distFnc}{character string specifying the function to be used to
+calculate co-expression similarity for distance networks. Defaults to the
+function \code{\link{dist}}. Any function returning non-negative values can
+be used.}
+
+\item{distOptions}{character string specifying additional arguments to be
+passed to the function given by \code{distFnc}. For example, when the
+function \code{\link{dist}} is used, the argument \code{method} can be used
+to specify various ways of computing the distance.}
+
+\item{networkType}{network type. Allowed values are (unique abbreviations
+of) \code{"unsigned"}, \code{"signed"}, \code{"signed hybrid"},
+\code{"distance"}.}
+
+\item{power}{soft thresholding power.}
+
+\item{ignoreColors}{level(s) of \code{colors} that identifies unassigned
+genes. The intramodular connectivity in this "module" will not be
+calculated.}
+
+\item{getWholeNetworkConnectivity}{logical: should whole-network
+connectivity be computed as well? For large networks, this can be quite
+time-consuming.}
 
 \item{datExpr}{data frame containing expression data. Columns correspond to
 genes and rows to samples.}

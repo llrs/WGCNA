@@ -4,11 +4,16 @@
 \alias{apply.multiSet}
 \alias{apply}
 \alias{apply.default}
+\alias{apply}
+\alias{apply.default}
+\alias{apply.default}
 \title{Apply a function to each set in a multiSet structure.}
 \usage{
 \method{apply}{multiSet}(multiSet, MARGIN, FUN, ...)
 
 apply(multiSet, ...)
+
+\method{apply}{default}(multiSet, MARGIN, FUN, ...)
 
 \method{apply}{default}(multiSet, MARGIN, FUN, ...)
 }
@@ -19,12 +24,35 @@ apply(multiSet, ...)
 
 \item{FUN}{Function to be applied.}
 
+\item{\dots}{Other arguments to the function \code{FUN}.
+Apply a function to each set in a multiSet structure.
+
+Inspired by \code{\link{lapply}}, these functions apply a given function to
+each \code{data} component in the input \code{multiSet} structure, and
+optionally simplify the result to an array if possible.
+
+A multiSet structure is intended to store (the same type of) data for
+multiple, possibly independent, realizations (for example, expression data
+for several independent experiments). It is a list where each component
+corresponds to an (independent) data set. Each component is in turn a list
+that can hold various types of information but must have a \code{data}
+component. In a "strict" multiSet structure, the \code{data} components are
+required to each be a matrix or a data frame and have the same number of
+columns. In a "loose" multiSet structure, the \code{data} components can be
+anything (but for most purposes should be of comparable type and content).
+
+\code{apply.multiSet} works on any "loose" multiSet structure}
+
+\item{multiSet}{A multiSet structure to apply the function over}
+
+\item{FUN}{Function to be applied.}
+
 \item{\dots}{Other arguments to the function \code{FUN}.}
 }
 \value{
-A multiSet structure containing the results of the supplied
-function on each \code{data} component in the input multiSet structure.
-Other components are simply copied.
+A multiSet structure containing the results of the supplied function
+on each \code{data} component in the input multiSet structure. Other
+components are simply copied.
 }
 \description{
 Inspired by \code{\link{lapply}}, these functions apply a given function to

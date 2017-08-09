@@ -1,10 +1,11 @@
-
 # moduleEigengenes ####
+
+
 #' Calculate module eigengenes.
-#'
+#' 
 #' Calculates module eigengenes (1st principal component) of modules in a given
 #' single dataset.
-#'
+#' 
 #' Module eigengene is defined as the first principal component of the
 #' expression matrix of the corresponding module. The calculation may fail if
 #' the expression data has too many missing entries. Handling of such errors is
@@ -15,20 +16,20 @@
 #' offending module will be ignored and the return value will allow the user to
 #' remove the module from further analysis; if \code{FALSE}, the function will
 #' stop.
-#'
+#' 
 #' From the user's point of view, setting \code{trapErrors=FALSE} ensures that
 #' if the function returns normally, there will be a valid eigengene (principal
 #' component or hubgene) for each of the input colors. If the user sets
 #' \code{trapErrors=TRUE}, all calculational (but not input) errors will be
 #' trapped, but the user should check the output (see below) to make sure all
 #' modules have a valid returned eigengene.
-#'
+#' 
 #' While the principal component calculation can fail even on relatively sound
 #' data (it does not take all that many "well-placed" \code{NA} to torpedo the
 #' calculation), it takes many more irregularities in the data for the hubgene
 #' calculation to fail. In fact such a failure signals there likely is
 #' something seriously wrong with the data.
-#'
+#' 
 #' @param datExpr Expression data for a single set in the form of a data frame
 #' where rows are samples and columns are genes (probes).
 #' @param colors A vector of the same length as the number of probes in
@@ -552,13 +553,15 @@ orderMEs <- function(MEs, greyLast = TRUE,
 }
 
 # removeGrey ####
+
+
 #' Removes the grey eigengene from a given collection of eigengenes.
-#'
+#' 
 #' Given module eigengenes either in a single data frame or in a multi-set
 #' format, removes the grey eigengenes from each set. If the grey eigengenes
 #' are not found, a warning is issued.
-#'
-#'
+#' 
+#' 
 #' @param MEs Module eigengenes, either in a single data frame (typicaly for a
 #' single set), or in a multi-set format. See \code{\link{checkSets}} for a
 #' description of the multi-set format.
@@ -611,19 +614,21 @@ removeGreyME <- function(MEs, greyMEName = paste0(getMEprefix(), "grey")) {
 }
 
 # getMEprefix ####
+
+
 #' Get the prefix used to label module eigengenes.
-#'
+#' 
 #' Returns the currently used prefix used to label module eigengenes.  When
 #' returning module eigengenes in a dataframe, names of the corresponding
 #' columns will start with the given prefix.
-#'
+#' 
 #' Returns the prefix used to label module eigengenes. When returning module
 #' eigengenes in a dataframe, names of the corresponding columns will consist
 #' of the corresponfing color label preceded by the given prefix. For example,
 #' if the prefix is "PC" and the module is turquoise, the corresponding module
 #' eigengene will be labeled "PCturquoise". Most of old code assumes "PC", but
 #' "ME" is more instructive and used in some newer analyses.
-#'
+#' 
 #' @return A character string.
 #' @note Currently the standard prefix is \code{"ME"} and there is no way to
 #' change it.

@@ -5,6 +5,9 @@
 \alias{subset}
 \alias{subset.default}
 \alias{[.multiSet}
+\alias{subset}
+\alias{subset.default}
+\alias{[.multiSet}
 \alias{subset.multiSet}
 \title{Subset rows and columns in a multiSet structure}
 \usage{
@@ -45,6 +48,12 @@ if the input \code{multiSet} does not follow the "strict" format.}
 \item{i}{Columns to subset of the object}
 
 \item{j}{Rows to subset of the object}
+
+\item{i}{Columns to subset of the object}
+
+\item{j}{Rows to subset of the object}
+
+\item{x}{MultiSet Object to subset}
 }
 \value{
 A multiSet structure containing the selected rows and columns. Note
@@ -65,10 +74,11 @@ required to each be a matrix or a data frame and have the same number of
 columns. In a "loose" multiSet structure, the \code{data} components can be
 anything (but for most purposes should be of comparable type and content).
 
-This function assumes a "strict" multiSet structure unless
-\code{permissive} is \code{TRUE}.
+This function assumes a "strict" multiSet structure unless \code{permissive}
+is \code{TRUE}.
 }
 \examples{
+
 
 data1 <- matrix(rnorm(100), 20, 5)
 data2 <- matrix(rnorm(50), 10, 5)
@@ -76,6 +86,7 @@ data2 <- matrix(rnorm(50), 10, 5)
 md <- multiSet(Set1 = data1, Set2 = data2)
 md[, c(1,3)]
 md[c(1,3), ]
+
 }
 \seealso{
 \code{\link{multiSet}} to create a multiSet structure.

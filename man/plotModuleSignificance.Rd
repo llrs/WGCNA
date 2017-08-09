@@ -37,9 +37,9 @@ barplot or boxplot form. Each bar or box is labeled by the corresponding
 module color.
 }
 \references{
-Bin Zhang and Steve Horvath (2005) "A General Framework for Weighted Gene
-Co-Expression Network Analysis", Statistical Applications in Genetics and
-Molecular Biology: Vol. 4: No. 1, Article 17
+Bin Zhang and Steve Horvath (2005) "A General Framework for
+Weighted Gene Co-Expression Network Analysis", Statistical Applications in
+Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 
 Dong J, Horvath S (2007) Understanding Network Concepts in Modules, BMC
 Systems Biology 2007, 1:24

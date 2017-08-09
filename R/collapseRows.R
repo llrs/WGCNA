@@ -130,8 +130,10 @@
 # ----------------- Main Function ------------------- #
 
 
+
+
 #' Select one representative row per group
-#'
+#' 
 #' Abstractly speaking, the function allows one to collapse the rows of a
 #' numeric matrix, e.g. by forming an average or selecting one representative
 #' row for each group of rows specified by a grouping variable (referred to as
@@ -145,14 +147,14 @@
 #' this function is that it implements default settings which have worked well
 #' in numerous applications.  Below, we describe these default settings in more
 #' detail.
-#'
+#' 
 #' The function is robust to missing data.  Also, if rowIDs are missing, they
 #' are inferred according to the rownames of datET when possible.  When a group
 #' corresponds to only 1 row then it is represented by this row since there is
 #' no other choice. Having said this, the row may be removed if it contains an
 #' excessive amount of missing data (90 percent or more missing values), see
 #' the description of the argument \code{selectFewestMissing} for more details.
-#'
+#' 
 #' A group is represented by a corresponding row with the fewest number of
 #' missing data if \code{selectFewestMissing} has been set to TRUE.  Often
 #' several rows have the same minimum number of missing values (or no missing
@@ -169,7 +171,7 @@
 #' as representative. If connectivityBasedCollapsing=FALSE, then \code{method}
 #' is used.  For both situations, if more than one row has the same value, the
 #' first such row is chosen.
-#'
+#' 
 #' Setting \code{thresholdCombine} is a special case of this function, as not
 #' all ids for a single group are necessarily collapsed--only those with
 #' similar expression patterns are collapsed.  We suggest using this option
@@ -177,7 +179,7 @@
 #' but when ALL ids for a single group should not be combined (for example, if
 #' two probes could represent different splice variants for the same gene for
 #' many genes on a microarray).
-#'
+#' 
 #' Example application: when dealing with microarray gene expression data then
 #' the rows of \code{datET} may correspond to unique probe identifiers and
 #' \code{rowGroup} may contain corresponding gene symbols. Recall that multiple
@@ -186,7 +188,7 @@
 #' \code{datET} contains the input expression data with rows as rowIDs and
 #' output expression data with rows as gene symbols, collapsing all probes for
 #' a given gene symbol into one representative.
-#'
+#' 
 #' @param datET matrix or data frame containing numeric values where rows
 #' correspond to variables (e.g. microarray probes) and columns correspond to
 #' observations (e.g. microarrays). Each row of \code{datET} must have a unique
@@ -255,17 +257,17 @@
 #' implementing this option for use in comparisons between multiple matrices /
 #' data frames.
 #' @return The output is a list with the following components.
-#'
+#' 
 #' \item{datETcollapsed}{ is a numeric matrix with the same columns as the
 #' input matrix \code{datET}, but with rows corresponding to the different row
 #' groups rather than individual row identifiers.  (If thresholdCombine is set,
 #' then rows still correspond to individual row identifiers.) }
-#'
+#' 
 #' \item{group2row}{ is a matrix whose rows correspond to the unique group
 #' labels and whose 2 columns report which group label (first column called
 #' \code{group}) is represented by what row label (second column called
 #' \code{selectedRowID}).  Set to NULL if method="ME" or "function".}.
-#'
+#' 
 #' \item{selectedRow}{ is a logical vector whose components are TRUE for probes
 #' selected as representatives and FALSE otherwise. It has the same length as
 #' the vector probeID.  Set to NULL if method="ME" or "function".}
@@ -275,7 +277,8 @@
 #' Technical Report.
 #' @keywords misc
 #' @examples
-#'
+#' 
+#' 
 #'     ########################################################################
 #'     # EXAMPLE 1:
 #'     # The code simulates a data frame (called dat1) of correlated rows.
@@ -296,40 +299,40 @@
 #'     dat1=data.frame(RowIdentifier, datNumeric)
 #'     #we simulate a vector with n/5 group labels, i.e. each row group corresponds to 5 rows
 #'     rowGroup=rep(paste0("Group",1:(n/5)), 5 )
-#'
+#' 
 #'     # Typical Input Data
 #'     # Since the first column of dat1 contains the RowIdentifier, we use the following code
 #'     datET=dat1[,-1]
 #'     rowID=dat1[,1]
-#'
+#' 
 #'     # assign row names according to the RowIdentifier
 #'     dimnames(datET)[[1]]=rowID
 #'     # run the function and save it in an object
-#'
+#' 
 #'     collapse.object=collapseRows(datET=datET, rowGroup=rowGroup, rowID=rowID)
-#'
+#' 
 #'     # this creates the collapsed data where
 #'     # the first column contains the group name
 #'     # the second column reports the corresponding selected row name (the representative)
 #'     # and the remaining columns report the values of the representative row
 #'     dat1Collapsed=data.frame( collapse.object$group2row, collapse.object$datETcollapsed)
 #'     dat1Collapsed[1:5,1:5]
-#'
+#' 
 #'     ########################################################################
 #'     # EXAMPLE 2:
 #'     # Using the same data frame as above, run collapseRows with a user-inputted function.
 #'     # In this case we will use the mean.  Note that since we are choosing some combination
 #'     #   of the probe values for each gene, the group2row and selectedRow output
 #'     #   parameters are not meaningful.
-#'
+#' 
 #'     collapse.object.mean=collapseRows(datET=datET, rowGroup=rowGroup, rowID=rowID,
 #'           method="function", methodFunction=colMeans)[[1]]
-#'
+#' 
 #'     # Note that in this situation, running the following code produces the identical results:
-#'
+#' 
 #'     collapse.object.mean.2=collapseRows(datET=datET, rowGroup=rowGroup, rowID=rowID,
 #'           method="Average")[[1]]
-#'
+#' 
 #'     ########################################################################
 #'     # EXAMPLE 3:
 #'     # Using collapseRows to calculate the module eigengene.
@@ -338,7 +341,7 @@
 #'     n=500
 #'     MEtrue=rnorm(m)
 #'     datNumeric=data.frame(t(simulateModule(MEtrue,n)))
-#'
+#' 
 #'     # In this example, rows are genes, and groups are modules.
 #'     RowIdentifier=paste0("Gene", 1:n)
 #'     ColumnName=paste0("Sample", 1:m)
@@ -349,15 +352,16 @@
 #'     datET=dat1[,-1]
 #'     rowID=dat1[,1]
 #'     dimnames(datET)[[1]]=rowID
-#'
+#' 
 #'     # run the function and save it in an object
 #'     collapse.object.ME=collapseRows(datET=datET, rowGroup=rowGroup, rowID=rowID, method="ME")[[1]]
-#'
+#' 
 #'     # Note that in this situation, running the following code produces the identical results:
 #'     collapse.object.ME.2 = t(moduleEigengenes(datExpr=t(datET),colors=rowGroup)$eigengene)
 #'     colnames(collapse.object.ME.2) = ColumnName
 #'     rownames(collapse.object.ME.2) = sort(unique(rowGroup))
-#'
+#' 
+#' 
 #' @export collapseRows
 collapseRows <- function(datET, rowGroup, rowID, method="MaxMean",
                          connectivityBasedCollapsing=FALSE, methodFunction=NULL,

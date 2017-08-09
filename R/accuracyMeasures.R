@@ -20,16 +20,18 @@
 
 # accuracy measures
 
+
+
 #' Accuracy measures for a 2x2 confusion matrix or for vectors of predicted and
 #' observed values.
-#'
+#' 
 #' The function calculates various prediction accuracy statistics for
 #' predictions of binary or quantitative (continuous) responses. For binary
 #' classification, the function calculates the error rate, accuracy,
 #' sensitivity, specificity, positive predictive value, and other accuracy
 #' measures. For quantitative prediction, the function calculates correlation,
 #' R-squared, error measures, and the C-index.
-#'
+#' 
 #' The rows of the 2x2 table tab must correspond to a test (or predicted)
 #' outcome and the columns to a true outcome ("gold standard"). A table that
 #' relates a predicted outcome to a true test outcome is also known as
@@ -37,7 +39,7 @@
 #' specificity, the positive and negative outcome must be properly specified so
 #' they can be matched to the appropriate rows and columns in the confusion
 #' table.
-#'
+#' 
 #' Interchanging the negative and positive levels swaps the estimates of the
 #' sensitivity and specificity but has no effect on the error rate or accuracy.
 #' Specifically, denote by \code{pos} the index of the positive level in the
@@ -56,7 +58,7 @@
 #' status and 70 percent of the observed samples have the disease. Then the
 #' naive predictor has an error rate of 30 percent (since it only misclassifies
 #' 30 percent of the healthy individuals).
-#'
+#' 
 #' @param predicted either a a 2x2 confusion matrix (table) whose entries
 #' contain non-negative integers, or a vector of predicted values. Predicted
 #' values can be binary or quantitative (see \code{type} below). If a 2x2
@@ -96,10 +98,12 @@
 #' \item{Value}{this column contains the numeric estimates of the corresponding
 #' accuracy measures.}
 #' @author Steve Horvath and Peter Langfelder
-#' @references See wikipedia \url{http://en.wikipedia.org/wiki/Sensitivity_and_specificity}
+#' @references See wikipedia
+#' \url{http://en.wikipedia.org/wiki/Sensitivity_and_specificity}
 #' @keywords misc
 #' @examples
-#'
+#' 
+#' 
 #' m <- 100
 #' trueOutcome <- sample( c(1,2), m, replace=TRUE)
 #' predictedOutcome <- trueOutcome
@@ -107,9 +111,10 @@
 #' predictedOutcome[ 1:(m/2)] <- sample(predictedOutcome[ 1:(m/2)])
 #' tab <- table(predictedOutcome, trueOutcome)
 #' accuracyMeasures(tab)
-#'
+#' 
 #' # Should get the same result:
 #' accuracyMeasures(predictedOutcome, trueOutcome)
+#' 
 accuracyMeasures <- function(predicted, observed = NULL,
                              type = c("auto", "binary", "quantitative"),
                              levels = if (isTRUE(all.equal(dim(predicted),

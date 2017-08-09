@@ -93,6 +93,7 @@ test.
 \examples{
 
 
+
 require(survival) # For is.Surv in rcorr.cens
 m <- 50
 y <- sample(c(1,2), m, replace = TRUE)
@@ -112,6 +113,7 @@ Result2[1:5, ]
 Result3 <- standardScreeningBinaryTrait(datExpr, y, kruskalTest = TRUE,
                                        qValue=TRUE)
 Result3[1:5, ]
+
 }
 \references{
 Storey JD, Taylor JE, and Siegmund D. (2004) Strong control,

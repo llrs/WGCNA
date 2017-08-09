@@ -36,6 +36,7 @@ chooseTopHubInEachModule returns the gene in each module with the highest
 connectivity, looking at all genes in the expression file.
 }
 \examples{
+
 ## Example: first simulate some data.
 MEturquoise <- sample(1:100, 50)
 MEblue <- sample(1:100, 50)
@@ -55,6 +56,7 @@ tree1 <- tree2 <- fastcluster::hclust(as.dist(1-TOM1), method = "average")
 colorh <- labels2colors(dat1$allLabels)
 hubs <- chooseTopHubInEachModule(dat1$datExpr, colorh)
 hubs
+
 }
 \author{
 Jeremy Miller

@@ -6,6 +6,7 @@
 \alias{adjacency}
 \alias{adjacency.fromSimilarity}
 \alias{similarity}
+\alias{similarity}
 \title{Calculate network adjacency}
 \usage{
 adjacency.fromSimilarity(similarity, ...)
@@ -72,6 +73,8 @@ requested.
 similarity calculates the pairwise correlation of the expression data.
 }
 \details{
+similarity calculates the pairwise correlation of the expression data.
+
 The argument \code{type} determines whether a correlation (\code{type} one
 of \code{"unsigned"}, \code{"signed"}, \code{"signed hybrid"}), or a
 distance network (\code{type} equal \code{"distance"}) will be calculated.
@@ -108,6 +111,10 @@ correlation or a distance network is requested.
 datExpr <- matrix(rnorm(100), 10, 10)
 similarity <- similarity(datExpr)
 adj <-  adjacency.fromSimilarity(similarity)
+
+datExpr <- matrix(rnorm(100), 10, 10)
+similarity <- similarity(datExpr)
+adj <-  adjacency.fromSimilarity(similarity)
 similarity <- matrix(seq(-1, 1, length.out = 25), 5)
 similarity[lower.tri(similarity)] <- t(similarity)[lower.tri(similarity)]
 adj <-  adjacency.fromSimilarity(similarity, type = "unsigned", power = 5)
@@ -115,6 +122,7 @@ adj <-  adjacency.fromSimilarity(similarity, type = "unsigned", power = 5)
 datExpr <- matrix(seq(-1, 1, length.out = 25), 5)
 datExpr[lower.tri(datExpr)] <- t(datExpr)[lower.tri(datExpr)]
 adj <- adjacency(datExpr)
+
 }
 \references{
 Bin Zhang and Steve Horvath (2005) A General Framework for
@@ -129,3 +137,4 @@ relationships between co - expression modules. BMC Systems Biology 2007,
 Peter Langfelder and Steve Horvath
 }
 \keyword{array}
+\keyword{misc}

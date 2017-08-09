@@ -1,4 +1,48 @@
-.checkConsistencyOfGroupAndColID <- function(mdx, colID, group) {
+#============================================================================================================
+#
+# mdx version of collapseRows
+#
+#============================================================================================================
+
+
+.cr.absMaxMean <- function(x, robust) {
+   if (robust) {
+     colMedians(abs(x), na.rm = TRUE)
+   } else
+     colMeans(abs(x), na.rm = TRUE)
+}
+
+.cr.absMinMean <- function(x, robust) {
+   if (robust) {
+     -colMedians(abs(x), na.rm = TRUE)
+   } else
+     -colMeans(abs(x), na.rm = TRUE)
+}
+
+
+.cr.MaxMean <- function(x, robust) {
+   if (robust) {
+     colMedians(x, na.rm = TRUE)
+   } else
+     colMeans(x, na.rm = TRUE)
+}
+
+.cr.MinMean <- function(x, robust) {
+   if (robust) {
+     -colMedians(x, na.rm = TRUE)
+   } else
+     -colMeans(x, na.rm = TRUE)
+}
+
+.cr.maxVariance <- function(x, robust) {
+   if (robust)  {
+     colMads(x, na.rm = TRUE)
+   } else
+     colSds(x, na.rm = TRUE)
+
+}
+
+.checkConsistencyOfGroupAndColID = function(mdx, colID, group) {
   colID  = as.character(colID)
   group = as.character(group)
   if (length(colID)!=length(group)) {
@@ -62,6 +106,8 @@
   list(mdx = mdx, group = group, colID = colID, keepProbes = keepProbes)
 }
 # selectFewestConsensusMissing ####
+
+
 #' Select columns with the lowest consensus number of missing data
 #'
 #' Given a \code{\link{multiSet}} structure, this function calculates the
@@ -105,6 +151,8 @@ selectFewestConsensusMissing <- function(mdx, colID, group,
                                  minProportionPresent = 1,
                                  consensusQuantile = 0,
                                  verbose = 0, ...) {
+## For each gene, select the gene with the fewest missing probes, and return the results.
+#   If there is a tie, keep all probes involved in the tie.
 #   The main part of this function is run only if omitGroups=TRUE
 
    otherArgs = list(...)
@@ -136,7 +184,7 @@ selectFewestConsensusMissing <- function(mdx, colID, group,
    presentData         = as.matrix(apply(mdx, function(x) colSums(is.finite(x))))
 
    presentFrac = presentData/matrix(nSamples, nVars, nSets, byrow = TRUE)
-   consensusPresentFrac = .consensusCalculation(setTomMat = presentFrac, useMean = FALSE,
+   consensusPresentFrac = .consensusCalculation.base(data = presentFrac, useMean = FALSE,
                             setWeightMat = NULL,
                             consensusQuantile = consensusQuantile)$consensus
 
@@ -162,6 +210,8 @@ selectFewestConsensusMissing <- function(mdx, colID, group,
    return (keep)
 }
 # consensusRepresentatives ####
+
+
 #' Consensus selection of group representatives
 #'
 #' Given multiple data sets corresponding to the same variables and a grouping
@@ -469,7 +519,7 @@ consensusRepresentatives <- function(mdx,
  #       verboseScatterplot(xxx[, set], selectionStatistics[, set], samples = 10000)
  #  }
 
-   consensusSelStat = .consensusCalculation(selectionStatistics, useMean = FALSE, setWeightMat = NULL,
+   consensusSelStat = .consensusCalculation.base(selectionStatistics, useMean = FALSE, setWeightMat = NULL,
                              consensusQuantile = consensusQuantile)$consensus
 
    # Actually run the summarization.
@@ -530,7 +580,7 @@ consensusRepresentatives <- function(mdx,
      if (calibration=="full quantile")
        connectivities = normalize.quantiles(connectivities)
 
-     consConn = .consensusCalculation(connectivities, useMean = FALSE, setWeightMat = NULL,
+     consConn = .consensusCalculation.base(connectivities, useMean = FALSE, setWeightMat = NULL,
                                                consensusQuantile = consensusQuantile)$consensus
      repres.inMore = rep(0, length(more))
      for (ig in 1:length(more))

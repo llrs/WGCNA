@@ -255,7 +255,7 @@ NULL
 #' eigengenes moduleMergeUsingKME Merge modules and reassign genes using kME
 #' moduleNumber Fixed-height cut of a dendrogram modulePreservation Calculation
 #' of module preservation statistics multiSetMEs Calculate module eigengenes
-#' multiData.eigengeneSignificance Calculate eigengene significance for
+#' multiSet.eigengeneSignificance Calculate eigengene significance for
 #' multiple data sets mutualInfoAdjacency Calculate weighted adjacency matrices
 #' based on mutual information nPresent Number of present data entries
 #' nearestNeighborConnectivity Connectivity to a constant number of nearest

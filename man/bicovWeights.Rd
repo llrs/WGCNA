@@ -7,60 +7,6 @@
 bicovWeights(x, pearsonFallback = TRUE, maxPOutliers = 1,
   outlierReferenceWeight = 0.5625, defaultWeight = 0)
 }
-\arguments{
-\item{x}{A vector or a two-dimensional array (matrix or data frame).  If
-two-dimensional, the weights will be calculated separately on each column.}
-
-\item{pearsonFallback}{Logical: if the median absolute deviation is zero,
-should standard deviation be substituted?}
-
-\item{maxPOutliers}{Optional specification of the maximum proportion of
-outliers, i.e., data with weights equal to \code{outlierReferenceWeight}
-below.}
-
-\item{outlierReferenceWeight}{A number between 0 and 1 specifying what is to
-be considered an outlier when calculating the proportion of outliers.}
-
-\item{defaultWeight}{Value used for weights that correspond to a finite
-\code{x} but the weights themselves would not be finite, for example, when a
-column in \code{x} is constant.}
-}
-\value{
-A vector or matrix of the same dimensions as the input \code{x}
-giving the weights.
-}
 \description{
-The function calculates weights used in the calculation of biweight
-midcovariance and midcorrelation. The weights are designed such that
-outliers get smaller weights; the weights become zero for data points more
-than 9 median absolute deviations from the median.
+Weights used in biweight midcovariance
 }
-\examples{
-
-x = rnorm(100)
-x[1] = 10
-plot(x, bicovWeights(x))
-
-}
-\references{
-This function is based on Equation (3) in
-
-Langfelder P, Horvath S (2012) Fast R Functions for Robust Correlations and
-Hierarchical Clustering Journal of Statistical Software 46(11) 1-17 PMID:
-23050260 PMCID: PMC3465711
-
-That article also describes the Pearson fallback and maximum proportion of
-outliers in detail. For a full discussion of the biweight midcovariance and
-midcorrelation, see
-
-Wilcox RR (2005). Introduction to Robust Estimation and Hypothesis Testing.
-2nd edition. Academic Press, Section 9.3.8, page 399 as well as Section
-3.12.1, page 83.
-}
-\seealso{
-\code{\link{bicor}}
-}
-\author{
-Peter Langfelder
-}
-\keyword{misc}

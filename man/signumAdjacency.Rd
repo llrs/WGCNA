@@ -22,9 +22,11 @@ This function transforms correlations or other measures of similarity into
 an unweighted network adjacency.
 }
 \examples{
+
 datExpr <- matrix(rnorm(150), ncol = 5)
 corMat <- cor(datExpr)
 signumAdjacency(corMat, 0.1)
+
 }
 \references{
 Bin Zhang and Steve Horvath (2005) "A General Framework for

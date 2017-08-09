@@ -97,6 +97,7 @@ naive predictor has an error rate of 30 percent (since it only misclassifies
 }
 \examples{
 
+
 m <- 100
 trueOutcome <- sample( c(1,2), m, replace=TRUE)
 predictedOutcome <- trueOutcome
@@ -107,9 +108,11 @@ accuracyMeasures(tab)
 
 # Should get the same result:
 accuracyMeasures(predictedOutcome, trueOutcome)
+
 }
 \references{
-See wikipedia \url{http://en.wikipedia.org/wiki/Sensitivity_and_specificity}
+See wikipedia
+\url{http://en.wikipedia.org/wiki/Sensitivity_and_specificity}
 }
 \author{
 Steve Horvath and Peter Langfelder

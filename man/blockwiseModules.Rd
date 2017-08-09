@@ -18,6 +18,7 @@ blockwiseModules(datExpr, checkMissingData = TRUE, blocks = NULL,
   minAbsGap = NULL, minSplitHeight = NULL, minAbsSplitHeight = NULL,
   useBranchEigennodeDissim = FALSE,
   minBranchEigennodeDissim = mergeCutHeight, stabilityLabels = NULL,
+  stabilityCriterion = c("Individual fraction", "Common fraction"),
   minStabilityDissim = NULL, pamStage = TRUE, pamRespectsDendro = TRUE,
   reassignThreshold = 1e-06, minCoreKME = 0.5,
   minCoreKMESize = minModuleSize/3, minKMEtoStay = 0.3,
@@ -237,6 +238,68 @@ make the output progressively more and more verbose.}
 indentation, each unit adds two spaces.}
 
 \item{\dots}{Other arguments.}
+
+\item{datExpr}{expression data. A data frame in which columns are genes and
+rows ar samples.}
+
+\item{useSamples}{optional specifications of which samples to use for the
+check. Should be a logical vector; samples whose entries are \code{FALSE}
+will be ignored for the missing value counts. Defaults to using all samples.}
+
+\item{useGenes}{optional specifications of genes for which to perform the
+check. Should be a logical vector; genes whose entries are \code{FALSE} will
+be ignored. Defaults to using all genes.}
+
+\item{minFraction}{minimum fraction of non-missing samples for a gene to be
+considered good.}
+
+\item{minNSamples}{minimum number of good samples for the data set to be
+considered fit for analysis. If the actual number of good samples falls
+below this threshold, an error will be issued.}
+
+\item{minNGenes}{minimum number of non-missing samples for a sample to be
+considered good.}
+
+\item{verbose}{integer level of verbosity. Zero means silent, higher values
+make the output progressively more and more verbose.}
+
+\item{indent}{indentation for diagnostic messages. Zero means no
+indentation, each unit adds two spaces.}
+
+\item{datExpr}{expression data. A data frame in which columns are genes and
+rows ar samples.}
+
+\item{useSamples}{optional specifications of which samples to use for the
+check. Should be a logical vector; samples whose entries are \code{FALSE}
+will be ignored for the missing value counts. Defaults to using all samples.}
+
+\item{useGenes}{optional specifications of genes for which to perform the
+check. Should be a logical vector; genes whose entries are \code{FALSE} will
+be ignored. Defaults to using all genes.}
+
+\item{minFraction}{minimum fraction of non-missing samples for a gene to be
+considered good.}
+
+\item{minNSamples}{minimum number of non-missing samples for a gene to be
+considered good.}
+
+\item{minNGenes}{minimum number of good genes for the data set to be
+considered fit for analysis. If the actual number of good genes falls below
+this threshold, an error will be issued.}
+
+\item{tol}{an optional 'small' number to compare the variance against.
+Defaults to the square of \code{1e-10 * max(abs(datExpr), na.rm = TRUE)}.
+The reason of comparing the variance to this number, rather than zero, is
+that the fast way of computing variance used by this function sometimes
+causes small numerical overflow errors which make variance of constant
+vectors slightly non-zero; comparing the variance to \code{tol} rather than
+zero prevents the retaining of such genes as 'good genes'.}
+
+\item{verbose}{integer level of verbosity. Zero means silent, higher values
+make the output progressively more and more verbose.}
+
+\item{indent}{indentation for diagnostic messages. Zero means no
+indentation, each unit adds two spaces.}
 }
 \value{
 A list with the following components:
@@ -277,6 +340,15 @@ and in which \code{blockGenes} above is returned. For example,
 
 \item{MEsOK}{logical indicating whether the module eigengenes were
 calculated without errors. }
+
+A logical vector with one entry per sample that is \code{TRUE} if
+the sample is considered good and \code{FALSE} otherwise. Note that all
+samples excluded by \code{useSamples} are automatically assigned
+\code{FALSE}.
+
+A logical vector with one entry per gene that is \code{TRUE} if the
+gene is considered good and \code{FALSE} otherwise. Note that all genes
+excluded by \code{useGenes} are automatically assigned \code{FALSE}.
 }
 \description{
 This function performs automatic network construction and module detection
@@ -352,7 +424,8 @@ Weighted Gene Co-Expression Network Analysis", Statistical Applications in
 Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 }
 \seealso{
-\code{\link{goodSamplesGenes}} for basic quality control and filtering
+\code{\link{goodSamplesGenes}} for basic quality control and
+filtering
 
 \code{\link{adjacency}}, \code{\link{TOMsimilarity}} for network
 construction
@@ -363,8 +436,76 @@ construction
 hierarchical clustering dendrograms
 
 \code{\link{mergeCloseModules}} for merging of close modules.
+
+\code{\link{goodSamples}}, \code{\link{goodSamplesGenes}}
+
+\code{\link{goodSamples}}, \code{\link{goodSamplesGenes}}
 }
 \author{
 Peter Langfelder
+
+Peter Langfelder and Steve Horvath
+
+Peter Langfelder and Steve Horvath
 }
+\keyword{4.}
+\keyword{Filter}
+\keyword{For}
+\keyword{The}
+\keyword{This}
+\keyword{\code{..minNGenes}}
+\keyword{\code{..minNSamples}}
+\keyword{a}
+\keyword{absolute}
+\keyword{and}
+\keyword{are}
+\keyword{be}
+\keyword{below}
+\keyword{both}
+\keyword{checks}
+\keyword{constants}
+\keyword{criteria}
+\keyword{criterion}
+\keyword{criterion.}
+\keyword{data}
+\keyword{entries}
+\keyword{for}
+\keyword{fraction}
+\keyword{function}
+\keyword{genes}
+\keyword{given}
+\keyword{have}
+\keyword{list}
+\keyword{many}
+\keyword{maximum}
 \keyword{misc}
+\keyword{missing}
+\keyword{more}
+\keyword{most}
+\keyword{much}
+\keyword{must}
+\keyword{non-zero}
+\keyword{number}
+\keyword{of}
+\keyword{on}
+\keyword{pass}
+\keyword{returns}
+\keyword{samples}
+\keyword{set}
+\keyword{sets,}
+\keyword{stringent}
+\keyword{than}
+\keyword{that}
+\keyword{the}
+\keyword{threshold}
+\keyword{threshold.}
+\keyword{to}
+\keyword{too}
+\keyword{total}
+\keyword{two}
+\keyword{value}
+\keyword{values}
+\keyword{values:}
+\keyword{variance}
+\keyword{will}
+\keyword{with}

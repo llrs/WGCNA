@@ -1,12 +1,14 @@
 # Plots the kME values of genes in two groups of expression data for each module in an inputted color vector
 
 
+
+
 #' Function to plot kME values between two comparable data sets.
-#'
+#' 
 #' Plots the kME values of genes in two groups of expression data for each
 #' module in an inputted color vector.
-#'
-#'
+#' 
+#' 
 #' @param datExpr1 The first expression matrix (samples=rows, genes=columns).
 #' This can either include only the data for group A (in which case dataExpr2
 #' must be entered), or can contain all of the data for groups A and B (in
@@ -43,7 +45,7 @@
 #' solid circles.
 #' @param fileName Name of the file to hold the plots. Since the output format
 #' is pdf, the extension should be .pdf .
-#' @param ...  Other plotting parameters that are allowable inputs to
+#' @param ... Other plotting parameters that are allowable inputs to
 #' verboseScatterplot.
 #' @return The default output is a file called
 #' "kME_correlations_between_[nameA]_and_[nameB]_[all/inMod].pdf", where
@@ -56,9 +58,10 @@
 #' @author Jeremy Miller
 #' @keywords misc
 #' @examples
+#' 
 #' # Example output file "kME_correlations_between_A_and_B_inMod.pdf"
 #' # using simulated data.
-#'
+#' 
 #' set.seed <- 100
 #' ME <- matrix(0, 50, 5)
 #' for (i in 1:5) {
@@ -74,6 +77,7 @@
 #' kMEcomparisonScatterplot(simData1$datExpr, simData2$datExpr,
 #'                          simData1$truemodule, fileName = "../out.pdf")
 #' }
+#' 
 kMEcomparisonScatterplot <- function(datExpr1, datExpr2, colorh, inA = NULL,
                                      inB = NULL, MEsA = NULL, MEsB = NULL,
                                      nameA = "A", nameB = "B", plotAll = FALSE,

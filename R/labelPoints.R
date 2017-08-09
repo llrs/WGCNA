@@ -7,31 +7,33 @@
 
 
 
+
+
 #' Label scatterplot points
-#'
+#' 
 #' Given scatterplot point coordinates, the function tries to place labels near
 #' the points such that the labels overlap as little as possible. User beware:
 #' the algorithm implemented here is quite primitive and while it will help in
 #' many cases, it is by no means perfect. Consider this function experimental.
 #' We hope to improve the algorithm in the future to make it useful in a
 #' broader range of situations.
-#'
+#' 
 #' The algorithm basically works by finding the direction of most surrounding
 #' points, and attempting to place the label in the opposite direction. There
 #' are (not uncommon) situations in which this placement is suboptimal; the
 #' author promises to further develop the function sometime in the future.
-#'
+#' 
 #' Note that this function does not plot the actual scatterplot; only the
 #' labels are plotted. Plotting the scatterplot is the responsibility of the
 #' user.
-#'
+#' 
 #' The argument \code{offs} needs to be carefully tuned to the size of the
 #' plotted symbols. Sorry, no automation here yet.
-#'
+#' 
 #' The argument \code{protectEdges} can be used to shift labels that would
 #' otherwise extend beyond the plot to within the plot. Sometimes this may
 #' cause some overlapping with other points or labels; use with care.
-#'
+#' 
 #' @param x a vector of x coordinates of the points
 #' @param y a vector of y coordinates of the points
 #' @param labels labels to be placed next to the points
@@ -54,25 +56,27 @@
 #' @seealso \code{\link{plot.default}}, \code{\link{text}}
 #' @keywords plot
 #' @examples
-#'
+#' 
+#' 
 #' # generate some random points
 #'    set.seed(11)
 #'    n = 20
 #'    x = runif(n)
 #'    y = runif(n)
-#'
+#' 
 #' # Create a basic scatterplot
 #' \dontrun{
 #'    col = standardColors(n)
 #'    plot(x,y, pch = 21, col =1, bg = col, cex = 2.6,
 #'         xlim = c(-0.1, 1.1), ylim = c(-0.1, 1.0))
 #'    labelPoints(x, y, paste0("Pt", c(1:n)), offs = 0.10, cex = 1)
-#'
+#' 
 #' # label points using longer text labels. Note the positioning is not perfect, but close enough.
-#'
+#' 
 #'    plot(x,y, pch = 21, col =1, bg = col, cex = 2.6,
 #'         xlim = c(-0.1, 1.1), ylim = c(-0.1, 1.0))
 #'    labelPoints(x, y, col, offs = 0.10, cex = 0.8)}
+#' 
 labelPoints = function(x, y, labels, cex = 0.7, offs = 0.01, xpd = TRUE, jiggle = 0,
                        protectEdges = TRUE,
                        doPlot = TRUE, ...)
@@ -105,17 +109,17 @@ labelPoints = function(x, y, labels, cex = 0.7, offs = 0.01, xpd = TRUE, jiggle 
   if (jiggle > 0)
   {
     rangeX = max(xx, na.rm = TRUE) - min(xx, na.rm = TRUE)
-    jx = xx + jiggle * rangeX * (runif(nPts) - 0.5);
+    jx = xx + jiggle * rangeX * (runif(nPts) - 0.5)
     rangeY = max(yy, na.rm = TRUE) - min(yy, na.rm = TRUE)
-    jy = yy + jiggle * rangeY * (runif(nPts) - 0.5);
+    jy = yy + jiggle * rangeY * (runif(nPts) - 0.5)
   } else {
     jx = xx
     jy = yy
   }
   dx = offs
   dy = offs
-  labWidth = strwidth(labels, cex=cex) * scaleX;
-  labHeight = strheight(labels, cex=cex) * scaleY;
+  labWidth = strwidth(labels, cex=cex) * scaleX
+  labHeight = strheight(labels, cex=cex) * scaleY
   if (nPts==0) return(0)
 
   if (nPts==1)
@@ -141,7 +145,7 @@ labelPoints = function(x, y, labels, cex = 0.7, offs = 0.01, xpd = TRUE, jiggle 
   dir = matrix(0, nPts, 2)
 
   d0SqX = (labWidth+2*offs)^2
-  d0SqY = (labHeight + 2*offs)^2;
+  d0SqY = (labHeight + 2*offs)^2
   for (p in 1:nPts)
   {
     difs = matrix(jxMat[p, ], nPts, 2, byrow = TRUE) - jxMat
@@ -158,7 +162,7 @@ labelPoints = function(x, y, labels, cex = 0.7, offs = 0.01, xpd = TRUE, jiggle 
 
   scDir = dir / sqrt(matrix(apply(dir^2, 1, sum, na.rm = TRUE), nPts, 2))
   offsMat = cbind(labWidth/2 + offs, labHeight/2 + offs)
-  Rmat = abs(scDir / offsMat);
+  Rmat = abs(scDir / offsMat)
   ind = Rmat[, 1] > Rmat[, 2]; # This is an indicator of whether the labels touch the vertical (TRUE ) or
                                # horizontal (FALSE) edge of the square around the point
 
@@ -194,8 +198,8 @@ labelPoints = function(x, y, labels, cex = 0.7, offs = 0.01, xpd = TRUE, jiggle 
      overlap
   }
 
-  overlapX = overlapF(pointMinx, pointMaxx, labelMinx, labelMaxx);
-  overlapY = overlapF(pointMiny, pointMaxy, labelMiny, labelMaxy);
+  overlapX = overlapF(pointMinx, pointMaxx, labelMinx, labelMaxx)
+  overlapY = overlapF(pointMiny, pointMaxy, labelMiny, labelMaxy)
 
   indOvr = overlapX > 0 & overlapY >0
   overlap = matrix(0, nPts, nPts)

@@ -29,6 +29,7 @@ result of the function is then an n times n matrix.
 }
 \examples{
 
+
   # Create a symmetric matrix
   m = matrix(c(1:16), 4,4)
   mat = (m + t(m))
@@ -49,6 +50,7 @@ result of the function is then an n times n matrix.
   # Did we get back the same matrix?
 
   all.equal(mat, new.mat)
+
 
 
 }

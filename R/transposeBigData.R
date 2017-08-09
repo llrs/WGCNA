@@ -1,8 +1,8 @@
 #' Transpose a big matrix or data frame
-#'
+#' 
 #' This transpose command partitions a big matrix (or data frame) into blocks
 #' and applies the t() function to each block separately.
-#'
+#' 
 #' Assume you have a very large matrix with say 500k columns. In this case, the
 #' standard transpose function of R \code{t()} can take a long time. Solution:
 #' Split the original matrix into sub-matrices by dividing the columns into
@@ -12,7 +12,7 @@
 #' contains more rows or more columns. If the number of columns is larger than
 #' or equal to the number of rows then the block wise splitting will be applied
 #' to columns otherwise to the rows.
-#'
+#' 
 #' @param x a matrix or data frame
 #' @param blocksize a positive integer larger than 1, which determines the
 #' block size. Default is 20k.
@@ -24,11 +24,13 @@
 #' @references Any linear algebra book will explain the transpose.
 #' @keywords misc
 #' @examples
+#' 
 #' x <- data.frame(matrix(1:10000, nrow = 4, ncol = 2500))
 #' colnames(x) <- paste0("Y", 1:2500)
 #' xTranspose <- transposeBigData(x)
 #' x[1:4, 1:4]
 #' xTranspose[1:4, 1:4]
+#' 
 transposeBigData <- function (x, blocksize = 20000) {
     isdataframe <- is.data.frame(x)
     ismatrix <- is.matrix(x)

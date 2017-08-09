@@ -1,5 +1,46 @@
+#' Calculates connectivity of a weighted network.
+#'
+#' Given expression data or a similarity, the function constructs the adjacency
+#' matrix and for each node calculates its connectivity, that is the sum of the
+#' adjacency to the other nodes.
+#'
+#'
+#' @param similarity a similarity matrix: a square symmetric matrix with
+#' entries between -1 and 1.
+#' @param type network type. Allowed values are (unique abbreviations of)
+#' \code{"unsigned"}, \code{"signed"}, \code{"signed hybrid"}.
+#' @param power soft thresholding power.
+#' @param blockSize block size in which adjacency is to be calculated. Too low
+#' (say below 100) may make the calculation inefficient, while too high may
+#' cause R to run out of physical memory and slow down the computer. Should be
+#' chosen such that an array of doubles of size (number of genes) * (block
+#' size) fits into available physical memory.
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @param datExpr a data frame containing the expression data, with rows
+#' corresponding to samples and columns to genes.
+#' @param corFnc character string giving the correlation function to be used
+#' for the adjacency calculation. Recommended choices are \code{"cor"} and
+#' \code{"bicor"}, but other functions can be used as well.
+#' @param corOptions character string giving further options to be passed to
+#' the correlation function.
+#' @param minNSamples minimum number of samples available for the calculation
+#' of adjacency for the adjacency to be considered valid.  If not given,
+#' defaults to the greater of \code{..minNSamples} (currently 4) and number of
+#' samples divided by 3.  If the number of samples falls below this threshold,
+#' the connectivity of the corresponding gene will be returned as \code{NA}.
+#' @return A vector with one entry per gene giving the connectivity of each
+#' gene in the weighted network.
+#' @author Steve Horvath
+#' @seealso \code{\link{adjacency}}
+#' @references Bin Zhang and Steve Horvath (2005) "A General Framework for
+#' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
+#' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
+#' @keywords misc
+#' @export softConnectivity.fromSimilarity
 #' @rdname softConnectivity
-#' @export
 softConnectivity.fromSimilarity <- function(similarity, type = "unsigned",
                                             power = if (type ==  "signed") 15 else 6,
                                             blockSize = 1500, verbose = 2,
@@ -119,6 +160,8 @@ softConnectivity <- function(datExpr,
 } # end of function
 
 
+
+
 #' Calculation of intramodular connectivity
 #'
 #' Calculates intramodular connectivity, i.e., connectivity of nodes to other
@@ -129,12 +172,40 @@ softConnectivity <- function(datExpr,
 #' within the same module. Optionally, the connectivities can be scaled by the
 #' maximum connectivy in each module.
 #'
+#' @aliases intramodularConnectivity intramodularConnectivity.fromExpr
 #' @param adjMat adjacency matrix, a square, symmetric matrix with entries
 #' between 0 and 1.
 #' @param colors module labels. A vector of length \code{ncol(adjMat)} giving a
 #' module label for each gene (node) of the network.
 #' @param scaleByMax logical: should intramodular connectivities be scaled by
 #' the maximum IM connectivity in each module?
+#' @param datExpr data frame containing expression data. Columns correspond to
+#' genes and rows to samples.
+#' @param corFnc character string specifying the function to be used to
+#' calculate co-expression similarity for correlation networks. Defaults to
+#' Pearson correlation. Any function returning values between -1 and 1 can be
+#' used.
+#' @param corOptions character string specifying additional arguments to be
+#' passed to the function given by \code{corFnc}. Use \code{"use = 'p', method
+#' = 'spearman'"} to obtain Spearman correlation.
+#' @param distFnc character string specifying the function to be used to
+#' calculate co-expression similarity for distance networks. Defaults to the
+#' function \code{\link{dist}}. Any function returning non-negative values can
+#' be used.
+#' @param distOptions character string specifying additional arguments to be
+#' passed to the function given by \code{distFnc}. For example, when the
+#' function \code{\link{dist}} is used, the argument \code{method} can be used
+#' to specify various ways of computing the distance.
+#' @param networkType network type. Allowed values are (unique abbreviations
+#' of) \code{"unsigned"}, \code{"signed"}, \code{"signed hybrid"},
+#' \code{"distance"}.
+#' @param power soft thresholding power.
+#' @param ignoreColors level(s) of \code{colors} that identifies unassigned
+#' genes. The intramodular connectivity in this "module" will not be
+#' calculated.
+#' @param getWholeNetworkConnectivity logical: should whole-network
+#' connectivity be computed as well? For large networks, this can be quite
+#' time-consuming.
 #' @return If input \code{getWholeNetworkConnectivity} is \code{TRUE}, a data
 #' frame with 4 columns giving the total connectivity, intramodular
 #' connectivity, extra-modular connectivity, and the difference of the intra-

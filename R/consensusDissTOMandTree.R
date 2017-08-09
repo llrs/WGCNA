@@ -1,14 +1,16 @@
 # Makes a consensus network using all of the default values in the WGCNA library.
 
+
+
 #' Consensus clustering based on topological overlap and hierarchical
 #' clustering
-#'
+#' 
 #' This function makes a consensus network using all of the default values in
 #' the WGCNA library.  Details regarding how consensus modules are formed can
 #' be found here:
 #' http://www.genetics.ucla.edu/labs/horvath/CoexpressionNetwork/Rpackages/WGCNA/Tutorials/Consensus-NetworkConstruction-man.pdf
-#'
-#'
+#' 
+#' 
 #' @param multiExpr Expression data in the multi-set format (see checkSets). A
 #' vector of lists, one per set. Each set must contain a component data that
 #' contains the expression data.  Rows correspond to samples and columns to
@@ -33,16 +35,17 @@
 #' 1:54
 #' @keywords misc
 #' @examples
-#'
+#' 
+#' 
 #' # Example consensus network using two simulated data sets
-#'
+#' 
 #' set.seed <- 100
 #' MEturquoise <- sample(1:100, 50)
 #' MEblue <- sample(1:100, 50)
 #' MEbrown <- sample(1:100, 50)
 #' MEyellow <- sample(1:100, 50)
 #' MEgreen <- sample(1:100, 50)
-#'
+#' 
 #' ME <- data.frame(MEturquoise, MEblue, MEbrown, MEyellow, MEgreen)
 #' dat1 <- simulateDatExpr(ME,300,c(0.2,  0.10,  0.10,  0.10,  0.10,  0.2),
 #'   signed=TRUE)
@@ -50,13 +53,14 @@
 #'   signed = TRUE)
 #' multiExpr <- list(S1=list(data=dat1$datExpr), S2=list(data=dat2$datExpr))
 #' softPower <- 8
-#'
+#' 
 #' consensusNetwork <- consensusDissTOMandTree(multiExpr, softPower)
 #' \dontrun{
 #' plotDendroAndColors(consensusNetwork$consTree,
 #'      cbind(labels2colors(dat1$allLabels),
 #'      labels2colors(dat2$allLabels)), c("S1","S2"), dendroLabels=FALSE)
-#'}
+#' }
+#' 
 consensusDissTOMandTree <- function(multiExpr, softPower, TOM=NULL){
 	nGenes <- ncol(multiExpr[[1]]$data)
 	nSets <- length(multiExpr)
@@ -73,7 +77,7 @@ consensusDissTOMandTree <- function(multiExpr, softPower, TOM=NULL){
 		}
 	}
 	nSets <- length(TOM)
-	set.seed(12345);
+	set.seed(12345)
 	scaleP <- 0.95
 	nSamples <- as.integer(1/(1-scaleP) * 1000)
 	scaleSample <- sample(nGenes*(nGenes-1)/2, size = nSamples)

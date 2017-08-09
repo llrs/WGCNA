@@ -1,4 +1,3 @@
-
 ###########################################################################
 # Statistics for Microarray Analysis for R
 # Discriminant analysis
@@ -9,30 +8,32 @@
 # Authors: Sandrine Dudoit, Yee Hwa (Jean) Yang, and Jane Fridlyand.
 ##########################################################################
 
+
+
 #' Red and Green Color Specification
-#'
+#' 
 #' This function creates a vector of n ``contiguous'' colors, corresponding to
 #' n intensities (between 0 and 1) of the red, green and blue primaries, with
 #' the blue intensities set to zero. The values returned by
-#' \code{rgcolors.func} can be used with a \code{col} specification in
-#' graphics functions or in \code{\link{par}}.
-#'
-#'
-#' @param n the number of colors (> =  1) to be used in the red and green
+#' \code{rgcolors.func} can be used with a \code{col} specification in graphics
+#' functions or in \code{\link{par}}.
+#' 
+#' 
+#' @param n the number of colors (> = 1) to be used in the red and green
 #' palette.
 #' @return a character vector of color names. Colors are specified directly in
 #' terms of their RGB components with a string of the form "\#RRGGBB", where
 #' each of the pairs RR, GG, BB consist of two hexadecimal digits giving a
 #' value in the range 00 to FF.
-#' @author
-#' Sandrine Dudoit, \email{sandrine@@stat.berkeley.edu} \cr Jane
+#' @author Sandrine Dudoit, \email{sandrine@@stat.berkeley.edu} \cr Jane
 #' Fridlyand, \email{janef@@stat.berkeley.edu}
-#' @seealso
-#' \code{\link{plotCor}}, \code{\link{plotMat}}, \code{\link{colors}},
+#' @seealso \code{\link{plotCor}}, \code{\link{plotMat}}, \code{\link{colors}},
 #' \code{\link{rgb}}, \code{\link{image}}.
 #' @keywords color
 #' @examples
+#' 
 #' rgcolors.func(n = 5)
+#' 
 rgcolors.func <- function(n = 50) {
     k <- round(n/2)
     r <- c(rep(0, k), seq(0, 1, length = k))
@@ -41,19 +42,21 @@ rgcolors.func <- function(n = 50) {
     res
 }
 
+
+
 #' Red and Green Color Image of Correlation Matrix
-#'
+#' 
 #' This function produces a red and green color image of a correlation matrix
 #' using an RGB color specification. Increasingly positive correlations are
 #' represented with reds of increasing intensity, and increasingly negative
 #' correlations are represented with greens of increasing intensity.
-#'
-#'
+#' 
+#' 
 #' @param x a matrix of numerical values.
 #' @param new If \code{new = F}, \code{x} must already be a correlation matrix.
 #' If \code{new = T}, the correlation matrix for the columns of \code{x} is
 #' computed and displayed in the image.
-#' @param nrgcols the number of colors (> =  1) to be used in the red and green
+#' @param nrgcols the number of colors (> = 1) to be used in the red and green
 #' palette.
 #' @param labels vector of character strings to be placed at the tickpoints,
 #' labels for the columns of \code{x}.
@@ -70,7 +73,9 @@ rgcolors.func <- function(n = 50) {
 #' \code{\link{cor}}, \code{\link{image}}, \code{\link{rgb}}.
 #' @keywords hplot
 #' @examples
+#' 
 #' plotCor(matrix(runif(4), ncol = 2, nrow = 2))
+#' 
 plotCor <- function(x, new = FALSE, nrgcols = 50, labels = FALSE, labcols = 1,
                     title = "", ...) {
     #   X <- x
@@ -106,16 +111,18 @@ plotCor <- function(x, new = FALSE, nrgcols = 50, labels = FALSE, labcols = 1,
     box()
 }
 
+
+
 #' Red and Green Color Image of Data Matrix
-#'
+#' 
 #' This function produces a red and green color image of a data matrix using an
 #' RGB color specification. Larger entries are represented with reds of
 #' increasing intensity, and smaller entries are represented with greens of
 #' increasing intensity.
-#'
-#'
+#' 
+#' 
 #' @param x a matrix of numbers.
-#' @param nrgcols the number of colors (> =  1) to be used in the red and green
+#' @param nrgcols the number of colors (> = 1) to be used in the red and green
 #' palette.
 #' @param rlabels vector of character strings to be placed at the row
 #' tickpoints, labels for the rows of \code{x}.

@@ -3,6 +3,8 @@
 # columns.
 
 
+
+
 #' Calculation of correlations and associated p-values
 #'
 #' A faster, one-step calculation of Student correlation p-values for multiple
@@ -38,7 +40,6 @@
 #' Software, 46(11), 1-17.  \url{http://www.jstatsoft.org/v46/i11/}
 #' @keywords stats
 #' @examples
-#'
 #' # generate random data with non-zero correlation
 #' set.seed(1)
 #' a = rnorm(100)
@@ -50,7 +51,6 @@
 #' x[c(1:4), 1] = NA
 #' corAndPvalue(x)
 #' # Note that changed number of observations.
-#'
 corAndPvalue <- function(x, y = NULL, use = "pairwise.complete.obs",
                         alternative = c("two.sided", "less", "greater"), ...) {
   ia = match.arg(alternative)
@@ -77,6 +77,8 @@ corAndPvalue <- function(x, y = NULL, use = "pairwise.complete.obs",
 
   list(cor = cor, p = p, Z = Z, t = T, nObs = np)
 }
+
+
 
 
 
@@ -117,6 +119,7 @@ corAndPvalue <- function(x, y = NULL, use = "pairwise.complete.obs",
 #' @keywords stats
 #' @examples
 #'
+#'
 #' # generate random data with non-zero correlation
 #' set.seed(1)
 #' a <- rnorm(100)
@@ -128,6 +131,7 @@ corAndPvalue <- function(x, y = NULL, use = "pairwise.complete.obs",
 #' x[c(1:4), 1] <- NA
 #' corAndPvalue(x)
 #' # Note that changed number of observations.
+#'
 #'
 bicorAndPvalue <- function(x, y = NULL, use = "pairwise.complete.obs",
                           alternative = c("two.sided", "less", "greater"),

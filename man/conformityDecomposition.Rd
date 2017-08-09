@@ -99,6 +99,7 @@ formulas for the conformity (Dong and Horvath 2007).
 \examples{
 
 
+
 # assume the number of nodes can be divided by 2 and by 3
 n=6
 # here is a perfectly factorizable matrix
@@ -121,6 +122,7 @@ blockdiag.A[1:(n/3),(n/3+1):n]=0.3
 blockdiag.A[(n/3+1):n , 1:(n/3)]=0.3
 block.Cl=rep(c(1,2),c(n/3,2*n/3))
 conformityDecomposition(adj= blockdiag.A,Cl=block.Cl)
+
 
 
 }

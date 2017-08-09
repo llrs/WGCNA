@@ -1,19 +1,20 @@
-
 # checkAdjMat ####
+
+
 #' Check adjacency matrix
-#'
+#' 
 #' Checks a given matrix for properties that an adjacency matrix must satisfy.
-#'
+#' 
 #' The function checks whether the given matrix really is a 2-dimensional
 #' numeric matrix, whether it is square, symmetric, and all finite entries are
 #' between \code{min} and \code{max}.  If any of the conditions is not met, the
 #' function issues an error.
-#'
-#' @aliases checkAdjMat checkSimilarity
-#' @param adjMat matrix to be checked
+#' 
+#' @aliases checkAdjMat checkSimilarity checkAdjMat checkSimilarity
 #' @param similarity matrix to be checked
 #' @param min minimum allowed value for entries of the input
 #' @param max maximum allowed value for entries of the input
+#' @param adjMat matrix to be checked
 #' @return None. The function returns normally if all conditions are met.
 #' @author Peter Langfelder
 #' @seealso \code{\link{adjacency}}
@@ -35,17 +36,19 @@ checkAdjMat <- function(adjMat, min = 0, max = 1) {
 }
 
 # unsignedAdjacency ####
+
+
 #' Calculation of unsigned adjacency
-#'
+#' 
 #' Calculation of the unsigned network adjacency from expression data. The
 #' restricted set of parameters for this function should allow a faster and
 #' less memory-hungry calculation.
-#'
+#' 
 #' The correlation function will be called with arguments \code{datExpr,
 #' datExpr2} plus any extra arguments given in \code{corOptions}. If
 #' \code{datExpr2} is \code{NULL}, the standard correlation functions will
 #' calculate the corelation of columns in \code{datExpr}.
-#'
+#' 
 #' @param datExpr expression data. A data frame in which columns are genes and
 #' rows ar samples. Missing values are ignored.
 #' @param datExpr2 optional specification of a second set of expression data.
@@ -65,8 +68,10 @@ checkAdjMat <- function(adjMat, min = 0, max = 1) {
 #' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 #' @keywords misc
 #' @examples
+#' 
 #' datExpr <- matrix(rnorm(150), ncol = 5)
 #' unsignedAdjacency(datExpr)
+#' 
 unsignedAdjacency <- function(datExpr, datExpr2 = NULL, power = 6,
                               corFnc = "cor", corOptions = "use = 'p'") {
     corExpr <- parse(text = paste(corFnc, "(datExpr, datExpr2 ",
@@ -78,13 +83,17 @@ unsignedAdjacency <- function(datExpr, datExpr2 = NULL, power = 6,
 }
 
 # adjacnecy ####
+
+
 #' Calculate network adjacency
-#'
+#' 
 #' Calculates (correlation or distance) network adjacency from given expression
 #' data or from a similarity. Computes the adjacency from the expression data:
 #' takes cor, transforms it as appropriate and possibly adds a sign if
 #' requested.
-#'
+#' 
+#' similarity calculates the pairwise correlation of the expression data.
+#' 
 #' The argument \code{type} determines whether a correlation (\code{type} one
 #' of \code{"unsigned"}, \code{"signed"}, \code{"signed hybrid"}), or a
 #' distance network (\code{type} equal \code{"distance"}) will be calculated.
@@ -92,7 +101,7 @@ unsignedAdjacency <- function(datExpr, datExpr2 = NULL, power = 6,
 #' (values between -1 and 1, with high numbers meaning high similarity). In
 #' distance networks, the adjacency is constructed from distances (non-negative
 #' values, high values mean low similarity).
-#'
+#' 
 #' The function calculates the similarity of columns (genes) in \code{datExpr}
 #' by calling the function given in \code{corFnc} (for correlation networks) or
 #' \code{distFnc} (for distance networks), transforms the similarity according
@@ -101,30 +110,32 @@ unsignedAdjacency <- function(datExpr, datExpr2 = NULL, power = 6,
 #' function will be given arguments \code{(datExpr, datExpr[selectCols], ...)}
 #' hence the returned adjacency will have rows corresponding to all genes and
 #' columns corresponding to genes selected by \code{selectCols}.
-#'
+#' 
 #' Correlation and distance are transformed as follows: for \code{type =
 #' "unsigned"}, adjacency = |cor|^power; for \code{type = "signed"} , adjacency
 #' = (0.5 * (1 + cor))^power; for \code{type = "signed hybrid"}, adjacency =
 #' cor^power if cor > 0 and 0 otherwise; and for \code{type = "distance"},
 #' adjacency = (1 - (dist/max(dist))^2)^power.
-#'
+#' 
 #' The function \code{adjacency.fromSimilarity} inputs a similarity matrix,
 #' that is it skips the correlation calculation step but is otherwise
 #' identical.
-#'
-#' @aliases adjacency adjacency.fromSimilarity
+#' 
+#' @aliases adjacency adjacency.fromSimilarity adjacency
+#' adjacency.fromSimilarity similarity adjacency adjacency.fromSimilarity
 #' @param similarity A (signed) similarity matrix: square, symmetric matrix
 #' with entries between - 1 and 1.
-#' @param type Network type, allowed values are \code{"unsigned"},
-#' \code{"signed"}, \code{"signed hybrid"}, \code{"distance"}.
-#' @param power Soft thresholding power, integer used in the function of the
-#' network type.
+#' @param ... Other arguments from adjacency
 #' @param datExpr data.frame containing expression data. Columns correspond to
 #' genes and rows to samples.
 #' @param selectCols For correlation networks only (see below) can be used to
 #' select genes whose adjacencies will be calculated. Should be either a
 #' numeric vector giving the indices of the genes to be used, or a boolean
 #' vector indicating which genes are to be used.
+#' @param type Network type, allowed values are \code{"unsigned"},
+#' \code{"signed"}, \code{"signed hybrid"}, \code{"distance"}.
+#' @param power Soft thresholding power, integer used in the function of the
+#' network type.
 #' @param corFnc Character string specifying the function to be used to
 #' calculate co - expression similarity for correlation networks. Defaults to
 #' Pearson correlation. Any function returning values between - 1 and 1 can be
@@ -151,20 +162,25 @@ unsignedAdjacency <- function(datExpr, datExpr2 = NULL, power = 6,
 #' @references Bin Zhang and Steve Horvath (2005) A General Framework for
 #' Weighted Gene Co-Expression Network Analysis, Statistical Applications in
 #' Genetics and Molecular Biology, Vol. 4 No. 1, Article 17
-#'
+#' 
 #' Langfelder P, Horvath S (2007) Eigengene networks for studying the
 #' relationships between co - expression modules. BMC Systems Biology 2007,
 #' 1:54
-#' @keywords array
+#' @keywords array misc
 #' @examples
+#' 
+#' datExpr <- matrix(rnorm(100), 10, 10)
+#' similarity <- similarity(datExpr)
+#' adj <-  adjacency.fromSimilarity(similarity)
 #' similarity <- matrix(seq(-1, 1, length.out = 25), 5)
 #' similarity[lower.tri(similarity)] <- t(similarity)[lower.tri(similarity)]
 #' adj <-  adjacency.fromSimilarity(similarity, type = "unsigned", power = 5)
-#'
+#' 
 #' datExpr <- matrix(seq(-1, 1, length.out = 25), 5)
 #' datExpr[lower.tri(datExpr)] <- t(datExpr)[lower.tri(datExpr)]
 #' adj <- adjacency(datExpr)
-#' @export
+#' 
+#' @export adjacency
 adjacency <- function(datExpr, selectCols = NULL, type = "unsigned",
                       power = if (type == "distance") 1 else 6,
                       corFnc = "cor", corOptions = "use = 'p'",
@@ -256,8 +272,10 @@ similarity <- function(datExpr, selectCols = NULL, corFnc = "cor",
 }
 
 # adjacency.polyReg ####
+
+
 #' Adjacency matrix based on polynomial regression
-#'
+#' 
 #' adjacency.polyReg calculates a network adjacency matrix by fitting
 #' polynomial regression models to pairs of variables (i.e. pairs of columns
 #' from \code{datExpr}). Each polynomial fit results in a model fitting index
@@ -266,7 +284,7 @@ similarity <- function(datExpr, selectCols = NULL, corFnc = "cor",
 #' typically non-symmetric. To arrive at a (symmetric) adjacency matrix, one
 #' can specify different symmetrization methods with
 #' \code{symmetrizationMethod}.
-#'
+#' 
 #' A network adjacency matrix is a symmetric matrix whose entries lie between 0
 #' and 1. It is a special case of a similarity matrix. Each variable (column of
 #' \code{datExpr}) is regressed on every other variable, with each model
@@ -287,8 +305,9 @@ similarity <- function(datExpr, selectCols = NULL, corFnc = "cor",
 #' A.min(ij)=min(R.squared(ij),R.squared(ji)),
 #' A.ave(ij)=(R.squared(ij)+R.squared(ji))/2,
 #' A.max(ij)=max(R.squared(ij),R.squared(ji)).
-#'
-#' @inheritParams adjacency
+#' 
+#' @param datExpr data.frame containing expression data. Columns correspond to
+#' genes and rows to samples.
 #' @param degree the degree of the polynomial. Must be less than the number of
 #' unique points.
 #' @param symmetrizationMethod character string (eg "none", "min","max","mean")
@@ -300,11 +319,12 @@ similarity <- function(datExpr, selectCols = NULL, corFnc = "cor",
 #' functions \code{\link{poly}} and \code{\link{glm}}
 #' @references Song L, Langfelder P, Horvath S Avoiding mutual information
 #' based co-expression measures (to appear).
-#'
+#' 
 #' Horvath S (2011) Weighted Network Analysis. Applications in Genomics and
 #' Systems Biology. Springer Book. ISBN: 978-1-4419-8818-8
 #' @keywords misc
 #' @examples
+#' 
 #' #Simulate a data frame datE which contains 5 columns and 50 observations
 #' m <- 50
 #' x1 <- rnorm(m)
@@ -328,6 +348,7 @@ similarity <- function(datExpr, selectCols = NULL, corFnc = "cor",
 #' # output the unsymmetrized pairwise model fitting indices R.squared
 #' R.squared <- adjacency.polyReg(datE, symmetrizationMethod = "none")
 #' R.squared
+#' 
 adjacency.polyReg <- function(datExpr, degree = 3,
                               symmetrizationMethod = "mean") {
 
@@ -374,8 +395,10 @@ adjacency.polyReg <- function(datExpr, degree = 3,
 }
 
 # adjacency.splineReg ####
+
+
 #' Calculate network adjacency based on natural cubic spline regression
-#'
+#' 
 #' adjacency.splineReg calculates a network adjacency matrix by fitting spline
 #' regression models to pairs of variables (i.e. pairs of columns from
 #' \code{datExpr}). Each spline regression model results in a fitting index
@@ -384,7 +407,7 @@ adjacency.polyReg <- function(datExpr, degree = 3,
 #' typically non-symmetric. To arrive at a (symmetric) adjacency matrix, one
 #' can specify different symmetrization methods with
 #' \code{symmetrizationMethod}.
-#'
+#' 
 #' A network adjacency matrix is a symmetric matrix whose entries lie between 0
 #' and 1. It is a special case of a similarity matrix. Each variable (column of
 #' \code{datExpr}) is regressed on every other variable, with each model
@@ -405,26 +428,28 @@ adjacency.polyReg <- function(datExpr, degree = 3,
 #' A.ave(ij)=(R.squared(ij)+R.squared(ji))/2,
 #' A.max(ij)=max(R.squared(ij),R.squared(ji)). For more information about
 #' natural cubic spline regression, please refer to functions "ns" and "glm".
-#'
-#' @inheritParams adjacency
+#' 
+#' @param datExpr data.frame containing expression data. Columns correspond to
+#' genes and rows to samples.
 #' @param df degrees of freedom in generating natural cubic spline. The default
 #' is as follows: if nrow(datExpr)>100 use 6, if nrow(datExpr)>30 use 4,
 #' otherwise use 5.
 #' @param symmetrizationMethod character string (eg "none", "min","max","mean")
 #' that specifies the method used to symmetrize the pairwise model fitting
 #' index matrix (see details).
-#' @param ...  other arguments from function \code{\link[splines]{ns}}
+#' @param ... other arguments from function \code{\link[splines]{ns}}
 #' @return An adjacency matrix of dimensions ncol(datExpr) times ncol(datExpr).
 #' @author Lin Song, Steve Horvath
 #' @seealso \code{\link[splines]{ns}}, \code{\link{glm}}
 #' @references Song L, Langfelder P, Horvath S Avoiding mutual information
 #' based co-expression measures (to appear).
-#'
+#' 
 #' Horvath S (2011) Weighted Network Analysis. Applications in Genomics and
 #' Systems Biology. Springer Book. ISBN: 978-1-4419-8818-8
 #' @keywords misc
 #' @examples
-#'
+#' 
+#' 
 #' #Simulate a data frame datE which contains 5 columns and 50 observations
 #' m <- 50
 #' x1 <- rnorm(m)
@@ -448,6 +473,7 @@ adjacency.polyReg <- function(datExpr, degree = 3,
 #' # output the unsymmetrized pairwise model fitting indices R.squared
 #' R.squared <- adjacency.splineReg(datE, symmetrizationMethod = "none")
 #' R.squared
+#' 
 adjacency.splineReg <- function(datExpr,
                                df = 6-(nrow(datExpr)<100)-(nrow(datExpr)<30),
                                symmetrizationMethod = "mean", ...) {
@@ -493,20 +519,22 @@ adjacency.splineReg <- function(datExpr,
 }
 
 # sigmoidAdjacency ####
+
+
 #' Sigmoid-type adacency function.
-#'
+#' 
 #' Sigmoid-type function that converts a similarity to a weighted network
 #' adjacency.
-#'
+#' 
 #' The sigmoid adjacency function is defined as \eqn{1/(1+\exp[-\alpha(ss -
-#' \mu)])}{1/(1 + exp(-alpha * (ss - mu)))}.
-#'
+#' }{1/(1 + exp(-alpha * (ss - mu)))}\eqn{\mu)])}{1/(1 + exp(-alpha * (ss -
+#' mu)))}.
+#' 
 #' @param ss similarity, a number between 0 and 1. Can be given as a scalar,
 #' vector or a matrix.
 #' @param mu shift parameter.
 #' @param alpha slope parameter.
-#' @return
-#' Adjacencies returned in the same form as the input \code{ss}
+#' @return Adjacencies returned in the same form as the input \code{ss}
 #' @author Steve Horvath
 #' @references Bin Zhang and Steve Horvath (2005) "A General Framework for
 #' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
@@ -522,12 +550,14 @@ sigmoidAdjacency <- function(ss, mu = 0.8, alpha = 20) {
 }
 
 # SignumAdjacency ####
+
+
 #' Hard-thresholding adjacency function
-#'
+#' 
 #' This function transforms correlations or other measures of similarity into
 #' an unweighted network adjacency.
-#'
-#'
+#' 
+#' 
 #' @param corMat a matrix of correlations or other measures of similarity.
 #' @param threshold threshold for connecting nodes: all nodes whose
 #' \code{corMat} is above the threshold will be connected in the resulting
@@ -542,9 +572,11 @@ sigmoidAdjacency <- function(ss, mu = 0.8, alpha = 20) {
 #' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 #' @keywords misc
 #' @examples
+#' 
 #' datExpr <- matrix(rnorm(150), ncol = 5)
 #' corMat <- cor(datExpr)
 #' signumAdjacency(corMat, 0.1)
+#' 
 signumAdjacency <- function(corMat, threshold) {
     adjmat <- as.matrix(abs(corMat) >= threshold)
     dimnames(adjmat) <- dimnames(corMat)

@@ -19,4 +19,8 @@
 .corTypes <- c("pearson", "bicor")
 
 .corFnc <- c("cor", "bicor", "cor")
-.corOptions <- c("use <- 'p'", "use <- 'p'", "use <- 'p', method <- spearman")
+.corOptions = c("use = 'p'", "use = 'p'", "use = 'p', method = spearman")
+
+.zeroMADWarnings = c("Some results will be NA.",
+                    "Pearson correlation was used for individual columns with zero (or missing) MAD.",
+                    "Pearson correlation was used for entire variable.")

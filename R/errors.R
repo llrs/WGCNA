@@ -1,10 +1,11 @@
-
 # addErrorBars ####
+
+
 #' Add error bars to a barplot.
-#'
+#' 
 #' This function adds error bars to an existing barplot.
-#'
-#'
+#' 
+#' 
 #' @param means vector of means plotted in the barplot
 #' @param errors vector of standard errors (signle positive values) to be
 #' plotted.
@@ -42,19 +43,23 @@ addErrorBars <- function(means, errors, two.side = FALSE) {
 }
 
 # stdErr ####
+
+
 #' Standard error of the mean of a given vector.
-#'
+#' 
 #' Returns the standard error of the mean of a given vector. Missing values are
 #' ignored.
-#'
-#'
+#' 
+#' 
 #' @param x a numeric vector
 #' @return Standard error of the mean of x.
 #' @author Steve Horvath
 #' @keywords misc
 #' @examples
+#' 
 #' x <- c(0.2, 0.5, 0.8)
 #' stdErr(x)
+#' 
 stdErr <- function(x) {
     sqrt(var(x, na.rm = TRUE) / sum(x, na.rm = TRUE))
 }

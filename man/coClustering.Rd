@@ -40,6 +40,7 @@ reference cluster in the test clustering, while a value close to zero
 indicates a low preservation.
 }
 \examples{
+
 # An example with random (unrelated) clusters:
 set.seed(1)
 nModules <- 10
@@ -50,6 +51,7 @@ coClustering(cl1, cl2)
 coClustering(cl1, cl2, tupletSize = 3)
 # For the same reference and test clustering:
 coClustering(cl1, cl1)
+
 }
 \references{
 For example, see Langfelder P, Luo R, Oldham MC, Horvath S

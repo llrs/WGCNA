@@ -4,6 +4,8 @@
 ##  The goal is to biologically optimize the dendrogram.
 
 # orderBranchesUsingHubGenes ####
+
+
 #' Optimize dendrogram using branch swaps and reflections.
 #'
 #' This function takes as input the hierarchical clustering tree as well as a
@@ -57,8 +59,6 @@
 #' theoretically it should work for many more genes and modules, depending upon
 #' the speed of the computer running R.  Please address any problems or
 #' suggestions to jeremyinla@gmail.com.
-#' @author Jeremy Miller
-#' @keywords misc
 #' @examples
 #' ## Example: first simulate some data.
 #' MEturquoise <- sample(1:100, 50)
@@ -98,21 +98,32 @@
 #' pdf("DENDROGRAM_PLOTS.pdf", width = 10, height = 5)
 #' plotDendroAndColors(tree1, colorh2, dendroLabels = FALSE,
 #'                     main = "Starting Dendrogram")
+#' tree1  = fastcluster::hclust(as.dist(1-TOM1),method="average")
+#' colorh = labels2colors(dat1$allLabels)
 #'
-#' tree1 <- swapTwoBranches(tree1, hubs["red"], hubs["turquoise"])
-#' plotDendroAndColors(tree1, colorh2, dendroLabels = FALSE,
-#'                     main = "Swap blue/turquoise and red/brown")
+#' plotDendroAndColors(tree1,colorh,dendroLabels=FALSE)
+#' }
+#' ## Reassign modules using the selectBranch and chooseOneHubInEachModule functions
 #'
-#' tree1 <- reflectBranch(tree1, hubs["blue"], hubs["green"])
-#' plotDendroAndColors(tree1, colorh2, dendroLabels = FALSE,
-#'                     main = "Reflect turquoise/blue")
-#' # (This function will take a few minutes)
-#' out <- orderBranchesUsingHubGenes(tree1, datExpr, colorh2,
-#'                                   useReflections = TRUE, iter = 100)
-#' tree1 <- out$geneTree
-#' plotDendroAndColors(tree1, colorh2, dendroLabels = FALSE,
-#'                     main = "Semi-optimal branch order")
-#' out$changeLog
+#' datExpr = dat1$datExpr
+#' hubs    = chooseOneHubInEachModule(datExpr, colorh)
+#' colorh2 = rep("grey", length(colorh))
+#' colorh2 [selectBranch(tree1,hubs["blue"],hubs["turquoise"])] = "blue"
+#' colorh2 [selectBranch(tree1,hubs["turquoise"],hubs["blue"])] = "turquoise"
+#' colorh2 [selectBranch(tree1,hubs["green"],hubs["yellow"])]   = "green"
+#' colorh2 [selectBranch(tree1,hubs["yellow"],hubs["green"])]   = "yellow"
+#' colorh2 [selectBranch(tree1,hubs["red"],hubs["brown"])]      = "red"
+#' colorh2 [selectBranch(tree1,hubs["brown"],hubs["red"])]      = "brown"
+#' \dontrun{
+#' plotDendroAndColors(tree1,cbind(colorh,colorh2),c("Old","New"),dendroLabels=FALSE)
+#'
+#' ## Now swap and reflect some branches, then optimize the order of the branches
+#' # and output pdf with resulting images
+#' pdf("DENDROGRAM_PLOTS.pdf",width=10,height=5)
+#' plotDendroAndColors(tree1,colorh2,dendroLabels=FALSE,main="Starting Dendrogram")
+#'
+#' tree1 = swapTwoBranches(tree1,hubs["red"],hubs["turquoise"])
+#' plotDendroAndColors(tree1,colorh2,dendroLabels=FALSE,main="Swap blue/turquoise and red/brown")
 #' }
 orderBranchesUsingHubGenes <- function(hierTOM, datExpr = NULL, colorh = NULL,
                                        type = "signed", adj = NULL, iter = NULL,
@@ -262,6 +273,8 @@ reflectBranch <- function (hierTOM, g1, g2, both = FALSE) {
 }
 
 # swapTwoBranches ####
+
+
 #' Select, swap, or reflect branches in a dendrogram.
 #'
 #' swapTwoBranches takes the a gene tree object and two genes as input, and
@@ -276,7 +289,6 @@ reflectBranch <- function (hierTOM, g1, g2, both = FALSE) {
 #' outputs indices for all genes in the branch containing the first gene, up to
 #' the nearest branch point of the dendrogram.
 #'
-#'
 #' @aliases swapTwoBranches reflectBranch selectBranch
 #' @param hierTOM A hierarchical clustering object (or gene tree) that is used
 #' to plot the dendrogram.  For example, the output object from the function
@@ -290,10 +302,12 @@ reflectBranch <- function (hierTOM, g1, g2, both = FALSE) {
 #'
 #' selectBranch returns a numeric vector corresponding to all genes in the
 #' requested branch.
-#' @author Jeremy Miller
 #' @keywords misc
 #' @examples
+#'
+#' \dontrun{
 #' ## Example: first simulate some data.
+#' <<<<<<< HEAD
 #' MEturquoise <- sample(1:100, 50)
 #' MEblue <- c(MEturquoise[1:25], sample(1:100, 25))
 #' MEbrown <- sample(1:100,50)
@@ -304,6 +318,23 @@ reflectBranch <- function (hierTOM, g1, g2, both = FALSE) {
 #' dat1 <- simulateDatExpr(ME, 400, c(0.16, 0.12, 0.11, 0.10, 0.10, 0.09, 0.15),
 #'                          signed = TRUE)
 #' TOM1 <- TOMsimilarityFromExpr(dat1$datExpr, networkType = "signed")
+#' =======
+#' n = 30
+#' n2 = 2*n
+#' n.3 = 20
+#' n.5 = 10
+#' MEturquoise = sample(1:(2*n),n)
+#' MEblue      = c(MEturquoise[1:(n/2)], sample(1:(2*n),n/2))
+#' MEbrown     = sample(1:n2,n)
+#' MEyellow    = sample(1:n2,n)
+#' MEgreen     = c(MEyellow[1:n.3], sample(1:n2,n.5))
+#' MEred	    = c(MEbrown [1:n.5], sample(1:n2,n.3))
+#'
+#' ME     = data.frame(MEturquoise, MEblue, MEbrown, MEyellow, MEgreen, MEred)
+#' dat1   = simulateDatExpr(ME,8*n ,c(0.16,0.12,0.11,0.10,0.10,0.09,0.15),
+#'                          signed=TRUE)
+#' TOM1   = TOMsimilarityFromExpr(dat1$datExpr, networkType="signed")
+#' >>>>>>> 80351c0... version 1.60
 #' colnames(TOM1) <- rownames(TOM1) <- colnames(dat1$datExpr)
 #' tree1 <- fastcluster::hclust(as.dist(1-TOM1), method="average")
 #' colorh <- labels2colors(dat1$allLabels)
@@ -334,10 +365,22 @@ reflectBranch <- function (hierTOM, g1, g2, both = FALSE) {
 #' plotDendroAndColors(tree1,colorh2,dendroLabels=FALSE,
 #'                     main="Swap blue/turquoise and red/brown",
 #'                     setLayout = FALSE)
+#' <<<<<<< HEAD
 #' tree1 <- reflectBranch(tree1, hubs["blue"], hubs["green"])
 #' plotDendroAndColors(tree1, colorh2, dendroLabels = FALSE,
 #'                     main = "Reflect turquoise/blue", setLayout = FALSE)
 #' }
+#' }
+#' {
+#' Jeremy Miller
+#' }
+#' =======
+#'
+#' tree1 = reflectBranch(tree1,hubs["blue"],hubs["green"])
+#' plotDendroAndColors(tree1,colorh2,dendroLabels=FALSE,main="Reflect turquoise/blue",
+#'                     setLayout = FALSE)
+#'
+#'
 swapTwoBranches <- function(hierTOM, g1, g2) {
     ## This function re-arranges two branches in a heirarchical clustering tree
     ##  at the nearest branch point of two given genes (or indices)
@@ -392,6 +435,8 @@ swapTwoBranches <- function(hierTOM, g1, g2) {
 }
 
 # chooseOneHubInEachModule ####
+
+
 #' Chooses a single hub gene in each module
 #'
 #' chooseOneHubInEachModule returns one gene in each module with high
@@ -419,6 +464,7 @@ swapTwoBranches <- function(hierTOM, g1, g2) {
 #' @author Jeremy Miller
 #' @keywords misc
 #' @examples
+#'
 #' ## Example: first simulate some data.
 #' MEturquoise <- sample(1:100, 50)
 #' MEblue <- sample(1:100, 50)
@@ -438,6 +484,7 @@ swapTwoBranches <- function(hierTOM, g1, g2) {
 #' colorh <- labels2colors(dat1$allLabels)
 #' hubs <- chooseOneHubInEachModule(dat1$datExpr, colorh)
 #' hubs
+#'
 chooseOneHubInEachModule <- function(datExpr, colorh, numGenes = 100,
                                      omitColors = "grey", power = 2,
                                      type = "signed",...) {
@@ -470,6 +517,8 @@ chooseOneHubInEachModule <- function(datExpr, colorh, numGenes = 100,
 }
 
 # chooseTopHubInEachModule ####
+
+
 #' Chooses the top hub gene in each module
 #'
 #' chooseTopHubInEachModule returns the gene in each module with the highest
@@ -494,6 +543,7 @@ chooseOneHubInEachModule <- function(datExpr, colorh, numGenes = 100,
 #' @author Jeremy Miller
 #' @keywords misc
 #' @examples
+#'
 #' ## Example: first simulate some data.
 #' MEturquoise <- sample(1:100, 50)
 #' MEblue <- sample(1:100, 50)
@@ -513,6 +563,7 @@ chooseOneHubInEachModule <- function(datExpr, colorh, numGenes = 100,
 #' colorh <- labels2colors(dat1$allLabels)
 #' hubs <- chooseTopHubInEachModule(dat1$datExpr, colorh)
 #' hubs
+#'
 chooseTopHubInEachModule <- function(datExpr, colorh, omitColors = "grey",
                                      power = 2, type = "signed", ... ) {
     # This function returns the gene in each module with the highest

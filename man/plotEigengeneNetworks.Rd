@@ -152,8 +152,8 @@ Langfelder P, Horvath S (2007) Eigengene networks for studying the
 relationships between co-expression modules. BMC Systems Biology 2007, 1:54
 }
 \seealso{
-\code{\link{labeledHeatmap}}, \code{\link{labeledBarplot}} for annotated
-heatmaps and barplots
+\code{\link{labeledHeatmap}}, \code{\link{labeledBarplot}} for
+annotated heatmaps and barplots
 
 \code{\link[stats]{hclust}} for hierarchical clustering and dendrogram plots
 }

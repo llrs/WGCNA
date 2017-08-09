@@ -11,14 +11,12 @@
   x = as.matrix(x)
   #printFlush(paste(".alignedFirstPC: dim(x) = ", paste(dim(x), collapse = ", ")))
   pc = try( svd(x, nu = 1, nv = 0)$u[,1] , silent = TRUE)
-  if (class(pc)=='try-error')
-  {
+  if (inherits(pc, 'try-error')) {
     #file = "alignedFirstPC-svdError-inputData-x.RData"
     #save(x, file = file)
     #stop(paste("Error in .alignedFirstPC: svd failed with following message: \n    ",
     #                 pc, "\n. Saving the offending data into file", file))
-    if (verbose > 0)
-    {
+    if (verbose > 0) {
       spaces = indentSpaces(indent)
       printFlush(paste(spaces, ".alignedFirstPC: FYI: svd failed, using a weighted mean instead.\n",
                        spaces, "  ...svd reported:", pc))
@@ -48,25 +46,13 @@
 
 
 
+
+
 #' Branch dissimilarity based on eigennodes (eigengenes).
-#'
-#' Calculation of branch dissimilarity based on eigennodes (eigengenes) in
-#' single set and multi-data situations. This function is used as a plugin for
-#' the dynamicTreeCut package and the user should not call this function
-#' directly. This function is experimental and subject to change.
-#'
-#'
+#' 
+#' 
+#' 
 #' @aliases branchEigengeneDissim multiSet.branchEigengeneDissim
-#' @param expr Expression data.
-#' @param branch1 Branch 1.
-#' @param branch2 Branch 2.
-#' @param corFnc Correlation function.
-#' @param corOptions Other arguments to the correlation function.
-#' @param signed Should the network be considered signed?
-#' @param \dots Other arguments for compatibility; currently unused.
-#' @return A single number or a list containing details of the calculation.
-#' @author Peter Langfelder
-#' @keywords misc
 branchEigengeneDissim = function(expr, branch1, branch2,
                             corFnc = cor, corOptions = list(use = 'p'),
                             signed = TRUE, ...) {
@@ -96,13 +82,48 @@ multiSet.branchEigengeneDissim <- function(multiExpr, branch1, branch2,
   setSplits.list = apply(multiExpr, branchEigengeneDissim,
                         branch1 = branch1, branch2 = branch2,
                         corFnc = corFnc, corOptions = corOptions,
-                        signed = signed)
-  setSplits = unlist(multiSet2list(setSplits.list))
-  quantile(setSplits,
-           prob = ifelse(reproduceQuantileError, consensusQuantile,
-                         1-consensusQuantile),
+                        signed = signed,
+                        returnList = TRUE)
+  setSplits = unlist(setSplits.list)
+  quantile(setSplits, prob = ifelse(reproduceQuantileError,consensusQuantile,1-consensusQuantile), 
            na.rm = TRUE, names = FALSE)
 }
+
+branchEigengeneSimilarity = function(expr, branch1, branch2,
+                            networkOptions, 
+                            returnDissim = TRUE,
+                            ...)
+{
+  corFnc = match.fun(networkOptions$corFnc)
+  cor0 = as.numeric(do.call(corFnc, 
+       c(list(x = .alignedFirstPC(expr[, branch1], verbose = 0),
+              y = .alignedFirstPC(expr[, branch2], verbose = 0)),
+         networkOptions$corOptions)))
+  if (length(cor0) != 1) stop ("Internal error in branchEigengeneDissim: cor has length ", length(cor0))
+  if (grepl("signed", networkOptions$networkType))  cor0 = abs(cor0)
+  if (returnDissim) 1-cor0 else cor0
+}
+
+
+hierarchicalBranchEigengeneDissim = function(
+    multiExpr, 
+    branch1, branch2,
+    networkOptions,
+    consensusTree, ...)
+{
+   setSplits.list = multiSet.mapply(branchEigengeneSimilarity,
+                        expr = multiExpr, networkOptions = networkOptions,
+                        MoreArgs = list(
+                           branch1 = branch1, branch2 = branch2,
+                           returnDissim = FALSE), returnList = TRUE)
+
+   1 - simpleHierarchicalConsensusCalculation(individualData = setSplits.list,
+                  consensusTree = consensusTree)
+}
+   
+                       
+
+
 
 
 #==========================================================================================================
@@ -127,8 +148,7 @@ multiSet.branchEigengeneDissim <- function(multiExpr, branch1, branch2,
 .histogramsWithCommonBreaks = function(data, groups, discardProp = 0.08)
 {
 
-  if (is.list(data))
-  {
+  if (is.list(data)) {
     lengths = sapply(data, length)
     data = data[lengths>0]
     lengths = sapply(data, length)
@@ -137,8 +157,7 @@ multiSet.branchEigengeneDissim <- function(multiExpr, branch1, branch2,
     data = unlist(data)
   }
 
-  if (discardProp > 0)
-  {
+  if (discardProp > 0) {
     # get rid of outliers on either side - those are most likely not interesting.
     # The code is somewhat involved because I want to get rid of outliers that are defined with respect to
     # the combined data, but no more than a certain proportion of either of the groups.
@@ -188,13 +207,15 @@ multiSet.branchEigengeneDissim <- function(multiExpr, branch1, branch2,
 
 
 
+
+
 #' Branch split.
-#'
+#' 
 #' Calculation of branch split based on expression data. This function is used
 #' as a plugin for the dynamicTreeCut package and the user should not call this
 #' function directly.
-#'
-#'
+#' 
+#' 
 #' @param expr Expression data.
 #' @param branch1 Branch 1,
 #' @param branch2 Branch 2.
@@ -264,16 +285,17 @@ branchSplit = function(expr, branch1, branch2, discardProp = 0.05, minCentralPro
     # Locate the region between the two central regions and check whether the gap is deep enough.
     if (min(h[[1]]$mids[central[[1]]]) > max(h[[2]]$mids[central[[2]]]))
     {
-      left = 2; right = 1
+      left = 2
+      right = 1
     } else {
-      left = 1; right = 2
+      left = 1
+      right = 2
     }
     leftEdge = max(h[[left]]$mids[central[[left]]])
     rightEdge = min(h[[right]]$mids[central[[right]]])
     middle = ( (h[[left]]$mids > leftEdge) & (h[[left]]$mids < rightEdge) )
     nMiddle = sum(middle)
-    if (nMiddle==0)
-    {
+    if (nMiddle==0) {
       result = list(middleCounts = NULL, criterion = minCentralProp, split = -1, histograms = h)
     } else {
       # Reference level: 75th percentile of the central region of the smaller branch
@@ -305,20 +327,17 @@ branchSplit = function(expr, branch1, branch2, discardProp = 0.05, minCentralPro
 #
 #==========================================================================================================
 
-.meanInRange = function(mat, rangeMat)
-{
+.meanInRange = function(mat, rangeMat) {
   nc = ncol(mat)
   means = rep(0, nc)
-  for (c in 1:nc)
-  {
+  for (c in 1:nc) {
     col = mat[, c]
     means[c] = mean( col[col >=rangeMat[c, 1] & col <= rangeMat[c, 2]], na.rm= TRUE)
   }
   means
 }
 
-.sizeDependentQuantile = function(p, sizes, minNumber = 5)
-{
+.sizeDependentQuantile = function(p, sizes, minNumber = 5) {
   refSize = minNumber/p
   correctionFactor = pmin( rep(1, length(sizes)), sizes/refSize)
 
@@ -328,14 +347,16 @@ branchSplit = function(expr, branch1, branch2, discardProp = 0.05, minCentralPro
 
 
 
+
+
 #' Branch split based on dissimilarity.
-#'
+#' 
 #' Calculation of branch split based on a dissimilarity matrix. This function
 #' is used as a plugin for the dynamicTreeCut package and the user should not
 #' call this function directly. This function is experimental and subject to
 #' change.
-#'
-#'
+#' 
+#' 
 #' @param dissimMat Dissimilarity matrix.
 #' @param branch1 Branch 1.
 #' @param branch2 Branch 2.
@@ -464,9 +485,15 @@ branchSplit.dissim = function(dissimMat, branch1, branch2, upperP,
 # Basic idea: if two branches are separate, their membership should be predictable from the alternate
 # labels.
 
-# For each module in the alternate labeling: assign it to the branch in which |module ^ branch|/|branch| is
-# bigger; then calculate |module ^ branch|/|branch| for the other branch as a classification error. Add all
-# classification errors for a single alternate labeling and average them over labelings.
+# This function takes the l-th stability labels, finds ones that overlap with both branches, and for each
+# label calculates the contribution to similarity as
+#      r1 = sum(lab1==cl)/n1
+#      r2 = sum(lab2==cl)/n2
+#      sim = sim + min(r1, r2)
+
+# This will penalize similarity of a small and large module if the large module is a composite of several
+# branches, only few of which overlap with the small module. 
+
 
 # This method is invariant under splitting of alternate module as long as the branch to which the modules are
 # assigned does not change. So in this sense the splitting settings in the resampling study shouldn't
@@ -478,68 +505,130 @@ branchSplit.dissim = function(dissimMat, branch1, branch2, upperP,
 
 #' Branch split (dissimilarity) statistic derived from labels determined from a
 #' stability study
-#'
-#' This function evaluates how different two branches are based on a series of
-#' cluster labels that are usually obtained in a stability study but can in
-#' principle be arbitrary. The idea is to quantify how well membership on the
-#' two tested branches can be predicted from clusters in the given stability
-#' labels.
-#'
-#' The idea is to measure how well clusters in \code{stabilityLabels} can
-#' distinguish the two given branches. For example, if a cluster C intersects
-#' with branch1 but not branch2, it can distinguish branches 1 and 2 perfectly.
-#' On the other hand, if there is a cluster C that contains both branch 1 and
-#' branch 2, the two branches are indistinguishable (based on the test
-#' clustering).
-#'
-#' Formally, for each cluster C in each clustering in \code{stabilityLabels},
-#' its contribution to the branch similarity is min(r1, r2), where r1 =
-#' |intersect(C, branch1)|/|branch1| and r2 = |intersect(C,
-#' branch2)|/|branch2|. The statistics for clusters in each clustering are
-#' added; the sums are then averaged across the clusterings. Since the result
-#' is a similarity statistic, the final dissimilarity is defined as
-#' 1-similarity. The dissimilarity ranges between 0 (branch1 and branch2 are
-#' indistinguishable) and 1 (branch1 and branch2 are perfectly
-#' distinguishable).
-#'
-#' This is a very simple statistic that does not attempt to correct for the
-#' similarity that would be expected by chance.
-#'
-#' @param branch1 A vector of indices giving members of branch 1.
-#' @param branch2 A vector of indices giving members of branch 1.
-#' @param stabilityLabels A matrix of cluster labels. Each column corresponds
-#' to one clustering and each row to one object (whose indices \code{branch1}
-#' and \code{branch2} refer to).
-#' @param ignoreLabels Label or labels that do not constitute proper clusters
-#' in \code{stabilityLabels}, for example because they label unassigned
-#' objects.
-#' @param \dots Ignored.
-#' @return Branch dissimilarity (a single number between 0 and 1).
-#' @author Peter Langfelder
-#' @seealso This function is utilized in \code{\link{blockwiseModules}} and
-#' \code{\link{blockwiseConsensusModules}}.
-#' @keywords misc
-branchSplitFromStabilityLabels <- function( branch1, branch2, stabilityLabels,
-                                           ignoreLabels = 0, ...) {
+#' 
+#' 
+#' 
+branchSplitFromStabilityLabels = function(
+            branch1, branch2, 
+            stabilityLabels, ignoreLabels = 0, ...)
+{
   nLabels = ncol(stabilityLabels)
   n1 = length(branch1)
   n2 = length(branch2)
 
   sim = 0
+  #browser()
   for (l in 1:nLabels) {
-      lab1 = stabilityLabels[branch1, l]
-      lab2 = stabilityLabels[branch2, l]
-      commonLevels = intersect(unique(lab1), unique(lab2))
-      commonLevels = setdiff(commonLevels, ignoreLabels)
-      if (length(commonLevels) > 0) {
-          for (cl in commonLevels) {
-              #printFlush(paste0("Common level ", cl, " in clustering ", l))
-              r1 = sum(lab1==cl)/n1
-              r2 = sum(lab2==cl)/n2
-              sim = sim + min(r1, r2)
-          }
-      }
+    lab1 = stabilityLabels[branch1, l]
+    lab2 = stabilityLabels[branch2, l]
+    commonLevels = intersect(unique(lab1), unique(lab2))
+    commonLevels = setdiff(commonLevels, ignoreLabels)
+    if (length(commonLevels) > 0) {
+         for (cl in commonLevels) {
+          #printFlush(paste0("Common level ", cl, " in clustering ", l))
+          r1 = sum(lab1==cl)/n1
+          r2 = sum(lab2==cl)/n2
+          sim = sim + min(r1, r2)
+        }
+    }
   }
 
   1-sim/nLabels
+}
+
+# Resurrect the old idea of prediction
+# accuracy. For each overlap module, count the genes in the branch with which the module has smaller overlap
+# and add it to the score for that branch. The final counts divided by number of genes on branch give a
+# "indistinctness" score; take the larger of the the two indistinctness scores and call this the similarity.
+
+# This method is still more or less invariant under splitting of the stability modules, as long as the
+# splitting is random with respect to the two branches. 
+
+## Note that one could in principle run a chisq.test on the table of labels corresponding to branch1 and
+## branch2 vs. stabilityLabels restricted to branch1 and branch2, 
+
+# The problem here is that small changes in stability labels could make a big difference in final
+# (dis)similarity when one module is large and the other small. Assume a few of the stability labels cover
+# small and a part of the large module; other stability labels cover the rest of the large module. If the
+# common stability labels cover a bit more of large than small module, similarity will be high; if they
+# switch more to the smaller module, similarity could be near zero. 
+
+# In summary, this function may be used for experiments but should not be used in production setting.
+ 
+branchSplitFromStabilityLabels.prediction = function(
+            branch1, branch2,
+            stabilityLabels, ignoreLabels = 0, ...)
+{
+  nLabels = ncol(stabilityLabels)
+  n1 = length(branch1)
+  n2 = length(branch2)
+
+  s1 = s2 = 0
+  for (l in 1:nLabels) {
+    lab1 = stabilityLabels[branch1, l]
+    lab2 = stabilityLabels[branch2, l]
+    commonLevels = intersect(lab1, lab2)
+    commonLevels = setdiff(commonLevels, ignoreLabels)
+    if (length(commonLevels) > 0) {
+for (cl in commonLevels) {
+      #printFlush(paste0("Common level ", cl, " in clustering ", l))
+      o1 = sum(lab1 == cl)
+      o2 = sum(lab2 == cl)
+      if (o1 > o2) {
+         s2 = s2 + o2
+      } else
+         s1 = s1 + o1
+    }
+  }
+}
+  indist1 = s1/(n1 * nLabels)
+  indist2 = s2/(n2 * nLabels)
+  sim = min(1, 2*max(indist1, indist2))
+  dissim = 1-sim
+  #printFlush(paste0("branchSplitFromStabilityLabels.prediction: returning ", dissim))
+
+  dissim
+}
+
+ 
+# Third idea: for each branch, for each gene sum the fraction of the stability label (restricted to the two
+# branches) that belongs to the branch. If this is relatively low, around 0.5, it means most elements are in
+# non-discriminative stability labels.
+
+branchSplitFromStabilityLabels.individualFraction= function(
+            branch1, branch2,
+            stabilityLabels, ignoreLabels = 0, ...) {
+  nLabels = ncol(stabilityLabels)
+  n1 = length(branch1)
+  n2 = length(branch2)
+
+  s1 = s2 = 0
+  for (l in 1:nLabels) {
+    lab1 = stabilityLabels[branch1, l]
+    lab2 = stabilityLabels[branch2, l]
+    commonLevels = intersect(lab1, lab2)
+    commonLevels = setdiff(commonLevels, ignoreLabels)
+    s1.all = n1
+    s2.all = n2
+    for (cl in commonLevels) {
+      #printFlush(paste0("Common level ", cl, " in clustering ", l))
+      o1 = sum(lab1==cl)
+      o2 = sum(lab2==cl)
+      o12 = o1 + o2
+      coef1 = max(0.5, o1/o12)
+      coef2 = max(0.5, o2/o12)
+      s2 = s2 + o2*coef2
+      s1 = s1 + o1*coef1
+      s1.all = s1.all - o1
+      s2.all = s2.all - o2
+    }
+    s1 = s1 + s1.all
+    s2 = s2 + s2.all
+  }
+  distinctness1 = 2*s1/(n1 * nLabels) -1
+  distinctenss2 = 2*s2/(n2 * nLabels) -1
+  dissim = min(distinctness1, distinctenss2)
+  printFlush(paste0("branchSplitFromStabilityLabels.individualFraction: returning ", dissim))
+
+  dissim
 }

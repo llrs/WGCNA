@@ -67,6 +67,7 @@ defined in several ways (generally involving kME) based on user input.
 }
 \examples{
 
+
 # Example: first generate simulated data.
 
 set.seed(100)
@@ -97,6 +98,7 @@ results$PvaluesHypergeo
 # Check which genes are in common between the black modules from set 1 and
 # the green module from set 2
 results$OverlappingGenes$MM1_green_MM2_black
+
 
 }
 \seealso{

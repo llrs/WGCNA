@@ -1,13 +1,15 @@
 #read in mutual information fx
 
+
+
 #' Calculate weighted adjacency matrices based on mutual information
-#'
+#' 
 #' The function calculates different types of weighted adjacency matrices based
 #' on the mutual information between vectors (corresponding to the columns of
 #' the input data frame datE).  The mutual information between pairs of vectors
 #' is divided by an upper bound so that the resulting normalized measure lies
 #' between 0 and 1.
-#'
+#' 
 #' The function inputs a data frame \code{datE} and outputs a list whose
 #' components correspond to different weighted network adjacency measures
 #' defined beteween the columns of \code{datE}. Make sure to install the
@@ -29,7 +31,7 @@
 #' overfit the data if relatively few observations are available. Thus, if the
 #' number of rows of \code{datE} is smaller than say 200, it may be better to
 #' fit a correlation using the function \code{adjacency}.
-#'
+#' 
 #' @param datE \code{datE} is a data frame or matrix whose columns correspond
 #' to variables and whose rows correspond to measurements. For example, the
 #' columns may correspond to genes while the rows correspond to microarrays.
@@ -54,7 +56,7 @@
 #' is set to sqrt(m) where m is the number of samples, i.e. the number of rows
 #' of \code{datE}. Thus the default is \code{numberBins}=sqrt(nrow(datE)).
 #' @return The function outputs a list with the following components:
-#'
+#' 
 #' \item{ Entropy}{ is a vector whose components report entropy estimates of
 #' each column of \code{datE}. The natural logarithm (base e) is used in the
 #' definition. Using the notation from the Wikipedia entry
@@ -66,7 +68,7 @@
 #' general, the entries of this matrix can be larger than 1, i.e. this is not
 #' an adjacency matrix. Using the notation from the Wikipedia entry, this
 #' matrix contains the mutual information estimates I(X;Y) }
-#'
+#' 
 #' \item{AdjacencySymmetricUncertainty}{ is a weighted adjacency matrix whose
 #' entries are based on the mutual information. Using the notation from the
 #' Wikipedia entry, this matrix contains the mutual information estimates
@@ -74,7 +76,7 @@
 #' I(X;X)=H(X), the diagonal elements of \code{AdjacencySymmetricUncertainty}
 #' equal 1. In general the entries of this symmetric matrix
 #' \code{AdjacencySymmetricUncertainty} lie between 0 and 1.  }
-#'
+#' 
 #' \item{AdjacencyUniversalVersion1}{ is a weighted adjacency matrix that is a
 #' simple function of the \code{AdjacencySymmetricUncertainty}. Specifically,
 #' \code{AdjacencyUniversalVersion1= AdjacencySymmetricUncertainty/(2-
@@ -85,31 +87,32 @@
 #' distance function, i.e. it satisfies the properties of a distance (including
 #' the triangle inequality) and it takes on a small value if any other distance
 #' measure takes on a small value (Kraskov et al 2003).  }
-#'
+#' 
 #' \item{AdjacencyUniversalVersion2}{ is a weighted adjacency matrix for which
 #' dissUAversion2=1-\code{AdjacencyUniversalVersion2} is also a universal
 #' distance measure. Using the notation from Wikipedia, the entries of the
 #' symmetric matrix AdjacencyUniversalVersion2 are defined as follows
 #' \code{AdjacencyUniversalVersion2}=I(X;Y)/max(H(X),H(Y)).
-#'
+#' 
 #' }
 #' @author Steve Horvath, Lin Song, Peter Langfelder
 #' @seealso \code{\link{adjacency}}
 #' @references Hausser J, Strimmer K (2008) Entropy inference and the
 #' James-Stein estimator, with application to nonlinear gene association
 #' networks. See http://arxiv.org/abs/0811.3579
-#'
+#' 
 #' Patrick E. Meyer, Frederic Lafitte, and Gianluca Bontempi. minet: A
 #' R/Bioconductor Package for Inferring Large Transcriptional Networks Using
 #' Mutual Information. BMC Bioinformatics, Vol 9, 2008
-#'
+#' 
 #' Kraskov A, Stoegbauer H, Andrzejak RG, Grassberger P (2003) Hierarchical
 #' Clustering Based on Mutual Information. ArXiv q-bio/0311039
 #' @keywords misc
 #' @examples
+#' 
 #' # Load requisite packages. These packages are considered "optional",
 #' # so WGCNA does not load them automatically.
-#'
+#' 
 #' if (require(infotheo, quietly = TRUE) &&
 #'     require(minet, quietly = TRUE) &&
 #'     require(entropy, quietly = TRUE))
@@ -130,6 +133,7 @@
 #'   # matrices based on mutual information.
 #'   MIadj <- mutualInfoAdjacency(datE = datE)
 #'   }
+#' 
 mutualInfoAdjacency <- function(datE, discretizeColumns = TRUE,
                                 entropyEstimationMethod = "MM",
                                 numberBins = NULL) {

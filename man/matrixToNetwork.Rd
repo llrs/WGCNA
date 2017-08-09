@@ -54,8 +54,10 @@ The diagonal of the result is set to \code{diagEntry}. Note that most WGCNA
 functions expect the diagonal of an adjacency matrix to be 1.
 }
 \examples{
+
 mat <- matrix(rnorm(25), ncol = 5)
 matrixToNetwork(mat, "max")
+
 }
 \seealso{
 \code{adjacency} for calculation of a correlation network

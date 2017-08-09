@@ -21,8 +21,10 @@ To see the first \code{n} colors, use argument \code{colors =
 standardColors(n)}.
 }
 \examples{
+
 \dontrun{
 displayColors(standardColors(10))}
+
 }
 \seealso{
 \code{\link{standardColors}}

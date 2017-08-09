@@ -86,22 +86,32 @@ for each gene across the input data sets. The module labels (here 1, 2,
 etc.) correspond to those in \code{moduleLabels}.}
 
 \item{weightedAverage.equalWeights.kME1, weightedAverage.equalWeights.kME2,
-...}{ Average kME in each module for each gene across the input data sets. }
+}{ Average kME in each module for each gene across the input data sets.
+}\item{...}{ Average kME in each module for each gene across the input data
+sets. }
 
-\item{weightedAverage.RootDoFWeights.kME1,
-weightedAverage.RootDoFWeights.kME2, ...}{ Weighted average kME in each
+\item{weightedAverage.RootDoFWeights.kME1, }{ Weighted average kME in each
 module for each gene across the input data sets. The weight of each data set
-is proportional to the square root of the number of samples in the set. }
+is proportional to the square root of the number of samples in the set.
+}\item{weightedAverage.RootDoFWeights.kME2, ...}{ Weighted average kME in
+each module for each gene across the input data sets. The weight of each
+data set is proportional to the square root of the number of samples in the
+set. }
 
-\item{weightedAverage.DoFWeights.kME1, weightedAverage.DoFWeights.kME2,
-...}{ Weighted average kME in each module for each gene across the input
-data sets. The weight of each data set is proportional to number of samples
-in the set. }
-
-\item{weightedAverage.userWeights.kME1, weightedAverage.userWeights.kME2,
-...}{ (Only present if input \code{metaAnalysisWeights} is non-NULL.)
+\item{weightedAverage.DoFWeights.kME1, weightedAverage.DoFWeights.kME2, }{
 Weighted average kME in each module for each gene across the input data
-sets. The weight of each data set is given in \code{metaAnalysisWeights}.}
+sets. The weight of each data set is proportional to number of samples in
+the set. }\item{...}{ Weighted average kME in each module for each gene
+across the input data sets. The weight of each data set is proportional to
+number of samples in the set. }
+
+\item{weightedAverage.userWeights.kME1, weightedAverage.userWeights.kME2, }{
+(Only present if input \code{metaAnalysisWeights} is non-NULL.) Weighted
+average kME in each module for each gene across the input data sets. The
+weight of each data set is given in \code{metaAnalysisWeights}.}\item{...}{
+(Only present if input \code{metaAnalysisWeights} is non-NULL.) Weighted
+average kME in each module for each gene across the input data sets. The
+weight of each data set is given in \code{metaAnalysisWeights}.}
 
 \item{meta.Z.equalWeights.kME1, meta.Z.equalWeights.kME2, ...}{Meta-analysis
 Z statistic for kME in each module, obtained by weighing the Z scores in
@@ -179,33 +189,45 @@ specified in \code{rankPvalueOptions}. We explicitly list columns that are
 based on weighing each set equally; names of these columns carry the suffix
 \code{.equalWeights}
 
-\item{pValueExtremeRank.ME1.equalWeights,
-pValueExtremeRank.ME2.equalWeights, ...}{ This is the minimum between
-pValueLowRank and pValueHighRank, i.e. min(pValueLow, pValueHigh)}
+\item{pValueExtremeRank.ME1.equalWeights, }{ This is the minimum between
+pValueLowRank and pValueHighRank, i.e. min(pValueLow,
+pValueHigh)}\item{pValueExtremeRank.ME2.equalWeights, ...}{ This is the
+minimum between pValueLowRank and pValueHighRank, i.e. min(pValueLow,
+pValueHigh)}
 
 \item{pValueLowRank.ME1.equalWeights, pValueLowRank.ME2.equalWeights, ...}{
 Asymptotic p-value for observing a consistently low value across the columns
 of datS based on the rank method.}
 
-\item{pValueHighRank.ME1.equalWeights, pValueHighRank.ME2.equalWeights,
-...}{ Asymptotic p-value for observing a consistently low value across the
-columns of datS based on the rank method.}
+\item{pValueHighRank.ME1.equalWeights, pValueHighRank.ME2.equalWeights, }{
+Asymptotic p-value for observing a consistently low value across the columns
+of datS based on the rank method.}\item{...}{ Asymptotic p-value for
+observing a consistently low value across the columns of datS based on the
+rank method.}
 
-\item{pValueExtremeScale.ME1.equalWeights,
-pValueExtremeScale.ME2.equalWeights, ...}{ This is the minimum between
-pValueLowScale and pValueHighScale, i.e. min(pValueLow, pValueHigh)}
+\item{pValueExtremeScale.ME1.equalWeights, }{ This is the minimum between
+pValueLowScale and pValueHighScale, i.e. min(pValueLow,
+pValueHigh)}\item{pValueExtremeScale.ME2.equalWeights, ...}{ This is the
+minimum between pValueLowScale and pValueHighScale, i.e. min(pValueLow,
+pValueHigh)}
 
-\item{pValueLowScale.ME1.equalWeights, pValueLowScale.ME2.equalWeights,
-...}{ Asymptotic p-value for observing a consistently low value across the
-columns of datS based on the Scale method.}
+\item{pValueLowScale.ME1.equalWeights, pValueLowScale.ME2.equalWeights, }{
+Asymptotic p-value for observing a consistently low value across the columns
+of datS based on the Scale method.}\item{...}{ Asymptotic p-value for
+observing a consistently low value across the columns of datS based on the
+Scale method.}
 
-\item{pValueHighScale.ME1.equalWeights, pValueHighScale.ME2.equalWeights,
-...}{ Asymptotic p-value for observing a consistently low value across the
-columns of datS based on the Scale method.}
+\item{pValueHighScale.ME1.equalWeights, pValueHighScale.ME2.equalWeights, }{
+Asymptotic p-value for observing a consistently low value across the columns
+of datS based on the Scale method.}\item{...}{ Asymptotic p-value for
+observing a consistently low value across the columns of datS based on the
+Scale method.}
 
-\item{qValueExtremeRank.ME1.equalWeights,
-qValueExtremeRank.ME2.equalWeights, ...}{ local false discovery rate
-(q-value) corresponding to the p-value pValueExtremeRank}
+\item{qValueExtremeRank.ME1.equalWeights, }{ local false discovery rate
+(q-value) corresponding to the p-value
+pValueExtremeRank}\item{qValueExtremeRank.ME2.equalWeights, ...}{ local
+false discovery rate (q-value) corresponding to the p-value
+pValueExtremeRank}
 
 \item{qValueLowRank.ME1.equalWeights, qValueLowRank.ME2.equalWeights, ...}{
 local false discovery rate (q-value) corresponding to the p-value
@@ -215,17 +237,21 @@ pValueLowRank}
 local false discovery rate (q-value) corresponding to the p-value
 pValueHighRank}
 
-\item{qValueExtremeScale.ME1.equalWeights,
-qValueExtremeScale.ME2.equalWeights, ...}{ local false discovery rate
-(q-value) corresponding to the p-value pValueExtremeScale}
+\item{qValueExtremeScale.ME1.equalWeights, }{ local false discovery rate
+(q-value) corresponding to the p-value
+pValueExtremeScale}\item{qValueExtremeScale.ME2.equalWeights, ...}{ local
+false discovery rate (q-value) corresponding to the p-value
+pValueExtremeScale}
 
-\item{qValueLowScale.ME1.equalWeights, qValueLowScale.ME2.equalWeights,
-...}{ local false discovery rate (q-value) corresponding to the p-value
-pValueLowScale}
+\item{qValueLowScale.ME1.equalWeights, qValueLowScale.ME2.equalWeights, }{
+local false discovery rate (q-value) corresponding to the p-value
+pValueLowScale}\item{...}{ local false discovery rate (q-value)
+corresponding to the p-value pValueLowScale}
 
-\item{qValueHighScale.ME1.equalWeights,qValueHighScale.ME2.equalWeights,
-...}{ local false discovery rate (q-value) corresponding to the p-value
-pValueHighScale}
+\item{qValueHighScale.ME1.equalWeights,qValueHighScale.ME2.equalWeights, }{
+local false discovery rate (q-value) corresponding to the p-value
+pValueHighScale}\item{...}{ local false discovery rate (q-value)
+corresponding to the p-value pValueHighScale}
 
 \item{...}{Analogous columns corresponding to weighing individual sets by
 the square root of the number of samples, by number of samples, and by user

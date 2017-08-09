@@ -1,12 +1,14 @@
 # Relabel the labels in source such that modules with high overlap with those
 # in reference will have the same labels
 # overlapTable ####
+
+
 #' Calculate overlap of modules
-#'
+#' 
 #' The function calculates overlap counts and Fisher exact test p-values for
 #' the given two sets of module assignments.
-#'
-#'
+#' 
+#' 
 #' @param labels1 a vector containing module labels.
 #' @param labels2 a vector containing module labels to be compared to
 #' \code{labels1}.
@@ -17,7 +19,7 @@
 #' whose rows correspond to modules (unique labels) in \code{labels1} and whose
 #' columns correspond to modules (unique labels) in \code{labels2}, giving the
 #' number of objects in the intersection of the two respective modules. }
-#'
+#' 
 #' \item{pTable}{a matrix whose rows correspond to modules (unique labels) in
 #' \code{labels1} and whose columns correspond to modules (unique labels) in
 #' \code{labels2}, giving Fisher's exact test significance p-values for the
@@ -26,12 +28,14 @@
 #' @seealso \code{\link{fisher.test}}, \code{\link{matchLabels}}
 #' @keywords misc
 #' @examples
+#' 
 #' set.seed(1)
 #' nModules <- 10
 #' nGenes <- 1000
 #' labels1 <- sample(c(1:nModules), nGenes, replace = TRUE)
 #' labels2 <- sample(c(1:nModules), nGenes, replace = TRUE)
 #' overlapTable(labels1, labels2)
+#' 
 overlapTable <- function(labels1, labels2, na.rm = TRUE, ignore = NULL) {
     labels1 <- as.factor(labels1)
     labels2 <- as.factor(labels2)
@@ -74,17 +78,19 @@ overlapTable <- function(labels1, labels2, na.rm = TRUE, ignore = NULL) {
 }
 
 # matchLabels ####
+
+
 #' Relabel module labels to best match the given reference labels
-#'
+#' 
 #' Given a \code{source} and \code{reference} vectors of module labels, the
 #' function produces a module labeling that is equivalent to \code{source}, but
 #' individual modules are re-labeled so that modules with significant overlap
 #' in \code{source} and \code{reference} have the same labels.
-#'
+#' 
 #' Each column of \code{source} is treated separately. Unlike in previous
 #' version of this function, source and reference labels can be any labels, not
 #' necessarily of the same type.
-#'
+#' 
 #' The function calculates the overlap of the \code{source} and
 #' \code{reference} modules using Fisher's exact test. It then attempts to
 #' relabel \code{source} modules such that each \code{source} module gets the
@@ -92,11 +98,12 @@ overlapTable <- function(labels1, labels2, na.rm = TRUE, ignore = NULL) {
 #' not renaming two \code{source} modules to the same \code{reference} module.
 #' (If two \code{source} modules point to the same \code{reference} module, the
 #' one with the more significant overlap is chosen.)
-#'
+#' 
 #' Those \code{source} modules that cannot be matched to a \code{reference}
 #' module are labeled using those labels from \code{extraLabels} that do not
 #' occur in either of \code{source}, \code{reference} or \code{ignoreLabels}.
-#'
+#' 
+#' @aliases matchLabels match.Labels
 #' @param source a vector or a matrix of reference labels. The labels may be
 #' numeric or character.
 #' @param reference a vector of reference labels.
@@ -117,20 +124,19 @@ overlapTable <- function(labels1, labels2, na.rm = TRUE, ignore = NULL) {
 #' @return A vector (if the input \code{source} labels are a vector) or a
 #' matrix (if the input \code{source} labels are a matrix) of the new labels.
 #' @author Peter Langfelder
-#' @export
-#' @rdname matchLabels
-#' @aliases match.Labels
-#' @seealso
-#' \code{\link{overlapTable}} for calculation of overlap counts and p-values
-#' \code{\link{standardColors}} for standard non-numeric WGCNA labels.
+#' @seealso \code{\link{overlapTable}} for calculation of overlap counts and
+#' p-values \code{\link{standardColors}} for standard non-numeric WGCNA labels.
 #' @keywords misc
 #' @examples
+#' 
 #' set.seed(1)
 #' nModules <- 10
 #' nGenes <- 1000
 #' labels1 <- sample(c(1:nModules), nGenes, replace = TRUE)
 #' labels2 <- sample(c(1:nModules), nGenes, replace = TRUE)
 #' sample(matchLabels(labels1, labels2), 20)
+#' 
+#' @export matchLabels
 matchLabels <- function(source, reference, pThreshold = 5e-2, na.rm = TRUE,
                         ignoreLabels = ifelse(is.numeric(reference), 0, "grey"),
                         extraLabels = ifelse(is.numeric(reference), c(1:1000),

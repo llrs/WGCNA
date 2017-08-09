@@ -1,12 +1,14 @@
 # This code was written by Jun Dong, modified by Peter Langfelder and
 # by Lluís Revilla
 
+
+
 #' Calculations of network concepts
-#'
+#' 
 #' This functions calculates various network concepts (topological properties,
 #' network indices) of a network calculated from expression data. See details
 #' for a detailed description.
-#'
+#' 
 #' This function computes various network concepts (also known as network
 #' statistics, topological properties, or network indices) for a weighted
 #' correlation network. The nodes of the weighted correlation network will be
@@ -17,7 +19,7 @@
 #' use the term gene and node interchangeably since these methods were
 #' originally developed for gene networks. The function computes the following
 #' 4 types of network concepts (introduced in Horvath and Dong 2008):
-#'
+#' 
 #' Type I: fundamental network concepts are defined as a function of the
 #' off-diagonal elements of an adjacency matrix A and/or a node significance
 #' measure GS. These network concepts can be defined for any network (not just
@@ -26,7 +28,7 @@
 #' the trait based gene significance measure is given by \code{GS=
 #' abs(cor(datExpr,trait, use="p"))^power} where \code{datExpr}, \code{trait},
 #' \code{power} are input parameters.
-#'
+#' 
 #' Type II: conformity-based network concepts are functions of the off-diagonal
 #' elements of the conformity based adjacency matrix \code{A.CF=CF*t(CF)}
 #' and/or the node significance measure. These network concepts are defined for
@@ -42,13 +44,13 @@
 #' can calculate the \code{Factorizability}, which is a number between 0 and 1
 #' (Dong and Horvath 2007). T he conformity is defined using a monotonic,
 #' iterative algorithm that maximizes the factorizability measure.
-#'
+#' 
 #' Type III: approximate conformity based network concepts are functions of all
 #' elements of the conformity based adjacency matrix \code{A.CF} (including the
 #' diagonal) and/or the node significance measure \code{GS}. These network
 #' concepts are very useful for deriving relationships between network concepts
 #' in networks that are approximately factorizable.
-#'
+#' 
 #' Type IV: eigengene-based (also known as eigennode-based) network concepts
 #' are functions of the eigengene-based adjacency matrix
 #' \code{A.E=ConformityE*t(ConformityE)} (diagonal included) and/or the
@@ -76,7 +78,7 @@
 #' its eigengene-based analog have been used to characterize networks where
 #' highly connected hub genes are important with regard to a trait based gene
 #' significance measure (Horvath and Dong 2008).
-#'
+#' 
 #' @param datExpr a data frame containg the expression data, with rows
 #' corresponding to samples and columns to genes (nodes).
 #' @param power soft thresholding power.
@@ -91,41 +93,41 @@
 #' columns of the data frame report the 4 types of network concepts mentioned
 #' in the description: Fundamental concepts, eigengene-based concepts,
 #' conformity-based concepts, and approximate conformity-based concepts.}
-#'
+#' 
 #' \item{Size}{reports the network size, i.e. the number of nodes, which equals
 #' the number of columns of the input data frame \code{datExpr}.}
-#'
+#' 
 #' \item{Factorizability}{a number between 0 and 1. The closer it is to 1, the
 #' better the off-diagonal elements of the conformity based network \code{A.CF}
 #' approximate those of \code{A} (according to the Frobenius norm). }
-#'
+#' 
 #' \item{Eigengene}{the first principal component of the standardized columns
 #' of \code{datExpr}. The number of components of this vector equals the number
 #' of rows of \code{datExpr}.}
-#'
+#' 
 #' \item{VarExplained}{the proportion of variance explained by the first
 #' principal component (the \code{Eigengene}). It is numerically different from
 #' the eigengene based factorizability.  While \code{VarExplained} is based on
 #' the squares of the singular values of \code{datExpr}, the eigengene-based
 #' factorizability is based on fourth powers of the singular values. }
-#'
+#' 
 #' \item{Conformity}{numerical vector giving the conformity.  The number of
 #' components of the conformity vector equals the number of columns in
 #' \code{datExpr}. The conformity is often highly correlated with the vector of
 #' node connectivities. The conformity is computed using an iterative algorithm
 #' for maximizing the factorizability measure. The algorithm and related
 #' network concepts are described in Dong and Horvath 2007.}
-#'
+#' 
 #' \item{ClusterCoef}{a numerical vector that reports the cluster coefficient
 #' for each node. This fundamental network concept measures the cliquishness of
 #' each node.}
-#'
+#' 
 #' \item{Connectivity}{a numerical vector that reports the connectivity (also
 #' known as degree) of each node. This fundamental network concept is also
 #' known as whole network connectivity. One can also define the scaled
 #' connectivity \code{K=Connectivity/max(Connectivity)} which is used for
 #' computing the hub gene significance.}
-#'
+#' 
 #' \item{MAR}{a numerical vector that reports the maximum adjacency ratio for
 #' each node. \code{MAR[i]} equals 1 if all non-zero adjacencies between node
 #' \code{i} and the remaining network nodes equal 1. This fundamental network
@@ -134,22 +136,22 @@
 #' node has high connectivity because of many weak connections (small MAR) or
 #' because of strong (but few) connections (high MAR), see Horvath and Dong
 #' 2008. }
-#'
+#' 
 #' \item{ConformityE}{a numerical vector that reports the eigengene based (aka
 #' eigenenode based) conformity for the correlation network. The number of
 #' components equals the number of columns of \code{datExpr}.}
-#'
+#' 
 #' \item{GS}{a numerical vector that encodes the node (gene) significance. The
 #' i-th component equals the node significance of the i-th column of
 #' \code{datExpr} if a sample trait was supplied to the function (input trait).
 #' \code{GS[i]=abs(cor(datE[,i], trait, use="p"))^power} }
-#'
+#' 
 #' \item{GSE}{a numerical vector that reports the eigengene based gene
 #' significance measure.  Its i-th component is given by
 #' \code{GSE[i]=ConformityE[i]*EigengeneSignificance} where the eigengene
 #' significance \code{abs(cor(Eigengene,trait))^power} is defined as power of
 #' the absolute value of the correlation between eigengene and trait.}
-#'
+#' 
 #' \item{Significance}{a data frame whose rows report network concepts that
 #' also depend on the trait based node significance measure. The rows
 #' correspond to network concepts and the columns correspond to the type of
@@ -163,20 +165,18 @@
 #' \code{abs(cor(Eigengene,trait))^power}. More details can be found in Horvath
 #' and Dong (2008).}
 #' @author Jun Dong, Steve Horvath, Peter Langfelder
-#' @seealso
-#'
-#' \code{\link{conformityBasedNetworkConcepts}} for approximate
+#' @seealso \code{\link{conformityBasedNetworkConcepts}} for approximate
 #' conformity-based network concepts
-#'
+#' 
 #' \code{\link{fundamentalNetworkConcepts}} for calculation of fundamental
 #' network concepts only.
 #' @references Bin Zhang and Steve Horvath (2005) "A General Framework for
 #' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
 #' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
-#'
+#' 
 #' Dong J, Horvath S (2007) Understanding Network Concepts in Modules, BMC
 #' Systems Biology 2007, 1:24
-#'
+#' 
 #' Horvath S, Dong J (2008) Geometric Interpretation of Gene Coexpression
 #' Network Analysis. PLoS Comput Biol 4(8): e1000117
 #' @keywords misc
@@ -423,12 +423,14 @@ MAR=MAR, ConformityE=ConformityE)
    }
 }
 
+
+
 #' Calculation of conformity-based network concepts.
-#'
+#' 
 #' This function computes 3 types of network concepts (also known as network
 #' indices or statistics) based on an adjacency matrix and optionally a node
 #' significance measure.
-#'
+#' 
 #' This function computes 3 types of network concepts (also known as network
 #' indices or statistics) based on an adjacency matrix and optionally a node
 #' significance measure. Specifically, it computes I) fundamental network
@@ -439,7 +441,7 @@ MAR=MAR, ConformityE=ConformityE)
 #' (2008). In the following, we use the term gene and node interchangeably
 #' since these methods were originally developed for gene networks. In the
 #' following, we briefly describe the 3 types of network concepts:
-#'
+#' 
 #' Type I: fundamental network concepts are defined as a function of the
 #' off-diagonal elements of an adjacency matrix A and/or a node significance
 #' measure GS.  Type II: conformity-based network concepts are functions of the
@@ -461,17 +463,17 @@ MAR=MAR, ConformityE=ConformityE)
 #' node significance measure GS. These network concepts are very useful for
 #' deriving relationships between network concepts in networks that are
 #' approximately factorizable.
-#'
+#' 
 #' @param adj adjacency matrix. A symmetric matrix with components between 0
 #' and 1.
 #' @param GS optional node significance measure. A vector with length equal the
 #' dimension of \code{adj}.
 #' @return A list with the following components:
-#'
+#' 
 #' \item{Factorizability}{number between 0 and 1 giving the factorizability of
 #' the matrix.  The closer to 1 the higher the evidence of factorizability,
 #' that is, A-I is close to outer(CF,CF)-diag(CF^2).}
-#'
+#' 
 #' \item{fundamentalNCs}{fundamental network concepts, that is network concepts
 #' calculated directly from the given adjacency matrix \code{adj}. A list with
 #' components \code{ScaledConnectivity} (giving the scaled connectivity of each
@@ -484,14 +486,14 @@ MAR=MAR, ConformityE=ConformityE)
 #' included: \code{NetworkSignificance} (network significance, the mean node
 #' significance), and \code{HubNodeSignificance} (hub node significance given
 #' by the linear regression of node significance on connectivity). }
-#'
+#' 
 #' \item{conformityBasedNCs}{network concepts based on an approximate adjacency
 #' matrix given by the outer product of the conformity vector but with unit
 #' diagonal. A list with components \code{Conformity} (the conformity vector)
 #' and \code{Connectivity.CF, ClusterCoef.CF, MAR.CF, Density.CF,
 #' Centralization.CF, Heterogeneity.CF} giving the conformity-based analogs of
 #' the above network concepts. }
-#'
+#' 
 #' \item{approximateConformityBasedNCs}{network concepts based on an
 #' approximate adjacency matrix given by the outer product of the conformity
 #' vector. A list with components \code{Conformity} (the conformity vector) and
@@ -501,7 +503,7 @@ MAR=MAR, ConformityE=ConformityE)
 #' @author Steve Horvath
 #' @seealso \code{\link{networkConcepts}} for calculation of eigennode based
 #' network concepts for a correlation network
-#'
+#' 
 #' \code{\link{fundamentalNetworkConcepts}} for calculation of fundamental
 #' network concepts only.
 #' @references Dong J, Horvath S (2007) Understanding Network Concepts in
@@ -600,8 +602,10 @@ conformityBasedNetworkConcepts <- function(adj, GS=NULL) {
   output
 } # end of function
 
+
+
 #' Calculation of fundamental network concepts from an adjacency matrix.
-#'
+#' 
 #' This function computes fundamental network concepts (also known as network
 #' indices or statistics) based on an adjacency matrix and optionally a node
 #' significance measure. These network concepts are defined for any symmetric
@@ -610,8 +614,8 @@ conformityBasedNetworkConcepts <- function(adj, GS=NULL) {
 #' Fundamental network concepts are defined as a function of the off-diagonal
 #' elements of an adjacency matrix \code{adj} and/or a node significance
 #' measure \code{GS}.
-#'
-#'
+#' 
+#' 
 #' @param adj an adjacency matrix, that is a square, symmetric matrix with
 #' entries between 0 and 1
 #' @param GS a node significance measure: a vector of the same length as the
@@ -622,15 +626,15 @@ conformityBasedNetworkConcepts <- function(adj, GS=NULL) {
 #' connectivity. One can also define the scaled connectivity
 #' \code{K=Connectivity/max(Connectivity)} which is used for computing the hub
 #' gene significance.}
-#'
+#' 
 #' \item{ScaledConnectivity}{the \code{Connectivity} vector scaled by the
 #' highest connectivity in the network, i.e.,
 #' \code{Connectivity/max(Connectivity)}.}
-#'
+#' 
 #' \item{ClusterCoef}{a numerical vector that reports the cluster coefficient
 #' for each node. This fundamental network concept measures the cliquishness of
 #' each node.}
-#'
+#' 
 #' \item{MAR}{a numerical vector that reports the maximum adjacency ratio for
 #' each node. \code{MAR[i]} equals 1 if all non-zero adjacencies between node
 #' \code{i} and the remaining network nodes equal 1. This fundamental network
@@ -639,22 +643,20 @@ conformityBasedNetworkConcepts <- function(adj, GS=NULL) {
 #' node has high connectivity because of many weak connections (small MAR) or
 #' because of strong (but few) connections (high MAR), see Horvath and Dong
 #' 2008.  }
-#'
+#' 
 #' \item{Density}{the density of the network. }
-#'
+#' 
 #' \item{Centralization}{the centralization of the network. }
 #' \item{Heterogeneity}{the heterogeneity of the network. }
 #' @author Steve Horvath
 #' @seealso \code{\link{conformityBasedNetworkConcepts}} for calculation of
 #' conformity based network concepts for a network adjacency matrix
-#'
+#' 
 #' \code{\link{networkConcepts}}, for calculation of conformity based and
 #' eigennode based network concepts for a correlation network.
-#' @references
-#'
-#' Dong J, Horvath S (2007) Understanding Network Concepts in Modules, BMC
-#' Systems Biology 2007, 1:24
-#'
+#' @references Dong J, Horvath S (2007) Understanding Network Concepts in
+#' Modules, BMC Systems Biology 2007, 1:24
+#' 
 #' Horvath S, Dong J (2008) Geometric Interpretation of Gene Coexpression
 #' Network Analysis. PLoS Comput Biol 4(8): e1000117
 #' @keywords misc

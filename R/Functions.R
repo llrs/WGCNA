@@ -168,3 +168,18 @@ prependZeros <- function(x, width = max(nchar(x))) {
     }
     out
 }
+
+
+moduleColorOptions = list(MEprefix = "ME")
+
+#' Get module eigengene prefix
+#'
+#' Search in the package options for moduleColorOptions and return the MEprefix
+#'
+#' @return The character string for modules
+#' @example moduleColor.getMEprefix()
+#' @export
+moduleColor.getMEprefix = function()
+{
+  .moduleColorOptions$MEprefix
+}

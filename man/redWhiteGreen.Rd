@@ -27,10 +27,12 @@ saturated, respectively.
 }
 \examples{
 
+
   \dontrun{par(mfrow = c(3, 1))
   displayColors(redWhiteGreen(50))
   displayColors(redWhiteGreen(50, 3))
   displayColors(redWhiteGreen(50, 0.5))}
+
 
 }
 \author{

@@ -90,8 +90,10 @@ A matrix holding the topological overlap.
 Calculation of the topological overlap matrix from given expression data.
 }
 \examples{
+
 datExpr <- matrix(runif(500*25), ncol = 500, nrow = 25)
 TOM <- TOMsimilarityFromExpr(datExpr)
+
 }
 \references{
 Bin Zhang and Steve Horvath (2005) "A General Framework for

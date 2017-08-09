@@ -1,13 +1,15 @@
 # TrueTrait ####
+
+
 #' Estimate the true trait underlying a list of surrogate markers.
-#'
+#' 
 #' Assume an imprecisely measured trait \code{y} that is related to the true,
 #' unobserved trait yTRUE as follows yTRUE=y+noise where noise is assumed to
 #' have mean zero and a constant variance. Assume you have 1 or more surrogate
 #' markers for yTRUE corresponding to the columns of \code{datX}. The function
 #' implements several approaches for estimating yTRUE based on the inputs
 #' \code{y} and/or \code{datX}.
-#'
+#' 
 #' This R function implements formulas described in Klemera and Doubal (2006).
 #' The assumptions underlying these formulas are described in Klemera et al.
 #' But briefly, the function provides several estimates of the true underlying
@@ -19,29 +21,29 @@
 #' least squares estimation is used to relate the surrogate markers to the
 #' underlying trait where the weights are proportional to 1/ssq.j where ssq.j
 #' is the noise variance of the j-th marker.
-#'
+#' 
 #' Specifically, output \code{y.true1} corresponds to formula 31,
 #' \code{y.true2} corresponds to formula 25, and \code{y.true3} corresponds to
 #' formula 34.
-#'
+#' 
 #' Although the true underlying trait yTRUE is not known, one can estimate the
 #' standard deviation between the estimate \code{y.true2} and yTRUE using
 #' formula 33. Similarly, one can estimate the SD for the estimate
 #' \code{y.true3} using formula 42. These estimated SDs correspond to output
 #' components 2 and 3, respectively. These SDs are valuable since they provide
 #' a sense of how accurate the measure is.
-#'
+#' 
 #' To estimate the correlations between \code{y} and the surrogate markers, one
 #' can specify different correlation measures. The default method is based on
 #' the Person correlation but one can also specify the biweight midcorrelation
 #' by choosing "bicor", see help(bicor) to learn more.
-#'
+#' 
 #' When the \code{datX} is comprised of observations measured in different
 #' strata (e.g. different batches or independent data sets) then one can obtain
 #' stratum specific estimates by specifying the strata using the argument
 #' \code{Strata}. In this case, the estimation focuses on one stratum at a
 #' time.
-#'
+#' 
 #' @param datX is a vector or data frame whose columns correspond to the
 #' surrogate markers (variables) for the true underlying trait. The number of
 #' rows of \code{datX} equals the number of observations, i.e. it should equal
@@ -90,7 +92,7 @@
 #' \code{y.true2} but it includes \code{y} as additional surrogate marker. It
 #' is expected to be the best estimate of the underlying true trait (see
 #' Klemera et al 2006). }
-#'
+#' 
 #' \item{datEstimatestest}{is output only if a test data set has been specified
 #' in the argument \code{datXtest}. In this case, it contains a data frame with
 #' columns \code{ytrue1} and \code{ytrue2}. The number of rows equals the
@@ -98,38 +100,38 @@
 #' Since the value of \code{y} is not known in case of a test data set, one
 #' cannot calculate \code{y.true3}. An additional column with linear model
 #' predictions \code{y.lm} is added if codeaddLinearModel=TRUE.  }
-#'
+#' 
 #' \item{datEstimates.LeaveOneOut.CV}{is output only if the argument
 #' \code{LeaveOneOut.CV} has been set to \code{TRUE}. In this case, it contains
 #' a data frame with leave-one-out cross validation estimates of \code{ytrue1}
 #' and \code{ytrue2}. The number of rows equals the length of \code{y}. Since
 #' the value of \code{y} is not known in case of a test data set, one cannot
 #' calculate \code{y.true3} }
-#'
+#' 
 #' \item{SD.ytrue2}{is a scalar. This is an estimate of the standard deviation
 #' between the estimate \code{y.true2} and the true (unobserved) yTRUE. It
 #' corresponds to formula 33.}
-#'
+#' 
 #' \item{SD.ytrue3}{is a scalar. This is an estimate of the standard deviation
 #' between \code{y.true3} and the true (unobserved) yTRUE. It corresponds to
 #' formula 42.}
-#'
+#' 
 #' \item{datVariableInfo}{is a data frame that reports information for each
 #' variable (column of \code{datX}) when it comes to the definition of
 #' \code{y.true2}. The rows correspond to the number of variables. Columns
 #' report the variable name, the center (intercept that is subtracted to scale
 #' each variable), the scale (i.e. the slope that is used in the denominator),
 #' and finally the weights used in the weighted sum of the scaled variables.}
-#'
+#' 
 #' \item{datEstimatesByStratum}{ a data frame that will only be output if
 #' \code{Strata} is different from NULL. In this case, it is has the same
 #' dimensions as \code{datEstimates} but the estimates were calculated
 #' separately for each level of \code{Strata}.}
-#'
+#' 
 #' \item{SD.ytrue2ByStratum}{ a vector of length equal to the different levels
 #' of \code{Strata}. Each component reports the estimate of \code{SD.ytrue2}
 #' for observations in the stratum specified by unique(Strata).}
-#'
+#' 
 #' \item{datVariableInfoByStratum}{ a list whose components are matrices with
 #' variable information. Each list component reports the variable information
 #' in the stratum specified by unique(Strata). }
@@ -137,13 +139,14 @@
 #' @references Klemera P, Doubal S (2006) A new approach to the concept and
 #' computation of biological age. Mechanisms of Ageing and Development 127
 #' (2006) 240-248
-#'
+#' 
 #' Choa IH, Parka KS, Limb CJ (2010) An Empirical Comparative Study on
 #' Validation of Biological Age Estimation Algorithms with an Application of
 #' Work Ability Index. Mechanisms of Ageing and Development Volume 131, Issue
 #' 2, February 2010, Pages 69-78
 #' @keywords misc
 #' @examples
+#' 
 #' # observed trait
 #' y <- rnorm(1000, mean = 50, sd = 20)
 #' # unobserved, true trait
@@ -171,6 +174,7 @@
 #' True1[[3]]
 #' # with the true SD
 #' sqrt(var(yTRUE - datTrue$y.true3))
+#' 
 TrueTrait <- function(datX, y, datXtest = NULL, corFnc = "bicor",
                       corOptions = "use = 'pairwise.complete.obs'",
                       LeaveOneOut.CV = FALSE, skipMissingVariables = TRUE,

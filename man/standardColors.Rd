@@ -19,7 +19,9 @@ Returns the vector of color names in the order they are assigned by other
 functions in this library.
 }
 \examples{
+
 standardColors(10)
+
 }
 \author{
 Peter Langfelder, \email{Peter.Langfelder@gmail.com}

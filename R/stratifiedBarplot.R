@@ -1,6 +1,8 @@
 # This function barplots data across two splitting parameters
 
 
+
+
 #' Bar plots of data across two splitting parameters
 #' 
 #' This function takes an expression matrix which can be split using two
@@ -21,9 +23,9 @@
 #' Hip, EC, EC, NA, NA.  This trait will be plotted as the same color across
 #' each split of the barplot.  For the function to work properly, the same
 #' split values should be inputted for each group.
-#' @param subset A list of one or more genes to compare the expression with.
-#' If the list contains more than one gene, the first element contains the
-#' group name. For example, Ribosomes, RPL3, RPL4, RPS3.
+#' @param subset A list of one or more genes to compare the expression with. If
+#' the list contains more than one gene, the first element contains the group
+#' name. For example, Ribosomes, RPL3, RPL4, RPS3.
 #' @param genes If entered, this parameter is a list of gene/probe identifiers
 #' corresponding to the columns in expAll.
 #' @param scale For subsets of genes that include more than one gene, this
@@ -36,12 +38,12 @@
 #' considered experimental.
 #' @param graph If TRUE (default), bar plot is made.  If FALSE, only the
 #' results are returned, and no plot is made.
+#' @param las1 Sets the graphing parameter las (default=2).
 #' @param cex1 Sets the graphing parameters of cex.axis and cex.names
 #' (default=1.5)
-#' @param las1 Sets the graphing parameter las (default=2).
-#' @param \dots Other graphing parameters allowed in the barplot function.
-#' Note that the parameters for cex.axis, cex.names, and las are superseded by
-#' cex1 and las1 and will therefore be ignored.
+#' @param \dots Other graphing parameters allowed in the barplot function. Note
+#' that the parameters for cex.axis, cex.names, and las are superseded by cex1
+#' and las1 and will therefore be ignored.
 #' @return \item{splitGroupMeans}{ The group/split averaged expression across
 #' each group and split combination.  This is the height of the bars in the
 #' graph. } \item{splitGroupSDs}{ The standard deviation of group/split
@@ -53,6 +55,7 @@
 #' @seealso \code{\link{barplot}}, \code{\link{verboseBarplot}}
 #' @keywords misc
 #' @examples
+#' 
 #' 
 #' # Example: first simulate some data
 #' set.seed(100)
@@ -74,6 +77,7 @@
 #' 
 #' # Now plot it the other way
 #' results = stratifiedBarplot(datExpr, split, groups, subset)
+#' 
 #' 
 #' 
 stratifiedBarplot = function (expAll, groups, split, subset, 

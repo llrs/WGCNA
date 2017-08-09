@@ -29,7 +29,7 @@ A dataframe containing the matrix of dissimilarities, with
 }
 \description{
 Calculates consensus dissimilarity \code{(1-cor)} of given module eigengenes
-relaized in several sets.
+realized in several sets.
 }
 \details{
 This function calculates the individual set dissimilarities of the given

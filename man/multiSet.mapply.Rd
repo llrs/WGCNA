@@ -35,11 +35,11 @@ components are re-calculated by default.}
 argument has an effect only if \code{mdmaExistingResults} is non-NULL. If
 the length of \code{mdmaExistingResults} (call the length `k') is less than
 the number of sets in \code{multiSet}, the function assumes that the
-existing results correspond to the first `k' sets in \code{multiSet} and
-the rest of the sets are automatically calculated, irrespective of the
-setting of \code{mdmaUpdateIndex}. The argument \code{mdmaUpdateIndex} can
-be used to specify re-calculation of some (or all) of the results that
-already exist in \code{mdmaExistingResults}.}
+existing results correspond to the first `k' sets in \code{multiSet} and the
+rest of the sets are automatically calculated, irrespective of the setting
+of \code{mdmaUpdateIndex}. The argument \code{mdmaUpdateIndex} can be used
+to specify re-calculation of some (or all) of the results that already exist
+in \code{mdmaExistingResults}.}
 
 \item{mdmaSimplify}{Logical: should simplification of the result to an array
 be attempted? The simplification is fragile and can produce unexpected
@@ -81,17 +81,19 @@ columns. In a "loose" multiSet structure, the \code{data} components can be
 anything (but for most purposes should be of comparable type and content).
 
 This function applies the function \code{FUN} to each \code{data} component
-of those arguments in \code{...} that are multiSet structures in the
-"loose" sense, and to each component of those arguments in \code{...} that
-are not multiSet structures.
+of those arguments in \code{...} that are multiSet structures in the "loose"
+sense, and to each component of those arguments in \code{...} that are not
+multiSet structures.
 }
 \examples{
+
 data1 <- matrix(rnorm(100L), 20L, 5L)
 data2 <- matrix(rnorm(50L), 10L, 5L)
 colnames(data1) <- LETTERS[1:5]
 colnames(data2) <- LETTERS[2:6]
 md <- list2multiSet(list(Set1 = data1, Set2 = data2))
 multiSet.mapply(md, FUN = sum)
+
 }
 \seealso{
 \code{\link{multiSet}} to create a multiSet structure

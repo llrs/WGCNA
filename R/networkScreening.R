@@ -1,13 +1,14 @@
-
 #  networkScreeningGS ####
+
+
 #' Network gene screening with an external gene significance measure
-#'
+#' 
 #' This function blends standard and network approaches to selecting genes (or
 #' variables in general) with high gene significance
-#'
+#' 
 #' This function should be considered experimental. It takes into account both
 #' the "standard" and the network measures of gene importance for the trait.
-#'
+#' 
 #' @param datExpr data frame of expression data
 #' @param datME data frame of module eigengenes
 #' @param GS numeric vector of gene significances
@@ -145,14 +146,16 @@ networkScreeningGS <- function(datExpr,
 } # end of function
 
 # networkScreening ####
+
+
 #' Identification of genes related to a trait
-#'
+#' 
 #' This function blends standard and network approaches to selecting genes (or
 #' variables in general) highly related to a given trait.
-#'
+#' 
 #' This function should be considered experimental. It takes into account both
 #' the "standard" and the network measures of gene importance for the trait.
-#'
+#' 
 #' @param y clinical trait given as a numeric vector (one value per sample)
 #' @param datME data frame of module eigengenes
 #' @param datExpr data frame of expression data
@@ -177,23 +180,23 @@ networkScreeningGS <- function(datExpr,
 #' @return datout = data.frame(p.Weighted, q.Weighted, Cor.Weighted,
 #' Z.Weighted, p.Standard, q.Standard, Cor.Standard, Z.Standard) Data frame
 #' reporting the following quantities for each given gene:
-#'
+#' 
 #' \item{p.Weighted }{weighted p-value of association with the trait}
-#'
+#' 
 #' \item{q.Weighted }{q-value (local FDR) calculated from \code{p.Weighted}}
-#'
+#' 
 #' \item{cor.Weighted}{correlation of trait with gene expression weighted by a
 #' network term}
-#'
+#' 
 #' \item{Z.Weighted}{ Fisher Z score of the weighted correlation}
-#'
+#' 
 #' \item{p.Standard}{ standard Student p-value of association of the gene with
 #' the trait}
-#'
+#' 
 #' \item{q.Standard}{ q-value (local FDR) calculated from \code{p.Standard}}
-#'
+#' 
 #' \item{cor.Standard}{ correlation of gene with the trait}
-#'
+#' 
 #' \item{Z.Standard}{ Fisher Z score of the standard correlation}
 #' @author Steve Horvath
 #' @keywords misc
@@ -403,17 +406,19 @@ networkScreening <- function(y,
 }
 
 # automaticNetworkScreening ####
+
+
 #' One-step automatic network gene screening
-#'
+#' 
 #' This function performs gene screening based on a given trait and gene
 #' network properties
-#'
+#' 
 #' Network screening is a method for identifying genes that have a high gene
 #' significance and are members of important modules at the same time.  If
 #' \code{datME} is given, the function calls \code{\link{networkScreening}}
 #' with the default parameters. If \code{datME} is not given, module eigengenes
 #' are first calculated using network analysis based on supplied parameters.
-#'
+#' 
 #' @param datExpr data frame containing the expression data, columns
 #' corresponding to genes and rows to samples
 #' @param y vector containing trait values for all samples in \code{datExpr}
@@ -563,17 +568,19 @@ automaticNetworkScreening <- function(datExpr,
 } # end of function automaticNetworkScreening
 
 # automaticNetworkScreeningGS ####
+
+
 #' One-step automatic network gene screening with external gene significance
-#'
+#' 
 #' This function performs gene screening based on external gene significance
 #' and their network properties.
-#'
+#' 
 #' Network screening is a method for identifying genes that have a high gene
 #' significance and are members of important modules at the same time.  If
 #' \code{datME} is given, the function calls \code{\link{networkScreeningGS}}
 #' with the default parameters. If \code{datME} is not given, module eigengenes
 #' are first calculated using network analysis based on supplied parameters.
-#'
+#' 
 #' @param datExpr data frame containing the expression data, columns
 #' corresponding to genes and rows to samples
 #' @param GS vector containing gene significance for all genes given in
@@ -665,6 +672,24 @@ automaticNetworkScreeningGS <- function(datExpr, GS, power = 6,
         networkScreening = data.frame(NS1, MMdata, MMdataPvalue),
         datME = data.frame(datME),
 
+
+
+#' Hubgene significance
+#' 
+#' Calculate approximate hub gene significance for all modules in network.
+#' 
+#' In \code{datKME} rows correspond to genes and columns to modules.
+#' 
+#' @param datKME a data frame (or a matrix-like object) containing
+#' eigengene-based connectivities of all genes in the network.
+#' @param GS a vector with one entry for every gene containing its gene
+#' significance.
+#' @return A vector whose entries are the hub gene significances for each
+#' module.
+#' @author Steve Horvath
+#' @references Dong J, Horvath S (2007) Understanding Network Concepts in
+#' Modules, BMC Systems Biology 2007, 1:24
+#' @keywords misc
         hubGeneSignificance = data.frame(HGS1)
     )
     output

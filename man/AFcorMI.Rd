@@ -29,6 +29,7 @@ generation and features of the predicted mutual information adjacency,
 please refer to the function \code{\link{mutualInfoAdjacency}}.
 }
 \examples{
+
 #Simulate a data frame datE which contains 5 columns and 50 observations
 m <- 50
 x1 <- rnorm(m)
@@ -45,6 +46,7 @@ cor.data <- cor(datE, use = "p")
 \dontrun{
 AUV2 <- AFcorMI(r = cor.data, m = nrow(datE))
 }
+
 }
 \seealso{
 \code{\link{mutualInfoAdjacency}}

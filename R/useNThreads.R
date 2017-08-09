@@ -35,28 +35,30 @@
 }
 
 
+
+
 #' Allow and disable multi-threading for certain WGCNA calculations
-#'
+#' 
 #' These functions allow and disable multi-threading for WGCNA calculations
 #' that can optionally be multi-threaded, which includes all functions using
 #' \code{\link{cor}} or \code{\link{bicor}} functions.
-#'
+#' 
 #' \code{allowWGCNAThreads} enables parallel calculation within the compiled
 #' code in WGCNA, principally for calculation of correlations in the presence
 #' of missing data. This function is now deprecated; use
 #' \code{enableWGCNAThreads} instead.
-#'
+#' 
 #' \code{enableWGCNAThreads} enables parallel calculations within user-level R
 #' functions as well as within the compiled code, and registers an appropriate
 #' parallel calculation back-end for the operating system/platform.
-#'
+#' 
 #' \code{disableWGCNAThreads} disables parallel processing.
-#'
+#' 
 #' \code{WGCNAnThreads} returns the number of threads (parallel processes) that
 #' WGCNA is currently configured to run with.
-#'
+#' 
 #' @aliases allowWGCNAThreads enableWGCNAThreads disableWGCNAThreads
-#' WGCNAnThreads
+#' WGCNAnThreads disableWGCNAThreads enableWGCNAThreads WGCNAnThreads
 #' @param nThreads Number of threads to allow. If not given, the number of
 #' processors online (as reported by system configuration) will be used. There
 #' appear to be some cases where the automatically-determined number is wrong
@@ -165,14 +167,16 @@ WGCNAnThreads = function() {
 # returned allocation will have length 0.
 
 
+
+
 #' Divide tasks among workers
-#'
+#' 
 #' This function calculates an even splitting of a given number of tasks among
 #' a given number of workers (threads).
-#'
+#' 
 #' Tasks are labeled consecutively 1,2,..., \code{nTasks}. The tasks are split
 #' in contiguous blocks as evenly as possible.
-#'
+#' 
 #' @param nTasks number of tasks to be divided
 #' @param nWorkers number of workers
 #' @return A list with one component per worker giving the task indices to be
@@ -181,10 +185,12 @@ WGCNAnThreads = function() {
 #' @author Peter Langfelder
 #' @keywords misc
 #' @examples
-#'
+#' 
+#' 
 #' allocateJobs(10, 3)
 #' allocateJobs(2,4)
-#'
+#' 
+#' 
 #' @export allocateJobs
 allocateJobs = function(nTasks, nWorkers) {
   if (is.na(nWorkers)) {

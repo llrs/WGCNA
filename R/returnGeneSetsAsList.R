@@ -15,8 +15,8 @@
 #' 
 #' 2) Gene / category files (must be csv files), where the first line is the
 #' column headers corresponding to Genes and Lists, and the remaining lines
-#' correspond to the genes in each list, for any number of genes and lists.
-#' For example: Gene, Category RPS4, Ribosome RPS8, Ribosome ... NDUF1,
+#' correspond to the genes in each list, for any number of genes and lists. For
+#' example: Gene, Category RPS4, Ribosome RPS8, Ribosome ... NDUF1,
 #' Mitohcondria NDUF3, Mitochondria ... MAPT, AlzheimersDisease PSEN1,
 #' AlzheimersDisease PSEN2, AlzheimersDisease ...
 #' 
@@ -35,11 +35,11 @@
 #' name will be appended to each overlap corresponding to that filename.  The
 #' default sets the category names as the corresponding file names.
 #' @param useBrainLists If TRUE, a pre-made set of brain-derived enrichment
-#' lists will be added to any user-defined lists for enrichment comparison.
-#' The default is FALSE.  See references section for related references.
+#' lists will be added to any user-defined lists for enrichment comparison. The
+#' default is FALSE.  See references section for related references.
 #' @param useBloodAtlases If TRUE, a pre-made set of blood-derived enrichment
-#' lists will be added to any user-defined lists for enrichment comparison.
-#' The default is FALSE.  See references section for related references.
+#' lists will be added to any user-defined lists for enrichment comparison. The
+#' default is FALSE.  See references section for related references.
 #' @param useStemCellLists If TRUE, a pre-made set of stem cell (SC)-derived
 #' enrichment lists will be added to any user-defined lists for enrichment
 #' comparison.  The default is FALSE.  See references section for related
@@ -66,9 +66,11 @@
 #' @keywords misc
 #' @examples
 #' 
+#' 
 #' # Example: Return a list of genes for various immune pathways
 #' geneSets   = returnGeneSetsAsList(useImmunePathwayLists=TRUE)
 #' geneSets[7:8]
+#' 
 #' 
 returnGeneSetsAsList <- function (fnIn = NULL, catNmIn = fnIn, useBrainLists = FALSE, useBloodAtlases = FALSE, 
     useStemCellLists = FALSE, useBrainRegionMarkers = FALSE, useImmunePathwayLists = FALSE, geneSubset=NULL) 

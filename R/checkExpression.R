@@ -184,19 +184,21 @@ goodSamples <- function(datExpr,
 }
 
 # goodGenesMS ####
+
+
 #' Filter genes with too many missing entries across multiple sets
-#'
+#' 
 #' This function checks data for missing entries and returns a list of genes
 #' that have non-zero variance in all sets and pass two criteria on maximum
 #' number of missing values in each given set: the fraction of missing values
 #' must be below a given threshold and the total number of missing samples must
 #' be below a given threshold
-#'
+#' 
 #' The constants \code{..minNSamples} and \code{..minNGenes} are both set to
 #' the value 4.  For most data sets, the fraction of missing samples criterion
 #' will be much more stringent than the absolute number of missing samples
 #' criterion.
-#'
+#' 
 #' @param multiExpr expression data in the multi-set format (see
 #' \code{\link{checkSets}}). A vector of lists, one per set. Each set must
 #' contain a component \code{data} that contains the expression data, with rows
@@ -232,7 +234,7 @@ goodSamples <- function(datExpr,
 #' @author Peter Langfelder
 #' @seealso \code{\link{goodGenes}}, \code{\link{goodSamples}},
 #' \code{\link{goodSamplesGenes}} for cleaning individual sets separately
-#'
+#' 
 #' \code{\link{goodSamplesMS}}, \code{\link{goodSamplesGenesMS}} for additional
 #' cleaning of multiple data sets together.
 #' @keywords misc
@@ -322,18 +324,20 @@ goodGenesMS <- function(multiExpr,
 }
 
 # goodSamplesMS ####
+
+
 #' Filter samples with too many missing entries across multiple data sets
-#'
+#' 
 #' This function checks data for missing entries and returns a list of samples
 #' that pass two criteria on maximum number of missing values: the fraction of
 #' missing values must be below a given threshold and the total number of
 #' missing genes must be below a given threshold.
-#'
+#' 
 #' The constants \code{..minNSamples} and \code{..minNGenes} are both set to
 #' the value 4.  For most data sets, the fraction of missing samples criterion
 #' will be much more stringent than the absolute number of missing samples
 #' criterion.
-#'
+#' 
 #' @param multiExpr expression data in the multi-set format (see
 #' \code{\link{checkSets}}). A vector of lists, one per set. Each set must
 #' contain a component \code{data} that contains the expression data, with rows
@@ -361,7 +365,7 @@ goodGenesMS <- function(multiExpr,
 #' @author Peter Langfelder and Steve Horvath
 #' @seealso \code{\link{goodGenes}}, \code{\link{goodSamples}},
 #' \code{\link{goodSamplesGenes}} for cleaning individual sets separately
-#'
+#' 
 #' \code{\link{goodGenesMS}}, \code{\link{goodSamplesGenesMS}} for additional
 #' cleaning of multiple data sets together.
 #' @keywords misc
@@ -438,19 +442,21 @@ goodSamplesMS <- function(multiExpr,
 }
 
 # goodSamplesGenes ####
+
+
 #' Iterative filtering of samples and genes with too many missing entries
-#'
+#' 
 #' This function checks data for missing entries and zero-variance genes, and
 #' returns a list of samples and genes that pass criteria maximum number of
 #' missing values. If necessary, the filtering is iterated.
-#'
+#' 
 #' This function iteratively identifies samples and genes with too many missing
 #' entries and genes with zero variance. Iterations may be required since
 #' excluding samples effectively changes criteria on genes and vice versa. The
 #' process is repeated until the lists of good samples and genes are stable.
 #' The constants \code{..minNSamples} and \code{..minNGenes} are both set to
 #' the value 4.
-#'
+#' 
 #' @param datExpr expression data. A data frame in which columns are genes and
 #' rows ar samples.
 #' @param minFraction minimum fraction of non-missing samples for a gene to be
@@ -471,12 +477,10 @@ goodSamplesMS <- function(multiExpr,
 #' make the output progressively more and more verbose.
 #' @param indent indentation for diagnostic messages. Zero means no
 #' indentation, each unit adds two spaces.
-#' @return
-#'
-#' A list with the foolowing components: \item{goodSamples}{ A logical vector
-#' with one entry per sample that is \code{TRUE} if the sample is considered
-#' good and \code{FALSE} otherwise.  }
-#'
+#' @return A list with the foolowing components: \item{goodSamples}{ A logical
+#' vector with one entry per sample that is \code{TRUE} if the sample is
+#' considered good and \code{FALSE} otherwise.  }
+#' 
 #' \item{goodGenes}{ A logical vector with one entry per gene that is
 #' \code{TRUE} if the gene is considered good and \code{FALSE} otherwise.  }
 #' @author Peter Langfelder
@@ -539,21 +543,23 @@ goodSamplesGenes <- function(datExpr,
 }
 
 # goodSamplesGenesMS ####
+
+
 #' Iterative filtering of samples and genes with too many missing entries
 #' across multiple data sets
-#'
+#' 
 #' This function checks data for missing entries and zero variance across
 #' multiple data sets and returns a list of samples and genes that pass
 #' criteria maximum number of missing values. If necessary, the filtering is
 #' iterated.
-#'
+#' 
 #' This function iteratively identifies samples and genes with too many missing
 #' entries, and genes with zero variance. Iterations may be required since
 #' excluding samples effectively changes criteria on genes and vice versa. The
 #' process is repeated until the lists of good samples and genes are stable.
 #' The constants \code{..minNSamples} and \code{..minNGenes} are both set to
 #' the value 4.
-#'
+#' 
 #' @param multiExpr expression data in the multi-set format (see
 #' \code{\link{checkSets}}). A vector of lists, one per set. Each set must
 #' contain a component \code{data} that contains the expression data, with rows
@@ -581,13 +587,13 @@ goodSamplesGenes <- function(datExpr,
 #' with one component per given set. Each component is a logical vector with
 #' one entry per sample in the corresponding set that is \code{TRUE} if the
 #' sample is considered good and \code{FALSE} otherwise.  }
-#'
+#' 
 #' \item{goodGenes}{ A logical vector with one entry per gene that is
 #' \code{TRUE} if the gene is considered good and \code{FALSE} otherwise.  }
 #' @author Peter Langfelder
 #' @seealso \code{\link{goodGenes}}, \code{\link{goodSamples}},
 #' \code{\link{goodSamplesGenes}} for cleaning individual sets separately
-#'
+#' 
 #' \code{\link{goodSamplesMS}}, \code{\link{goodGenesMS}} for additional
 #' cleaning of multiple data sets together.
 #' @keywords misc

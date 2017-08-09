@@ -68,7 +68,8 @@ for co-expression analysis. Cluster centers are defined by the first
 principal component, and distances by correlation (more precisely,
 1-correlation). The distance between a gene and a cluster is multiplied by a
 factor of \eqn{max(clusterSize/preferredSize,
-1)^{sizePenaltyPower}}{\code{max(clusterSize/preferredSize,
+}{\code{max(clusterSize/preferredSize,
+1)^sizePenaltyPower}}\eqn{1)^{sizePenaltyPower}}{\code{max(clusterSize/preferredSize,
 1)^sizePenaltyPower}}, thus penalizing clusters whose size exceeds
 \code{preferredSize}. The function starts with randomly generated cluster
 assignment (hence the need to set the random seed for repeatability) and

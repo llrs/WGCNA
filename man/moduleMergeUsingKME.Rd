@@ -74,6 +74,7 @@ issues with the function.
 \examples{
 
 
+
 ## First simulate some data and the resulting network dendrogram
 set.seed(100)
 MEturquoise = sample(1:100,50)
@@ -117,6 +118,7 @@ for (m in merges)  colorPlot = cbind(colorPlot,
 plotDendroAndColors(tree1, colorPlot, c("ORIG",merges), dendroLabels=FALSE)
 # (Note that with real data, the default threshPercent=50 usually results
 # in some modules being merged)
+
 
 
 }

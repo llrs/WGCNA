@@ -1,27 +1,29 @@
 # Convert modules numbers to colors
 
+
+
 #' Convert numerical labels to colors.
-#'
+#' 
 #' Converts a vector or array of numerical labels into a corresponding vector
 #' or array of colors corresponding to the labels.
-#'
+#' 
 #' If \code{labels} is numeric, it is used directly as index to the standard
 #' color sequence. If 0 is present among the labels and \code{zeroIsGrey=TRUE},
 #' labels 0 are given grey color.
-#'
+#' 
 #' If \code{labels} is not numeric, its columns are turned into factors and the
 #' numeric representation of each factor is used to assign the corresponding
 #' colors. In this case \code{commonColorCode} governs whether each column gets
 #' its own color code, or whether the color code will be universal.
-#'
+#' 
 #' The standard sequence start with well-distinguishable colors, and after
 #' about 40 turns into a quasi-random sampling of all colors available in R
 #' with the exception of all shades of grey (and gray).
-#'
+#' 
 #' If the input \code{labels} have a dimension attribute, it is copied into the
 #' output, meaning the dimensions of the returned value are the same as those
 #' of the input \code{labels}.
-#'
+#' 
 #' @param labels Vector or matrix of non-negative integer or other (such as
 #' character) labels. See details.
 #' @param zeroIsGrey If TRUE, labels 0 will be assigned color grey. Otherwise,
@@ -36,12 +38,14 @@
 #' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
 #' @keywords color
 #' @examples
+#' 
 #' labels <- c(0:20)
 #' labels2colors(labels)
 #' labels <- matrix(letters[1:9], 3, )
 #' labels2colors(labels)
 #' # Note the difference when commonColorCode = FALSE
 #' labels2colors(labels, commonColorCode = FALSE)
+#' 
 labels2colors <- function(labels, zeroIsGrey = TRUE, colorSeq = NULL,
                           naColor = "grey",
                           commonColorCode = TRUE) {
@@ -92,12 +96,14 @@ labels2colors <- function(labels, zeroIsGrey = TRUE, colorSeq = NULL,
     colors
 }
 
+
+
 #' Colors this library uses for labeling modules.
-#'
+#' 
 #' Returns the vector of color names in the order they are assigned by other
 #' functions in this library.
-#'
-#'
+#' 
+#' 
 #' @param n Number of colors requested. If \code{NULL}, all (approx. 450)
 #' colors will be returned. Any other invalid argument such as less than one or
 #' more than maximum (\code{length(standardColors())}) will trigger an error.
@@ -105,7 +111,9 @@ labels2colors <- function(labels, zeroIsGrey = TRUE, colorSeq = NULL,
 #' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
 #' @keywords color misc
 #' @examples
+#' 
 #' standardColors(10)
+#' 
 standardColors <- function(n = NULL){
     if (is.null(n)) {
         return(.GlobalStandardColors)
@@ -117,13 +125,15 @@ standardColors <- function(n = NULL){
     }
 }
 
+
+
 #' Show colors used to label modules
-#'
+#' 
 #' The function plots a barplot using colors that label modules.
-#'
+#' 
 #' To see the first \code{n} colors, use argument \code{colors =
 #' standardColors(n)}.
-#'
+#' 
 #' @param colors colors to be displayed. Defaults to all colors available for
 #' module labeling.
 #' @return None.
@@ -131,8 +141,10 @@ standardColors <- function(n = NULL){
 #' @seealso \code{\link{standardColors}}
 #' @keywords misc
 #' @examples
+#' 
 #' \dontrun{
 #' displayColors(standardColors(10))}
+#' 
 displayColors <- function(colors = NULL) {
     if (is.null(colors)) {
         colors <- standardColors()

@@ -410,12 +410,11 @@ GOenrichmentAnalysis <- function(labels, entrezCodes, yeastORFs = NULL,
           } else
               termCodes[[c]] <- as.numeric(as.character(intersect(tc[use], mapECodes)))
       }
-      nAllInTerm[c] <- length(termCodes[[c]]);
+      nAllInTerm[c] <- length(termCodes[[c]])
       if ( (c %%50  == 0) & (verbose > 0)) pind <- updateProgInd(c/nTerms, pind)
    }
        }
-   if (verbose > 0)
-   {
+   if (verbose > 0) {
       pind <- updateProgInd(1, pind)
       printFlush("")
    }
@@ -427,13 +426,11 @@ GOenrichmentAnalysis <- function(labels, entrezCodes, yeastORFs = NULL,
 
    setResults <- list()
 
-   for (set in 1:nSets)
-   {
+   for (set in 1:nSets) {
       if (verbose > 0)
         printFlush(paste(spaces, " ..working on label set", set, ".."))
       labelLevels <- levels(factor(labels[, set]))
-      if (!is.null(leaveOutLabel))
-      {
+      if (!is.null(leaveOutLabel)) {
         keep <- !(labelLevels %in% as.character(leaveOutLabel))
         if (sum(keep) == 0)
           stop("No labels were kept after removing labels that are supposed to be ignored.")
@@ -443,17 +440,13 @@ GOenrichmentAnalysis <- function(labels, entrezCodes, yeastORFs = NULL,
 
       modCodes <- list()
       nModCodes <- rep(0, nLabelLevels)
-      if (backT == 1)
-      {
-        for (ll in 1:nLabelLevels)
-        {
+      if (backT == 1) {
+        for (ll in 1:nLabelLevels) {
            modCodes[[ll]] <- entrezCodes[labels[, set] == labelLevels[ll]]
            nModCodes[ll] <- length(modCodes[[ll]])
         }
-      } else
-      {
-        for (ll in 1:nLabelLevels)
-        {
+      } else {
+        for (ll in 1:nLabelLevels) {
            modCodes[[ll]] <- mapECodes[mapLabels[, set] == labelLevels[ll]]
            nModCodes[ll] <- length(modCodes[[ll]])
         }
@@ -511,7 +504,7 @@ GOenrichmentAnalysis <- function(labels, entrezCodes, yeastORFs = NULL,
               enrTab <- data.frame(module = rep(labelLevels[ll], nRepTerms),
                                   modSize = rep(modSizes[ll], nRepTerms),
                                   bkgrModSize = rep(nModCodes[ll], nRepTerms),
-                                  rank = c(1:nRepTerms),
+                                  rank = seq(length.out = nRepTerms),
                                   enrichmentP = enrichment[ll, reportTerms],
                                   BonferoniP = pmin(rep(1, nRepTerms),
                                                     enrichment[ll, reportTerms] * nOntTerms),
@@ -525,7 +518,7 @@ GOenrichmentAnalysis <- function(labels, entrezCodes, yeastORFs = NULL,
                                   termName = rep("NA", nRepTerms),
                                   termDefinition =  rep("NA", nRepTerms))
               bestPTerms[[ont]]$forModule[[ll]] <- list()
-              for (rci in 1:length(reportTerms)) {
+              for (rci in seq(length.out = nRepTerms)) {
                  term <- reportTerms[rci]
                  termID <- names(Go2eg)[term]
                  dbind <- match(termID, dbGoNames)
@@ -596,7 +589,7 @@ GOenrichmentAnalysis <- function(labels, entrezCodes, yeastORFs = NULL,
                                   termName = rep("NA", nRepTerms),
                                   termDefinition =  rep("NA", nRepTerms))
               biggestTerms[[ont]]$forModule[[ll]] <- list()
-              for (rci in 1:length(reportTerms)) {
+              for (rci in seq(length.out = nRepTerms)) {
                  term <- reportTerms[rci]
                  termID <- names(Go2eg)[term]
                  dbind <- match(termID, dbGoNames)

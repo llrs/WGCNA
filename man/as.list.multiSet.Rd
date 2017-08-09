@@ -4,7 +4,7 @@
 \alias{as.list.multiSet}
 \title{Convert a multiSet object to a list}
 \usage{
-\method{as.list}{multiSet}(x, ...)
+as.list.multiSet(x, ...)
 }
 \arguments{
 \item{x}{muiltiSet object to be converted to list}

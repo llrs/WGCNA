@@ -72,6 +72,7 @@ meaning they are simulated with a low but non-zero correlation with the seed
 eigengene. The correlations run between \code{minCor} and zero.
 }
 \examples{
+
 nSamples <- 50
 nGenes <- 30
 y <- sample(c(1,2), nSamples, replace = TRUE)
@@ -80,6 +81,7 @@ module2 <- simulateModule(scale(y), nGenes, signed = TRUE)
 geneMeans <- sample(c(4, 5, 10), nGenes, replace = TRUE)
 module3 <- simulateModule(scale(y), nGenes, signed = TRUE,
                           geneMeans = geneMeans)
+
 }
 \references{
 A short description of the simulation method can also be found
@@ -92,8 +94,8 @@ The material is posted at
 \url{http://www.genetics.ucla.edu/labs/horvath/CoexpressionNetwork/EigengeneNetwork/SupplementSimulations.pdf}.
 }
 \seealso{
-\code{\link{simulateEigengeneNetwork}} for a simulation of eigengenes with a
-given causal structure
+\code{\link{simulateEigengeneNetwork}} for a simulation of
+eigengenes with a given causal structure
 
 \code{\link{simulateDatExpr}} for simulations of whole datasets consisting
 of multiple modules

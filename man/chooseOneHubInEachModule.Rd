@@ -40,6 +40,7 @@ chooseOneHubInEachModule returns one gene in each module with high
 connectivity, given a number of randomly selected genes to test.
 }
 \examples{
+
 ## Example: first simulate some data.
 MEturquoise <- sample(1:100, 50)
 MEblue <- sample(1:100, 50)
@@ -59,6 +60,7 @@ tree1 <- tree2 <- fastcluster::hclust(as.dist(1-TOM1), method = "average")
 colorh <- labels2colors(dat1$allLabels)
 hubs <- chooseOneHubInEachModule(dat1$datExpr, colorh)
 hubs
+
 }
 \author{
 Jeremy Miller

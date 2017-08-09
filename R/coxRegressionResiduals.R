@@ -1,5 +1,5 @@
 #' Deviance- and martingale residuals from a Cox regression model
-#'
+#' 
 #' The function inputs a censored time variable which is specified by two input
 #' variables \code{time} and \code{event}. It outputs i) the martingale
 #' residual and ii) deviance residual corresponding to a Cox regression model.
@@ -7,7 +7,7 @@
 #' model. But optionally, the user can input covariates using the argument
 #' \code{datCovariates}. The function makes use of the coxph function in the
 #' survival library.  See \code{help(residuals.coxph)} to learn more.
-#'
+#' 
 #' Residuals are often used to investigate the lack of fit of a model.  For Cox
 #' regression, there is no easy analog to the usual "observed minus predicted"
 #' residual of linear regression. Instead, several specialized residuals have
@@ -36,7 +36,7 @@
 #' used as (uncensored) quantitative variables instead of the original time
 #' censored variable. For example, they could be used as outcome in a
 #' regression tree or regression forest predictor.
-#'
+#' 
 #' @param time is a numeric variable that contains follow up time or time to
 #' event.
 #' @param event is a binary variable that takes on values 1 and 0. 1 means that
@@ -49,16 +49,16 @@
 #' correspond to martingale and deviance residuals respectively.
 #' @note This function can be considered a wrapper of the coxph function.
 #' @author Steve Horvath
-#' @references
-#' Thereneau TM, Grambsch PM, Fleming TR (1990) Martingale-based residuals for
-#' survival models. Biometrika (1990), 77, 1, pp. 147-60
+#' @references Thereneau TM, Grambsch PM, Fleming TR (1990) Martingale-based
+#' residuals for survival models. Biometrika (1990), 77, 1, pp. 147-60
 #' @keywords misc
 #' @examples
+#' 
 #' library(survival)
 #' # simulate time and event data
 #' time1 <- sample(1:100)
 #' event1 <- sample(c(1, 0), 100, replace=TRUE)
-#'
+#' 
 #' event1[1:5] <- NA
 #' time1[1:5] <- NA
 #' # no covariates
@@ -69,6 +69,7 @@
 #' datResiduals <- coxRegressionResiduals(time = time1, event = event1,
 #' datCovariates <- data.frame(z))
 #' cor(datResiduals, use="p")
+#' 
 coxRegressionResiduals <- function(time, event, datCovariates = NULL) {
     if (eval(parse(text= '!require("survival")'))) {
         stop("This function requires package survival. Please install it first.")

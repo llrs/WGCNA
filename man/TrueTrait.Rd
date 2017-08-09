@@ -154,6 +154,7 @@ stratum specific estimates by specifying the strata using the argument
 time.
 }
 \examples{
+
 # observed trait
 y <- rnorm(1000, mean = 50, sd = 20)
 # unobserved, true trait
@@ -181,6 +182,7 @@ sqrt(var(yTRUE - datTrue$y.true2))
 True1[[3]]
 # with the true SD
 sqrt(var(yTRUE - datTrue$y.true3))
+
 }
 \references{
 Klemera P, Doubal S (2006) A new approach to the concept and

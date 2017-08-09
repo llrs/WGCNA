@@ -1,5 +1,6 @@
-
 # plotDendroAndColors ####
+
+
 #' Dendrogram plot with color annotation of objects
 #'
 #' This function plots a hierarchical clustering dendrogram and color
@@ -9,6 +10,7 @@
 #' dendrogram in the upper region, then plots color rows in the region below
 #' the dendrogram.
 #'
+#' @aliases plotDendroAndColors plotDendroAndColors
 #' @param dendro a hierarchical clustering dendrogram such as one produced by
 #' \code{\link[stats]{hclust}}.
 #' @param colors Coloring of objects on the dendrogram. Either a vector (one
@@ -78,7 +80,7 @@
 #' @return None.
 #' @author Peter Langfelder
 #' @seealso \code{\link{plotColorUnderTree}}
-#' @keywords hplot
+#' @keywords hplot hplot
 plotDendroAndColors <- function(dendro,
                                 colors,
                                 groupLabels = NULL,
@@ -156,6 +158,8 @@ plotDendroAndColors <- function(dendro,
 }
 
 # plotMEpairs ####
+
+
 #' Pairwise scatterplots of eigengenes
 #'
 #' The function produces a matrix of plots containing pairwise scatterplots of
@@ -232,6 +236,8 @@ plotMEpairs <- function(datME,
 # a) scale free topology,
 # b) log - log R^2 and
 # c) truncated exponential R^2
+
+
 #' Visual check of scale-free topology
 #'
 #' A simple visula check of scale-free network ropology.
@@ -250,11 +256,9 @@ plotMEpairs <- function(datME,
 #' @param \dots other graphical parameter to the \code{plot} function.
 #' @return None.
 #' @author Steve Horvath
-#' @seealso
-#' \code{\link{softConnectivity}} for connectivity calculation in
+#' @seealso \code{\link{softConnectivity}} for connectivity calculation in
 #' weigheted networks.
-#' @references
-#' Bin Zhang and Steve Horvath (2005) "A General Framework for
+#' @references Bin Zhang and Steve Horvath (2005) "A General Framework for
 #' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
 #' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 #' @keywords misc
@@ -332,6 +336,8 @@ scaleFreePlot <- function(connectivity, nBreaks = 10, truncated = FALSE,
 } # end of function
 
 # plotColorUnderTree ####
+
+
 #' Plot color rows in a given order, for example under a dendrogram
 #'
 #' Plot color rows encoding information about objects in a given order, for
@@ -383,11 +389,9 @@ scaleFreePlot <- function(connectivity, nBreaks = 10, truncated = FALSE,
 #' @return None.
 #' @note This function replaces \code{plotHclustColors} in package
 #' \code{moduleColor}.
-#' @author
-#' Steve Horvath \email{SHorvath@@mednet.ucla.edu} and Peter Langfelder
+#' @author Steve Horvath \email{SHorvath@@mednet.ucla.edu} and Peter Langfelder
 #' \email{Peter.Langfelder@@gmail.com}
-#' @seealso
-#' \code{\link[dynamicTreeCut]{cutreeDynamic}} for module detection in
+#' @seealso \code{\link[dynamicTreeCut]{cutreeDynamic}} for module detection in
 #' a dendrogram
 #'
 #' \code{\link{plotDendroAndColors}} for automated plotting of dendrograms and
@@ -647,6 +651,8 @@ plotOrderedColors <- function(order,
 # clustering tree or the microarray samples. The rows of datExpr correspond to
 # the samples and the columns to the genes.
 # You can optionally input a quantitative microarray sample trait.
+
+
 #' Annotated clustering dendrogram of microarray samples
 #'
 #' This function plots an annotated clustering dendorgram of microarray
@@ -712,8 +718,7 @@ plotOrderedColors <- function(order,
 #' @param \dots other graphical parameters to \code{\link{plot.hclust}}.
 #' @return None.
 #' @author Steve Horvath and Peter Langfelder
-#' @seealso
-#' \code{\link[stats]{dist}}, \code{\link[stats]{hclust}},
+#' @seealso \code{\link[stats]{dist}}, \code{\link[stats]{hclust}},
 #' \code{\link{plotDendroAndColors}}
 #' @keywords hplot misc
 plotClusterTreeSamples <- function(datExpr,
@@ -785,6 +790,8 @@ plotClusterTreeSamples <- function(datExpr,
 }
 
 # TOMplot ####
+
+
 #' Graphical representation of the Topological Overlap Matrix
 #'
 #' Graphical representation of the Topological Overlap Matrix using a heatmap
@@ -873,6 +880,8 @@ TOMplot <- function(dissim, dendro, Colors = NULL, ColorsLeft = Colors,
 }
 
 # plotNetworkHeatmap ####
+
+
 #' Network heatmap plot
 #'
 #' Network heatmap plot.
@@ -957,6 +966,8 @@ plotNetworkHeatmap <- function(datExpr, plotGenes, useTOM = TRUE, power = 6 ,
 } # end of function
 
 # plotModuleSigninficance ####
+
+
 #' Barplot of module significance
 #'
 #' Plot a barplot of gene significance.
@@ -978,11 +989,9 @@ plotNetworkHeatmap <- function(datExpr, plotGenes, useTOM = TRUE, power = 6 ,
 #' @return None.
 #' @author Steve Horvath
 #' @seealso \code{\link{barplot}}, \code{\link{boxplot}}
-#' @references
-#'
-#' Bin Zhang and Steve Horvath (2005) "A General Framework for Weighted Gene
-#' Co-Expression Network Analysis", Statistical Applications in Genetics and
-#' Molecular Biology: Vol. 4: No. 1, Article 17
+#' @references Bin Zhang and Steve Horvath (2005) "A General Framework for
+#' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
+#' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 #'
 #' Dong J, Horvath S (2007) Understanding Network Concepts in Modules, BMC
 #' Systems Biology 2007, 1:24
@@ -1029,13 +1038,14 @@ plotModuleSignificance <- function(geneSignificance, colors, boxplot = FALSE,
 } # end of function
 
 # plotEigengeneNetworks ####
+
+
 #' Eigengene network plot
 #'
 #' This function plots dendrogram and eigengene representations of (consensus)
 #' eigengenes networks.  In the case of conensus eigengene networks the
 #' function also plots pairwise preservation measures between consensus
 #' networks in different sets.
-#'
 #'
 #' Consensus eigengene networks consist of a fixed set of eigengenes
 #' "expressed" in several different sets. Network connection strengths are
@@ -1134,15 +1144,11 @@ plotModuleSignificance <- function(geneSignificance, colors, boxplot = FALSE,
 #' \code{\link{labeledHeatmap}}.
 #' @return None.
 #' @author Peter Langfelder
-#' @seealso
-#'
-#' \code{\link{labeledHeatmap}}, \code{\link{labeledBarplot}} for annotated
-#' heatmaps and barplots
+#' @seealso \code{\link{labeledHeatmap}}, \code{\link{labeledBarplot}} for
+#' annotated heatmaps and barplots
 #'
 #' \code{\link[stats]{hclust}} for hierarchical clustering and dendrogram plots
-#' @references
-#'
-#' For theory and applications of consensus eigengene networks, see
+#' @references For theory and applications of consensus eigengene networks, see
 #'
 #' Langfelder P, Horvath S (2007) Eigengene networks for studying the
 #' relationships between co-expression modules. BMC Systems Biology 2007, 1:54
@@ -1449,6 +1455,8 @@ plotEigengeneNetworks <- function(multiME,
             }
 
 # addGrid ####
+
+
 #' Add grid lines to an existing plot.
 #'
 #' This function adds horizontal and/or vertical grid lines to an existing
@@ -1468,8 +1476,10 @@ plotEigengeneNetworks <- function(multiME,
 #' @keywords hplot
 #' @examples
 #'
+#'
 #'   plot(c(1:10), c(1:10))
 #'   addGrid()
+#'
 #'
 addGrid <- function(linesPerTick = NULL, horiz = TRUE, vert = FALSE,
                     col = "grey30", lty = 3) {
@@ -1517,6 +1527,8 @@ addGrid <- function(linesPerTick = NULL, horiz = TRUE, vert = FALSE,
 }
 
 # addGuidesLines ####
+
+
 #' Add vertical ``guide lines'' to a dendrogram plot
 #'
 #' Adds vertical ``guide lines'' to a dendrogram plot.
@@ -1569,6 +1581,8 @@ addGuideLines <- function(dendro, all = FALSE, count = 50, positions = NULL,
 }
 
 # sizeGrWindow ####
+
+
 #' Opens a graphics window with specified dimensions
 #'
 #' If a graphic device window is already open, it is closed and re-opened with
@@ -1589,6 +1603,8 @@ sizeGrWindow <- function(width, height) {
 }
 
 # scaleFreeFitIndex ####
+
+
 #' Calculation of fitting statistics for evaluating scale free topology fit.
 #'
 #' The function scaleFreeFitIndex calculates several indices (fitting

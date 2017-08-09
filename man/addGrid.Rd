@@ -32,8 +32,10 @@ The function does not work whenever logarithmic scales are in use.
 }
 \examples{
 
+
   plot(c(1:10), c(1:10))
   addGrid()
+
 
 }
 \author{

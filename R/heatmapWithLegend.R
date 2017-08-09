@@ -1,14 +1,12 @@
 # Replacement for the function image.plot
 
-.autoTicks = function(min, max, maxTicks = 6 , tickPos = c(1,2,5))
-{
+.autoTicks = function(min, max, maxTicks = 6 , tickPos = c(1,2,5)) {
   range = max - min
   tick0 = range/maxTicks
   maxTick = max(tickPos)
   # Ticks can only be multiples of tickPos
   mult = 1
-  if (tick0 < maxTick/10)
-  {
+  if (tick0 < maxTick/10) {
      while (tick0 < maxTick/10) {tick0 = 10*tick0; mult = mult*10; }
   } else
      while (tick0 >=maxTick ) {tick0 = tick0/10; mult = mult/10; }
@@ -59,9 +57,9 @@
                      keepLegendSpace = plotLegend,
                      cex.legend = 1, 
                      legendShrink = 0.94,
-                     legendSpace = 0.10,
-                     legendWidth = 0.02,
-                     legendGap = 0.02,
+                     legendSpace = 4 * strwidth("M"),
+                     legendWidth = 1 * strwidth("M"),
+                     legendGap = 0.7 * strwidth("M"),
                      frame = TRUE,
                      frameTicks = FALSE, tickLen = 0.7* strwidth("M"),
                      ...)
@@ -89,10 +87,13 @@
      legendGap = 0
   }
 
-  ymin = yminAll; 
-  ymax = ymaxAll; 
-  xmin = xminAll; 
-  xmax = xmaxAll - legendSpace * (xmaxAll-xminAll)
+  ymin = yminAll
+  ymax = ymaxAll
+  xmin = xminAll
+  xmax = xmaxAll - legendSpace
+  if (xmax < xmin) {
+      stop("'legendSpace is too large, not enough space for the heatmap.")
+  }
 
   xStep = (xmax - xmin)/nCols; 
   xLeft = xmin + c(0:(nCols-1)) * xStep
@@ -111,18 +112,16 @@
 
   dim(colorMat) = dim(data)
 
-  for (c in 1:nCols)
-  {
+  for (c in 1:nCols) {
     rect(xleft = rep(xLeft[c], nRows), xright = rep(xRight[c], nRows),
          ybottom = yBot, ytop = yTop, col = colorMat[, c], border = colorMat[, c])
   }
   if (frame) lines( c(xmin, xmax, xmax, xmin, xmin), c(ymin, ymin, ymax, ymax, ymin) )
 
-  if (plotLegend)
-  {
+  if (plotLegend) {
       # Now plot the legend.
-      .plotColorLegend(xmin = xmaxAll - (xmaxAll - xminAll) * (legendSpace - legendGap),
-                       xmax = xmaxAll - (xmaxAll - xminAll) * (legendSpace - legendGap - legendWidth),
+      .plotColorLegend(xmin = xmaxAll - (legendSpace - legendGap),
+                       xmax = xmaxAll - (legendSpace - legendGap - legendWidth),
                        ymin = yminAll + (1-legendShrink) * (ymaxAll - yminAll),
                        ymax =  ymaxAll - (1-legendShrink) * (ymaxAll - yminAll),
                        lim = zlim,

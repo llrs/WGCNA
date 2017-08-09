@@ -1,6 +1,8 @@
 # Functions for exporting networks to various network visualization software
 
 
+
+
 #' Export network data in format readable by VisANT
 #' 
 #' Exports network data in a format readable and displayable by the VisANT
@@ -85,6 +87,8 @@ exportNetworkToVisANT = function(
 
   invisible(visAntData)
 }
+
+
 
 
 

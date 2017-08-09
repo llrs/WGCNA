@@ -41,7 +41,6 @@ corresponding Student p-values. The output is not as full-featured as
 \code{\link{cor.test}}, but can work with matrices as input.
 }
 \examples{
-
 # generate random data with non-zero correlation
 set.seed(1)
 a = rnorm(100)
@@ -53,7 +52,6 @@ corAndPvalue(x)
 x[c(1:4), 1] = NA
 corAndPvalue(x)
 # Note that changed number of observations.
-
 }
 \references{
 Peter Langfelder, Steve Horvath (2012) Fast R Functions for

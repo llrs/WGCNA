@@ -191,6 +191,8 @@ checkSets <- function(data, checkStructure = FALSE, useSets = NULL) {
 }
 
 # subset.multiSet ####
+
+
 #' Subset rows and columns in a multiSet structure
 #'
 #' The function restricts each \code{data} component to the given columns and
@@ -206,9 +208,10 @@ checkSets <- function(data, checkStructure = FALSE, useSets = NULL) {
 #' columns. In a "loose" multiSet structure, the \code{data} components can be
 #' anything (but for most purposes should be of comparable type and content).
 #'
-#' This function assumes a "strict" multiSet structure unless
-#' \code{permissive} is \code{TRUE}.
+#' This function assumes a "strict" multiSet structure unless \code{permissive}
+#' is \code{TRUE}.
 #'
+#' @aliases subset.multiSet subset subset.default [.multiSet subset.multiSet
 #' @param multiSet A multiSet structure.
 #' @param rowIndex A list in which each component corresponds to a set and is a
 #' vector giving the rows to be retained in that set. All indexing methods
@@ -225,11 +228,16 @@ checkSets <- function(data, checkStructure = FALSE, useSets = NULL) {
 #' if the input \code{multiSet} does not follow the "strict" format.
 #' @param drop logical: should dimensions with extent 1 be dropped?
 #' @param \dots Other arguments
+##' @param x MultiSet Object to subset
+##' @param i Columns to subset of the object
+##' @param j Rows to subset of the object
 #' @return A multiSet structure containing the selected rows and columns. Note
 #' that result always retaines it dimension and other attributes.
 #' @author Peter Langfelder
 #' @seealso \code{\link{multiSet}} to create a multiSet structure.
+#' @keywords misc
 #' @examples
+#'
 #'
 #' data1 <- matrix(rnorm(100), 20, 5)
 #' data2 <- matrix(rnorm(50), 10, 5)
@@ -237,8 +245,7 @@ checkSets <- function(data, checkStructure = FALSE, useSets = NULL) {
 #' md <- multiSet(Set1 = data1, Set2 = data2)
 #' md[, c(1,3)]
 #' md[c(1,3), ]
-#' @keywords misc
-#' @export
+#'
 subset.multiSet <- function(multiSet, rowIndex = NULL, colIndex = NULL,
                       permissive = FALSE, drop = FALSE, ...) {
   size <- checkSets(multiSet, checkStructure = permissive)
@@ -315,23 +322,27 @@ subset.default <- function(multiSet, ...) {
 }
 
 # list2multiSet ####
+
+
 #' Convert a list to a multiSet structure and vice-versa.
 #'
 #' \code{list2multiSet} converts a list to a multiSet structure
 #' \code{multiSet2list} does the inverse.
 #'
-#' A multiSet structure is a vector of lists (one list for each set) where
-#' each list has a component \code{data} containing some useful information.
+#' A multiSet structure is a vector of lists (one list for each set) where each
+#' list has a component \code{data} containing some useful information.
 #'
-#' @aliases list2multiSet multiSet2list
+#' @aliases list2multiSet multiSet2list as.multiSet as.multiSet.default.list
+#' as.multiSet.default multiSet2list
 #' @param data A list to be converted to a multiSet structure.
 #' @param x Object to convert to multiSet or to list
 #' @param \dots Other arguments
+#' @param multiSet A multiSet structure to be converted to a list.
 #' @return For \code{list2multiSet}, a multiSet structure; for
 #' \code{multiSet2list}, the corresponding list.
 #' @author Peter Langfelder
 #' @keywords misc
-#' @export
+#' @export list2multiSet
 list2multiSet <- function(data) {
   out = list()
   for (set in 1:length(data)) {
@@ -342,11 +353,15 @@ list2multiSet <- function(data) {
   out
 }
 
+
+
 #' Convert a list to a multiSet
-#' @export
-#' @method as.multiSet list
-#' @param multiSet list to be converted to a multiSet object, or a multiSet to be
-#' converted to a list
+#'
+#' Convert a list to a multiSet
+#'
+#'
+#' @param multiSet list to be converted to a multiSet object, or a multiSet to
+#' be converted to a list
 #' @param \dots other arguments to be passed to \code{list2multiSet} or
 #' \code{list2multiset}
 #' @return An object of class multiSet or a list.
@@ -371,13 +386,15 @@ as.multiSet.default.list <- function(x) {
 as.multiSet.default <- function(x, ...) {
     list2multiSet(x, ...)
 }
+
+
 #' Convert a multiSet object to a list
 #'
 #' Each dataset is a list with a data element with the expression.
-#' @export
+#'
+#'
 #' @param x muiltiSet object to be converted to list
 #' @param \dots other arguments passed to multiSet2list
-#' @method as.list multiSet
 as.list.multiSet <- function(x, ...) {
     multiSet2list(x, ...)
 }
@@ -486,16 +503,38 @@ multiSet2list <- function(multiSet) {
 # #' diagnostic messages.
 # #' @param mdaIndent Integer specifying the indentation of the printed progress
 # #' messages. Each unit equals two spaces.
+
+
+#' Apply a function to each set in a multiSet structure.
+#'
+#' Inspired by \code{\link{lapply}}, these functions apply a given function to
+#' each \code{data} component in the input \code{multiSet} structure, and
+#' optionally simplify the result to an array if possible.
+#'
+#' A multiSet structure is intended to store (the same type of) data for
+#' multiple, possibly independent, realizations (for example, expression data
+#' for several independent experiments). It is a list where each component
+#' corresponds to an (independent) data set. Each component is in turn a list
+#' that can hold various types of information but must have a \code{data}
+#' component. In a "strict" multiSet structure, the \code{data} components are
+#' required to each be a matrix or a data frame and have the same number of
+#' columns. In a "loose" multiSet structure, the \code{data} components can be
+#' anything (but for most purposes should be of comparable type and content).
+#'
+#' \code{apply.multiSet} works on any "loose" multiSet structure
+#'
+#' @aliases apply.multiSet apply apply.default
+#' @param multiSet A multiSet structure to apply the function over
 #' @param MARGIN Column or row you want to use
-#' @return A multiSet structure containing the results of the supplied
-#' function on each \code{data} component in the input multiSet structure.
-#' Other components are simply copied.
+#' @param FUN Function to be applied.
+#' @param \dots Other arguments to the function \code{FUN}.
+#' @return A multiSet structure containing the results of the supplied function
+#' on each \code{data} component in the input multiSet structure. Other
+#' components are simply copied.
 #' @author Lluís Revilla
-#' @seealso
-#' \code{\link{multiSet}} to create a multiSet structure
+#' @seealso \code{\link{multiSet}} to create a multiSet structure
 #' \code{\link{multiSet.mapply}} for vectorizing over several arguments.
 #' @keywords misc
-#' @export
 apply.multiSet <- function(multiSet, MARGIN, FUN, ...) {
 
   if (!is.multiSet(multiSet, strict = FALSE)) {
@@ -529,8 +568,53 @@ apply.default <- function(multiSet, MARGIN, FUN, ...) {
     base::apply(X = multiSet, MARGIN = MARGIN, FUN = FUN, ...)
 }
 
+multiSet.simplify = function(multiSet) {
+  len = length(multiSet[[1]]$data)
+  dim = dim(multiSet[[1]]$data)
+  simplifiable = TRUE
+  nSets = length(multiSet)
+  for (set in 1:nSets) {
+    if (len!=length(multiSet[[set]]$data)) simplifiable = FALSE
+    if (!isTRUE(all.equal( dim, dim(multiSet[[set]]$data)))) simplifiable = FALSE
+  }
+  if (simplifiable) {
+    if (is.null(dim)) {
+       innerDim = len
+       innerNames = names(multiSet[[1]]$data)
+       if (is.null(innerNames)) innerNames = paste0("X", c(1:len))
+    } else {
+       innerDim = dim
+       innerNames = dimnames(multiSet[[1]]$data)
+       if (is.null(innerNames))
+         innerNames = lapply(innerDim, function(x) {paste0("X", 1:x)})
+       nullIN = sapply(innerNames, is.null)
+       if (any(nullIN))
+         innerNames[nullIN] = lapply(innerDim[nullIN], function(x) {paste0("X", 1:x)})
+    }
+    setNames = names(multiSet)
+    if (is.null(setNames)) setNames = paste0("Set_", 1:nSets)
+    mtd.s = matrix(NA, prod(innerDim), nSets)
+    for (set in 1:nSets)
+      mtd.s[, set] = as.vector(multiSet[[set]]$data)
+
+    dim(mtd.s) = c(innerDim, nSets)
+    if (!is.null(innerNames))
+      dimnames(mtd.s) = c (if (is.list(innerNames)) innerNames else list(innerNames), list(setNames))
+    return(mtd.s)
+  }
+  return(multiSet)
+}
+
+#' @export
+#' @rdname apply.multiSet
+apply.default <- function(multiSet, MARGIN, FUN, ...) {
+    base::apply(X = multiSet, MARGIN = MARGIN, FUN = FUN, ...)
+}
+
 
 # is.multiSet ####
+
+
 #' Determine whether the supplied object is a valid multiSet structure
 #'
 #' Attempts to determine whether the supplied object is a valid multiSet
@@ -559,7 +643,7 @@ apply.default <- function(multiSet, MARGIN, FUN, ...) {
 #' @seealso Other multiSet handling functions whose names start with
 #' \code{multiSet.}
 #' @keywords misc
-#' @export
+#' @export is.multiSet
 is.multiSet <- function(x, strict = TRUE) {
     if ("multiSet" %in% class(x)) {
         return(TRUE)
@@ -573,6 +657,8 @@ is.multiSet <- function(x, strict = TRUE) {
 }
 
 # multiSet.mapply ####
+
+
 #' Apply a function to elements of given multiSet structures.
 #'
 #' Inspired by \code{\link{mapply}}, this function applies a given function to
@@ -590,9 +676,9 @@ is.multiSet <- function(x, strict = TRUE) {
 #' anything (but for most purposes should be of comparable type and content).
 #'
 #' This function applies the function \code{FUN} to each \code{data} component
-#' of those arguments in \code{...} that are multiSet structures in the
-#' "loose" sense, and to each component of those arguments in \code{...} that
-#' are not multiSet structures.
+#' of those arguments in \code{...} that are multiSet structures in the "loose"
+#' sense, and to each component of those arguments in \code{...} that are not
+#' multiSet structures.
 #'
 #' @param FUN Function to be applied.
 #' @param \dots Arguments to be vectorized over. These can be multiSet
@@ -614,11 +700,11 @@ is.multiSet <- function(x, strict = TRUE) {
 #' argument has an effect only if \code{mdmaExistingResults} is non-NULL. If
 #' the length of \code{mdmaExistingResults} (call the length `k') is less than
 #' the number of sets in \code{multiSet}, the function assumes that the
-#' existing results correspond to the first `k' sets in \code{multiSet} and
-#' the rest of the sets are automatically calculated, irrespective of the
-#' setting of \code{mdmaUpdateIndex}. The argument \code{mdmaUpdateIndex} can
-#' be used to specify re-calculation of some (or all) of the results that
-#' already exist in \code{mdmaExistingResults}.
+#' existing results correspond to the first `k' sets in \code{multiSet} and the
+#' rest of the sets are automatically calculated, irrespective of the setting
+#' of \code{mdmaUpdateIndex}. The argument \code{mdmaUpdateIndex} can be used
+#' to specify re-calculation of some (or all) of the results that already exist
+#' in \code{mdmaExistingResults}.
 #' @param mdmaSimplify Logical: should simplification of the result to an array
 #' be attempted? The simplification is fragile and can produce unexpected
 #' errors; use the default \code{FALSE} if that happens.
@@ -642,13 +728,15 @@ is.multiSet <- function(x, strict = TRUE) {
 #' structure.
 #' @keywords misc
 #' @examples
+#'
 #' data1 <- matrix(rnorm(100L), 20L, 5L)
 #' data2 <- matrix(rnorm(50L), 10L, 5L)
 #' colnames(data1) <- LETTERS[1:5]
 #' colnames(data2) <- LETTERS[2:6]
 #' md <- list2multiSet(list(Set1 = data1, Set2 = data2))
 #' multiSet.mapply(md, FUN = sum)
-#' @export
+#'
+#' @export multiSet.mapply
 multiSet.mapply <- function(FUN, ..., MoreArgs = NULL,
                             # How to interpret the input
                             mdma.argIsMultiData = NULL,
@@ -715,31 +803,30 @@ multiSet.mapply <- function(FUN, ..., MoreArgs = NULL,
   return(res)
 }
 
-#' If possible, simplify a multiData structure to a 3-dimensional array
+
+
+#' If possible, simplify a multiSet structure to a 3-dimensional array
 #'
-#' This function attempts to put all \code{data} components into a 3-dimensional
-#'  array, with the last dimension corresponding to the sets. This is only
-#' possible if all \code{data} components are matrices or data frames with the
-#' same dimension.
+#' This function attempts to put all \code{data} components into a
+#' 3-dimensional array, with the last dimension corresponding to the sets. This
+#' is only possible if all \code{data} components are matrices or data frames
+#' with the same dimension.
+#'
+#' A multiSet structure is intended to store (the same type of) data for
+#' multiple, possibly independent, realizations (for example, expression data
+#' for several independent experiments). It is a list where each component
+#' corresponds to an (independent) data set. Each component is in turn a list
+#' that can hold various types of information but must have a \code{data}
+#' component. In a "strict" multiSet structure, the \code{data} components are
+#' required to each be a matrix or a data frame and have the same number of
+#' columns. In a "loose" multiSet structure, the \code{data} components can be
+#' anything (but for most purposes should be of comparable type and content).
+#'
 #' @param multiSet Object of class multiSet
-#' @details
-#' A multiData structure is intended to store (the same type of) data for
-#' multiple, possibly independent, realizations
-#' (for example, expression data for several independent experiments). It is a
-#' list where each component corresponds to an (independent) data set. Each
-#' component is in turn a list that can hold various types of information but
-#' must have a \code{data} component. In a "strict" multiData structure, the
-#' \code{data} components are required to each be a matrix or a data frame and
-#' have the same number of columns. In a "loose" multiData structure, the
-#' \code{data} components can be anything (but for most purposes should be of
-#' comparable type and content).
-#' @return
-#' A 3-dimensional array collecting all \code{data} components.
-#' @note
-#' The function is relatively fragile and may fail. Use at your own risk.
-#' @seealso
-#' \code{\link{multiSet}} to create a multiData structure
-#' \code{\link{multiSet2list}} for converting multiData structures to plain
+#' @return A 3-dimensional array collecting all \code{data} components.
+#' @note The function is relatively fragile and may fail. Use at your own risk.
+#' @seealso \code{\link{multiSet}} to create a multiSet structure
+#' \code{\link{multiSet2list}} for converting multiSet structures to plain
 #' lists.
 simplify <- function(multiSet) {
         len <- length(multiSet[[1]]$data)
@@ -769,7 +856,7 @@ simplify <- function(multiSet) {
                         paste0("X", 1:x)
                     })
                 }
-                nullIN <- sapply(innerNames, is.null);
+                nullIN <- sapply(innerNames, is.null)
                 if (any(nullIN)) {
                     innerNames[nullIN] <- lapply(innerDim[nullIN], function(x) {
                         paste0("X", 1:x)
@@ -785,7 +872,7 @@ simplify <- function(multiSet) {
                 mtd.s[, set] <- as.vector(multiSet[[set]]$data)
             }
 
-            dim(mtd.s) <- c(innerDim, nSets);
+            dim(mtd.s) <- c(innerDim, nSets)
             if (!is.null(innerNames))
                 dimnames(mtd.s) <- c(ifelse(is.list(innerNames),
                                            innerNames,
@@ -797,6 +884,8 @@ simplify <- function(multiSet) {
 
 }
 # multiSet.rbindSelf ####
+
+
 #' Turn a multiSet structure into a single matrix or data frame.
 #'
 #' This function "rbinds" the \code{data} components of all sets in the input
@@ -821,7 +910,8 @@ simplify <- function(multiSet) {
 #'
 #' \code{\link{rbind}} for various subtleties of the row binding operation.
 #' @keywords misc
-#' @export
+#' @aliases multiSet.rbindSelf
+#' @export multiSet.rbindSelf
 multiSet.rbindSelf <- function(multiSet){
   size <- checkSets(multiSet)
   out <- NULL
@@ -837,6 +927,8 @@ multiSet.rbindSelf <- function(multiSet){
 }
 
 # multiSet.setAttr ####
+
+
 #' Set attributes on each component of a multiSet structure
 #'
 #' Set attributes on each \code{data} component of a multiSet structure
@@ -853,7 +945,7 @@ multiSet.rbindSelf <- function(multiSet){
 #'
 #' \code{is.multiSet} for a description of the multiSet structure.
 #' @keywords misc
-#' @export
+#' @export multiSet.setAttr
 multiSet.setAttr <- function(multiSet, attribute, valueList) {
   size = checkSets(multiSet)
   ind <- 1
@@ -868,6 +960,8 @@ multiSet.setAttr <- function(multiSet, attribute, valueList) {
 }
 
 # multiSet.colnames ####
+
+
 #' Get and set column names in a multiSet structure.
 #'
 #' Get and set column names on each \code{data} component in a multiSet
@@ -883,19 +977,17 @@ multiSet.setAttr <- function(multiSet, attribute, valueList) {
 #' columns. In a "loose" multiSet structure, the \code{data} components can be
 #' anything (but for most purposes should be of comparable type and content).
 #'
-#' The \code{colnames.multiSet}  assume (and checks for) a"strict" multiSet
+#' The \code{colnames.multiSet} assume (and checks for) a"strict" multiSet
 #' structure.
 #'
 #' @param multiSet A multiSet structure
 #' @param value A vector (coercible to character) of column names.
 #' @param \dots Other arguments passed
-#' @return The multiSet structure with the column names
-#' set in all \code{data} components.
-#' @rdname setColnames
+#' @return The multiSet structure with the column names set in all \code{data}
+#' components.
 #' @author Peter Langfelder
 #' @seealso \code{\link{multiSet}} to create a multiSet structure.
 #' @keywords misc
-#' @export
 `colnames<-.multiSet` <- function(multiSet, value) {
   size <- checkSets(multiSet)
   for (set in 1:size$nSets) {
@@ -906,13 +998,13 @@ multiSet.setAttr <- function(multiSet, attribute, valueList) {
 }
 
 #' @export
-#' @rdname setColnames
+#' @rdname colnames.multiSet
 `colnames<-` <- function(multiSet, value) {
     UseMethod("colnames<-", multiSet)
 }
 
 #' @export
-#' @rdname setColnames
+#' @rdname colnames.multiSet
 `colnames<-.default` <- function(multiSet, value) {
     base::`colnames<-`(multiSet, value)
 }
@@ -1024,3 +1116,4 @@ keepCommonProbes <- function(multiExpr, orderBy = 1) {
     }
     multiExpr
 }
+

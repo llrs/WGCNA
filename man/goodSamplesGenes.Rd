@@ -36,9 +36,9 @@ make the output progressively more and more verbose.}
 indentation, each unit adds two spaces.}
 }
 \value{
-A list with the foolowing components: \item{goodSamples}{ A logical vector
-with one entry per sample that is \code{TRUE} if the sample is considered
-good and \code{FALSE} otherwise.  }
+A list with the foolowing components: \item{goodSamples}{ A logical
+vector with one entry per sample that is \code{TRUE} if the sample is
+considered good and \code{FALSE} otherwise.  }
 
 \item{goodGenes}{ A logical vector with one entry per gene that is
 \code{TRUE} if the gene is considered good and \code{FALSE} otherwise.  }

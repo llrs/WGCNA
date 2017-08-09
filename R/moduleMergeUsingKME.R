@@ -1,14 +1,16 @@
 ## Merge modules and reassign module genes based on kME values
 
 
+
+
 #' Merge modules and reassign genes using kME.
-#'
+#' 
 #' This function takes an expression data matrix (and other user-defined
 #' parameters), calculates the module membership (kME) values, and adjusts the
 #' module assignments, merging modules that are not sufficiently distinct and
 #' reassigning modules that were originally assigned suboptimally.
-#'
-#'
+#' 
+#' 
 #' @param datExpr An expression data matrix, with samples as rows, genes (or
 #' probes) as column.
 #' @param colorh The color vector (module assignments) corresponding to the
@@ -54,8 +56,9 @@
 #' @author Jeremy Miller
 #' @keywords misc
 #' @examples
-#'
-#'
+#' 
+#' 
+#' 
 #' ## First simulate some data and the resulting network dendrogram
 #' set.seed(100)
 #' MEturquoise = sample(1:100,50)
@@ -69,7 +72,7 @@
 #' dat1 = simulateDatExpr(ME, 400, c(0.15,0.13,0.12,0.10,0.09,0.09,0.1), signed=TRUE)
 #' TOM1  = TOMsimilarityFromExpr(dat1$datExpr, networkType="signed")
 #' tree1 = fastcluster::hclust(as.dist(1-TOM1),method="average")
-#'
+#' 
 #' ## Here is an example using different mergePercentages,
 #' # setting an inclusive threshPercent (91)
 #' colorh1  <- colorPlot <- labels2colors(dat1$allLabels)
@@ -79,7 +82,7 @@
 #'                      moduleMergeUsingKME(dat1$datExpr,colorh1,
 #'                         threshPercent=91, mergePercent=m)$moduleColors)
 #' plotDendroAndColors(tree1, colorPlot, c("ORIG",merges), dendroLabels=FALSE)
-#'
+#' 
 #' ## Here is an example using a lower reassignScale (so that more genes get reassigned)
 #' colorh1  <- colorPlot <- labels2colors(dat1$allLabels)
 #' merges = c(65,40,20,5)
@@ -87,10 +90,10 @@
 #'   moduleMergeUsingKME(dat1$datExpr,colorh1,threshPercent=91,
 #'                       reassignScale=0.7, mergePercent=m)$moduleColors)
 #' plotDendroAndColors(tree1, colorPlot, c("ORIG",merges), dendroLabels=FALSE)
-#'
+#' 
 #' ## Here is an example using a less-inclusive threshPercent (75),
 #' # little if anything is merged.
-#'
+#' 
 #' colorh1  <- colorPlot <- labels2colors(dat1$allLabels)
 #' merges = c(65,40,20,5)
 #' for (m in merges)  colorPlot = cbind(colorPlot,
@@ -99,8 +102,9 @@
 #' plotDendroAndColors(tree1, colorPlot, c("ORIG",merges), dendroLabels=FALSE)
 #' # (Note that with real data, the default threshPercent=50 usually results
 #' # in some modules being merged)
-#'
-#'
+#' 
+#' 
+#' 
 moduleMergeUsingKME <- function (datExpr, colorh, ME=NULL, threshPercent=50, mergePercent = 25, reassignModules=TRUE,
 convertGrey=TRUE, omitColors="grey", reassignScale=1, threshNumber=NULL) {
 

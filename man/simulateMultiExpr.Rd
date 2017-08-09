@@ -128,8 +128,8 @@ The material is posted at
 http://www.genetics.ucla.edu/labs/horvath/CoexpressionNetwork/EigengeneNetwork/SupplementSimulations.pdf.
 }
 \seealso{
-\code{\link{simulateEigengeneNetwork}} for a simulation of eigengenes with a
-given causal structure
+\code{\link{simulateEigengeneNetwork}} for a simulation of
+eigengenes with a given causal structure
 
 \code{\link{simulateDatExpr}} for simulation of individual data sets
 

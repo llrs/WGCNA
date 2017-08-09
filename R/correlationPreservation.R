@@ -1,14 +1,15 @@
-
 # CorrelationPreservation ####
+
+
 #' Preservation of eigengene correlations
-#'
+#' 
 #' Calculates a summary measure of preservation of eigengene correlations
 #' across data sets
-#'
+#' 
 #' The function calculates the preservation of correlation of each eigengene
 #' with all other eigengenes (optionally except the 'grey' eigengene) in all
 #' pairs of sets.
-#'
+#' 
 #' @param multiME consensus module eigengenes in a multi-set format. A vector
 #' of lists with one list corresponding to each set. Each list must contain a
 #' component \code{data} that is a data frame whose columns are consensus
@@ -25,11 +26,9 @@
 #' set comparisons. The two sets compared in each column are indicated in the
 #' column name.
 #' @author Peter Langfelder
-#' @seealso
-#' \code{\link{multiSetMEs}} and module\code{\link{checkSets}} in
+#' @seealso \code{\link{multiSetMEs}} and module\code{\link{checkSets}} in
 #' package moduleColor for more on eigengenes and the multi-set format
-#' @references
-#' Langfelder P, Horvath S (2007) Eigengene networks for studying
+#' @references Langfelder P, Horvath S (2007) Eigengene networks for studying
 #' the relationships between co-expression modules. BMC Systems Biology 2007,
 #' 1:54
 #' @keywords misc
@@ -69,17 +68,19 @@ correlationPreservation <- function(multiME, setLabels, excludeGrey = TRUE,
 }
 
 # setCorrelationPreservation ####
+
+
 #' Summary correlation preservation measure
-#'
+#' 
 #' Given consensus eigengenes, the function calculates the average correlation
 #' preservation pair-wise for all pairs of sets.
-#'
+#' 
 #' For each pair of sets, the function calculates the average preservation of
 #' correlation among the eigengenes. Two preservation measures are available,
 #' the abosolute preservation (high if the two correlations are similar and low
 #' if they are different), and the hyperbolically scaled preservation, which
 #' de-emphasizes preservation of low correlation values.
-#'
+#' 
 #' @param multiME consensus module eigengenes in a multi-set format. A vector
 #' of lists with one list corresponding to each set. Each list must contain a
 #' component \code{data} that is a data frame whose columns are consensus
@@ -98,13 +99,10 @@ correlationPreservation <- function(multiME, setLabels, excludeGrey = TRUE,
 #' in \code{multiME}, containing the pairwise average correlation preservation
 #' values. Names and rownames are set to entries of \code{setLabels}.
 #' @author Peter Langfelder
-#' @seealso
-#'
-#' \code{\link{multiSetMEs}} for module eigengene calculation
-#'
+#' @seealso \code{\link{multiSetMEs}} for module eigengene calculation
+#' 
 #' \code{\link{plotEigengeneNetworks}} for eigengene network visualization.
-#' @references
-#' Langfelder P, Horvath S (2007) Eigengene networks for studying
+#' @references Langfelder P, Horvath S (2007) Eigengene networks for studying
 #' the relationships between co-expression modules. BMC Systems Biology 2007,
 #' 1:54
 #' @keywords misc
@@ -149,27 +147,30 @@ setCorrelationPreservation <- function(multiME, setLabels, excludeGrey = TRUE,
     }
 
 # preservationNetworkConnectivity ####
+
+
 #' Network preservation calculations
-#'
+#' 
 #' This function calculates several measures of gene network preservation.
 #' Given gene expression data in several individual data sets, it calculates
 #' the individual adjacency matrices, forms the preservation network and
 #' finally forms several summary measures of adjacency preservation for each
 #' node (gene) in the network.
-#'
+#' 
 #' The preservation network is formed from adjacencies of compared sets. For
 #' 'complete' preservations, all given sets are compared at once; for
 #' 'pairwise' preservations, the sets are compared in pairs. Unweighted
 #' preservations are simple mean preservations for each node; their weighted
 #' counterparts are weighted averages in which a preservation of adjacencies
 #' \eqn{A^{(1)}_{ij}}{A[i,j; 1]} and \eqn{A^{(2)}_{ij}}{A[i,j; 2]} of nodes
-#' \eqn{i,j} between sets 1 and 2 is weighted by \eqn{[ (A^{(1)}_{ij} +
-#' A^{(2)}_{ij} )/2]^weightPower}{ ( (A[i,j; 1]+A[i,j; 2])/2)^weightPower}. The
-#' hyperbolic preservation is based on \eqn{tanh[( max -
-#' min)/(max+min)^2]}{tanh[( max - min)/(max+min)^2]}, where \eqn{max}{max} and
-#' \eqn{min}{min} are the componentwise maximum and minimum of the compared
-#' adjacencies, respectively.
-#'
+#' \eqn{i,j} between sets 1 and 2 is weighted by \eqn{[ (A^{(1)}_{ij} + }{ (
+#' (A[i,j; 1]+A[i,j; 2])/2)^weightPower}\eqn{A^{(2)}_{ij} )/2]^weightPower}{ (
+#' (A[i,j; 1]+A[i,j; 2])/2)^weightPower}. The hyperbolic preservation is based
+#' on \eqn{tanh[( max - }{tanh[( max -
+#' min)/(max+min)^2]}\eqn{min)/(max+min)^2]}{tanh[( max - min)/(max+min)^2]},
+#' where \eqn{max}{max} and \eqn{min}{min} are the componentwise maximum and
+#' minimum of the compared adjacencies, respectively.
+#' 
 #' @param multiExpr expression data in the multi-set format (see
 #' \code{\link{checkSets}}). A vector of lists, one per set. Each set must
 #' contain a component \code{data} that contains the expression data, with rows
@@ -204,43 +205,42 @@ setCorrelationPreservation <- function(multiME, setLabels, excludeGrey = TRUE,
 #' @param indent indentation for diagnostic messages. Zero means no
 #' indentation, each unit adds two spaces.
 #' @return A list with the following components:
-#'
+#' 
 #' \item{pairwise}{ a matrix with rows corresponding to genes and columns to
 #' unique pairs of given sets, giving the pairwise preservation of the
 #' adjacencies connecting the gene to all other genes.}
-#'
+#' 
 #' \item{complete}{ a vector with one entry for each input gene containing the
 #' complete mean preservation of the adjacencies connecting the gene to all
 #' other genes.}
-#'
+#' 
 #' \item{pairwiseWeighted}{ a matrix with rows corresponding to genes and
 #' columns to unique pairs of given sets, giving the pairwise weighted
 #' preservation of the adjacencies connecting the gene to all other genes.}
-#'
+#' 
 #' \item{completeWeighted}{ a vector with one entry for each input gene
 #' containing the complete weighted mean preservation of the adjacencies
 #' connecting the gene to all other genes.}
-#'
+#' 
 #' \item{pairwiseHyperbolic}{ a matrix with rows corresponding to genes and
 #' columns to unique pairs of given sets, giving the pairwise hyperbolic
 #' preservation of the adjacencies connecting the gene to all other genes.}
-#'
+#' 
 #' \item{completeHyperbolic}{ a vector with one entry for each input gene
 #' containing the complete mean hyperbolic preservation of the adjacencies
 #' connecting the gene to all other genes.}
-#'
+#' 
 #' \item{pairwiseWeightedHyperbolic}{ a matrix with rows corresponding to genes
 #' and columns to unique pairs of given sets, giving the pairwise weighted
 #' hyperbolic preservation of the adjacencies connecting the gene to all other
 #' genes.}
-#'
+#' 
 #' \item{completeWeightedHyperbolic}{ a vector with one entry for each input
 #' gene containing the complete weighted hyperbolic mean preservation of the
 #' adjacencies connecting the gene to all other genes.}
 #' @author Peter Langfelder
 #' @seealso \code{\link{adjacency}} for calculation of adjacency
-#' @references
-#' Langfelder P, Horvath S (2007) Eigengene networks for studying
+#' @references Langfelder P, Horvath S (2007) Eigengene networks for studying
 #' the relationships between co-expression modules. BMC Systems Biology 2007,
 #' 1:54
 #' @keywords misc

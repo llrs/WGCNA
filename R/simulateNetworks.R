@@ -139,27 +139,29 @@ simulateEigengeneNetwork <- function(causeMat, anchorIndex, anchorVectors,
 # corPower controls how fast the correlation drops with index i in the module
 # the curve is roughly x^{1/corPower} with x<1 and x~0 near the "center", so the
 #  higher the power, the faster the curve rises.
+
+
 #' Simulate a gene co-expression module
-#'
+#' 
 #' Simulation of a single gene co-expression module.
-#'
+#' 
 #' Module genes are simulated around the eigengene by choosing them such that
 #' their (expected) correlations with the seed eigengene decrease progressively
 #' from (just below) \code{maxCor} to \code{minCor}. The genes are otherwise
 #' independent from one another. The variable \code{corPower} determines how
 #' fast the correlation drops towards \code{minCor}. Higher powers lead to a
 #' faster frop-off; \code{corPower} must be above zero but need not be integer.
-#'
+#' 
 #' If \code{signed} is \code{FALSE}, the genes are simulated so as to be part
 #' of an unsigned network module, that is some genes will be simulated with a
 #' negative correlation with the seed eigengene (but of the same absolute value
 #' that a positively correlated gene would be simulated with). The proportion
 #' of genes with negative correlation is controlled by \code{propNegativeCor}.
-#'
+#' 
 #' Optionally, the function can also simulate genes that are "near" the module,
 #' meaning they are simulated with a low but non-zero correlation with the seed
 #' eigengene. The correlations run between \code{minCor} and zero.
-#'
+#' 
 #' @param ME seed module eigengene.
 #' @param nGenes number of genes in the module to be simulated. Must be
 #' non-zero.
@@ -189,29 +191,28 @@ simulateEigengeneNetwork <- function(causeMat, anchorIndex, anchorVectors,
 #' @return A matrix containing the expression data with rows corresponding to
 #' samples and columns to genes.
 #' @author Peter Langfelder
-#' @seealso
-#'
-#' \code{\link{simulateEigengeneNetwork}} for a simulation of eigengenes with a
-#' given causal structure
-#'
+#' @seealso \code{\link{simulateEigengeneNetwork}} for a simulation of
+#' eigengenes with a given causal structure
+#' 
 #' \code{\link{simulateDatExpr}} for simulations of whole datasets consisting
 #' of multiple modules
-#'
+#' 
 #' \code{\link{simulateDatExpr5Modules}} for a simplified interface to
 #' expression simulations
-#'
+#' 
 #' \code{\link{simulateMultiExpr}} for a simulation of several related data
 #' sets.
 #' @references A short description of the simulation method can also be found
 #' in the Supplementary Material to the article
-#'
+#' 
 #' Langfelder P, Horvath S (2007) Eigengene networks for studying the
 #' relationships between co-expression modules. BMC Systems Biology 2007, 1:54.
-#'
+#' 
 #' The material is posted at
 #' \url{http://www.genetics.ucla.edu/labs/horvath/CoexpressionNetwork/EigengeneNetwork/SupplementSimulations.pdf}.
 #' @keywords misc
 #' @examples
+#' 
 #' nSamples <- 50
 #' nGenes <- 30
 #' y <- sample(c(1,2), nSamples, replace = TRUE)
@@ -220,6 +221,7 @@ simulateEigengeneNetwork <- function(causeMat, anchorIndex, anchorVectors,
 #' geneMeans <- sample(c(4, 5, 10), nGenes, replace = TRUE)
 #' module3 <- simulateModule(scale(y), nGenes, signed = TRUE,
 #'                           geneMeans = geneMeans)
+#' 
 simulateModule <- function(ME, nGenes, nNearGenes = 0, minCor = 0.3, maxCor = 1,
                            corPower = 1, signed = FALSE, propNegativeCor = 0.3,
                            geneMeans = NULL, verbose = 0, indent = 0) {
@@ -289,12 +291,14 @@ simulateModule <- function(ME, nGenes, nNearGenes = 0, minCor = 0.3, maxCor = 1,
 }
 
 # simulateSmallLayer ####
+
+
 #' Simulate small modules
-#'
+#' 
 #' This function simulates a set of small modules. The primary purpose is to
 #' add a submodule structure to the main module structure simulated by
 #' \code{\link{simulateDatExpr}}.
-#'
+#' 
 #' Module eigenvectors are chosen randomly and independently. Module sizes are
 #' chosen randomly from an exponential distribution with mean equal
 #' \code{averageModuleSize}. Two thirds of genes in each module are simulated
@@ -311,9 +315,9 @@ simulateModule <- function(ME, nGenes, nNearGenes = 0, minCor = 0.3, maxCor = 1,
 #' correlation with the gene index; values higher than 1 will result in the
 #' correlation approaching \code{minCor * maxCor} faster and lower than 1
 #' slower.
-#'
+#' 
 #' The simulated genes will be returned in the order given in \code{order}.
-#'
+#' 
 #' @param order a vector giving the simulation order for vectors. See details.
 #' @param nSamples integer giving the number of samples to be simulated.
 #' @param minCor a multiple of \code{maxCor} (see below) giving the minimum
@@ -333,10 +337,8 @@ simulateModule <- function(ME, nGenes, nNearGenes = 0, minCor = 0.3, maxCor = 1,
 #' @return A matrix of simulated gene expressions, with dimension
 #' \code{(nSamples, length(order))}.
 #' @author Peter Langfelder
-#' @seealso
-#'
-#' \code{\link{simulateModule}} for simulation of individual modules
-#'
+#' @seealso \code{\link{simulateModule}} for simulation of individual modules
+#' 
 #' \code{\link{simulateDatExpr}} for the main gene expression simulation
 #' function.
 #' @keywords misc
@@ -393,12 +395,13 @@ simulateSmallLayer <- function(order, nSamples, minCor = 0.3, maxCor = 0.5,
 # in a module (exponential distribution), average expression strength (
 # exponential density) and inverse density.
 # ScatteredModuleLayers: Layers of small modules whose order is random.
+
+
 #' Simulation of expression data
-#'
+#' 
 #' Simulation of expression data with a customizable modular structure and
 #' several different types of noise.
-#'
-#'
+#' 
 #' Given \code{eigengenes} can be unrelated or they can exhibit non-trivial
 #' correlations. Each module is simulated separately from others. The
 #' expression profiles are chosen such that their correlations with the
@@ -407,7 +410,7 @@ simulateSmallLayer <- function(order, nSamples, minCor = 0.3, maxCor = 0.5,
 #' \code{corPower} can be chosen to control the behaviour of the simulated
 #' correlation with the gene index; values higher than 1 will result in the
 #' correlation approaching \code{minCor} faster and lower than 1 slower.
-#'
+#' 
 #' Numbers of genes in each module are specified (as fractions of the total
 #' number of genes \code{nGenes}) by \code{modProportions}. The last entry in
 #' \code{modProportions} corresponds to the genes that will be simulated as
@@ -416,13 +419,13 @@ simulateSmallLayer <- function(order, nSamples, minCor = 0.3, maxCor = 0.5,
 #' partitioned into groups and simulated to be "close" to the proper modules,
 #' that is with small but non-zero correlations (between \code{minCor} and 0)
 #' with the module eigengene.
-#'
+#' 
 #' If \code{signed} is set \code{FALSE}, the correlation for some of the module
 #' genes is chosen negative (but the absolute values remain the same as they
 #' would be for positively correlated genes). To ensure consistency for
 #' simulations of multiple sets, the indices of the negatively correlated genes
 #' are fixed and distributed evenly.
-#'
+#' 
 #' In addition to the primary module structure, a secondary structure can be
 #' optionally simulated. Modules in the secondary structure have sizes chosen
 #' from an exponential distribution with mean equal
@@ -434,13 +437,13 @@ simulateSmallLayer <- function(order, nSamples, minCor = 0.3, maxCor = 0.5,
 #' structure can be simulated in several layers; their number is given by
 #' \code{SubmoduleLayers}. Genes in these submodules are ordered in the same
 #' order as in the main modules.
-#'
+#' 
 #' In addition to the ordered submodule structure, a scattered submodule
 #' structure can be simulated as well. This structure can be viewed as noise
 #' that tends to correlate random groups of genes. The size and effect
 #' parameters are the same as for the ordered submodules, and the number of
 #' layers added is controlled by \code{nScatteredModuleLayers}.
-#'
+#' 
 #' @param eigengenes a data frame containing the seed eigengenes for the
 #' simulated modules. Rows correspond to samples and columns to modules.
 #' @param nGenes total number of genes to be simulated.
@@ -488,38 +491,36 @@ simulateSmallLayer <- function(order, nSamples, minCor = 0.3, maxCor = 0.5,
 #' @return A list with the following components: \item{datExpr}{ simulated
 #' expression data in a data frame whose columns correspond genes and rows to
 #' samples. }
-#'
+#' 
 #' \item{setLabels}{ simulated module assignment. Module labels are numeric,
 #' starting from 1. Genes simulated to be outside of proper modules have label
 #' 0.  Modules that are left out (specified in \code{leaveOut}) are indicated
 #' as 0 here. }
-#'
+#' 
 #' \item{allLabels}{ simulated module assignment. Genes that belong to leftout
 #' modules (specified in \code{leaveOut}) are indicated by their would-be
 #' assignment here. }
-#'
+#' 
 #' \item{labelOrder}{ a vector specifying the order in which labels correspond
 #' to the given eigengenes, that is \code{labelOrder[1]} is the label assigned
 #' to module whose seed is \code{eigengenes[, 1]} etc.  }
 #' @author Peter Langfelder
-#' @seealso
-#'
-#' \code{\link{simulateEigengeneNetwork}} for a simulation of eigengenes with a
-#' given causal structure
-#'
+#' @seealso \code{\link{simulateEigengeneNetwork}} for a simulation of
+#' eigengenes with a given causal structure
+#' 
 #' \code{\link{simulateModule}} for simulations of individual modules
-#'
+#' 
 #' \code{\link{simulateDatExpr5Modules}} for a simplified interface to
 #' expression simulations
-#'
+#' 
 #' \code{\link{simulateMultiExpr}} for a simulation of several related data
 #' sets.
 #' @references A short description of the simulation method can also be found
 #' in the Supplementary Material to the article
-#'
+#' 
 #' Langfelder P, Horvath S (2007) Eigengene networks for studying the
 #' relationships between co-expression modules. BMC Systems Biology 2007, 1:54.
-#'
+#' 
 #' The material is posted at
 #' http://www.genetics.ucla.edu/labs/horvath/CoexpressionNetwork/EigengeneNetwork/SupplementSimulations.pdf.
 #' @keywords misc
@@ -732,10 +733,12 @@ simulateDatExpr <- function(eigengenes, nGenes, modProportions, minCor = 0.3,
 } # end of function
 
 # simulateMultiExpr ####
+
+
 #' Simulate multi-set expression data
-#'
+#' 
 #' Simulation of expression data in several sets with relate module structure.
-#'
+#' 
 #' For details of simulation of individual data sets and the meaning of
 #' individual set simulation arguments, see \code{\link{simulateDatExpr}}. This
 #' function simulates several data sets at a time and puts the result in a
@@ -743,7 +746,7 @@ simulateDatExpr <- function(eigengenes, nGenes, modProportions, minCor = 0.3,
 #' memberships are also the same, but modules can optionally be ``dissolved'',
 #' that is their genes will be simulated as unassigned. Such ``dissolved'', or
 #' left out, modules can be specified in the matrix \code{leaveOut}.
-#'
+#' 
 #' @param eigengenes the seed eigengenes for the simulated modules in a
 #' multi-set format. A list with one component per set. Each component is again
 #' a list that must contain a component \code{data}. This is a data frame of
@@ -795,46 +798,44 @@ simulateDatExpr <- function(eigengenes, nGenes, modProportions, minCor = 0.3,
 #' @param indent indentation for diagnostic messages. Zero means no
 #' indentation, each unit adds two spaces.
 #' @return A list with the following components:
-#'
+#' 
 #' \item{multiExpr }{simulated expression data in multi-set format analogous to
 #' that of the input \code{eigengenes}.  A list with one component per set.
 #' Each component is again a list that must contains a component \code{data}.
 #' This is a data frame of expression data for the corresponding data set.
 #' Columns correspond to genes, rows to samples.}
-#'
+#' 
 #' \item{setLabels}{a matrix of dimensions (number of genes) times (number of
 #' sets) that contains module labels for each genes in each simulated data set.
 #' }
-#'
+#' 
 #' \item{allLabels}{a matrix of dimensions (number of genes) times (number of
 #' sets) that contains the module labels that would be simulated if no module
 #' were left out using \code{leaveOut}. This means that all columns of the
 #' matrix are equal; the columns are repeated for convenience so
 #' \code{allLabels} has the same dimensions as \code{setLabels}. }
-#'
+#' 
 #' \item{labelOrder}{a matrix of dimensions (number of modules) times (number
 #' of sets) that contains the order in which module labels were assigned to
 #' genes in each set. The first label is assigned to genes 1...(module size of
 #' module labeled by first label), the second label to the following batch of
 #' genes etc.}
 #' @author Peter Langfelder
-#' @seealso
-#'
-#' \code{\link{simulateEigengeneNetwork}} for a simulation of eigengenes with a
-#' given causal structure
-#'
+#' @seealso \code{\link{simulateEigengeneNetwork}} for a simulation of
+#' eigengenes with a given causal structure
+#' 
 #' \code{\link{simulateDatExpr}} for simulation of individual data sets
-#'
+#' 
 #' \code{\link{simulateDatExpr5Modules}} for a simple simulation of a data set
 #' consisting of 5 modules
-#'
+#' 
 #' \code{\link{simulateModule}} for simulations of individual modules
 #' @references A short description of the simulation method can also be found
 #' in the Supplementary Material to the article
-#'
+#' 
 #' Langfelder P, Horvath S (2007) Eigengene networks for studying the
 #' relationships between co-expression modules. BMC Systems Biology 2007, 1:54.
-#'
+#' 
 #' The material is posted at
 #' http://www.genetics.ucla.edu/labs/horvath/CoexpressionNetwork/EigengeneNetwork/SupplementSimulations.pdf.
 #' @keywords misc
@@ -942,15 +943,17 @@ simulateMultiExpr <- function(eigengenes,
 }
 
 # simulateDatExpr5Modules ####
+
+
 #' Simplified simulation of expression data
-#'
+#' 
 #' This function provides a simplified interface to the expression data
 #' simulation, at the cost of considerably less flexibility.
-#'
+#' 
 #' Roughly one-third of the genes are simulated with a negative correlation to
 #' their seed eigengene. See the functions \code{\link{simulateModule}} and
 #' \code{\link{simulateDatExpr}} for more details.
-#'
+#' 
 #' @param nGenes total number of genes to be simulated.
 #' @param colorLabels labels for simulated modules.
 #' @param simulateProportions a vector of length 5 giving proportions of the
@@ -958,33 +961,32 @@ simulateMultiExpr <- function(eigengenes,
 #' must be positive and sum to at most 1. If the sum is less than 1, the
 #' leftover genes will be simulated outside of modules.
 #' @param MEturquoise,MEblue,MEbrown,MEyellow,MEgreen seed eigengenes for the
-#' simulated modules. If several are provided each one correesponds to a sample.
+#' simulated modules. If several are provided each one correesponds to a
+#' sample.
 #' @param SDnoise level of noise to be added to the simulated expressions.
 #' @param backgroundCor backgrond correlation. If non-zero, a component will be
 #' added to all genes such that the average correlation of otherwise unrelated
 #' genes will be \code{backgroundCor}.
-#' @return
-#'
-#' A list with the following components: \item{datExpr}{ the simulated
+#' @return A list with the following components: \item{datExpr}{ the simulated
 #' expression data in a data frame, with rows corresponding to samples and
 #' columns to genes. }
-#'
+#' 
 #' \item{truemodule}{ a vector with one entry per gene containing the simulated
 #' module membership. }
-#'
+#' 
 #' \item{datME}{a data frame containing a copy of the input module eigengenes.
 #' }
 #' @author Steve Horvath and Peter Langfelder
-#' @seealso
-#'
-#' \code{\link{simulateModule}} for simulation of individual modules
-#'
+#' @seealso \code{\link{simulateModule}} for simulation of individual modules
+#' 
 #' \code{\link{simulateDatExpr}} for a more comprehensive data simulation
 #' interface.
 #' @keywords misc
 #' @examples
+#' 
 #' sample <- simulateDatExpr5Modules(MEturquoise = 1, MEblue = 2, MEbrown = 1,
 #'                          MEyellow = 3, MEgreen = 45)
+#' 
 simulateDatExpr5Modules <- function(nGenes = 2000,
                                     colorLabels = c("turquoise", "blue", "brown", "yellow", "green"),
                                     simulateProportions = c(0.10, 0.08, 0.06, 0.04, 0.02),

@@ -107,12 +107,13 @@ The preservation network is formed from adjacencies of compared sets. For
 preservations are simple mean preservations for each node; their weighted
 counterparts are weighted averages in which a preservation of adjacencies
 \eqn{A^{(1)}_{ij}}{A[i,j; 1]} and \eqn{A^{(2)}_{ij}}{A[i,j; 2]} of nodes
-\eqn{i,j} between sets 1 and 2 is weighted by \eqn{[ (A^{(1)}_{ij} +
-A^{(2)}_{ij} )/2]^weightPower}{ ( (A[i,j; 1]+A[i,j; 2])/2)^weightPower}. The
-hyperbolic preservation is based on \eqn{tanh[( max -
-min)/(max+min)^2]}{tanh[( max - min)/(max+min)^2]}, where \eqn{max}{max} and
-\eqn{min}{min} are the componentwise maximum and minimum of the compared
-adjacencies, respectively.
+\eqn{i,j} between sets 1 and 2 is weighted by \eqn{[ (A^{(1)}_{ij} + }{ (
+(A[i,j; 1]+A[i,j; 2])/2)^weightPower}\eqn{A^{(2)}_{ij} )/2]^weightPower}{ (
+(A[i,j; 1]+A[i,j; 2])/2)^weightPower}. The hyperbolic preservation is based
+on \eqn{tanh[( max - }{tanh[( max -
+min)/(max+min)^2]}\eqn{min)/(max+min)^2]}{tanh[( max - min)/(max+min)^2]},
+where \eqn{max}{max} and \eqn{min}{min} are the componentwise maximum and
+minimum of the compared adjacencies, respectively.
 }
 \references{
 Langfelder P, Horvath S (2007) Eigengene networks for studying

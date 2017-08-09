@@ -65,6 +65,7 @@ regression tree or regression forest predictor.
 This function can be considered a wrapper of the coxph function.
 }
 \examples{
+
 library(survival)
 # simulate time and event data
 time1 <- sample(1:100)
@@ -80,10 +81,11 @@ z <- rnorm(100)
 datResiduals <- coxRegressionResiduals(time = time1, event = event1,
 datCovariates <- data.frame(z))
 cor(datResiduals, use="p")
+
 }
 \references{
-Thereneau TM, Grambsch PM, Fleming TR (1990) Martingale-based residuals for
-survival models. Biometrika (1990), 77, 1, pp. 147-60
+Thereneau TM, Grambsch PM, Fleming TR (1990) Martingale-based
+residuals for survival models. Biometrika (1990), 77, 1, pp. 147-60
 }
 \author{
 Steve Horvath

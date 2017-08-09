@@ -1,17 +1,18 @@
-
 # nearestNeighborConnectivity ####
+
+
 #' Connectivity to a constant number of nearest neighbors
-#'
+#' 
 #' Given expression data and basic network parameters, the function calculates
 #' connectivity of each gene to a given number of nearest neighbors.
-#'
+#' 
 #' Connectivity of gene \code{i} is the sum of adjacency strengths between gene
 #' \code{i} and other genes; in this case we take the \code{nNeighbors} nodes
 #' with the highest connection strength to gene \code{i}. The adjacency
 #' strengths are calculated by correlating the given expression data using the
 #' function supplied in \code{corFNC} and transforming them into adjacency
 #' according to the given network \code{type} and \code{power}.
-#'
+#' 
 #' @param datExpr a data frame containing expression data, with rows
 #' corresponding to samples and columns to genes. Missing values are allowed
 #' and will be ignored.

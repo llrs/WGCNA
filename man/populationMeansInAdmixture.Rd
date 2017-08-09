@@ -23,8 +23,8 @@ for which the means should be estimated.}
 
 \item{scaleProportionsTo1}{logical. If set to TRUE (default) then the
 proportions in each row of \code{datProportions} are scaled so that they sum
-to 1, i.e. datProportions[i,]=datProportions[i,]/max(datProportions[i,]).
-In general, we recommend to set it to TRUE.}
+to 1, i.e. datProportions[i,]=datProportions[i,]/max(datProportions[i,]). In
+general, we recommend to set it to TRUE.}
 
 \item{scaleProportionsInCelltype}{logical. If set to TRUE (default) then the
 proportions in each cell types are recaled and make the mean to 0.}
@@ -59,6 +59,7 @@ values in the sub-populations (Shen-Orr 2010).
 This can be considered a wrapper of the \code{lm} function.
 }
 \examples{
+
 
 set.seed(1)
 # this is the number of complex (mixed) tissue samples, e.g. arrays
@@ -126,6 +127,7 @@ for (i in 1:4 ){
   xlab="predicted mean",ylab="true mean",main="too many populations")
   abline(0,1)
 }
+
 
 
 }

@@ -6,6 +6,9 @@
 \alias{as.multiSet}
 \alias{as.multiSet.default.list}
 \alias{as.multiSet.default}
+\alias{as.multiSet}
+\alias{as.multiSet.default.list}
+\alias{as.multiSet.default}
 \alias{multiSet2list}
 \title{Convert a list to a multiSet structure and vice-versa.}
 \usage{
@@ -27,6 +30,8 @@ multiSet2list(multiSet)
 \item{\dots}{Other arguments}
 
 \item{multiSet}{A multiSet structure to be converted to a list.}
+
+\item{multiSet}{A multiSet structure to be converted to a list.}
 }
 \value{
 For \code{list2multiSet}, a multiSet structure; for
@@ -37,8 +42,8 @@ For \code{list2multiSet}, a multiSet structure; for
 \code{multiSet2list} does the inverse.
 }
 \details{
-A multiSet structure is a vector of lists (one list for each set) where
-each list has a component \code{data} containing some useful information.
+A multiSet structure is a vector of lists (one list for each set) where each
+list has a component \code{data} containing some useful information.
 }
 \author{
 Peter Langfelder

@@ -1,15 +1,17 @@
 #
 
 
+
+
 #' Conformity and module based decomposition of a network adjacency matrix.
-#'
+#' 
 #' The function calculates the conformity based approximation \code{A.CF} of an
 #' adjacency matrix and a factorizability measure codeFactorizability. If a
 #' module assignment \code{Cl} is provided, it also estimates a corresponding
 #' intermodular adjacency matrix. In this case, function automatically carries
 #' out the module- and conformity based decomposition of the adjacency matrix
 #' described in chapter 2 of (Horvath 2011).
-#'
+#' 
 #' We distinguish two situation depending on whether or not \code{Cl} equals
 #' \code{NULL}.  1) Let us start out assuming that \code{Cl = NULL}. In this
 #' case, the function calculates the conformity vector for a general, possibly
@@ -28,7 +30,7 @@
 #' \code{Factorizability}, the more factorizable is \code{adj}. Warning: the
 #' algorithm may only converge to a local optimum and it may not converge at
 #' all. Also see the notes below.
-#'
+#' 
 #' 2) Let us now assume that \code{Cl} is not NULL, i.e. it specifies the
 #' module assignment of each node. Then the function calculates a module- and
 #' CF-based approximation of \code{adj} (explained in chapter 2 in Horvath
@@ -45,7 +47,7 @@
 #' accurate Majorization Minorization (MM) algorithm for the decomposition is
 #' implemented in the function \code{propensityDecomposition} by Ranola et al
 #' (2011).
-#'
+#' 
 #' @param adj a symmetric numeric matrix (or data frame) whose entries lie
 #' between 0 and 1.
 #' @param Cl a vector (or factor variable) of length equal to the number of
@@ -85,8 +87,7 @@
 #' \code{adj[i,j]} are larger than 0. In this case, one can get explicit
 #' formulas for the conformity (Dong and Horvath 2007).
 #' @author Steve Horvath
-#' @seealso
-#' \code{\link{conformityBasedNetworkConcepts}}
+#' @seealso \code{\link{conformityBasedNetworkConcepts}}
 #' \code{propensityDecomposition}
 #' @references Dong J, Horvath S (2007) Understanding Network Concepts in
 #' Modules. BMC Systems Biology 2007, June 1:24 Horvath S, Dong J (2008)
@@ -98,8 +99,9 @@
 #' based decomposition of a network. Currently a draft.
 #' @keywords misc
 #' @examples
-#'
-#'
+#' 
+#' 
+#' 
 #' # assume the number of nodes can be divided by 2 and by 3
 #' n=6
 #' # here is a perfectly factorizable matrix
@@ -115,15 +117,16 @@
 #' blockdiag.A[(n/3+1):n , 1:(n/3)]=0
 #' block.Cl=rep(c(1,2),c(n/3,2*n/3))
 #' conformityDecomposition(adj= blockdiag.A,Cl=block.Cl)
-#'
+#' 
 #' # another block diagonal matrix
 #' blockdiag.A=A
 #' blockdiag.A[1:(n/3),(n/3+1):n]=0.3
 #' blockdiag.A[(n/3+1):n , 1:(n/3)]=0.3
 #' block.Cl=rep(c(1,2),c(n/3,2*n/3))
 #' conformityDecomposition(adj= blockdiag.A,Cl=block.Cl)
-#'
-#'
+#' 
+#' 
+#' 
 #' @export conformityDecomposition
 conformityDecomposition = function (adj, Cl = NULL) {
 

@@ -23,9 +23,9 @@ Hip, EC, EC, NA, NA.  This trait will be plotted as the same color across
 each split of the barplot.  For the function to work properly, the same
 split values should be inputted for each group.}
 
-\item{subset}{A list of one or more genes to compare the expression with.
-If the list contains more than one gene, the first element contains the
-group name. For example, Ribosomes, RPL3, RPL4, RPS3.}
+\item{subset}{A list of one or more genes to compare the expression with. If
+the list contains more than one gene, the first element contains the group
+name. For example, Ribosomes, RPL3, RPL4, RPS3.}
 
 \item{genes}{If entered, this parameter is a list of gene/probe identifiers
 corresponding to the columns in expAll.}
@@ -47,9 +47,9 @@ results are returned, and no plot is made.}
 \item{cex1}{Sets the graphing parameters of cex.axis and cex.names
 (default=1.5)}
 
-\item{\dots}{Other graphing parameters allowed in the barplot function.
-Note that the parameters for cex.axis, cex.names, and las are superseded by
-cex1 and las1 and will therefore be ignored.}
+\item{\dots}{Other graphing parameters allowed in the barplot function. Note
+that the parameters for cex.axis, cex.names, and las are superseded by cex1
+and las1 and will therefore be ignored.}
 }
 \value{
 \item{splitGroupMeans}{ The group/split averaged expression across
@@ -67,6 +67,7 @@ regions), and plots the results as a barplot. Group average, standard
 deviations, and relevant Kruskal-Wallis p-values are returned.
 }
 \examples{
+
 
 # Example: first simulate some data
 set.seed(100)
@@ -88,6 +89,7 @@ results
 
 # Now plot it the other way
 results = stratifiedBarplot(datExpr, split, groups, subset)
+
 
 
 }

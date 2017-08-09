@@ -1,4 +1,6 @@
 #  TOMsimilarity  ####
+
+
 #' Topological overlap matrix
 #'
 #' Calculation of the topological overlap matrix from given expression data.
@@ -68,10 +70,12 @@
 #' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
 #' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 #' @keywords misc
-#' @export
 #' @examples
+#'
 #' datExpr <- matrix(runif(500*25), ncol = 500, nrow = 25)
 #' TOM <- TOMsimilarityFromExpr(datExpr)
+#'
+#' @export TOMsimilarityFromExpr
 TOMsimilarityFromExpr = function(datExpr, corType = "pearson",
                                  networkType = "unsigned",
                                  power = 6, TOMType = "signed", TOMDenom = "min",
@@ -140,7 +144,7 @@ TOMsimilarityFromExpr = function(datExpr, corType = "pearson",
         as.integer(nThreads), as.integer(verbose), as.integer(indent), PACKAGE = "WGCNA")
 
   diag(tom) = 1
-  return (tom)
+  return(tom)
 }
 
 
@@ -149,10 +153,11 @@ TOMsimilarityFromExpr = function(datExpr, corType = "pearson",
 # TOMsimilarity (from adjacency)
 
 
+
+
 #' Topological overlap matrix similarity and dissimilarity
 #'
 #' Calculation of the topological overlap matrix from a given adjacency matrix.
-#'
 #'
 #' The functions perform basically the same calculations of topological
 #' overlap. \code{TOMdist} turns the overlap (which is a measure of similarity)
@@ -168,7 +173,7 @@ TOMsimilarityFromExpr = function(datExpr, corType = "pearson",
 #' equals 1. If this is not the case, the diagonal of the input is set to 1
 #' before the calculation begins.
 #'
-#' @aliases TOMsimilarity TOMdist
+#' @aliases TOMsimilarity TOMdist TOMsimilarity TOMdist
 #' @param adjMat adjacency matrix, that is a square, symmetric matrix with
 #' entries between 0 and 1 (negative values are allowed if
 #' \code{TOMType=="signed"}).
@@ -194,9 +199,11 @@ TOMsimilarityFromExpr = function(datExpr, corType = "pearson",
 #' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
 #' @keywords misc
 #' @examples
+#'
 #' datExpr <- matrix(runif(500*25), ncol = 500, nrow = 25)
 #' sim <- cor(datExpr)
 #' TOM <- TOMsimilarity(abs(sim))
+#'
 TOMsimilarity = function(adjMat, TOMType = "unsigned", TOMDenom = "min",
                          verbose = 1, indent = 0) {
   TOMTypeC = pmatch(TOMType, .TOMTypes)-1
@@ -214,26 +221,22 @@ TOMsimilarity = function(adjMat, TOMType = "unsigned", TOMDenom = "min",
   }
   checkAdjMat(adjMat, min = if (TOMTypeC==2) -1 else 0, max = 1)
 
-  if (sum(is.na(adjMat))>0) {
-      adjMat[is.na(adjMat)] = 0
+  TOMDenomC = pmatch(TOMDenom, .TOMDenoms)-1
+  if (is.na(TOMDenomC)) {
+    stop("Invalid 'TOMDenom'. Recognized values are", paste(.TOMDenoms, collapse = ", "))
   }
-  if (any(diag(adjMat)!=1)) {
-      diag(adjMat) = 1
+  checkAdjMat(adjMat, min = ifelse(TOMTypeC == 2, -1, 0), max = 1)
+
+  if (any(is.na(adjMat))) {
+     adjMat[is.na(adjMat)] = 0
   }
 
-  nGenes = dim(adjMat)[1]
+  tom <- .Call("tomSimilarityFromAdj_call", as.matrix(adjMat),
+         as.integer(TOMTypeC),
+         as.integer(TOMDenomC),
+         as.integer(verbose), as.integer(indent), PACKAGE = "WGCNA")
+  gc()
 
-  tom = matrix(0, nGenes, nGenes)
-
-  tomResult = .C("tomSimilarityFromAdj", as.double(as.matrix(adjMat)),
-                 as.integer(nGenes), as.integer(TOMTypeC),
-                 as.integer(TOMDenomC), tom = as.double(tom),
-                 as.integer(verbose), as.integer(indent), PACKAGE = "WGCNA")
-
-  tom[,] = tomResult$tom
-  diag(tom) = 1
-  rm(tomResult)
-  collectGarbage()
   tom
 }
 
@@ -249,6 +252,8 @@ TOMdist = function(adjMat, TOMType = "unsigned", TOMDenom = "min", verbose = 1,
 
 
 # blockwiseModules ####
+
+
 #' Automatic network construction and module detection
 #'
 #' This function performs automatic network construction and module detection
@@ -307,6 +312,7 @@ TOMdist = function(adjMat, TOMType = "unsigned", TOMDenom = "min", verbose = 1,
 #' if only a few missing data are treated approximately, the error introduced
 #' will be small but the potential speedup can be significant.
 #'
+#' @aliases blockwiseModules blockwiseModules
 #' @param datExpr expression data. A data frame in which columns are genes and
 #' rows ar samples. NAs are allowed, but not too many.
 #' @param checkMissingData logical: should data be checked for excessive
@@ -446,6 +452,8 @@ TOMdist = function(adjMat, TOMType = "unsigned", TOMDenom = "min", verbose = 1,
 #' the sense an object can be PAM-assigned only to clusters that lie below it
 #' on the branch that the object is merged into.  See
 #' \code{\link[dynamicTreeCut]{cutreeDynamic}} for more details.
+#' @param reassignThreshold p-value ratio threshold for reassigning genes
+#' between modules. See Details.
 #' @param minCoreKME a number between 0 and 1. If a detected module does not
 #' have at least \code{minModuleKMESize} genes with eigengene connectivity at
 #' least \code{minCoreKME}, the module is disbanded (its genes are unlabeled
@@ -453,8 +461,6 @@ TOMdist = function(adjMat, TOMType = "unsigned", TOMDenom = "min", verbose = 1,
 #' @param minCoreKMESize see \code{minCoreKME} above.
 #' @param minKMEtoStay genes whose eigengene connectivity to their module
 #' eigengene is lower than \code{minKMEtoStay} are removed from the module.
-#' @param reassignThreshold p-value ratio threshold for reassigning genes
-#' between modules. See Details.
 #' @param mergeCutHeight dendrogram cut height for module merging.
 #' @param impute logical: should imputation be used for module eigengene
 #' calculation? See \code{\link{moduleEigengenes}} for more details.
@@ -472,8 +478,7 @@ TOMdist = function(adjMat, TOMType = "unsigned", TOMDenom = "min", verbose = 1,
 #' @param indent indentation for diagnostic messages. Zero means no
 #' indentation, each unit adds two spaces.
 #' @param \dots Other arguments.
-#' @return
-#' A list with the following components:
+#' @return A list with the following components:
 #'
 #' \item{colors }{ a vector of color or numeric module labels for all genes.}
 #'
@@ -520,9 +525,8 @@ TOMdist = function(adjMat, TOMType = "unsigned", TOMDenom = "min", verbose = 1,
 #' guide, it is unlikely a standard desktop computer with 4GB memory or less
 #' will be able to work with blocks larger than 8000 genes.
 #' @author Peter Langfelder
-#' @seealso
-#'
-#' \code{\link{goodSamplesGenes}} for basic quality control and filtering
+#' @seealso \code{\link{goodSamplesGenes}} for basic quality control and
+#' filtering
 #'
 #' \code{\link{adjacency}}, \code{\link{TOMsimilarity}} for network
 #' construction
@@ -533,14 +537,14 @@ TOMdist = function(adjMat, TOMType = "unsigned", TOMDenom = "min", verbose = 1,
 #' hierarchical clustering dendrograms
 #'
 #' \code{\link{mergeCloseModules}} for merging of close modules.
-#' @references
-#' Bin Zhang and Steve Horvath (2005) "A General Framework for
+#' @references Bin Zhang and Steve Horvath (2005) "A General Framework for
 #' Weighted Gene Co-Expression Network Analysis", Statistical Applications in
 #' Genetics and Molecular Biology: Vol. 4: No. 1, Article 17
-#' @keywords misc
+#' @keywords misc misc
 blockwiseModules <- function(
   # Input data
   datExpr,
+
   # Data checking options
   checkMissingData = TRUE,
   # Options for splitting data into blocks
@@ -579,6 +583,7 @@ blockwiseModules <- function(
   useBranchEigennodeDissim = FALSE,
   minBranchEigennodeDissim = mergeCutHeight,
   stabilityLabels = NULL,
+  stabilityCriterion = c("Individual fraction", "Common fraction"),
   minStabilityDissim = NULL,
   pamStage = TRUE, pamRespectsDendro = TRUE,
   # Gene reassignment, module trimming, and module "significance" criteria
@@ -598,8 +603,9 @@ blockwiseModules <- function(
   ...) {
   spaces = indentSpaces(indent)
 
-  if (verbose>0)
+  if (verbose>0) {
      printFlush(paste(spaces, "Calculating module eigengenes block-wise from all genes"))
+  }
 
   seedSaved = FALSE
   if (!is.null(randomSeed)) {
@@ -611,12 +617,14 @@ blockwiseModules <- function(
   }
 
   intCorType = pmatch(corType, .corTypes)
-  if (is.na(intCorType))
+  if (is.na(intCorType)) {
     stop("Invalid 'corType'. Recognized values are", paste(.corTypes, collapse = ", "))
+  }
 
   intTOMType = pmatch(TOMType, .TOMTypes)
-  if (is.na(intTOMType))
+  if (is.na(intTOMType)) {
     stop("Invalid 'TOMType'. Recognized values are", paste(.TOMTypes, collapse = ", "))
+  }
 
   TOMDenomC = pmatch(TOMDenom, .TOMDenoms)-1
   if (is.na(TOMDenomC))
@@ -640,7 +648,7 @@ blockwiseModules <- function(
   # if ( (minKMEtoJoin >1) | (minKMEtoJoin  <0) ) stop("minKMEtoJoin  must be between 0 and 1.")
 
   intNetworkType = charmatch(networkType, .networkTypes)
-  if (is.na(intNetworkType)){
+  if (is.na(intNetworkType)) {
     stop("Unrecognized networkType argument.",
          "Recognized values are (unique abbreviations of)",
          paste(.networkTypes, collapse = ", "))
@@ -662,9 +670,6 @@ blockwiseModules <- function(
   AllMEs = NULL
   allLabelIndex = NULL
 
-  if (maxBlockSize >= floor(sqrt(2^31)) )
-    stop("'maxBlockSize must be less than ", floor(sqrt(2^31)),
-         ". Please decrease it and try again.")
 
   if (!is.null(blocks) && (length(blocks)!=nGenes)) {
     stop("Input error: the length of 'geneRank' does not",
@@ -677,7 +682,9 @@ blockwiseModules <- function(
 
   if (checkMissingData) {
     gsg = goodSamplesGenes(datExpr, verbose = verbose - 1, indent = indent + 1)
-    if (!gsg$allOK) datExpr = datExpr[gsg$goodSamples, gsg$goodGenes]
+    if (!gsg$allOK) {
+        datExpr = datExpr[gsg$goodSamples, gsg$goodGenes]
+    }
     nGGenes = sum(gsg$goodGenes)
     nGSamples = sum(gsg$goodSamples)
   } else {
@@ -688,8 +695,9 @@ blockwiseModules <- function(
 
   if (any(is.na(datExpr))) {
      datExpr.scaled.imputed = t(impute.knn(t(scale(datExpr)))$data)
-  } else
+  } else {
      datExpr.scaled.imputed = scale(datExpr)
+  }
 
   corFnc = .corFnc[intCorType]
   corOptions = list(use = 'p')
@@ -717,17 +725,19 @@ blockwiseModules <- function(
 
   if (!is.null(stabilityLabels))
   {
-    branchSplitFnc = c(branchSplitFnc, "branchSplitFromStabilityLabels")
+    stabilityCriterion = match.arg(stabilityCriterion)
+    branchSplitFnc = c(branchSplitFnc,
+           ifelse(stabilityCriterion=="Individual fraction",
+               "branchSplitFromStabilityLabels.individualFraction",
+               "branchSplitFromStabilityLabels"))
     minExternalSplit = c(minExternalSplit, minStabilityDissim)
     externalSplitFncNeedsDistance = c(externalSplitFncNeedsDistance, FALSE)
     print(dim(stabilityLabels))
     externalSplitOptions = c(externalSplitOptions, list(list(stabilityLabels = stabilityLabels)))
   }
 
-  if ("useBranchSplit" %in% names(otherArgs))
-  {
-    if (otherArgs$useBranchSplit)
-    {
+  if ("useBranchSplit" %in% names(otherArgs)) {
+    if (otherArgs$useBranchSplit) {
       nExternalBranchSplitFnc = nExternalBranchSplitFnc + 1
       branchSplitFnc[[nExternalBranchSplitFnc]] = "branchSplit"
       externalSplitOptions[[nExternalBranchSplitFnc]] = list(discardProp = 0.08, minCentralProp = 0.75,
@@ -761,6 +771,13 @@ blockwiseModules <- function(
 
   blockLevels = as.numeric(levels(factor(gBlocks)))
   blockSizes = table(gBlocks)
+
+  if (any(blockSizes > sqrt(2^31)-1))
+    printFlush(paste0(spaces,
+            "Found block(s) with size(s) larger than limit of 'int' indexing.\n",
+            spaces, " Support for such large blocks is experimental; please report\n",
+            spaces, " any issues to Peter.Langfelder@gmail.com."))
+
   nBlocks = length(blockLevels)
 
   # Initialize various variables
@@ -785,8 +802,7 @@ blockwiseModules <- function(
       if (verbose > 2)
         printFlush(paste(spaces, "  ..loading TOM for block", blockNo, "from file", TOMFiles[blockNo]))
       x = try(load(file =TOMFiles[blockNo]), silent = TRUE)
-      if (x!="TOM")
-      {
+      if (x!="TOM") {
         loadTOM = FALSE
         printFlush(paste0("Loading of TOM in block ", blockNo, " failed:\n file ",
                           TOMFiles[blockNo],
@@ -798,8 +814,7 @@ blockwiseModules <- function(
                            " Will recalculate TOM."))
       } else {
         size.1 = attr(TOM, "Size")
-        if (length(size.1)!=1 || size.1!=nBlockGenes)
-        {
+        if (length(size.1)!=1 || size.1!=nBlockGenes) {
            printFlush(paste0("TOM file ", TOMFiles[blockNo],
                              " does not contain object of the right type or size.\n",
                             " Will recalculate TOM."))
@@ -812,8 +827,7 @@ blockwiseModules <- function(
       }
     }
 
-    if (!loadTOM)
-    {
+    if (!loadTOM) {
       # Calculate TOM by calling a custom C function:
       callVerb = max(0, verbose - 1); callInd = indent + 2
       CcorType = intCorType - 1
@@ -834,8 +848,7 @@ blockwiseModules <- function(
 
       # FIXME: warn if necessary
 
-      if (saveTOMs)
-      {
+      if (saveTOMs) {
         TOM = as.dist(tom)
         TOMFiles[blockNo] = paste0(saveTOMFileBase, "-block.", blockNo, ".RData")
         if (verbose > 2)
@@ -888,8 +901,7 @@ blockwiseModules <- function(
     }
     if (class(blockLabels)=='try-error')
     {
-      if (verbose>0)
-      {
+      if (verbose>0) {
         printFlush(paste(spaces, "*** cutreeDynamic returned the following error:\n",
                          spaces, blockLabels, spaces,
                          "Stopping the module detection here."))
@@ -900,8 +912,7 @@ blockwiseModules <- function(
     }
     if (sum(blockLabels>0)==0)
     {
-      if (verbose>1)
-      {
+      if (verbose>1) {
           printFlush(paste(spaces, "No modules detected in block", blockNo))
       }
       blockNo = blockNo + 1
@@ -963,8 +974,7 @@ blockwiseModules <- function(
     # have a correlation with the eigengene higher than a given cutoff.
 
     if (verbose>2) printFlush(paste(spaces, "....checking modules for statistical meaningfulness.."))
-    for (mod in 1:ncol(propMEs))
-    {
+    for (mod in 1:ncol(propMEs)) {
       modGenes = (blockLabels==blockLabelIndex[mod])
       corEval = parse(text = paste(corFnc, "(selExpr[, modGenes], propMEs[, mod]",
                                    prepComma(.corOptions[intCorType]), ")"))
@@ -986,8 +996,7 @@ blockwiseModules <- function(
           printFlush(paste(spaces, "    ..removing", sum(KME<minKMEtoStay),
                            "genes from module", mod, "because their KME is too low."))
         blockLabels[modGenes][KME < minKMEtoStay] = 0
-        if (sum(blockLabels[modGenes]>0) < minModuleSize)
-        {
+        if (sum(blockLabels[modGenes]>0) < minModuleSize) {
           deleteModules = c(deleteModules, mod)
           blockLabels[modGenes] = 0
           if (verbose>3)
@@ -1001,8 +1010,7 @@ blockwiseModules <- function(
 
     # Remove modules that are to be removed
 
-    if (!is.null(deleteModules))
-    {
+    if (!is.null(deleteModules)) {
        propMEs = propMEs[, -deleteModules, drop = FALSE]
        modGenes = is.finite(match(blockLabels, blockLabelIndex[deleteModules]))
        blockLabels[modGenes] = 0
@@ -1013,10 +1021,8 @@ blockwiseModules <- function(
 
     # Check if any modules are left
 
-    if (sum(blockLabels>0)==0)
-    {
-      if (verbose>1)
-      {
+    if (sum(blockLabels>0)==0) {
+      if (verbose>1) {
         printFlush(paste(spaces, "No significant modules detected in block", blockNo))
       }
       blockNo = blockNo + 1
@@ -1072,8 +1078,7 @@ blockwiseModules <- function(
   deleteModules = NULL
   goodLabels = allLabels[gsg$goodGenes]
   reassignIndex = rep(FALSE, length(goodLabels))
-  if (sum(goodLabels!=0) > 0)
-  {
+  if (sum(goodLabels!=0) > 0) {
      propLabels = goodLabels[goodLabels!=0]
      assGenes = (c(1:nGenes)[gsg$goodGenes])[goodLabels!=0]
      corEval = parse(text = paste(corFnc, "(datExpr[, goodLabels!=0], AllMEs",
@@ -1081,36 +1086,31 @@ blockwiseModules <- function(
      KME = eval(corEval)
      if (intNetworkType == 1) KME = abs(KME)
      nMods = ncol(AllMEs)
-     for (mod in 1:nMods)
-     {
+     for (mod in 1:nMods) {
        modGenes = c(1:length(propLabels))[propLabels==allLabelIndex[mod]]
        KMEmodule = KME[modGenes, mod]
        KMEbest = apply(KME[modGenes, , drop = FALSE], 1, max)
        candidates = (KMEmodule < KMEbest)
        candidates[!is.finite(candidates)] = FALSE
 
-       if (FALSE)
-       {
+       if (FALSE) {
          modDiss = dissTom[goodLabels==allLabelIndex[mod], goodLabels==allLabelIndex[mod]]
          mod.k = colSums(modDiss)
          boxplot(mod.k~candidates)
        }
 
-       if (sum(candidates) > 0)
-       {
+       if (sum(candidates) > 0) {
          pModule = corPvalueFisher(KMEmodule[candidates], nSamples)
          whichBest = apply(KME[modGenes[candidates], , drop = FALSE], 1, which.max)
          pBest = corPvalueFisher(KMEbest[candidates], nSamples)
          reassign = ifelse(is.finite(pBest/pModule), (pBest/pModule < reassignThreshold), FALSE)
-         if (sum(reassign)>0)
-         {
+         if (sum(reassign)>0) {
            if (verbose > 2)
              printFlush(paste(spaces, " ..reassigning", sum(reassign),
                                       "genes from module", mod, "to modules with higher KME."))
            allLabels[assGenes[modGenes[candidates][reassign]]] = whichBest[reassign]
            changedModules = union(changedModules, whichBest[reassign])
-           if (sum(modGenes)-sum(reassign) < minModuleSize)
-           {
+           if (sum(modGenes)-sum(reassign) < minModuleSize) {
              deleteModules = c(deleteModules, mod)
            } else
              changedModules = union(changedModules, mod)
@@ -1142,18 +1142,15 @@ blockwiseModules <- function(
                                  relabel = TRUE, # trapErrors = FALSE,
                                  impute = impute,
                                  verbose = verbose-2, indent = indent + 2), silent = TRUE)
-  if (class(mergedMods)=='try-error')
-  {
+  if (class(mergedMods)=='try-error') {
     warning(paste("blockwiseModules: mergeCloseModules failed with the following error message:\n    ",
                   mergedMods, "\n--> returning unmerged colors.\n"))
     MEs = try(moduleEigengenes(datExpr, colors[gsg$goodGenes], # subHubs = TRUE, trapErrors = FALSE,
                                impute = impute,
                                verbose = verbose-3, indent = indent+3), silent = TRUE)
-    if (class(MEs) == 'try-error')
-    {
+    if (class(MEs) == 'try-error') {
       if (!trapErrors) stop(MEs)
-      if (verbose>0)
-      {
+      if (verbose>0) {
         printFlush(paste(spaces, "*** moduleEigengenes failed with the following error message:"))
         printFlush(paste(spaces, "     ", MEs))
         printFlush(paste(spaces, "*** returning no module eigengenes.\n"))
@@ -1189,7 +1186,94 @@ blockwiseModules <- function(
   list(colors = mergedAllColors,
        unmergedColors = colors,
        MEs = allSampleMEs,
+
+
+#' Filter samples with too many missing entries
+#'
+#' This function checks data for missing entries and returns a list of samples
+#' that pass two criteria on maximum number of missing values: the fraction of
+#' missing values must be below a given threshold and the total number of
+#' missing genes must be below a given threshold.
+#'
+#' The constants \code{..minNSamples} and \code{..minNGenes} are both set to
+#' the value 4.  For most data sets, the fraction of missing samples criterion
+#' will be much more stringent than the absolute number of missing samples
+#' criterion.
+#'
+#' @param datExpr expression data. A data frame in which columns are genes and
+#' rows ar samples.
+#' @param useSamples optional specifications of which samples to use for the
+#' check. Should be a logical vector; samples whose entries are \code{FALSE}
+#' will be ignored for the missing value counts. Defaults to using all samples.
+#' @param useGenes optional specifications of genes for which to perform the
+#' check. Should be a logical vector; genes whose entries are \code{FALSE} will
+#' be ignored. Defaults to using all genes.
+#' @param minFraction minimum fraction of non-missing samples for a gene to be
+#' considered good.
+#' @param minNSamples minimum number of good samples for the data set to be
+#' considered fit for analysis. If the actual number of good samples falls
+#' below this threshold, an error will be issued.
+#' @param minNGenes minimum number of non-missing samples for a sample to be
+#' considered good.
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @return A logical vector with one entry per sample that is \code{TRUE} if
+#' the sample is considered good and \code{FALSE} otherwise. Note that all
+#' samples excluded by \code{useSamples} are automatically assigned
+#' \code{FALSE}.
+#' @author Peter Langfelder and Steve Horvath
+#' @seealso \code{\link{goodSamples}}, \code{\link{goodSamplesGenes}}
+#' @keywords misc
        goodSamples = gsg$goodSamples,
+
+
+#' Filter genes with too many missing entries
+#'
+#' This function checks data for missing entries and returns a list of genes
+#' that have non-zero variance and pass two criteria on maximum number of
+#' missing values: the fraction of missing values must be below a given
+#' threshold and the total number of missing samples must be below a given
+#' threshold.
+#'
+#' The constants \code{..minNSamples} and \code{..minNGenes} are both set to
+#' the value 4.  For most data sets, the fraction of missing samples criterion
+#' will be much more stringent than the absolute number of missing samples
+#' criterion.
+#'
+#' @param datExpr expression data. A data frame in which columns are genes and
+#' rows ar samples.
+#' @param useSamples optional specifications of which samples to use for the
+#' check. Should be a logical vector; samples whose entries are \code{FALSE}
+#' will be ignored for the missing value counts. Defaults to using all samples.
+#' @param useGenes optional specifications of genes for which to perform the
+#' check. Should be a logical vector; genes whose entries are \code{FALSE} will
+#' be ignored. Defaults to using all genes.
+#' @param minFraction minimum fraction of non-missing samples for a gene to be
+#' considered good.
+#' @param minNSamples minimum number of non-missing samples for a gene to be
+#' considered good.
+#' @param minNGenes minimum number of good genes for the data set to be
+#' considered fit for analysis. If the actual number of good genes falls below
+#' this threshold, an error will be issued.
+#' @param tol an optional 'small' number to compare the variance against.
+#' Defaults to the square of \code{1e-10 * max(abs(datExpr), na.rm = TRUE)}.
+#' The reason of comparing the variance to this number, rather than zero, is
+#' that the fast way of computing variance used by this function sometimes
+#' causes small numerical overflow errors which make variance of constant
+#' vectors slightly non-zero; comparing the variance to \code{tol} rather than
+#' zero prevents the retaining of such genes as 'good genes'.
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
+#' @return A logical vector with one entry per gene that is \code{TRUE} if the
+#' gene is considered good and \code{FALSE} otherwise. Note that all genes
+#' excluded by \code{useGenes} are automatically assigned \code{FALSE}.
+#' @author Peter Langfelder and Steve Horvath
+#' @seealso \code{\link{goodSamples}}, \code{\link{goodSamplesGenes}}
+#' @keywords misc
        goodGenes = gsg$goodGenes,
        dendrograms = dendros,
        TOMFiles = TOMFiles,
@@ -1217,6 +1301,8 @@ blockwiseModules <- function(
 }
 
 # Re-cut trees ####
+
+
 #' Repeat blockwise module detection from pre-calculated data
 #'
 #' Given consensus networks constructed for example using
@@ -1224,7 +1310,6 @@ blockwiseModules <- function(
 #' by branch cutting of the corresponding dendrograms. If repeated branch cuts
 #' of the same gene network dendrograms are desired, this function can save
 #' substantial time by re-using already calculated networks and dendrograms.
-#'
 #'
 #' For details on blockwise module detection, see
 #' \code{\link{blockwiseModules}}. This function implements the module
@@ -1357,9 +1442,7 @@ blockwiseModules <- function(
 #' \item{MEsOK}{logical indicating whether the module eigengenes were
 #' calculated without errors. }
 #' @author Peter Langfelder
-#' @seealso
-#'
-#' \code{\link{blockwiseModules}} for full module calculation
+#' @seealso \code{\link{blockwiseModules}} for full module calculation
 #'
 #' \code{\link[dynamicTreeCut]{cutreeDynamic}} for adaptive branch cutting in
 #' hierarchical clustering dendrograms
@@ -1419,7 +1502,7 @@ recutBlockwiseTrees = function(datExpr,
   AllMEs = NULL
   allLabelIndex = NULL
 
-  if (length(blocks)!=nGenes)
+  if (length(blocks) != nGenes)
     stop("Input error: the length of 'geneRank' does not equal the number of genes in given 'datExpr'.")
 
   # Check data for genes and samples that have too many missing values
@@ -1640,7 +1723,7 @@ recutBlockwiseTrees = function(datExpr,
 
     # Update allMEs and allLabels
 
-    if (is.null(AllMEs)){
+    if (is.null(AllMEs)) {
       AllMEs = propMEs
     } else {
       AllMEs = cbind(AllMEs, propMEs)
@@ -1805,6 +1888,8 @@ recutBlockwiseTrees = function(datExpr,
 }
 
 # blockwiseIndividualTOMs ####
+
+
 #' Calculation of block-wise topological overlaps
 #'
 #' Calculates topological overlaps in the given (expression) data. If the
@@ -1830,21 +1915,87 @@ recutBlockwiseTrees = function(datExpr,
 #' particular, if the block-wise calculation is necessary, it is nearly certain
 #' that returning all matrices via the return value will be impossible.
 #'
-#' @inheritParams adjacency
-#' @inheritParams blockwiseModules
 #' @param multiExpr expression data in the multi-set format (see
 #' \code{\link{checkSets}}). A vector of lists, one per set. Each set must
 #' contain a component \code{data} that contains the expression data, with rows
 #' corresponding to samples and columns to genes or probes.
+#' @param checkMissingData logical: should data be checked for excessive
+#' numbers of missing entries in genes and samples, and for genes with zero
+#' variance? See details.
+#' @param blocks optional specification of blocks in which hierarchical
+#' clustering and module detection should be performed. If given, must be a
+#' numeric vector with one entry per column (gene) of \code{exprData} giving
+#' the number of the block to which the corresponding gene belongs.
+#' @param maxBlockSize integer giving maximum block size for module detection.
+#' Ignored if \code{blocks} above is non-NULL. Otherwise, if the number of
+#' genes in \code{datExpr} exceeds \code{maxBlockSize}, genes will be
+#' pre-clustered into blocks whose size should not exceed \code{maxBlockSize}.
+#' @param blockSizePenaltyPower number specifying how strongly blocks should be
+#' penalized for exceeding the maximum size. Set to a lrge number or \code{Inf}
+#' if not exceeding maximum block size is very important.
+#' @param nPreclusteringCenters number of centers for pre-clustering. Larger
+#' numbers typically results in better but slower pre-clustering.
+#' @param randomSeed integer to be used as seed for the random number generator
+#' before the function starts. If a current seed exists, it is saved and
+#' restored upon exit. If \code{NULL} is given, the function will not save and
+#' restore the seed.
+#' @param corType character string specifying the correlation to be used.
+#' Allowed values are (unique abbreviations of) \code{"pearson"} and
+#' \code{"bicor"}, corresponding to Pearson and bidweight midcorrelation,
+#' respectively. Missing values are handled using the
+#' \code{pairwise.complete.obs} option.
+#' @param maxPOutliers only used for \code{corType=="bicor"}. Specifies the
+#' maximum percentile of data that can be considered outliers on either side of
+#' the median separately. For each side of the median, if higher percentile
+#' than \code{maxPOutliers} is considered an outlier by the weight function
+#' based on \code{9*mad(x)}, the width of the weight function is increased such
+#' that the percentile of outliers on that side of the median equals
+#' \code{maxPOutliers}. Using \code{maxPOutliers=1} will effectively disable
+#' all weight function broadening; using \code{maxPOutliers=0} will give
+#' results that are quite similar (but not equal to) Pearson correlation.
+#' @param quickCor real number between 0 and 1 that controls the handling of
+#' missing data in the calculation of correlations. See details.
+#' @param pearsonFallback Specifies whether the bicor calculation, if used,
+#' should revert to Pearson when median absolute deviation (mad) is zero.
+#' Recongnized values are (abbreviations of) \code{"none", "individual",
+#' "all"}. If set to \code{"none"}, zero mad will result in \code{NA} for the
+#' corresponding correlation.  If set to \code{"individual"}, Pearson
+#' calculation will be used only for columns that have zero mad.  If set to
+#' \code{"all"}, the presence of a single zero mad will cause the whole
+#' variable to be treated in Pearson correlation manner (as if the
+#' corresponding \code{robust} option was set to \code{FALSE}). Has no effect
+#' for Pearson correlation.  See \code{\link{bicor}}.
+#' @param cosineCorrelation logical: should the cosine version of the
+#' correlation calculation be used? The cosine calculation differs from the
+#' standard one in that it does not subtract the mean.
+#' @param power Soft thresholding power, integer used in the function of the
+#' network type.
+#' @param networkType network type. Allowed values are (unique abbreviations
+#' of) \code{"unsigned"}, \code{"signed"}, \code{"signed hybrid"}. See
+#' \code{\link{adjacency}}.
 #' @param checkPower logical: should basic sanity check be performed on the
-#' supplied \code{power}? If you would like to experiment with unusual powers,
-#' set the argument to \code{FALSE} and proceed with caution.
-#' individual TOMs into. The following tags should be used to make the file
-#' names unique for each set and block: \code{\%s} will be replaced by the set
-#' number; \code{\%N} will be replaced by the set name (taken from
-#' \code{names(multiExpr)}) if it exists, otherwise by set number; \code{\%b}
-#' will be replaced by the block number. If the file names turn out to be
-#' non-unique, an error will be generated.
+#' supplied \code{power} ? If you would like to experiment with unusual powers,
+#' set the argument to \code{FALSE} and proceed with caution. individual TOMs
+#' into. The following tags should be used to make the file names unique for
+#' each set and block: \code{\%s} will be replaced by the set number; \code{\%N}
+#' will be replaced by the set name (taken from \code{names(multiExpr)}) if it
+#' exists, otherwise by set number; \code{\%b} will be replaced by the block
+#' number. If the file names turn out to be non-unique, an error will be
+#' generated.
+#' @param replaceMissingAdjacencies logical: should missing values in the
+#' calculation of adjacency be replaced by 0?
+#' @param TOMType one of \code{"none"}, \code{"unsigned"}, \code{"signed"}. If
+#' \code{"none"}, adjacency will be used for clustering. If \code{"unsigned"},
+#' the standard TOM will be used (more generally, TOM function will receive the
+#' adjacency as input). If \code{"signed"}, TOM will keep track of the sign of
+#' correlations between neighbors.
+#' @param TOMDenom a character string specifying the TOM variant to be used.
+#' Recognized values are \code{"min"} giving the standard TOM described in
+#' Zhang and Horvath (2005), and \code{"mean"} in which the \code{min} function
+#' in the denominator is replaced by \code{mean}. The \code{"mean"} may produce
+#' better results but at this time should be considered experimental.
+#' @param saveTOMs logical: should the consensus topological overlap matrices
+#' for each block be saved and returned?
 #' @param individualTOMFileNames character string giving the file names to save
 #' individual TOMs into. The following tags should be used to make the file
 #' names unique for each set and block: \code{\%s} will be replaced by the set
@@ -1852,6 +2003,16 @@ recutBlockwiseTrees = function(datExpr,
 #' \code{names(multiExpr)}) if it exists, otherwise by set number; \code{\%b}
 #' will be replaced by the block number. If the file names turn out to be
 #' non-unique, an error will be generated.
+#' @param nThreads non-negative integer specifying the number of parallel
+#' threads to be used by certain parts of correlation calculations. This option
+#' only has an effect on systems on which a POSIX thread library is available
+#' (which currently includes Linux and Mac OSX, but excludes Windows).  If
+#' zero, the number of online processors will be used if it can be determined
+#' dynamically, otherwise correlation calculations will use 2 threads.
+#' @param verbose integer level of verbosity. Zero means silent, higher values
+#' make the output progressively more and more verbose.
+#' @param indent indentation for diagnostic messages. Zero means no
+#' indentation, each unit adds two spaces.
 #' @return A list with the following components:
 #'
 #' \item{actualTOMFileNames}{Only returned if input \code{saveTOMs} is
@@ -1912,9 +2073,7 @@ recutBlockwiseTrees = function(datExpr,
 #'
 #' \item{setNames}{the \code{names} attribute of input \code{multiExpr}.}
 #' @author Peter Langfelder
-#' @seealso
-#'
-#' \code{\link{blockwiseConsensusModules}}
+#' @seealso \code{\link{blockwiseConsensusModules}}
 #' @references For a general discussion of the weighted network formalism, see
 #'
 #' Bin Zhang and Steve Horvath (2005) "A General Framework for Weighted Gene
@@ -1971,8 +2130,7 @@ blockwiseIndividualTOMs = function(multiExpr,
   }
 
 
-  if (length(power)!=1)
-  {
+  if (length(power) != 1) {
     if (length(power)!=nSets)
       stop("Invalid arguments: Length of 'power' must equal number of sets given in 'multiExpr'.")
   } else {
@@ -1980,10 +2138,8 @@ blockwiseIndividualTOMs = function(multiExpr,
   }
 
   seedSaved = FALSE
-  if (!is.null(randomSeed))
-  {
-    if (exists(".Random.seed"))
-    {
+  if (!is.null(randomSeed)) {
+    if (exists(".Random.seed")) {
        seedSaved = TRUE
        savedSeed = .Random.seed
     }
@@ -2033,11 +2189,9 @@ blockwiseIndividualTOMs = function(multiExpr,
 
   # Check data for genes and samples that have too many missing values
 
-  if (checkMissingData)
-  {
+  if (checkMissingData) {
     gsg = goodSamplesGenesMS(multiExpr, verbose = verbose - 1, indent = indent + 1)
-    if (!gsg$allOK)
-    {
+    if (!gsg$allOK) {
       for (set in 1:nSets)
         multiExpr[[set]]$data = multiExpr[[set]]$data[gsg$goodSamples[[set]], gsg$goodGenes]
     }
@@ -2077,8 +2231,7 @@ blockwiseIndividualTOMs = function(multiExpr,
   # check file names for uniqueness
 
   actualFileNames = NULL
-  if (saveTOMs)
-  {
+  if (saveTOMs) {
     actualFileNames = matrix("", nSets, nBlocks)
     for (set in 1:nSets) for (b in 1:nBlocks)
       actualFileNames[set, b] = .processFileName(individualTOMFileNames, set, names(multiExpr), b)
@@ -2148,14 +2301,14 @@ blockwiseIndividualTOMs = function(multiExpr,
       rm(tom)
 
       # Save the calculated TOM either to disk in chunks or to memory.
-      if (saveTOMs)
-      {
+      if (saveTOMs) {
         save(tomDS, file = actualFileNames[set, blockNo])
       } else {
         setTomDS[[blockNo]] [, set] = tomDS[]
       }
     }
-    rm(tomDS); collectGarbage()
+    rm(tomDS)
+    collectGarbage()
   }
 
   if (!multiFormat)
@@ -2183,6 +2336,8 @@ blockwiseIndividualTOMs = function(multiExpr,
 }
 
 # lowerTri2matrix ####
+
+
 #' Reconstruct a symmetric matrix from a distance (lower-triangular)
 #' representation
 #'
@@ -2202,6 +2357,7 @@ blockwiseIndividualTOMs = function(multiExpr,
 #' @author Peter Langfelder
 #' @keywords misc
 #' @examples
+#'
 #'
 #'   # Create a symmetric matrix
 #'   m = matrix(c(1:16), 4,4)
@@ -2223,6 +2379,7 @@ blockwiseIndividualTOMs = function(multiExpr,
 #'   # Did we get back the same matrix?
 #'
 #'   all.equal(mat, new.mat)
+#'
 #'
 #'
 lowerTri2matrix = function(x, diag = 1) {
@@ -2254,6 +2411,8 @@ lowerTri2matrix = function(x, diag = 1) {
 
 
 # blockwiseConsensusModules ####
+
+
 #' Find consensus modules across several datasets.
 #'
 #' Perform network construction and consensus module detection across several
@@ -2343,6 +2502,7 @@ lowerTri2matrix = function(x, diag = 1) {
 #' if only a few missing data are treated approximately, the error introduced
 #' will be small but the potential speedup can be significant.
 #'
+#' @aliases blockwiseConsensusModules blockwiseConsensusModules
 #' @param multiExpr expression data in the multi-set format (see
 #' \code{\link{checkSets}}). A vector of lists, one per set. Each set must
 #' contain a component \code{data} that contains the expression data, with rows
@@ -2662,9 +2822,8 @@ lowerTri2matrix = function(x, diag = 1) {
 #' Unix, Unix-like and Mac systems, but is normally not the case on Windows
 #' systems).
 #' @author Peter Langfelder
-#' @seealso
-#'
-#' \code{\link{goodSamplesGenesMS}} for basic quality control and filtering
+#' @seealso \code{\link{goodSamplesGenesMS}} for basic quality control and
+#' filtering
 #'
 #' \code{\link{adjacency}}, \code{\link{TOMsimilarity}} for network
 #' construction
@@ -2678,7 +2837,7 @@ lowerTri2matrix = function(x, diag = 1) {
 #' @references Langfelder P, Horvath S (2007) Eigengene networks for studying
 #' the relationships between co-expression modules. BMC Systems Biology 2007,
 #' 1:54
-#' @keywords misc
+#' @keywords misc misc
 blockwiseConsensusModules <- function(multiExpr,
          # Data checking options
          checkMissingData = TRUE,
@@ -2721,7 +2880,7 @@ blockwiseConsensusModules <- function(multiExpr,
          setWeights = NULL,
          # Saving the consensus TOM
          saveConsensusTOMs = FALSE,
-         consensusTOMFileNames = "consensusTOM-block.%b.RData",
+         consensusTOMFilePattern = "consensusTOM-block.%b.RData",
          # Internal handling of TOMs
          useDiskCache = TRUE, chunkSize = NULL,
          cacheBase = ".blockConsModsCache",
@@ -2768,8 +2927,7 @@ blockwiseConsensusModules <- function(multiExpr,
   nSets = dataSize$nSets
   nGenes = dataSize$nGenes
 
-  if (length(power)!=1)
-  {
+  if (length(power)!=1) {
     if (length(power)!=nSets)
       stop("Invalid arguments: Length of 'power' must equal number of sets given in 'multiExpr'.")
   } else {
@@ -2790,8 +2948,7 @@ blockwiseConsensusModules <- function(multiExpr,
   if ( (consensusQuantile < 0) | (consensusQuantile > 1) )
     stop("'consensusQuantile' must be between 0 and 1.")
 
-  if (checkMinModuleSize & (minModuleSize > nGenes/2))
-  {
+  if (checkMinModuleSize & (minModuleSize > nGenes/2)) {
     minModuleSize = nGenes/2
     warning("blockwiseConsensusModules: minModuleSize appeared too large and was lowered to",
             minModuleSize,
@@ -2887,8 +3044,7 @@ blockwiseConsensusModules <- function(multiExpr,
       individualTOMInfo = consensusTOMInfo$individualTOMInfo
   }
 
-  if (is.null(useIndivTOMSubset))
-  {
+  if (is.null(useIndivTOMSubset)) {
     if (individualTOMInfo$nSets != nSets)
       stop(paste("Number of sets in individualTOMInfo and in multiExpr do not agree.\n",
                  "  To use a subset of individualTOMInfo, set useIndivTOMSubset appropriately."))
@@ -2953,8 +3109,7 @@ blockwiseConsensusModules <- function(multiExpr,
   # Here's where the analysis starts
 
   removeConsensusTOMOnExit = FALSE
-  if (is.null(consensusTOMInfo) && (nBlocks==1 || saveConsensusTOMs || getNetworkCalibrationSamples))
-  {
+  if (is.null(consensusTOMInfo) && (nBlocks==1 || saveConsensusTOMs || getNetworkCalibrationSamples)) {
     consensusTOMInfo = consensusTOM(
          individualTOMInfo = individualTOMInfo,
          useIndivTOMSubset = useIndivTOMSubset,
@@ -2973,7 +3128,7 @@ blockwiseConsensusModules <- function(multiExpr,
 
          # Return options
          saveConsensusTOMs = saveConsensusTOMs,
-         consensusTOMFileNames = consensusTOMFileNames,
+         consensusTOMFilePattern = consensusTOMFilePattern,
          returnTOMs = nBlocks==1,
 
          # Internal handling of TOMs
@@ -3430,6 +3585,8 @@ blockwiseConsensusModules <- function(multiExpr,
 
 
 # recutConsensusTrees ####
+
+
 #' Repeat blockwise consensus module detection from pre-calculated data
 #'
 #' Given consensus networks constructed for example using
@@ -3438,7 +3595,6 @@ blockwiseConsensusModules <- function(multiExpr,
 #' branch cuts of the same gene network dendrograms are desired, this function
 #' can save substantial time by re-using already calculated networks and
 #' dendrograms.
-#'
 #'
 #' For details on blockwise consensus module detection, see
 #' \code{\link{blockwiseConsensusModules}}. This function implements the module
@@ -3589,10 +3745,9 @@ blockwiseConsensusModules <- function(multiExpr,
 #' @note Basic sanity checks are performed on given arguments, but it is left
 #' to the user's responsibility to provide valid input.
 #' @author Peter Langfelder
-#' @seealso
-#'
-#' \code{\link{blockwiseConsensusModules}} for the full blockwise modules
-#' calculation. Parts of its output are natural input for this function.
+#' @seealso \code{\link{blockwiseConsensusModules}} for the full blockwise
+#' modules calculation. Parts of its output are natural input for this
+#' function.
 #'
 #' \code{\link[dynamicTreeCut]{cutreeDynamic}} for adaptive branch cutting in
 #' hierarchical clustering dendrograms
@@ -4091,10 +4246,11 @@ recutConsensusTrees = function(multiExpr,
 
 
 # preliminary partitioning ####
+
+
 #' Projective K-means (pre-)clustering of expression data
 #'
 #' Implementation of a variant of K-means clustering for expression data.
-#'
 #'
 #' The principal aim of this function within WGCNA is to pre-cluster a large
 #' number of genes into smaller blocks that can be handled using standard WGCNA
@@ -4105,7 +4261,8 @@ recutConsensusTrees = function(multiExpr,
 #' principal component, and distances by correlation (more precisely,
 #' 1-correlation). The distance between a gene and a cluster is multiplied by a
 #' factor of \eqn{max(clusterSize/preferredSize,
-#' 1)^{sizePenaltyPower}}{\code{max(clusterSize/preferredSize,
+#' }{\code{max(clusterSize/preferredSize,
+#' 1)^sizePenaltyPower}}\eqn{1)^{sizePenaltyPower}}{\code{max(clusterSize/preferredSize,
 #' 1)^sizePenaltyPower}}, thus penalizing clusters whose size exceeds
 #' \code{preferredSize}. The function starts with randomly generated cluster
 #' assignment (hence the need to set the random seed for repeatability) and
@@ -4257,6 +4414,11 @@ projectiveKMeans = function (
   #if (preferredSize >= floor(sqrt(2^31)) )
   #  stop("'preferredSize must be less than ", floor(sqrt(2^31)), ". Please decrease it and try again.")
 
+  if (preferredSize >= sqrt(2^31)-1)
+    printFlush(paste0(
+            spaces, " Support for blocks larger than sqrt(2^31) is experimental; please report\n",
+            spaces, " any issues to Peter.Langfelder@gmail.com."))
+
   if (exists(".Random.seed"))
   {
      seedSaved = TRUE
@@ -4321,11 +4483,9 @@ projectiveKMeans = function (
     nearestDist = rep(0, nGenes)
     nearest = rep(0, nGenes)
     if (verbose > 5) printFlush(paste(spaces, " ....finding nearest center for each gene"))
-    minRes = .C("minWhichMin", as.double(dst), as.integer(nCenters), as.integer(nGenes),
-                as.double(nearestDist), as.double(nearest), PACKAGE = "WGCNA")
-    nearestDist = minRes[[4]]
-    nearest = minRes[[5]]+1
-    rm(minRes); collectGarbage()
+    minRes = .Call("minWhich_call", dst, 0L, PACKAGE = "WGCNA")
+    nearestDist = minRes$min
+    nearest = minRes$which
 
     if (sum(centerDist>nearestDist)>0)
     {
@@ -4451,11 +4611,12 @@ projectiveKMeans = function (
 }
 
 # consensusProjectiveKMeans ####
+
+
 #' Consensus projective K-means (pre-)clustering of expression data
 #'
 #' Implementation of a consensus variant of K-means clustering for expression
 #' data across multiple data sets.
-#'
 #'
 #' The principal aim of this function within WGCNA is to pre-cluster a large
 #' number of genes into smaller blocks that can be handled using standard WGCNA
@@ -4468,7 +4629,8 @@ projectiveKMeans = function (
 #' individual sets; however, if \code{useMean} is set, the mean distance will
 #' be used instead of the maximum.  The distance between a gene and a center of
 #' a cluster is multiplied by a factor of \eqn{max(clusterSize/preferredSize,
-#' 1)^{sizePenaltyPower}}{\code{max(clusterSize/preferredSize,
+#' }{\code{max(clusterSize/preferredSize,
+#' 1)^sizePenaltyPower}}\eqn{1)^{sizePenaltyPower}}{\code{max(clusterSize/preferredSize,
 #' 1)^sizePenaltyPower}}, thus penalizing clusters whose size exceeds
 #' \code{preferredSize}. The function starts with randomly generated cluster
 #' assignment (hence the need to set the random seed for repeatability) and
@@ -4567,54 +4729,44 @@ consensusProjectiveKMeans = function (
       for (set in 1:nSets)
         if (intNetworkType==1)
         {
-           dstX[set, , ] = -1+abs(cor(centers[[set]]$data[, changed], multiExpr[[set]]$data))
+           dstX[set, , ] = 1-abs(cor(centers[[set]]$data[, changed], multiExpr[[set]]$data))
         } else {
-           dstX[set, , ] = -1+cor(centers[[set]]$data[, changed], multiExpr[[set]]$data)
+           dstX[set, , ] = 1-cor(centers[[set]]$data[, changed], multiExpr[[set]]$data)
         }
       dst = array(0, c(nChanged, nGenes))
       if (useMean)
       {
-        minRes = .C("mean", as.double(dstX), as.integer(nSets), as.integer(nGenes * nChanged),
-                    as.double(dst), PACKAGE = "WGCNA")
+        dstAll[changed, ] = base::colMeans(dstX, dims = 1)
       } else {
-        which = array(0, c(nChanged, nGenes))
-        minRes = .C("minWhichMin", as.double(dstX), as.integer(nSets), as.integer(nGenes * nChanged),
-                    as.double(dst), as.double(which), PACKAGE = "WGCNA")
+        dstAll[changed, ] = -minWhichMin(-dstX, byRow = FALSE, dims = 1)$min
       }
-      dstAll[changed, ] = -minRes[[4]]
     }
     dstAll
   }
 
   memberCenterDist = function(dst, membership, sizes = NULL, changed = c(1:nCenters), oldMCDist = NULL)
   {
-    if (is.null(oldMCDist))
-    {
+    if (is.null(oldMCDist)) {
        changed = c(1:nCenters)
        oldMCDist = rep(0, nGenes)
     }
     centerDist = oldMCDist
-    if (!is.null(changed))
-    {
+    if (!is.null(changed)) {
       if (is.null(sizes)) sizes = table(membership)
-      if (length(sizes)!=nCenters)
-      {
+      if (length(sizes)!=nCenters) {
         sizes2 = rep(0, nCenters)
         sizes2[as.numeric(names(sizes))] = sizes
         sizes = sizes2
       }
-      if (is.finite(sizePenaltyPower))
-      {
+      if (is.finite(sizePenaltyPower)) {
         sizeCorrections = (sizes/preferredSize)^sizePenaltyPower
         sizeCorrections[sizeCorrections < 1] = 1
       } else {
         sizeCorrections = rep(1, length(sizes))
         sizeCorrections[sizes > preferredSize] = Inf
       }
-      for (cen in changed) if (sizes[cen]!=0)
-      {
-        if (is.finite(sizeCorrections[cen]))
-        {
+      for (cen in changed) if (sizes[cen]!=0) {
+        if (is.finite(sizeCorrections[cen])) {
           centerDist[membership==cen] = dst[cen, membership==cen] * sizeCorrections[cen]
         } else
           centerDist[membership==cen] = 10 + dst[cen, membership==cen]
@@ -4633,11 +4785,16 @@ consensusProjectiveKMeans = function (
   nGenes = allSize$nGenes
   nSets = allSize$nSets
 
-  if (preferredSize >= floor(sqrt(2^31)) )
-    stop("'preferredSize must be less than ", floor(sqrt(2^31)), ". Please decrease it and try again.")
+  #if (preferredSize >= floor(sqrt(2^31)) )
+  #  stop("'preferredSize must be less than ", floor(sqrt(2^31)), ". Please decrease it and try again.")
 
-  if (exists(".Random.seed"))
-  {
+  if (preferredSize >= sqrt(2^31)-1)
+    printFlush(paste0(
+            spaces, " Support for blocks larger than sqrt(2^31) is experimental; please report\n",
+            spaces, " any issues to Peter.Langfelder@gmail.com."))
+
+
+  if (exists(".Random.seed")) {
      seedSaved = TRUE
      savedSeed = .Random.seed
   } else seedSaved = FALSE
@@ -4711,14 +4868,11 @@ consensusProjectiveKMeans = function (
     dst = centerGeneDist(centers, dst, changed)
     centerDist = memberCenterDist(dst, membership, clusterSizes, changed, centerDist)
 
-    nearestDist = rep(0, nGenes)
-    nearest = rep(0, nGenes)
-    minRes = .C("minWhichMin", as.double(dst), as.integer(nCenters), as.integer(nGenes),
-                as.double(nearestDist), as.double(nearest), PACKAGE = "WGCNA")
-    nearestDist = minRes[[4]]
-    nearest = minRes[[5]]+1
     changed = NULL
-    rm(minRes); collectGarbage()
+    minRes = minWhichMin(dst)
+    nearestDist = minRes$min
+    nearest = minRes$which
+
     if (sum(centerDist>nearestDist)>0) {
       proposedMemb = nearest
       accepted = FALSE
@@ -4770,21 +4924,14 @@ consensusProjectiveKMeans = function (
       nC = length(select)
     }
     distX = array(0, dim=c(nSets, nC, nC))
-    for (set in 1:nSets)
-    {
-      if (intNetworkType==1)
-      {
-         distX[set, , ] = -1+abs(cor(centers[[set]]$data[, select]))
+    for (set in 1:nSets) {
+      if (intNetworkType==1) {
+         distX[set, , ] = 1-abs(cor(centers[[set]]$data[, select]))
       } else {
-         distX[set, , ] = -1+cor(centers[[set]]$data[, select])
+         distX[set, , ] = 1-cor(centers[[set]]$data[, select])
       }
     }
-    dst = matrix(0, nC, nC)
-    which = matrix(0, nC, nC)
-    minRes = .C("minWhichMin", as.double(distX), as.integer(nSets), as.integer(nC*nC),
-                as.double(dst), as.double(which), PACKAGE = "WGCNA")
-    dst[,] = -minRes[[4]]
-    dst
+    -minWhichMin(-distX, byRow = FALSE, dims = 1)$min
   }
 
   unmergedMembership = membership
@@ -4840,3 +4987,62 @@ consensusProjectiveKMeans = function (
   return(list(clusters = membershipAll, centers = centers, unmergedClusters = unmergedMembership,
                unmergedCenters = unmergedCenters))
 }
+
+
+# old initialization code:
+
+# signe-set:
+  #n0 = 40
+  #nSVectors = min(nCenters, as.integer(nSamples/2 * (1+exp(-nSamples/n0))))
+  #svd = svd(datExpr, nu = nSVectors, nv = 0)
+
+  #centers = matrix(0, nSamples, nCenters)
+  #for (sv in 1:nSVectors)
+  #{
+  #  coeffs = matrix(runif(n = nCenters, min = -svd$d[sv], max = svd$d[sv]), nSamples, nCenters,
+  #                         byrow = TRUE)
+  #  centers = centers + coeffs * matrix(svd$u[, sv], nSamples, nCenters)
+  #}
+
+  #centers = scale(centers)
+
+  #dst = centerGeneDist(centers)
+
+  #bestDst = rep(0, nGenes)
+  #best = rep(0, nGenes)
+  #minRes = .C("minWhichMin", as.double(dst), as.integer(nCenters), as.integer(nGenes),
+  #            as.double(bestDst), as.double(best))
+  #centerDist = minRes[[4]]
+  #membership = minRes[[5]]+1
+  #rm(minRes); collectGarbage()
+
+# Old initialization for consensus projective K means
+#  centers = vector(mode="list", length = nSets)
+#  n0 = 40
+#  nSVectors = min(nCenters, as.integer(nSamples/2 * (1+exp(-nSamples/n0))))
+#
+#  for (set in 1:nSets)
+#  {
+#    centers[[set]] = list(data = matrix(0, nSamples[set], nCenters))
+#    svd = svd(multiExpr[[set]]$data, nu = nSVectors, nv = 0)
+#
+#    for (sv in 1:nSVectors)
+#    {
+#      coeffs = matrix(runif(n = nCenters, min = -svd$d[sv], max = svd$d[sv]), nSamples[set], nCenters,
+#                             byrow = TRUE)
+#      centers[[set]]$data = centers[[set]]$data + coeffs * matrix(svd$u[, sv], nSamples[set], nCenters)
+#    }
+#
+#    centers[[set]]$data = scale(centers[[set]]$data)
+#  }
+#
+#  dst = centerGeneDist(centers)
+#
+#  bestDst = rep(0, nGenes)
+#  best = rep(0, nGenes)
+#  minRes = .C("minWhichMin", as.double(dst), as.integer(nCenters), as.integer(nGenes),
+#              as.double(bestDst), as.double(best))
+#  centerDist = minRes[[4]]
+#  membership = minRes[[5]]+1
+#  rm(minRes); collectGarbage()
+

@@ -33,12 +33,14 @@ The function calculates overlap counts and Fisher exact test p-values for
 the given two sets of module assignments.
 }
 \examples{
+
 set.seed(1)
 nModules <- 10
 nGenes <- 1000
 labels1 <- sample(c(1:nModules), nGenes, replace = TRUE)
 labels2 <- sample(c(1:nModules), nGenes, replace = TRUE)
 overlapTable(labels1, labels2)
+
 }
 \seealso{
 \code{\link{fisher.test}}, \code{\link{matchLabels}}

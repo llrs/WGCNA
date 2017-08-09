@@ -34,17 +34,19 @@ qvalue.restricted <- function(p, trapErrors = TRUE, ...) {
 }
 
 # qvalue ####
+
+
 #' Estimate the q-values for a given set of p-values
-#'
+#' 
 #' Estimate the q-values for a given set of p-values.  The q-value of a test
 #' measures the proportion of false positives incurred (called the false
 #' discovery rate) when that particular test is called significant.
-#'
+#' 
 #' If no options are selected, then the method used to estimate
 #' \eqn{\pi_0}{pi_0} is the smoother method described in Storey and Tibshirani
 #' (2003). The bootstrap method is described in Storey, Taylor & Siegmund
 #' (2004).
-#'
+#' 
 #' @param p A vector of p-values (only necessary input)
 #' @param lambda The value of the tuning parameter to estimate
 #' \eqn{\pi_0}{pi_0}. Must be in [0, 1). Optional, see Storey (2002).
@@ -63,13 +65,13 @@ qvalue.restricted <- function(p, trapErrors = TRUE, ...) {
 #' \eqn{\pi_0}{pi_0} will be estimated by applying a smoother to a scatterplot
 #' of \eqn{log} \eqn{\pi_0}{pi_0} estimates against the tuning parameter
 #' \eqn{\lambda}{lambda}. Optional.
-#' @return A list containing:
-#' \item{call}{gives the function call} \item{pi0}{an estimate
-#' of the proportion of null p-values} \item{qvalues}{a vector of the estimated
-#' q-values (the main quantity of interest)} \item{pvalues}{a vector of the
-#' original p-values} \item{significant}{if fdr.level is specified, and
-#' indicator of whether the q-value fell below fdr.level (taking all such
-#' q-values to be significant controls FDR at level fdr.level)}
+#' @return A list containing: \item{call}{gives the function call}
+#' \item{pi0}{an estimate of the proportion of null p-values} \item{qvalues}{a
+#' vector of the estimated q-values (the main quantity of interest)}
+#' \item{pvalues}{a vector of the original p-values} \item{significant}{if
+#' fdr.level is specified, and indicator of whether the q-value fell below
+#' fdr.level (taking all such q-values to be significant controls FDR at level
+#' fdr.level)}
 #' @note This function is adapted from package qvalue. The reason we provide
 #' our own copy is that package qvalue contains additional functionality that
 #' relies on Tcl/Tk which has led to multiple problems. Our copy does not
@@ -78,14 +80,14 @@ qvalue.restricted <- function(p, trapErrors = TRUE, ...) {
 #' by Peter Langfelder
 #' @references Storey JD. (2002) A direct approach to false discovery rates.
 #' Journal of the Royal Statistical Society, Series B, 64: 479-498.
-#'
+#' 
 #' Storey JD and Tibshirani R. (2003) Statistical significance for genome-wide
 #' experiments. Proceedings of the National Academy of Sciences, 100:
 #' 9440-9445.
-#'
+#' 
 #' Storey JD. (2003) The positive false discovery rate: A Bayesian
 #' interpretation and the q-value. Annals of Statistics, 31: 2013-2035.
-#'
+#' 
 #' Storey JD, Taylor JE, and Siegmund D. (2004) Strong control, conservative
 #' point estimation, and simultaneous conservative consistency of false
 #' discovery rates: A unified approach. Journal of the Royal Statistical

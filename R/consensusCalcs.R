@@ -1,4 +1,3 @@
-
 # consensusOrderMEs ####
 .clustOrder <- function(distM,
                         greyLast = TRUE,
@@ -36,8 +35,10 @@
     order
 }
 
+
+
 #' Put close eigenvectors next to each other in several sets.
-#'
+#' 
 #' Reorder given (eigen-)vectors such that similar ones (as measured by
 #' correlation) are next to each other. This is a multi-set version of
 #' \code{\link{orderMEs}}; the dissimilarity used can be of consensus type (for
@@ -45,13 +46,13 @@
 #' individual set dissimilarities over all sets) or of majority type (for each
 #' pair of eigenvectors the consensus dissimilarity is the average of
 #' individual set dissimilarities over all sets).
-#'
+#' 
 #' Ordering module eigengenes is useful for plotting purposes. This function
 #' calculates the consensus or majority dissimilarity of given eigengenes over
 #' the sets specified by \code{useSets} (defaults to all sets). A hierarchical
 #' dendrogram is calculated using the dissimilarity and the order given by the
 #' dendrogram is used for the eigengenes in all other sets.
-#'
+#' 
 #' @param MEs Module eigengenes of several sets in a multi-set format (see
 #' \code{\link{checkSets}}). A vector of lists, with each list corresponding to
 #' one dataset and the module eigengenes in the component \code{data}, that is
@@ -75,8 +76,7 @@
 #' @return A vector of lists of the same type as \code{MEs} containing the
 #' re-ordered eigengenes.
 #' @author Peter Langfelder, \email{Peter.Langfelder@@gmail.com}
-#' @seealso
-#' \code{\link{moduleEigengenes}}, \code{\link{multiSetMEs}},
+#' @seealso \code{\link{moduleEigengenes}}, \code{\link{multiSetMEs}},
 #' \code{\link{orderMEs}}
 #' @keywords misc
 consensusOrderMEs <- function(MEs,
@@ -106,16 +106,18 @@ consensusOrderMEs <- function(MEs,
 }
 
 # consensusMEDissimilarity ####
+
+
 #' Consensus dissimilarity of module eigengenes.
-#'
+#' 
 #' Calculates consensus dissimilarity \code{(1-cor)} of given module eigengenes
-#' relaized in several sets.
-#'
+#' realized in several sets.
+#' 
 #' This function calculates the individual set dissimilarities of the given
 #' eigengenes in each set, then takes the (parallel) maximum or average over
 #' all sets. For details on the structure of imput data, see
 #' \code{\link{checkSets}}.
-#'
+#' 
 #' @param MEs Module eigengenes of the same modules in several sets.
 #' @param useAbs Controls whether absolute value of correlation should be used
 #' instead of correlation in the calculation of dissimilarity.

@@ -28,9 +28,11 @@ At present, only one quantile type is implemented, namely the default type 7
 used by R.
 }
 \examples{
+
 data <- rnorm(100)
 p <- 0.1
 colQuantileC(data, p)
+
 }
 \seealso{
 \code{\link[stats]{quantile}}

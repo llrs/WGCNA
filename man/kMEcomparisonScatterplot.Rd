@@ -76,6 +76,7 @@ The function "pdf", which can be found in the grDevices library, is
 required to run this function.
 }
 \examples{
+
 # Example output file "kME_correlations_between_A_and_B_inMod.pdf"
 # using simulated data.
 
@@ -94,6 +95,7 @@ simData2 <- simulateDatExpr5Modules(MEturquoise = ME[, 1], MEblue = ME[, 2],
 kMEcomparisonScatterplot(simData1$datExpr, simData2$datExpr,
                          simData1$truemodule, fileName = "../out.pdf")
 }
+
 }
 \author{
 Jeremy Miller

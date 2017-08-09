@@ -1,21 +1,23 @@
-# multiData.eigengeneSignificance ####
+# multiSet.eigengeneSignificance ####
+
+
 #' Eigengene significance across multiple sets
-#'
+#' 
 #' This function calculates eigengene significance and the associated
 #' significance statistics (p-values, q-values etc) across several data sets.
-#'
+#' 
 #' This is a convenience function that calculates module eigengene
 #' significances (i.e., correlations of module eigengenes with a given trait)
 #' across all sets in a multi-set analysis. Also returned are p-values, Z
 #' scores, numbers of present (i.e., non-missing) observations for each
 #' significance, and optionally the q-values (false discovery rates)
 #' corresponding to the p-values.
-#'
+#' 
 #' The function \code{corAndPvalueFnc} is currently is expected to accept
 #' arguments \code{x} (gene expression profiles) and \code{y} (eigengene
 #' expression profiles).  Any additional arguments can be passed via
 #' \code{corOptions}.
-#'
+#' 
 #' The function \code{corAndPvalueFnc} should return a list which at the least
 #' contains (1) a matrix of associations of genes and eigengenes (this
 #' component should have the name given by \code{corComponent}), and (2) a
@@ -26,8 +28,8 @@
 #' vary from association to association), and (4) \code{Z} giving a Z static
 #' for each observation. If these are missing, \code{nObs} is calculated in the
 #' main function, and calculations using the Z statistic are skipped.
-#'
-#' @param multiData Expression data (or other data) in multi-set format (see
+#' 
+#' @param multiSet Expression data (or other data) in multi-set format (see
 #' \code{\link{checkSets}}). A vector of lists; in each list there must be a
 #' component named \code{data} whose content is a matrix or dataframe or array
 #' of dimension 2.
@@ -67,8 +69,8 @@
 #' non-missing observations in each correlation/p-value.}
 #' @author Peter Langfelder
 #' @keywords misc
-#' @export
-multiData.eigengeneSignificance <- function(multiData, multiTrait, moduleLabels,
+#' @export multiSet.eigengeneSignificance
+multiSet.eigengeneSignificance <- function(multiSet, multiTrait, moduleLabels,
                                             multiEigengenes = NULL,
                                             useModules = NULL,
                                             corAndPvalueFnc = corAndPvalue,
@@ -80,19 +82,19 @@ multiData.eigengeneSignificance <- function(multiData, multiTrait, moduleLabels,
     greyLabel <- ifelse(is.numeric(moduleLabels), 0, greyLabel)
     corAndPvalueFnc = match.fun(corAndPvalueFnc)
 
-    size <- checkSets(multiData)
+    size <- checkSets(multiSet)
     nSets <- size$nSets
     nSamples <- size$nSamples
 
     if (is.null(multiEigengenes)) {
-        multiEigengenes <- multiSetMEs(multiData,
+        multiEigengenes <- multiSetMEs(multiSet,
                                        universalColors = moduleLabels,
                                        verbose = 0, excludeGrey = excludeGrey,
                                        grey = greyLabel)
     } else {
         eSize <- checkSets(multiEigengenes)
         if (!isTRUE(all.equal(eSize$nSamples, nSamples)))
-            stop("Numbers of samples in multiData and multiEigengenes must ",
+            stop("Numbers of samples in multiSet and multiEigengenes must ",
                  "agree.")
     }
     modLevels <- substring(colnames(multiEigengenes[[1]]$data), 3)
@@ -146,7 +148,7 @@ multiData.eigengeneSignificance <- function(multiData, multiTrait, moduleLabels,
     }
 
     if (is.null(setNames)) {
-        setNames <- names(multiData)
+        setNames <- names(multiSet)
     }
     if (is.null(setNames)) {
         setNames <- paste0("Set_", c(1:nSets))
@@ -177,16 +179,16 @@ multiData.eigengeneSignificance <- function(multiData, multiTrait, moduleLabels,
 #' variable.
 #'
 #'
-#' @param multiData vector of lists; in each list there must be a component
+#' @param multiSet vector of lists; in each list there must be a component
 #' named \code{data} whose content is a matrix or dataframe or array of
 #' dimension 2.
 #' @param \dots Other arguments to function \code{\link{checkSets}}.
 #' @return A single integer that equals the number of sets given in the input
-#' \code{multiData}.
+#' \code{multiSet}.
 #' @author Peter Langfelder
 #' @seealso \code{\link{checkSets}}
 #' @keywords misc
-nSets <- function(multiData, ...) {
-    size <- checkSets(multiData, ...)
+nSets <- function(multiSet, ...) {
+    size <- checkSets(multiSet, ...)
     size$nSets
 }

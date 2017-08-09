@@ -6,28 +6,30 @@
     res$size
 }
 
+
+
 #' Attempt to calculate an appropriate block size to maximize efficiency of
 #' block-wise calcualtions.
-#'
+#' 
 #' The function uses a rather primitive way to estimate available memory and
 #' use it to suggest a block size appropriate for the many block-by-block
 #' calculations in this package.
-#'
+#' 
 #' Multiple functions within the WGCNA package use a divide-and-conquer (also
 #' known as block-by-block, or block-wise) approach to handling large data
 #' sets. This function is meant to assist in choosing a suitable block size,
 #' given the size of the data and the available memory.
-#'
+#' 
 #' If the entire expected result fits into the allowed memory (after taking
 #' into account the expected overhead), the returned block size will equal the
 #' input \code{matrixSize}.
-#'
+#' 
 #' The internal estimation of available memory works by returning the size of
 #' largest successfully allocated block of memory. It is hoped that this will
 #' lead to reasonable results but some operating systems may actually allocate
 #' more than is available. It is therefore preferable that the user specifies
 #' the available memory by hand.
-#'
+#' 
 #' @param matrixSize the relevant dimension (usually the number of columns) of
 #' the matrix that is to be operated on block-by-block.
 #' @param rectangularBlocks logical indicating whether the bocks of data are
@@ -48,10 +50,12 @@
 #' @author Peter Langfelder
 #' @keywords misc
 #' @examples
-#'
+#' 
+#' 
 #' # Suitable blocks for handling 30,000 genes within 2GB (=2^31 bytes) of memory
 #' blockSize(30000, rectangularBlocks = TRUE, maxMemoryAllocation = 2^31)
-#'
+#' 
+#' 
 #' @export blockSize
 blockSize <- function(matrixSize, rectangularBlocks = TRUE,
                      maxMemoryAllocation = NULL, overheadFactor = 3) {

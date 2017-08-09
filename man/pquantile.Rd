@@ -2,6 +2,7 @@
 % Please edit documentation in R/pquantile.R
 \name{pquantile}
 \alias{pquantile}
+\alias{pquantile.fromList}
 \alias{pmedian}
 \alias{pmean}
 \alias{pmedian}
@@ -12,7 +13,7 @@ pquantile(prob, ...)
 
 pmedian(...)
 
-pmean(...)
+pmean(..., weights = NULL)
 }
 \arguments{
 \item{prob}{A number or vector of probabilities at which to calculate the
@@ -26,42 +27,76 @@ A vector or array containing the quantiles, medians, or means. The
 dimensions are determined by the dimensions of the input arguments and
 whether the \code{prob} input is scalar or a vector.  If any of the input
 variables have \code{dimnames}, the first non-NULL dimnames are copied into
-the output.
-}
-\description{
+the output. ======= pmin pmean.fromList pminWhich.fromList Parallel
+quantile, median, mean
+
+Calculation of ``parallel'' quantiles, minima, maxima, medians, and means,
+across given arguments or across lists
+
+pquantile(prob, ...) pquantile.fromList(dataList, prob) pmedian(...)
+pmean(..., weights = NULL) pmin(...) pmean.fromList(dataList, weights =
+NULL) pminWhich.fromList(dataList)
+
+\item{prob}{ A single probability at which to calculate the quantile. See
+\code{\link{quantile}}.  } \item{dataList}{A list of numeric vectors or
+arrays, all of the same length and dimensions, over which to calculate
+``parallel'' quantiles.} \item{weights}{Optional vector of the same length
+as \code{dataList}, giving the weights to be used in the weighted mean. If
+not given, unit weights will be used.} \item{list()}{ Numeric arguments. All
+arguments must have the same dimensions. See details. }
+
+Given numeric arguments, say x,y,z, of equal dimensions (and length), the
+\code{pquantile} calculates and returns the quantile of the first components
+of x,y,z, then the second components, etc. Similarly, \code{pmedian} and
+\code{pmean} calculate the median and mean, respectively. The funtion
+\code{pquantile.fromList} is identical to \code{pquantile} except that the
+argument \code{dataList} replaces the ... in holding the numeric vectors
+over which to calculate the quantiles.
+
+\item{pquantile, pquantile.fromList}{A vector or array containing
+quantiles.} \item{pmean, pmean.fromList}{A vector or array containing means.
+} \item{pmin, pmedian}{A vector or array containing minima, medians, and
+maxima, respectively.} \item{pminWhich.fromList}{A list with two components:
+\code{min} gives the minima, \code{which} gives the indices of the elements
+that are the minima.}
+
+Dimensions are copied from dimensions of the input arguments. If any of the
+input variables have \code{dimnames}, the first non-NULL dimnames are copied
+into the output. >>>>>>> 80351c0... version 1.60
+
 Calculation of ``parallel'' quantiles, medians, and means, across given
 arguments.
-}
-\details{
+
+<<<<<<< HEAD
+
 Given the argumens, say x,y,z, of equal dimensions, the \code{pquantile}
 calculates and returns the quantile of the first components of x,y,z, then
 the second components, etc. Similarly, \code{pmedian} and \code{pmean}
-calculate the median and mean, respectively.
-}
-\examples{
-# Generate 2 simple matrices
-a <- matrix(c(1:12), 3, 4)
-b <- a + 1
-c <- a + 2
+calculate the median and mean, respectively. =======
 
-# Set the colnames on matrix a
-colnames(a) <- paste0("col_", c(1:4))
+\code{\link{quantile}}, \code{\link{median}}, \code{\link{mean}} for the
+underlying statistics. >>>>>>> 80351c0... version 1.60
 
-# Example use
-pquantile(prob = 0.5, a, b, c)
-pquantile(prob = c(0, 0.5, 1), a, b, c)
+# Generate 2 simple matrices a <- matrix(c(1:12), 3, 4) b <- a + 1 c <- a +
+2
 
-pmean(a, b, c)
-pmedian(a, b, c)
-}
-\seealso{
-\code{\link{pmin}} and \code{\link{pmax}} for analogous functions
-for minimum and maximum,
+# Set the colnames on matrix a colnames(a) <- paste0("col_", c(1:4))
+
+# Example use pquantile(prob = 0.5, a, b, c) <<<<<<< HEAD pquantile(prob =
+c(0, 0.5, 1), a, b, c) ======= >>>>>>> 80351c0... version 1.60
+
+pmean(a, b, c) pmedian(a, b, c)
+
+\code{\link{pmin}} and \code{\link{pmax}} for analogous functions for
+minimum and maximum,
 
 \code{\link{quantile}}, \code{\link{median}}, \code{\link{mean}} for the
 underlying statistics.
-}
-\author{
+
 Peter Langfelder and Steve Horvath
+
+misc
 }
-\keyword{misc}
+\description{
+Parallel quantile, median, mean
+}

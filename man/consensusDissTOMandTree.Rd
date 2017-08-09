@@ -38,6 +38,7 @@ http://www.genetics.ucla.edu/labs/horvath/CoexpressionNetwork/Rpackages/WGCNA/Tu
 }
 \examples{
 
+
 # Example consensus network using two simulated data sets
 
 set.seed <- 100
@@ -61,6 +62,7 @@ plotDendroAndColors(consensusNetwork$consTree,
      cbind(labels2colors(dat1$allLabels),
      labels2colors(dat2$allLabels)), c("S1","S2"), dendroLabels=FALSE)
 }
+
 }
 \references{
 Langfelder P, Horvath S (2007) Eigengene networks for studying

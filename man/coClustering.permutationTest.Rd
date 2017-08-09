@@ -58,6 +58,7 @@ test clustering is repeatedly randomly permuted.
 }
 \examples{
 
+
   set.seed(1)
   nModules = 5
   nGenes = 100
@@ -85,6 +86,7 @@ test clustering is repeatedly randomly permuted.
 
   # Note the high preservation Z statistics:
   ccPerm$Z
+
 
 }
 \references{

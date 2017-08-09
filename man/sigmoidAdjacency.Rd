@@ -23,7 +23,8 @@ adjacency.
 }
 \details{
 The sigmoid adjacency function is defined as \eqn{1/(1+\exp[-\alpha(ss -
-\mu)])}{1/(1 + exp(-alpha * (ss - mu)))}.
+}{1/(1 + exp(-alpha * (ss - mu)))}\eqn{\mu)])}{1/(1 + exp(-alpha * (ss -
+mu)))}.
 }
 \references{
 Bin Zhang and Steve Horvath (2005) "A General Framework for

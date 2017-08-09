@@ -58,9 +58,11 @@ equals 1. If this is not the case, the diagonal of the input is set to 1
 before the calculation begins.
 }
 \examples{
+
 datExpr <- matrix(runif(500*25), ncol = 500, nrow = 25)
 sim <- cor(datExpr)
 TOM <- TOMsimilarity(abs(sim))
+
 }
 \references{
 Bin Zhang and Steve Horvath (2005) "A General Framework for

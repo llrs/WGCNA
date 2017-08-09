@@ -20,10 +20,10 @@ consensusTOM(multiExpr, checkMissingData = TRUE, blocks = NULL,
   sampleForCalibrationFactor = 1000, getNetworkCalibrationSamples = FALSE,
   consensusQuantile = 0, useMean = FALSE, setWeights = NULL,
   saveConsensusTOMs = TRUE,
-  consensusTOMFileNames = "consensusTOM-Block\%b.RData", returnTOMs = FALSE,
-  useDiskCache = TRUE, chunkSize = NULL, cacheDir = ".",
-  cacheBase = ".blockConsModsCache", nThreads = 1, verbose = 1,
-  indent = 0)
+  consensusTOMFilePattern = "consensusTOM-Block\%b.RData",
+  returnTOMs = FALSE, useDiskCache = NULL, chunkSize = NULL,
+  cacheDir = ".", cacheBase = ".blockConsModsCache", nThreads = 1,
+  verbose = 1, indent = 0)
 }
 \arguments{
 \item{multiExpr}{expression data in the multi-set format (see
@@ -177,7 +177,12 @@ is \code{TRUE}.}
 \item{saveConsensusTOMs}{logical: should the consensus topological overlap
 matrices for each block be saved and returned?}
 
-\item{consensusTOMFileNames}{Load a previously saved TOM?}
+\item{consensusTOMFilePattern}{character string containing the file
+namefiles containing the consensus topological overlaps. The tag \code{\%b}
+will be replaced by the block number. If the resulting file names are
+non-unique (for example, because the user gives a file name without a
+\code{\%b} tag), an error will be generated. These files are standard R data
+files and can be loaded using the \code{\link{load}} function.}
 
 \item{returnTOMs}{logical: should calculated consensus TOM(s) be returned?}
 
@@ -213,6 +218,15 @@ make the output progressively more and more verbose.}
 
 \item{indent}{indentation for diagnostic messages. Zero means no
 indentation, each unit adds two spaces.}
+
+\item{consensusTOMFileNames}{Load a previously saved TOM?}
+
+\item{useDiskCache}{should calculated network similarities in individual
+sets be temporarilly saved to disk? Saving to disk is somewhat slower than
+keeping all data in memory, but for large blocks and/or many sets the memory
+footprint may be too big. If not given (the default), the function will
+determine the need of caching based on the size of the data. See
+\code{chunkSize} below for additional information.}
 }
 \value{
 List with the following components:

@@ -28,8 +28,8 @@
 #' for which the means should be estimated.
 #' @param scaleProportionsTo1 logical. If set to TRUE (default) then the
 #' proportions in each row of \code{datProportions} are scaled so that they sum
-#' to 1, i.e. datProportions[i,]=datProportions[i,]/max(datProportions[i,]).
-#' In general, we recommend to set it to TRUE.
+#' to 1, i.e. datProportions[i,]=datProportions[i,]/max(datProportions[i,]). In
+#' general, we recommend to set it to TRUE.
 #' @param scaleProportionsInCelltype logical. If set to TRUE (default) then the
 #' proportions in each cell types are recaled and make the mean to 0.
 #' @param setMissingProportionsToZero logical. Default is FALSE. If set to TRUE
@@ -44,6 +44,7 @@
 #' gene expression differences in complex tissues.  Nature Methods, vol 7 no.4
 #' @keywords misc
 #' @examples
+#' 
 #' 
 #' set.seed(1)
 #' # this is the number of complex (mixed) tissue samples, e.g. arrays
@@ -111,6 +112,7 @@
 #'   xlab="predicted mean",ylab="true mean",main="too many populations")
 #'   abline(0,1)
 #' }
+#' 
 #' 
 #' 
 populationMeansInAdmixture<-function (

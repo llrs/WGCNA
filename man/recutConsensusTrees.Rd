@@ -219,8 +219,9 @@ the relationships between co-expression modules. BMC Systems Biology 2007,
 1:54
 }
 \seealso{
-\code{\link{blockwiseConsensusModules}} for the full blockwise modules
-calculation. Parts of its output are natural input for this function.
+\code{\link{blockwiseConsensusModules}} for the full blockwise
+modules calculation. Parts of its output are natural input for this
+function.
 
 \code{\link[dynamicTreeCut]{cutreeDynamic}} for adaptive branch cutting in
 hierarchical clustering dendrograms

@@ -58,6 +58,7 @@ natural cubic spline regression, please refer to functions "ns" and "glm".
 }
 \examples{
 
+
 #Simulate a data frame datE which contains 5 columns and 50 observations
 m <- 50
 x1 <- rnorm(m)
@@ -81,6 +82,7 @@ A.min
 # output the unsymmetrized pairwise model fitting indices R.squared
 R.squared <- adjacency.splineReg(datE, symmetrizationMethod = "none")
 R.squared
+
 }
 \references{
 Song L, Langfelder P, Horvath S Avoiding mutual information

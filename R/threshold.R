@@ -354,7 +354,7 @@ pickSoftThreshold <- function(data, dataIsExpr = TRUE, RsquaredCut = 0.85,
                         startG, ":", endG, "."))
 
         datk.local <- matrix(nGenes1, nPowers)
-        corxPrev <- matrix(1, nrow = nrow(corx), rcol = ncol(corx))
+        corxPrev <- matrix(1, nrow = nrow(corx), ncol = ncol(corx))
         powerVector1 <- c(0, head(powerVector, -1))
         powerSteps <- powerVector- powerVector1
         uniquePowerSteps <- unique(powerSteps)

@@ -12,23 +12,22 @@ columns corresponding to kME values.}
 
 \item{Gin}{Genes labels in a 1 to 1 correspondence with the rows of MM.}
 
-\item{Pin}{If NULL (default), rownames of MM are assumed to be probe IDs.
-If entered, Pin must be the same length as Gin and correspond to probe IDs
-for MM.}
+\item{Pin}{If NULL (default), rownames of MM are assumed to be probe IDs. If
+entered, Pin must be the same length as Gin and correspond to probe IDs for
+MM.}
 
 \item{kMEcols}{A numeric vector showing which columns in MM correspond to
 kME values.  The default is all of them.}
 }
 \value{
-A list containing the following items:
-\item{MMcollapsed}{ A numeric matrix with the same columns as the
-input matrix MM, but with rows corresponding to the genes rather than the
-probes. } \item{group2row}{ A matrix whose rows correspond to the unique
-gene labels and whose 2 columns report which gene label (first column called
-group) is represented by what probe (second column called selectedRowID) }
-\item{selectedRow}{ A logical vector whose components are TRUE for probes
-selected as representatives and FALSE otherwise. It has the same length as
-the vector Pin. }
+A list containing the following items: \item{MMcollapsed}{ A numeric
+matrix with the same columns as the input matrix MM, but with rows
+corresponding to the genes rather than the probes. } \item{group2row}{ A
+matrix whose rows correspond to the unique gene labels and whose 2 columns
+report which gene label (first column called group) is represented by what
+probe (second column called selectedRowID) } \item{selectedRow}{ A logical
+vector whose components are TRUE for probes selected as representatives and
+FALSE otherwise. It has the same length as the vector Pin. }
 }
 \description{
 This function selects only the most informative probe for each gene in a kME
@@ -37,6 +36,7 @@ module in the module membership matrix.  This function is a special case of
 the function collapseRows.
 }
 \examples{
+
 # Example: first simulate some data
 set.seed(100)
 ME.A <- sample(1:100, 50)
@@ -58,6 +58,7 @@ results <- collapseRowsUsingKME(MM, Gin, Pin)
 head(results$MMcollapsed)
 head(results$group2Row)
 head(results$selectedRow)
+
 }
 \seealso{
 \code{\link{collapseRows}}

@@ -108,6 +108,7 @@ number of rows of \code{datE} is smaller than say 200, it may be better to
 fit a correlation using the function \code{adjacency}.
 }
 \examples{
+
 # Load requisite packages. These packages are considered "optional",
 # so WGCNA does not load them automatically.
 
@@ -131,6 +132,7 @@ if (require(infotheo, quietly = TRUE) &&
   # matrices based on mutual information.
   MIadj <- mutualInfoAdjacency(datE = datE)
   }
+
 }
 \references{
 Hausser J, Strimmer K (2008) Entropy inference and the

@@ -36,6 +36,7 @@ common type of color blindness, we recommend using the analogous palette
 returned by the function \code{\link{blueWhiteRed}}.
 }
 \examples{
+
 \dontrun{
   par(mfrow = c(3, 1))
   displayColors(greenWhiteRed(50))
@@ -45,6 +46,7 @@ returned by the function \code{\link{blueWhiteRed}}.
   displayColors(greenWhiteRed(50, 0.5))
   title("gamma = 0.5")
 }
+
 }
 \seealso{
 \code{\link{blueWhiteRed}} for a color sequence more friendly to

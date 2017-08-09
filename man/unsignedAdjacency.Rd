@@ -39,8 +39,10 @@ datExpr2} plus any extra arguments given in \code{corOptions}. If
 calculate the corelation of columns in \code{datExpr}.
 }
 \examples{
+
 datExpr <- matrix(rnorm(150), ncol = 5)
 unsignedAdjacency(datExpr)
+
 }
 \references{
 Bin Zhang and Steve Horvath (2005) "A General Framework for
